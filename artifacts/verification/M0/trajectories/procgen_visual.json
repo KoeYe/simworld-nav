@@ -1,0 +1,388 @@
+{
+  "label": "procgen_visual",
+  "map_name": "small-city-11",
+  "preset": "nav",
+  "render_mode": "vision",
+  "seed": 42,
+  "step_count": 32,
+  "actions": [
+    "{\"action\": \"VIEW_ORDERS()\"}",
+    "{\"action\": \"ACCEPT_ORDER(0)\"}",
+    "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"PICKUP(orders=[0])\"}",
+    "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"DROP_OFF(oid=0)\"}"
+  ],
+  "hashes": {
+    "reset_state_digest": "a719bcb1e408e42e07c1fd26fc984a1b206c18b57fe72c6d4f4feb284e61c38b",
+    "transition_hash": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+    "terminal_hash": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+    "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+    "observation_media_hash": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559"
+  },
+  "score": {
+    "cumulative_reward": 7.828507,
+    "steps_taken": 32,
+    "earnings_total": 107.828507,
+    "energy_pct": 100.0,
+    "delivered_count": 1,
+    "sim_hours": 0.040008347,
+    "success": true
+  },
+  "extraction_stats": {
+    "nodes": 4621373,
+    "truncated_sequences": 0,
+    "depth_limited": 0,
+    "dropped_types": {
+      "Random": 30
+    }
+  },
+  "steps": [
+    {
+      "index": 0,
+      "action": "{\"action\": \"VIEW_ORDERS()\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "4efd6d72f5568785640b6675c4a2a00d705b1cbd0461f8c4ce35bea610747a35",
+      "obs_digest": "078dc21af495a1a5d3b1fbce7fa73631bb770fee969975f6bc75a54385e16ec1",
+      "media_digest": "da70dcb6b9e090716de22a98ba5249874c0ea8dc967715862af0aeaee7426594",
+      "error": null
+    },
+    {
+      "index": 1,
+      "action": "{\"action\": \"ACCEPT_ORDER(0)\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "3b2e5419ccb638f055fcdd184d557bfe936795345557d56d974477cb17a52e54",
+      "obs_digest": "3b218fe11afddf8dfb2c5828f0a9f7bfd9349d8d787e37c2d1e36e145b6fe716",
+      "media_digest": "9c7847549147e752e7e845e1630587c3a69e439474e33ccfbf2f3c2da2b2c2a6",
+      "error": null
+    },
+    {
+      "index": 2,
+      "action": "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "16bffa6294cc3e510e6e7a77126537fae8629585f2afe437eb9adfdcd6ca2cfd",
+      "obs_digest": "41f4696d0cfad1018a9d789290189cddffc44f2c98aeac7bf0667df007155f04",
+      "media_digest": "2871408e6a01f85a44f20576ca0a261eda8ac0a643a4cee773d9a3b1eb437325",
+      "error": null
+    },
+    {
+      "index": 3,
+      "action": "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "f955b573f68abb9a70685be555196f40853c0632617835ffd0e55e4bfbb20098",
+      "obs_digest": "bf0bbcc1c2441788b8fa8047423fcfe920317b8ccc7c8f01cc49481a9cb04ec6",
+      "media_digest": "535a6be5c25bad8f7483acb338ea1e174870658588d373a7e80b3a461230699b",
+      "error": null
+    },
+    {
+      "index": 4,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "eb27e11252e28e45df179c24658e888e797621352892b9e4cfa703e61030e714",
+      "obs_digest": "1859570997acd25de812bb5fbb8bbbcf2e8a051adfc18a1cbaabbb118c983354",
+      "media_digest": "c33679d23244e530d8836169a89329c271405fbd73d2aab9681a52060eba2285",
+      "error": null
+    },
+    {
+      "index": 5,
+      "action": "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "50e1a51cf98dcb40e6f23f285ae4c6ffcd738a553d4b9f366f9f01ca370985cb",
+      "obs_digest": "c32fb2b36e4cacc8e94b11385852d9127d96e8e383d56c9bdc2b2f25ec584f60",
+      "media_digest": "5d468d96b6b6bd7239aa8b47dc076068dcfe3b225455bfe573fa26baca7b78eb",
+      "error": null
+    },
+    {
+      "index": 6,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "0c17170350bfbc9a7733393339ee6e6928e6735eea4fb38975f8d6d9b1b4da81",
+      "obs_digest": "6f3bbce4d70c53293102d933e65263e99162486ab8303f09f140dfa9426fd7dd",
+      "media_digest": "e854efd9229a95c6c3e3ed32856a66c111d2ebe67feb8d17b7ac0782ea0f02c2",
+      "error": null
+    },
+    {
+      "index": 7,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "178988c79f81d0a53f54972026d8399e5ad32e192ad6d812d5158dd04a173055",
+      "obs_digest": "6d063899f2b6e84d32d40d74fb053dc09649d8bc875f43b67aac6e5da637d2be",
+      "media_digest": "c3da7cfbd6c1fd4dab08dafcbcce5435d24a25077b445d509a1f9bfc2d35697b",
+      "error": null
+    },
+    {
+      "index": 8,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "af5c956d8bc530da22c37952cb7d2e8425a60ad39634d257249101f5b9e66cb6",
+      "obs_digest": "cdd17273cac2261e7dc24ddc5433e51da7821874880f166063c27ef752ccf0ae",
+      "media_digest": "2d31eed0b3f5447e8014e41c962f7a3811bc9dce3ffcd315af3f905842a1b9b3",
+      "error": null
+    },
+    {
+      "index": 9,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "c871af10054336ddc1077a4274bee2d49999f96c2dd9e1f84900990366ddaf05",
+      "obs_digest": "0ec918f6dc8df3944c11b9e0c559340487463868b29712b1237f91e7ba000c35",
+      "media_digest": "bee66fe69242475be699b572a38bff02e7128e74e13fc1c0bfa48d7bf743fa59",
+      "error": null
+    },
+    {
+      "index": 10,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "d407295231661256f059215de26a8c01e3864ca0342e1822c06864b9caf31d8f",
+      "obs_digest": "391650d501a387f1cf8ce417be51d126af64f98e9646a5ac6b52520f8c4847f0",
+      "media_digest": "00b8147948a82858fac4cb8b7f5599e6e6c3cb3602c418935ed963a20bf7d274",
+      "error": null
+    },
+    {
+      "index": 11,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "dd28dee3767c311a18e7610dfd7d8a3996321670f4fe4e230df48b16fc7f9f2e",
+      "obs_digest": "026bd9d71ace0a316d9f667361b883614b315233684a898654e92561abca9105",
+      "media_digest": "6986c2d5dc3ffb94a0a8691b49d98da198813c24897665b825af4342c96bb113",
+      "error": null
+    },
+    {
+      "index": 12,
+      "action": "{\"action\": \"PICKUP(orders=[0])\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "bd597d23d9b07e6a7d705c2c6f00247d7792e9239c3f5d0ec653f104799f25d0",
+      "obs_digest": "611dea57485536401fbbd6d9623e68004cbfaccc45d123a0f979ded7680dd165",
+      "media_digest": "d7f515c0854bd06285cf4fd6cf31b314489850e9f4d1515b5a4b35e841c1a3cf",
+      "error": null
+    },
+    {
+      "index": 13,
+      "action": "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "af9ae4c3f9513c83c5964c836b42877e09966f4115db38f73806ceda46397aed",
+      "obs_digest": "48cc02d1b0722d70b537b9412f2ca8ca24724de4fd4578b7144e7445a4a7cd69",
+      "media_digest": "3604ac591dfa32f1715795c5ca718c4be72615cce68843f9bc4d2af5c6fea5de",
+      "error": null
+    },
+    {
+      "index": 14,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "9feab999a281aca786cc9ffb238cb0f8027b0ed62c393068ebcf98ba8620f5b9",
+      "obs_digest": "53821330ffa0e10129f6b804f69abaee1f61c09f215b4d98570bd4638b62264e",
+      "media_digest": "c785fe9938159a2deccc57d13fbe41941fb642c63983c81f98d2183e1107495a",
+      "error": null
+    },
+    {
+      "index": 15,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "3be6d9eb3909c64afd6ff82bd8f493ef66fc134c920bd944b1ce1f534cc7824e",
+      "obs_digest": "43ca4ec890550772337c02199f32a81e4bf4953851efaeb155395e37d826ee13",
+      "media_digest": "061f3c279f10e6d19f370154ce6e2aaef1c175468a711954efdbcfd8718b4a37",
+      "error": null
+    },
+    {
+      "index": 16,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "8f7091f7413c20092c31ed9793945a7a9bce8e624866548e6da449a06e4f67aa",
+      "obs_digest": "e1cff0663af093827c116937c705eb41fd8687c2de5db9603d7edfdcd20b355d",
+      "media_digest": "90b5d98de0076c56916f70b46686913e442fb9df2b9a9808460f4120c688b2ce",
+      "error": null
+    },
+    {
+      "index": 17,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "4023f7c78be1f87e5477b3c68828ec717e5677fe7669a2eb741675b26b89ac9e",
+      "obs_digest": "1177bb48ea8ee1745a54b39910b4312519ae3e59372236731a68b0117c2b06a9",
+      "media_digest": "1c63c12f76e4297697c72505764d9de9541f7b21940fc9775289ad6314270db0",
+      "error": null
+    },
+    {
+      "index": 18,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "483ac21b81582520931770db84892ddc53e2311ce48e0dd9e02bb2ef620f54a5",
+      "obs_digest": "2007bfd25a36b57c2175fd866d6bc0d328d206483ba12d069120576eedf46030",
+      "media_digest": "76bde6656185b77f4da692847dda0c66c09d9c40cd92bb40f636749c406576ea",
+      "error": null
+    },
+    {
+      "index": 19,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "ad6fe8ddd043cf9f7d01249f30c76cede86f98f486d7a7e34e815ffc281acada",
+      "obs_digest": "fef1ffc015d211060a326f013f497ddffd06f4ed92511c3573991df6a09c950e",
+      "media_digest": "069e8f148a46b882d360cfc42397006e3ac88fa2783033b372bf5aaa5cd0ea33",
+      "error": null
+    },
+    {
+      "index": 20,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "5fbbcf64516a4908d19e73d5a4b05a0145f4a48bb82ce5cde8ac647e843e9b20",
+      "obs_digest": "2d58a0fba08771fce164f5734722476b704bfd21b03052db97c2a6add6d56f17",
+      "media_digest": "a4d372dd0f516e45e44c6e807941d806b751d34b87266ea9f002d3eebf4b7363",
+      "error": null
+    },
+    {
+      "index": 21,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "10871dd8e7e79dee8777cb40f4a55cafdbc9727981ee61b1e733065c743cd1e7",
+      "obs_digest": "1496ea8aa2bf72b25a4649a00d77bf5d2cde3e73216ba13ab8b1beea39dca737",
+      "media_digest": "9bdbcea57ae79ac266708de8cd6bae4eeedb88f9883b7a3605e4a22cd029cf3f",
+      "error": null
+    },
+    {
+      "index": 22,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "230a538b52a9be41e8c7343a98194dc2499e03328006cee9b964b8b858877389",
+      "obs_digest": "0cdfc2ea3254f4ac781485297d79c6a27b8c1f5c48cf182b835fcce8ec4242b2",
+      "media_digest": "0ca1a9864f20bd3b936ee9579e82d5a0baeb3e3f670ae106ec9166768933a2ef",
+      "error": null
+    },
+    {
+      "index": 23,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "fff1a2f525cb6cfe4026ad44cf42f8c045981ccdb9db41275aaefd3d26ed2682",
+      "obs_digest": "69682cd5f0c959c3ac6aed951974e6f8ef1e121c5c6a72800288b5df1c289f80",
+      "media_digest": "82ed3ba9a12a6c6e8a2763e46366409dda10d8ead3c0c3d4c8502443e668e869",
+      "error": null
+    },
+    {
+      "index": 24,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "cf8213973e05d06459412616a80d2608b8cf54a8a6bf2d7304753e96e1bbc250",
+      "obs_digest": "a756463029c8f19e6eca76401a125260bfd6230683749f094d507ba060324c2b",
+      "media_digest": "d21a7a0dada3abd7808b28e41aab1ef980d61630c37a78b635aaf1b32c3c38c9",
+      "error": null
+    },
+    {
+      "index": 25,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "8b6a14e0c6dffbfc57f64a7eb9d5b28047cf4b51d98e34ca6f25c19fdf690091",
+      "obs_digest": "10dd1ae9d43e01f8de615e971e5cfed2f81702204562d93db18064c5241e3e60",
+      "media_digest": "8ea9ac934cb0f1b7eddf15a5f509f25ecfc845004ac60b8104ad271361dd76be",
+      "error": null
+    },
+    {
+      "index": 26,
+      "action": "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "b674b82db64a058fcad3835a63550755d4fe341b7eb915485f2a44f889fe7178",
+      "obs_digest": "66aa9b4fdcaa33de39a8ecce2ddfcf09c94bdf27e7a06b51d8995f060b532982",
+      "media_digest": "74335b26005ebf1f8b00b45773a63eb214497d541a8cc93630feae0396141993",
+      "error": null
+    },
+    {
+      "index": 27,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "f1d0589ba679c14f163b756b277afe0922782c3194cec6ff0ab68169d44ab678",
+      "obs_digest": "5ceb84c7f1d2a7ce7b717134647fc773f36cc49941d74767c79685ae28b9928a",
+      "media_digest": "bd46acfb002bf34481f72da5d0c568f45392841f42d3e8b2dd54cf84a40c181e",
+      "error": null
+    },
+    {
+      "index": 28,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "06b64acaebdb6fa3a9fdc1a9da881aec3366dca6728298cedbad095a663e5f28",
+      "obs_digest": "155831d0ea5b9adebc9173a2836c5b85d0bb65ad4f31413cbbb0871d31fed2d8",
+      "media_digest": "0e01115306b6f6e7a1b645caeff92b31e5d16e9b40581240c314834eebcb4d6c",
+      "error": null
+    },
+    {
+      "index": 29,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "3aac66f291b9fe88f2b2277f99e2eb7124edcbe0b606970c074a28ece8b8f04e",
+      "obs_digest": "95a0cd3e505e47c586e53deabdfcbf1019eaa4d1d31b5dd7712a28b21ae25c8c",
+      "media_digest": "af40259a02d022c2448f3660dbb7dd917e113190f2f317e1129bdd5be8cf8ba2",
+      "error": null
+    },
+    {
+      "index": 30,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "dbbd8cb2fbae16ae2388ae78dd3368100815225d7e2512f4572bbae67fda1e70",
+      "obs_digest": "e0a4f5965479ddfe542bd52951e9ab51852240a44e940af267396c937f3708e6",
+      "media_digest": "8856f3201b8b5d5c98018e652ad209ac0e266153dc534534ea64cdb56d29b25b",
+      "error": null
+    },
+    {
+      "index": 31,
+      "action": "{\"action\": \"DROP_OFF(oid=0)\"}",
+      "reward": 7.828507,
+      "done": false,
+      "state_digest": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "obs_digest": "cf4be7183b47a4f052d14e4a1c9d23c5c0630b33173517c74e81a00fe8b8af2f",
+      "media_digest": "913431ef4af45944e532ed64875b0052d121cee126d3969689dfc41ea8d63690",
+      "error": null
+    }
+  ]
+}

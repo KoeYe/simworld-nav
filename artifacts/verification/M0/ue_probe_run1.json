@@ -1,0 +1,53 @@
+{
+  "schema": "embodiedbench/m0_ue_probe/v0.1",
+  "map_path": "/Game/CityCore_Paris/Scenes/ParisCity_FinalBlueprints",
+  "sample_count_requested": 100,
+  "engine_version": "5.8.0-0+UE5",
+  "steps": [
+    {
+      "name": "load_map",
+      "seconds": 32.98,
+      "world": "ParisCity_FinalBlueprints"
+    },
+    {
+      "name": "actor_inventory",
+      "actor_count": 3300
+    },
+    {
+      "name": "nav_actors",
+      "count": 1,
+      "sample": [
+        {
+          "name": "AbstractNavData-Default",
+          "class": "AbstractNavData"
+        }
+      ]
+    },
+    {
+      "name": "nav_system",
+      "present": true
+    },
+    {
+      "name": "build_navigation_direct_failed",
+      "error": "type object 'NavigationSystemV1' has no attribute 'build_navigation'"
+    }
+  ],
+  "assertions": [
+    {
+      "name": "map_opens",
+      "expected": "ParisCity_FinalBlueprints",
+      "observed": "ParisCity_FinalBlueprints",
+      "status": "pass"
+    }
+  ],
+  "status": "fail",
+  "actor_count": 3300,
+  "nav_actors": [
+    {
+      "name": "AbstractNavData-Default",
+      "class": "AbstractNavData"
+    }
+  ],
+  "error": "type object 'EditorLevelLibrary' has no attribute 'editor_command'",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/murray/simworld_nav/tools/ue/m0_paris_nav_probe.py\", line 126, in main\n    unreal.NavigationSystemV1.build_navigation(world)\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: type object 'NavigationSystemV1' has no attribute 'build_navigation'\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/murray/simworld_nav/tools/ue/m0_paris_nav_probe.py\", line 129, in main\n    unreal.EditorLevelLibrary.editor_command(\"RebuildNavigation\")\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: type object 'EditorLevelLibrary' has no attribute 'editor_command'\n"
+}

@@ -1,0 +1,388 @@
+{
+  "label": "procgen_text",
+  "map_name": "small-city-11",
+  "preset": "nav",
+  "render_mode": "text",
+  "seed": 42,
+  "step_count": 32,
+  "actions": [
+    "{\"action\": \"VIEW_ORDERS()\"}",
+    "{\"action\": \"ACCEPT_ORDER(0)\"}",
+    "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"PICKUP(orders=[0])\"}",
+    "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+    "{\"action\": \"DROP_OFF(oid=0)\"}"
+  ],
+  "hashes": {
+    "reset_state_digest": "96505695428e219376f125155e5483b773459ad8ecc3b537fe312b7868b2491c",
+    "transition_hash": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+    "terminal_hash": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+    "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+    "observation_media_hash": null
+  },
+  "score": {
+    "cumulative_reward": 7.828507,
+    "steps_taken": 32,
+    "earnings_total": 107.828507,
+    "energy_pct": 100.0,
+    "delivered_count": 1,
+    "sim_hours": 0.040008347,
+    "success": true
+  },
+  "extraction_stats": {
+    "nodes": 3104759,
+    "truncated_sequences": 0,
+    "depth_limited": 0,
+    "dropped_types": {
+      "Random": 30
+    }
+  },
+  "steps": [
+    {
+      "index": 0,
+      "action": "{\"action\": \"VIEW_ORDERS()\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "75f71ffdb63523e869962f90e9317ceaf90f76a656c7f946f05ee5764ca1302d",
+      "obs_digest": "df7bde25b6d645528d306565a0ec00fb2111dd05bfa2321db687093137392f79",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 1,
+      "action": "{\"action\": \"ACCEPT_ORDER(0)\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "c67fd369ea050aec4d9516781f07316bedaf8d3c23afad7476d0bb5beb348479",
+      "obs_digest": "1ab97b12e47980163ea4b527c5bc73dfa078342a9a6c5c567daa9ee187711eb8",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 2,
+      "action": "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "98199b5cf31201225dd6b8b16ad24a45ce86e8b4b2181df89c91d94ecb1ae521",
+      "obs_digest": "1b76a411151a7bd299a7ab31c87021983df6ac0c6efddcc208a2c21466552153",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 3,
+      "action": "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "772d4d3e862bf7e16e7ec2ee2e9ba1229383d2c91a3af5bd4ffb1bef878a6879",
+      "obs_digest": "5827ffe42c3647c1f5f7193b4b7ab893d29a94ff667fbf0b41c6c76ef74e51a1",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 4,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "92e81991ce04d2797a38cfe55d549f2df43df542180e6cd6e0fe521521edac3e",
+      "obs_digest": "3583f22754ecdddb3b3c04dd76462aea29067a821470bade41da767957046fb8",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 5,
+      "action": "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "1e55e5418a00ed222fb1a37cf3d81104bd303cf33b96fded35d04e9497f4ee14",
+      "obs_digest": "c56c08e3ea6b99ead3ba821f568de0ced9070838600b486f0089bc7ea81714fa",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 6,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "6fd7a2a91db9829fdc8bb94cc758eea74b8a3589c20c91ebeee31555ed77def3",
+      "obs_digest": "ea35c059fa2a8802f6cf55d64b24cce796ec322fff9814831939c36887931a0d",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 7,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "57c9a1483248690e57438a8acadc7b8024e861d567b7cbdc6419fdc7b6eb3d49",
+      "obs_digest": "af53887303f584f7f30655e79d4f1cb30b56f5df1144e8a84bafefbdfd8d91c2",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 8,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "da57568343c958bfecc09aa91e35c66e50b8d587a5e401081822da79d240562e",
+      "obs_digest": "5969c4d16d3aad003dda3c9cca4f3bc6be5f436100058454abdab581bf926dbb",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 9,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "1c69ef66a146045a78e8a64b54a0810ee752403e4d28accdc76b654fdde2ee0d",
+      "obs_digest": "d4521fc218a339f3f61e6a75ccfea0021d37f63a1b76ac3328c1cc30c42893a2",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 10,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "927a70915d5523f3dd93c6593ec70041ce1d2814216b69bea7f157bce5a84a1f",
+      "obs_digest": "135d8a4b9e0ccbad8316e140c535c408e6801e1e8acd24372f8661287a03da65",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 11,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "44fb293bbab2bb3c480fbb307be290816a58a5275614851626dceaddb7a6d39e",
+      "obs_digest": "322adcabc0e9859c77faeb1e104191697b875029494e8e29022ae30810e07cc4",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 12,
+      "action": "{\"action\": \"PICKUP(orders=[0])\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "061813e3d97e3e236a163cf98ddc7f9aac312887648f3c588d11dc736048cfcb",
+      "obs_digest": "0d149bc19a1e6d8daabfbf01e7d0f561165e85483c7b267d68df04e739303b38",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 13,
+      "action": "{\"action\": \"MOVE(direction=\\\"backward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "99262519cb47158fc9f439ba0e1df8fccbc0d8684e8defc01f7a61384be81333",
+      "obs_digest": "a3e3893eb12e1e6b69ee2b91c11a4028ff9948b5018fe4ef2b47e95f5deee098",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 14,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "955dc037659252ad19bc1831d43c8de2dba696309520ae6caab8a203f86151d4",
+      "obs_digest": "942df86da5d379de3feb90260b2a8ed1722ef5d32c112be3ed66ec0265432887",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 15,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "51be1388fc19e55a4f45808edf9b654f6917c9da6e55077c429c99c1a8225001",
+      "obs_digest": "a19bb5c68288ec7c64e5d589318fbfd0fd4133f81ae03f2407693553fa7e9f06",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 16,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "f35bb48962037fbd19c31f63c89f95bebd3e67f0d8d47db3ea23f600e92df092",
+      "obs_digest": "bc89eef48ebe4066eabdffbde7cc44f893bac821cc9375aafb1ce0207fc8d1e0",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 17,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "d1441556b6b333d8d3ed8550fe62f3c9f900f2c3f4408e0d70584a4d4e824a03",
+      "obs_digest": "8f1138a62d5920a0ad35c267b130a496028277c757bc83a9a93fa722f80312f2",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 18,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "aee5fd34c660bce6c210809e42c7028700c495c8630ade2365af9e8a15e02ff6",
+      "obs_digest": "c848adb96f75b3d39e08e631e853a56db3afa902586e6ae62c5f8e3c17d77ddc",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 19,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "ef7bd21eb6f60ff990c730ab9f90f294cd2d4111fa33c883e4defbbe14180a14",
+      "obs_digest": "c0ee7029ae16953aff5869d6bda4e4530ef5d6645934ebc132298a22541ae9a5",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 20,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "b4c77a1edccd24f4fd4dda9e5f4107510a6f0779b7cd53821ee51a6328ed285d",
+      "obs_digest": "bbc04527ca4e693d8a445c5344ebf61ce63ff1829a6383c6715010e5272e4329",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 21,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "dc5d6519167ab25bbef33d32a51ebb387eeec386c69fd3a79804c4b66bbbfd4a",
+      "obs_digest": "4c362fff256b3f41767e78865d9c9a643f01db72dddbc05c0c87534f11652c9a",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 22,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "8b33933b3d1a1d8320c92f2b566b47391ce9533eb72f4cd73fb4da3911d103e4",
+      "obs_digest": "19830ec59a588d84443ad5b689ab4f6fa8e7deed177782c720c67cb7e5b330ab",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 23,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "be0fa5e1b81aa0ed90300f831f898b7098adc8f70fad78fb693e41dec32eb0b1",
+      "obs_digest": "1c7b03f2d33630203a1ad2b10e1599b5d8e760d4b2fb93a18d55bee743865417",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 24,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "f3aa2749ec4d8d52ffa0a19765de8147175ecb0aa55486700cd8babd6a916153",
+      "obs_digest": "068daa7f59f61cb03781d3c2e2a743082e6d3b2ec50a73ddd739f67625ebe078",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 25,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "76be7eadf98b2b787f0438671c0b3fc43e0bf811e0bc99cd13b01aecec103c00",
+      "obs_digest": "b2bfdf0a472e35f6d0eb65a1626d08590013a66b70fe3d267f609cdb47b82461",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 26,
+      "action": "{\"action\": \"MOVE(direction=\\\"left\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "d9b66e2ff88d49468063d64b3c07b270d0f8244e6338f3ede8ac5aba5dc81b1b",
+      "obs_digest": "a0d213ba8a1b818620556f54db4098ed1179794231366e419e9f8039a59e1797",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 27,
+      "action": "{\"action\": \"MOVE(direction=\\\"right\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "d0ce50d923317488909c84082c6c2fef47c216c3c3f68e3bc438c6e211a49b58",
+      "obs_digest": "011722414c509987379e1487856f67620a1f67076728b8eca07802fb75fa72ca",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 28,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "2c405db55da1bb7ab79c1599ec29d2a40cd312a6d622a6c07e717c8b2af7f619",
+      "obs_digest": "1c937cb032077ef3b49eb2383853eddea5fbdccd0636ecdda5a812eb3a51fa6a",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 29,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "be1af0e1959d6bdb4732c16fd41d62d201351f97485b9eee14f1b0a197345b17",
+      "obs_digest": "7fe802b438b89118fd3b3ca5d2acc902f799f1bfb9b2040b81cfd81f316547ce",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 30,
+      "action": "{\"action\": \"MOVE(direction=\\\"forward\\\")\"}",
+      "reward": 0.0,
+      "done": false,
+      "state_digest": "b69be69e58b25244e830e32af3cbb8b6321569c9cb7b398ea67ea455e5dfeadf",
+      "obs_digest": "ad19a371d5ec6f8176fcd7c8cff298ee2426b777a954c3b39c1cbbfea6463b02",
+      "media_digest": null,
+      "error": null
+    },
+    {
+      "index": 31,
+      "action": "{\"action\": \"DROP_OFF(oid=0)\"}",
+      "reward": 7.828507,
+      "done": false,
+      "state_digest": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "obs_digest": "299d1973f727c1c7402f22d696be396b97713bda5135df7fe7d8f3c8507eafe3",
+      "media_digest": null,
+      "error": null
+    }
+  ]
+}

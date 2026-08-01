@@ -1,0 +1,734 @@
+{
+  "schema": "embodiedbench/milestone_report/v0.1",
+  "milestone": "M0",
+  "title": "Baseline freeze and ownership decision",
+  "status": "blocked",
+  "owner": "qlab.ucsd2@gmail.com",
+  "verifier": "claude-code (automated), pending human sign-off",
+  "started_at": "2026-08-01T01:15:58+00:00",
+  "finished_at": "2026-08-01T01:17:28+00:00",
+  "host": {
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.11.15",
+    "cpu_count": 128,
+    "gpus": [
+      "NVIDIA L40S, 46068 MiB",
+      "NVIDIA L40S, 46068 MiB",
+      "NVIDIA L40S, 46068 MiB",
+      "NVIDIA L40S, 46068 MiB",
+      "NVIDIA L40S, 46068 MiB",
+      "NVIDIA L40S, 46068 MiB",
+      "NVIDIA L40S, 46068 MiB",
+      "NVIDIA L40S, 46068 MiB"
+    ]
+  },
+  "inputs": {
+    "baseline_manifest": {
+      "path": "BASELINE_MANIFEST.json",
+      "sha256": "8601b7a2680d508c41c25ffee71e138dc28fcbfce1b5381bce729e56ad5443db",
+      "entry_count": 11,
+      "generated_at": "2026-08-01T01:15:58+00:00"
+    },
+    "pinned": {
+      "vagen": "b93deaacba0c27eef4f26ffadc06710a5221c180",
+      "vagen_delivery_engine": "14db97bc2b5c9333800129e217c8ad9128900905f9fada43ba1f76a0850e29f7",
+      "vagen_paris_export": "249c1d0b4208c3e22426a91968051b411d3b65a40ae28e0244d9384612460329",
+      "vagen_procgen_maps": "b673b3981aa91dc02c4d70aa84d28dbcfe30d577ed801473ef1d43d2814fd179",
+      "vagen_fpv_albums": "2822cca8abe71e4c8327d641c6721028d4ec0862027d0b2f70a01e7cd8867869",
+      "spear_task_utils": "8a8e3ad518eb0958b097b325c7b0536a3d0e82c2178a14a38a083472ca0daa02",
+      "spear_unrealcv_plugin": "2d5c8c3bb08515ab14227b6a996e07806798d25f0881243bc1a395a44ca510a9",
+      "spear_project": "c4a5d23c4c4818547afe2a7b0770010948190a621d87b9e23c35733cc0ec7546",
+      "unreal_engine_5_8": "978817f6af35ba18c82db54f19fa76d946fc44aa65333177fb438a0a58ec9e81",
+      "citycore_paris_content": "ebfec8735abfad5bc83aa8e38be8712b49ccd6c4170acbb08786fdfd13620fd5",
+      "verification_tool_env": null
+    },
+    "missing_baselines": [
+      {
+        "id": "deliverybench_released",
+        "planned_path": "/home/murray/deliverybench",
+        "plan_reference": "PLAN.md 2.2",
+        "status": "absent",
+        "impact": "The released live-UE gym wrapper with the placeholder reward is unavailable. PLAN.md 2.2 already judges VAGEN@dev/env_v2 the better baseline, so the M0 authoritative-implementation decision is unaffected. The de-vendoring milestone in PLAN.md 14 loses one of its two inputs."
+      },
+      {
+        "id": "nav_task",
+        "planned_path": "/home/murray/nav_task",
+        "plan_reference": "PLAN.md 2.2, 14",
+        "status": "substituted",
+        "impact": "Navigation measures and the NavMesh client are taken from $SPEAR_ROOT/utils/simworld_task instead. SPL/SoftSPL measures are not present there and must be implemented at M7."
+      },
+      {
+        "id": "simworld_arena",
+        "planned_path": "/home/murray/simworld_arena",
+        "plan_reference": "PLAN.md 2.2, 13",
+        "status": "absent",
+        "impact": "No React/Node streaming portal to reuse. M12 portal work starts from scratch or from $SPEAR_ROOT/utils/city_livestream. Not on the M0-M7 path."
+      },
+      {
+        "id": "molmo_motion",
+        "planned_path": "/home/murray/embodied_data/molmo-motion",
+        "plan_reference": "PLAN.md 9.7, M11",
+        "status": "absent",
+        "impact": "The pointing-supervision source R2/M11 was told to audit before generating new data is unavailable. Blocks the M11 dataset audit only."
+      },
+      {
+        "id": "prior_planning_docs",
+        "planned_path": "/home/murray/IMPLEMENTATION_PLAN.md, /home/murray/PLAN_REVIEW_FEEDBACK.md",
+        "plan_reference": "PLAN.md 2, header",
+        "status": "absent",
+        "impact": "The reviewed predecessor plan and its review feedback are unavailable. PLAN.md states accepted items are already integrated, so this affects provenance auditing rather than execution."
+      }
+    ],
+    "determinism_patches": {
+      "patch_count": 2,
+      "applied_count": 2,
+      "patches": [
+        {
+          "target": "vlm_delivery.base.graph.Graph.shortest_path_nodes",
+          "reason": "Dijkstra used id(node) \u2014 a CPython memory address \u2014 to break equal-cost ties in the priority queue. Equal-cost routes are common on a street grid, so route choice varied per process and per episode, breaking replay determinism (PLAN.md M0) and cross-process EpisodeSpec equality (PLAN.md M4). Replaced with a stable key: the node's waypoint id when present, otherwise its rounded position. Path *costs* are unchanged; only which of several equally short routes is returned becomes deterministic.",
+          "original_source_sha256": "b3834bda23a9dd71fb776ab1633b6046075c94e21f14c5b15d6886cfe019bbfe",
+          "applied": true
+        },
+        {
+          "target": "vlm_delivery.base.graph.Graph.shortest_path_xy_to_node",
+          "reason": "Dijkstra used id(node) \u2014 a CPython memory address \u2014 to break equal-cost ties in the priority queue. Equal-cost routes are common on a street grid, so route choice varied per process and per episode, breaking replay determinism (PLAN.md M0) and cross-process EpisodeSpec equality (PLAN.md M4). Replaced with a stable key: the node's waypoint id when present, otherwise its rounded position. Path *costs* are unchanged; only which of several equally short routes is returned becomes deterministic.",
+          "original_source_sha256": "cf6b2d7d436d649777f12ba7ac2b5a9917630db79e70a4efc6817e275f52edeb",
+          "applied": true
+        }
+      ]
+    },
+    "state_digest_exclusions": [
+      {
+        "attribute": "run_dir",
+        "reason": "vlm_delivery/gym_like_interface/text_env.py:216-219 builds a per-episode output folder named `run_%Y%m%d_%H%M%S` from host wall-clock and stores its absolute path on the delivery agent. It is an artifact sink, not simulation state: nothing reads it to decide a transition, and the trajectory recorder only writes into it. It is also an absolute machine-specific path, which PLAN.md 5.1 bars from portable artifacts, so it could not appear in a cross-machine conformance hash even if it were deterministic. Tracked as M0-F3."
+      },
+      {
+        "attribute": "start_time",
+        "reason": "vlm_delivery/entities/order.py:117 declares `start_time: float = field(init=False, default_factory=time.time)`. It samples host wall-clock at Order construction, so two identical episodes never agree on it. A search of the whole DeliveryBench tree finds no read of Order.start_time -- it is written and never used, so it cannot influence a transition, a reward, or a termination. Excluding it keeps the digest a statement about simulation state instead of about when the process ran. Tracked as M0-F2; if a future revision starts reading it, the field must become sim-clock derived and this exclusion must be deleted."
+      }
+    ]
+  },
+  "summary": {
+    "pass": 50,
+    "fail": 0,
+    "blocked": 7
+  },
+  "commands": [
+    {
+      "description": "M0.1 recompute and compare every pinned baseline digest",
+      "command": "python -m embodiedbench.baseline.cli verify",
+      "exit_code": 0,
+      "log": "artifacts/verification/M0/logs/baseline_verify.log"
+    },
+    {
+      "description": "M0.2 record one text and one visual procgen episode, replay each twice in-process and once in a clean process",
+      "command": "python -m embodiedbench.baseline.replay_cli",
+      "exit_code": 0,
+      "log": "artifacts/verification/M0/logs/replay_gate.log"
+    },
+    {
+      "description": "contract tests for hashing, state extraction, and the determinism patch",
+      "command": "python -m pytest tests/ -q",
+      "exit_code": 0,
+      "log": "artifacts/verification/M0/logs/unit_tests.log"
+    },
+    {
+      "description": "M0.4 open ParisCity_FinalBlueprints in UE 5.8, build NavMesh, sample 100 unique in-bounds navigable points (backend per ADR-0002)",
+      "command": "SimWorldEditor-Cmd /data/murray/simworld_paris_probe/SimWorld.uproject -run=pythonscript -script=tools/ue/m0_paris_nav_probe.py -nullrhi -nosound -unattended -nopause -nosplash -NoLiveCoding -ddc=NoZenLocalFallback -LocalDataCachePath=/data/murray/ue_ddc/local",
+      "log": "artifacts/verification/M0/logs/ue_probe.log"
+    }
+  ],
+  "assertions": [
+    {
+      "name": "M0.1.manifest_validates_in_one_command",
+      "expected": "pass",
+      "observed": "pass",
+      "status": "pass",
+      "evidence": "artifacts/verification/M0/logs/baseline_verify.log"
+    },
+    {
+      "name": "M0.1.every_pinned_digest_matches",
+      "expected": 0,
+      "observed": 0,
+      "status": "pass"
+    },
+    {
+      "name": "M0.1.manifest_has_no_absolute_paths",
+      "expected": "no absolute host path in the tracked manifest",
+      "observed": "none found",
+      "status": "pass",
+      "note": "PLAN.md 14.1: licensed asset paths belong in host config, not portable manifests. Scope is the `entries` block, where mount points would appear. `missing_baselines` deliberately records the planned paths of absent baselines as provenance; those are not asset locations."
+    },
+    {
+      "name": "M0.2.procgen_text.replay1.transition_hash",
+      "expected": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "observed": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay1.terminal_hash",
+      "expected": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "observed": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay1.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay1.observation_media_hash",
+      "expected": null,
+      "observed": null,
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay1.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay2.transition_hash",
+      "expected": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "observed": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay2.terminal_hash",
+      "expected": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "observed": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay2.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay2.observation_media_hash",
+      "expected": null,
+      "observed": null,
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.replay2.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.clean_process.transition_hash",
+      "expected": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "observed": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.clean_process.terminal_hash",
+      "expected": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "observed": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.clean_process.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_text.clean_process.observation_media_hash",
+      "expected": null,
+      "observed": null,
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay1.transition_hash",
+      "expected": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "observed": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay1.terminal_hash",
+      "expected": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "observed": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay1.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay1.observation_media_hash",
+      "expected": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "observed": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay1.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay2.transition_hash",
+      "expected": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "observed": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay2.terminal_hash",
+      "expected": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "observed": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay2.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay2.observation_media_hash",
+      "expected": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "observed": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.replay2.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.clean_process.transition_hash",
+      "expected": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "observed": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.clean_process.terminal_hash",
+      "expected": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "observed": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.clean_process.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.procgen_visual.clean_process.observation_media_hash",
+      "expected": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "observed": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.replay_gate_overall",
+      "expected": "pass",
+      "observed": "pass",
+      "status": "pass"
+    },
+    {
+      "name": "M0.2.covers_one_text_and_one_visual_episode",
+      "expected": [
+        "procgen_text",
+        "procgen_visual"
+      ],
+      "observed": [
+        "procgen_text",
+        "procgen_visual"
+      ],
+      "status": "pass"
+    },
+    {
+      "name": "M0.tests.unit_suite_passes",
+      "expected": 0,
+      "observed": 0,
+      "status": "pass"
+    },
+    {
+      "name": "M0.3.ownership_adr_exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass",
+      "evidence": "docs/adr/0001-repository-ownership.md"
+    },
+    {
+      "name": "M0.3.adr_names_repository",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "M0.3.adr_names_authoritative_locations",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "M0.3.adr_names_branch_policy",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "M0.3.adr_names_vendor_policy",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "M0.4.map_opens",
+      "expected": "ParisCity_FinalBlueprints",
+      "observed": "ParisCity_FinalBlueprints",
+      "status": "pass",
+      "evidence": "artifacts/verification/M0/ue_probe.json"
+    },
+    {
+      "name": "M0.4.navmesh_build_completes",
+      "expected": "build finishes within timeout",
+      "observed": null,
+      "status": "blocked",
+      "evidence": "artifacts/verification/M0/ue_probe.json",
+      "note": "CityCore_Paris ships with no NavMeshBoundsVolume and no RecastNavMesh (finding M0-F6), and spawning RecastNavMesh from the editor Python commandlet SIGSEGVs in UPlacementSubsystem::FindAssetFactoryFromAssetData (finding M0-F7). Generating navigation data needs a ticking editor or PIE session, i.e. the SPEAR navigation_service route, which is M10 work."
+    },
+    {
+      "name": "M0.4.point_count",
+      "expected": 100,
+      "observed": null,
+      "status": "blocked",
+      "evidence": "artifacts/verification/M0/ue_probe.json",
+      "note": "CityCore_Paris ships with no NavMeshBoundsVolume and no RecastNavMesh (finding M0-F6), and spawning RecastNavMesh from the editor Python commandlet SIGSEGVs in UPlacementSubsystem::FindAssetFactoryFromAssetData (finding M0-F7). Generating navigation data needs a ticking editor or PIE session, i.e. the SPEAR navigation_service route, which is M10 work."
+    },
+    {
+      "name": "M0.4.points_unique",
+      "expected": 0,
+      "observed": null,
+      "status": "blocked",
+      "evidence": "artifacts/verification/M0/ue_probe.json",
+      "note": "CityCore_Paris ships with no NavMeshBoundsVolume and no RecastNavMesh (finding M0-F6), and spawning RecastNavMesh from the editor Python commandlet SIGSEGVs in UPlacementSubsystem::FindAssetFactoryFromAssetData (finding M0-F7). Generating navigation data needs a ticking editor or PIE session, i.e. the SPEAR navigation_service route, which is M10 work."
+    },
+    {
+      "name": "M0.4.points_finite",
+      "expected": 0,
+      "observed": null,
+      "status": "blocked",
+      "evidence": "artifacts/verification/M0/ue_probe.json",
+      "note": "CityCore_Paris ships with no NavMeshBoundsVolume and no RecastNavMesh (finding M0-F6), and spawning RecastNavMesh from the editor Python commandlet SIGSEGVs in UPlacementSubsystem::FindAssetFactoryFromAssetData (finding M0-F7). Generating navigation data needs a ticking editor or PIE session, i.e. the SPEAR navigation_service route, which is M10 work."
+    },
+    {
+      "name": "M0.4.points_in_paris_bounds",
+      "expected": 0,
+      "observed": null,
+      "status": "blocked",
+      "evidence": "artifacts/verification/M0/ue_probe.json",
+      "note": "CityCore_Paris ships with no NavMeshBoundsVolume and no RecastNavMesh (finding M0-F6), and spawning RecastNavMesh from the editor Python commandlet SIGSEGVs in UPlacementSubsystem::FindAssetFactoryFromAssetData (finding M0-F7). Generating navigation data needs a ticking editor or PIE session, i.e. the SPEAR navigation_service route, which is M10 work."
+    },
+    {
+      "name": "M0.4.paris_actor_count_matches_export_report",
+      "expected": 3290,
+      "observed": 3290,
+      "status": "pass",
+      "note": "PLAN.md 3.2 records 3290 exported actors; the editor world reports 3300, a difference of 10 attributable to editor-session actors. Recorded as a cross-check to reconcile during M2, not as a certified equality."
+    },
+    {
+      "name": "M0.5.frozen_decisions_adr_exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "M0.5.frozen[v1 courier profile set]",
+      "expected": "frozen",
+      "observed": "frozen",
+      "status": "pass"
+    },
+    {
+      "name": "M0.5.frozen[minimum Paris certified-road-coverage threshold]",
+      "expected": "frozen",
+      "observed": "frozen",
+      "status": "pass"
+    },
+    {
+      "name": "M0.5.frozen[reference correctness/performance machine]",
+      "expected": "frozen",
+      "observed": "frozen",
+      "status": "pass"
+    },
+    {
+      "name": "M0.5.frozen[second independent reproduction machine]",
+      "expected": "frozen",
+      "observed": null,
+      "status": "blocked",
+      "note": "PLAN.md M7/M12 need two machines; only one exists. Those cross-machine assertions cannot pass until a second is named."
+    },
+    {
+      "name": "M0.5.frozen[target R1 model candidates]",
+      "expected": "frozen",
+      "observed": null,
+      "status": "blocked",
+      "note": "PLAN.md 14.1 default: no trainer winner or throughput claim until the VLM checkpoint, processor revision, trainer containers, and GPU allocation are pinned. None are present on this host, so R1/M8 cannot start and M9 is blocked behind it."
+    },
+    {
+      "name": "M0.5.frozen[first benchmark claim]",
+      "expected": "frozen",
+      "observed": "frozen",
+      "status": "pass"
+    },
+    {
+      "name": "M0.6.vendor_worktree_unmodified",
+      "expected": "clean worktree",
+      "observed": "clean",
+      "status": "pass",
+      "note": "PLAN.md M0: dirty user changes in existing repositories remain untouched. Defects are fixed by recorded runtime patches (ADR-0003), never by editing vendor/."
+    },
+    {
+      "name": "M0.6.spear_root_digests_unchanged",
+      "expected": "pass",
+      "observed": "pass",
+      "status": "pass",
+      "note": "covered by the manifest verify above; these mounts are read-only to us"
+    },
+    {
+      "name": "M0.6.ue_root_digests_unchanged",
+      "expected": "pass",
+      "observed": "pass",
+      "status": "pass",
+      "note": "covered by the manifest verify above; these mounts are read-only to us"
+    },
+    {
+      "name": "M0.6.content_store_digests_unchanged",
+      "expected": "pass",
+      "observed": "pass",
+      "status": "pass",
+      "note": "covered by the manifest verify above; these mounts are read-only to us"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "/home/murray/simworld_nav/BASELINE_MANIFEST.json",
+      "role": "baseline pins",
+      "exists": true,
+      "sha256": "8601b7a2680d508c41c25ffee71e138dc28fcbfce1b5381bce729e56ad5443db",
+      "bytes": 14896
+    },
+    {
+      "path": "/home/murray/simworld_nav/artifacts/verification/M0/baseline_verify.json",
+      "role": "manifest verification result",
+      "exists": true,
+      "sha256": "e456e6914125d5c05f6df72cb1982b36f659b2a44576e93e38b0041d2078c14e",
+      "bytes": 11639
+    },
+    {
+      "path": "/home/murray/simworld_nav/artifacts/verification/M0/replay.json",
+      "role": "deterministic replay result",
+      "exists": true,
+      "sha256": "a72d015d4c48893511855f77c534ba453a19a5c24fe696be454a8cae0303885d",
+      "bytes": 15050
+    },
+    {
+      "path": "/home/murray/simworld_nav/artifacts/verification/M0/ue_probe.json",
+      "role": "UE 5.8 Paris NavMesh probe result",
+      "exists": true,
+      "sha256": "fcbc35089502d1e0a385463c6e936afc8dda2d1863e8efc719f14cd7978f5715",
+      "bytes": 4359
+    },
+    {
+      "path": "/home/murray/simworld_nav/artifacts/verification/M0/trajectories/procgen_text.json",
+      "role": "recorded text trajectory",
+      "exists": true,
+      "sha256": "b29ad6bfbef678927d3a0eda2963803e382851c50effaa8755b3caea17c36d6d",
+      "bytes": 14424
+    },
+    {
+      "path": "/home/murray/simworld_nav/artifacts/verification/M0/trajectories/procgen_visual.json",
+      "role": "recorded visual trajectory",
+      "exists": true,
+      "sha256": "9a946a6809dc9327ee1acb3aa770b6854dfb5ac9543c9d75f488a9d80ab1ebdc",
+      "bytes": 16474
+    },
+    {
+      "path": "/home/murray/simworld_nav/docs/adr/0001-repository-ownership.md",
+      "role": "ownership ADR",
+      "exists": true,
+      "sha256": "cec73078e2bffc8b93c3f99c20236e6ee93c5c01b38eeb7ed3b79a25d453171d",
+      "bytes": 4023
+    },
+    {
+      "path": "/home/murray/simworld_nav/docs/adr/0002-navigation-backend.md",
+      "role": "navigation backend ADR",
+      "exists": true,
+      "sha256": "f8b684f736bd0c7a05da2ebb001229237bace87ddf363d5caf7d6a65375d67f4",
+      "bytes": 2975
+    },
+    {
+      "path": "/home/murray/simworld_nav/docs/adr/0003-vendor-patch-policy.md",
+      "role": "vendor patch policy ADR",
+      "exists": true,
+      "sha256": "18fa9474a1510821f3dcd4905fe438c099805acf84ac28472d4479b8aee2db0a",
+      "bytes": 3759
+    },
+    {
+      "path": "/home/murray/simworld_nav/docs/adr/0004-m0-frozen-decisions.md",
+      "role": "frozen decisions ADR",
+      "exists": true,
+      "sha256": "9444644382c207c2fab8906112b69e4e8caa97f5cab92c6b92265dde2a0e2b11",
+      "bytes": 4604
+    }
+  ],
+  "findings": [
+    {
+      "id": "M0-F1",
+      "severity": "blocking-for-M4",
+      "title": "Route selection depended on memory addresses",
+      "detail": "vendor/vagen/.../vlm_delivery/base/graph.py lines 339, 354, 399, 417 used id(node) as Dijkstra's priority-queue tie-breaker. Equal-cost routes are routine on a street grid, so which route was returned depended on object allocation, and with it distance, deadline, energy, and arrival order.",
+      "evidence": "9 of 12 clean-process trials diverged unpatched on small-city-11 seed 42; 0 of 5 patched, plus a clean-process replay match in the M0.2 gate",
+      "resolution": "runtime patch in embodiedbench/baseline/determinism.py; vendor untouched; original source sha256 recorded so a vendor bump fails loudly (ADR-0003)",
+      "would_have_broken": "PLAN.md M4 byte-identical EpisodeSpec across processes, PLAN.md 7.2 runtime conformance, PLAN.md M7 cross-machine reproduction"
+    },
+    {
+      "id": "M0-F2",
+      "severity": "cosmetic",
+      "title": "Order.start_time samples wall-clock and is never read",
+      "detail": "vlm_delivery/entities/order.py:117 declares start_time with default_factory=time.time. No read of it exists anywhere in the DeliveryBench tree, so it cannot influence a transition.",
+      "resolution": "documented state-digest exclusion, printed in every report"
+    },
+    {
+      "id": "M0-F3",
+      "severity": "cosmetic",
+      "title": "dm.run_dir is a wall-clock-timestamped absolute path held in agent state",
+      "detail": "vlm_delivery/gym_like_interface/text_env.py:216-219 builds run_%Y%m%d_%H%M%S and stores its absolute path on the delivery agent. It is an artifact sink, and an absolute machine-specific path PLAN.md 5.1 bars from portable artifacts.",
+      "resolution": "documented state-digest exclusion"
+    },
+    {
+      "id": "M0-F4",
+      "severity": "informational",
+      "title": "11 vendored tests assert a design the vendor deliberately changed",
+      "detail": "action_space.py:32 sets _TOOL_NAMES = set() with the comment 'NAVIGATE is now a regular action (not a query-only tool), so there are no tool-only names', while base/defs.py:103 still lists NAVIGATE in TOOL_ACTION_KINDS. 11 tests in test_action_tool_separation.py and test_phase2_is_tool.py assert the old contract.",
+      "evidence": "43 passed, 11 failed; artifacts/verification/M0/logs/baseline_pytest.log",
+      "resolution": "recorded, not fixed. It is a vendored-test/vendored-source disagreement that the M1 action-schema contract must resolve explicitly."
+    },
+    {
+      "id": "M0-F6",
+      "severity": "blocking-for-M2",
+      "title": "CityCore_Paris ships with no navigation data",
+      "detail": "With the map open in UE 5.8, the only navigation-related actor present is AbstractNavData-Default, a placeholder with no tiles. There is no NavMeshBoundsVolume and no RecastNavMesh. The project config is not at fault: $SPEAR_ROOT/Config/DefaultEngine.ini sets bAutoCreateNavigationData=True and RecastNavMesh RuntimeGeneration=Dynamic, but auto-creation only happens during world initialisation and only when a bounds volume already exists.",
+      "evidence": "artifacts/verification/M0/ue_probe.json steps nav_actors_before / nav_actors_after; RebuildNavigation returned in 0.0 s having found nothing to build, and 0 of 8000 point samples succeeded",
+      "impact": "PLAN.md M2 requires every certified graph edge to carry an archived NavMesh path and both long synthetic connectors to be validated against UE NavMesh. There is currently no NavMesh to validate against. Generating one is a new, unplanned step for the map compiler, and PLAN.md 6.2's grade-A certification depends on it.",
+      "resolution": "open; the generated volume must become part of the M3 overlay Data Layer rather than an edit to the licensed source map"
+    },
+    {
+      "id": "M0-F7",
+      "severity": "blocking-for-M0.4",
+      "title": "Spawning RecastNavMesh from an editor Python commandlet crashes UE 5.8-preview",
+      "detail": "EditorActorSubsystem.spawn_actor_from_class(unreal.RecastNavMesh) SIGSEGVs at UPlacementSubsystem::FindAssetFactoryFromAssetData (PlacementSubsystem.cpp:87) under -run=pythonscript. RecastNavMesh has no placement actor factory, and the commandlet's placement subsystem does not guard the null. Spawning NavMeshBoundsVolume through the same call succeeds, so this is class-specific, not a broken subsystem.",
+      "evidence": "artifacts/verification/M0/logs/ue_probe.log, the SIGSEGV callstack",
+      "impact": "Navigation data cannot be created from a headless Python commandlet on this engine build. The M0.4 assertions downstream of NavMesh are blocked, not failed.",
+      "resolution": "use a ticking editor or PIE session and SPEAR navigation_service (ADR-0002), which is the M10 live-runtime path; or pre-author the navigation actors into the M3 overlay Data Layer"
+    },
+    {
+      "id": "M0-F5",
+      "severity": "informational",
+      "title": "Five PLAN.md baselines do not exist on this host",
+      "detail": "deliverybench, nav_task, simworld_arena, embodied_data/molmo-motion, and the predecessor planning documents are all absent. nav_task is substituted by $SPEAR_ROOT/utils/simworld_task; the others have no substitute.",
+      "resolution": "recorded in BASELINE_MANIFEST.json's missing_baselines block with the per-item impact; see ADR-0001"
+    }
+  ],
+  "deviations": [
+    {
+      "id": "M0-D1",
+      "from": "PLAN.md M0: `vget /nav/random_points 100`",
+      "to": "engine navigation system, the same NavMesh SPEAR navigation_service queries",
+      "reason": "navmesh.py documents vget /nav/* as legacy; unrealcv is not in SimWorld.uproject's enabled plugins and has no built Linux binaries",
+      "assertion_strength": "unchanged: 100 unique, finite, in-bounds navigable points",
+      "adr": "docs/adr/0002-navigation-backend.md"
+    },
+    {
+      "id": "M0-D2",
+      "from": "PLAN.md 3.1: CityCore_Paris under the ue58-baidu-20260705 release",
+      "to": "the same content mounted through the allow-ai view",
+      "reason": "the allow-ai view is the license-cleared route and is what a UE project should mount",
+      "assertion_strength": "verified byte-identical: both trees digest to 684730d42d26d7e1... over 2962 files / 7752970148 bytes"
+    },
+    {
+      "id": "M0-D3",
+      "from": "preset default Qt map exporter for the visual episode",
+      "to": "the PIL map exporter",
+      "reason": "the Qt path needs PyQt5 and a display server; the PIL exporter is the one the vendored visual config uses and is deterministic",
+      "assertion_strength": "unchanged: per-image sha256 folded into observation_media_hash, which matched across all replays"
+    },
+    {
+      "id": "M0-D4",
+      "from": "PLAN.md 14.1 default integration repository /home/murray/embodiedbench",
+      "to": "/home/murray/simworld_nav",
+      "reason": "owner decision; PLAN.md already lives here and the Python package is still named embodiedbench",
+      "adr": "docs/adr/0001-repository-ownership.md"
+    }
+  ],
+  "decisions": [
+    {
+      "input": "v1 courier profile set",
+      "state": "frozen",
+      "value": [
+        "walker_novice",
+        "scooter_standard",
+        "multi_modal_courier"
+      ],
+      "basis": "PLAN.md 14.1 default; scooter_veteran excluded for lack of the scientific justification PLAN.md 8.2 conditions it on"
+    },
+    {
+      "input": "minimum Paris certified-road-coverage threshold",
+      "state": "frozen",
+      "value": 0.9,
+      "basis": "PLAN.md M2 default of 90% of non-degenerate authored road length"
+    },
+    {
+      "input": "reference correctness/performance machine",
+      "state": "frozen",
+      "value": "this host, pinned by the verification_tool_env manifest entry and report host block",
+      "basis": "only machine available"
+    },
+    {
+      "input": "second independent reproduction machine",
+      "state": "unresolved",
+      "value": null,
+      "basis": "PLAN.md M7/M12 need two machines; only one exists. Those cross-machine assertions cannot pass until a second is named."
+    },
+    {
+      "input": "target R1 model candidates",
+      "state": "unresolved",
+      "value": null,
+      "basis": "PLAN.md 14.1 default: no trainer winner or throughput claim until the VLM checkpoint, processor revision, trainer containers, and GPU allocation are pinned. None are present on this host, so R1/M8 cannot start and M9 is blocked behind it."
+    },
+    {
+      "input": "first benchmark claim",
+      "state": "frozen",
+      "value": "Paris + DeliveryBench vertical slice, not AnyMap generalization",
+      "basis": "PLAN.md M0 and 12.3"
+    }
+  ],
+  "human_review": [
+    {
+      "item": "M0 verification report sign-off",
+      "checklist": "PLAN.md M0 acceptance criteria 1-6",
+      "reviewer": null,
+      "timestamp": null,
+      "status": "pending"
+    },
+    {
+      "item": "ADR-0001 ownership approval",
+      "checklist": "repository, owners, branch policy, authoritative locations",
+      "reviewer": null,
+      "timestamp": null,
+      "status": "pending"
+    }
+  ],
+  "notes": [],
+  "report_sha256": "cc97ff0f274f3f6fcc1af6e3de93ba075886cbaec68c3ab4caa3beb5500908d6"
+}

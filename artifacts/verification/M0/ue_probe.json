@@ -1,0 +1,184 @@
+{
+  "schema": "embodiedbench/m0_ue_probe/v0.2",
+  "map_path": "/Game/CityCore_Paris/Scenes/ParisCity_FinalBlueprints",
+  "sample_count_requested": 100,
+  "steps": [
+    {
+      "name": "load_map",
+      "seconds": 5.89,
+      "world": "ParisCity_FinalBlueprints"
+    },
+    {
+      "name": "actor_inventory",
+      "actor_count": 3300
+    },
+    {
+      "name": "nav_actors_before",
+      "count": 1,
+      "has_bounds_volume": false,
+      "actors": [
+        {
+          "name": "AbstractNavData-Default",
+          "class": "AbstractNavData"
+        }
+      ]
+    },
+    {
+      "name": "spawn_nav_bounds_volume",
+      "api": "EditorActorSubsystem.spawn_actor_from_class",
+      "scale_api": "set_actor_scale3d",
+      "centre": [
+        -10127.29617438517,
+        1618.4288847153148,
+        0.0
+      ],
+      "size_cm": [
+        100789.15937418697,
+        111591.95341235676,
+        40000.0
+      ]
+    },
+    {
+      "name": "build_navigation",
+      "api": "SystemLibrary.execute_console_command('RebuildNavigation')"
+    },
+    {
+      "name": "wait_for_navigation",
+      "still_building": false,
+      "seconds": 0.0,
+      "polls": 1
+    },
+    {
+      "name": "nav_actors_after",
+      "count": 2,
+      "actors": [
+        {
+          "name": "AbstractNavData-Default",
+          "class": "AbstractNavData"
+        },
+        {
+          "name": "NavMeshBoundsVolume_0",
+          "class": "NavMeshBoundsVolume"
+        }
+      ]
+    },
+    {
+      "name": "sample_points",
+      "requested": 100,
+      "obtained": 0,
+      "attempts": 8000,
+      "api": "NavigationSystemV1.get_random_reachable_point_in_radius"
+    }
+  ],
+  "assertions": [
+    {
+      "name": "map_opens",
+      "expected": "ParisCity_FinalBlueprints",
+      "observed": "ParisCity_FinalBlueprints",
+      "status": "pass"
+    },
+    {
+      "name": "navmesh_build_completes",
+      "expected": "build finishes within timeout",
+      "observed": {
+        "still_building": false,
+        "seconds": 0.0,
+        "polls": 1
+      },
+      "status": "pass",
+      "note": "built against a probe-created NavMeshBoundsVolume; the shipped map has none (finding M0-F6)"
+    },
+    {
+      "name": "point_count",
+      "expected": 100,
+      "observed": 0,
+      "status": "fail"
+    },
+    {
+      "name": "points_unique",
+      "expected": 0,
+      "observed": 0,
+      "status": "fail"
+    },
+    {
+      "name": "points_finite",
+      "expected": 0,
+      "observed": 0,
+      "status": "fail"
+    },
+    {
+      "name": "points_in_paris_bounds",
+      "expected": 0,
+      "observed": 0,
+      "status": "fail"
+    }
+  ],
+  "api_attempts": [
+    {
+      "label": "spawn_navmesh_bounds_volume",
+      "tried": [
+        {
+          "api": "EditorActorSubsystem.spawn_actor_from_class",
+          "outcome": "ok"
+        }
+      ],
+      "used": "EditorActorSubsystem.spawn_actor_from_class"
+    },
+    {
+      "label": "size_navmesh_bounds_volume",
+      "tried": [
+        {
+          "api": "set_actor_scale3d",
+          "outcome": "ok"
+        }
+      ],
+      "used": "set_actor_scale3d"
+    },
+    {
+      "label": "build_navigation",
+      "tried": [
+        {
+          "api": "NavigationSystemV1.get_navigation_system(...).build()",
+          "outcome": "AttributeError: 'NavigationSystemV1' object has no attribute 'build'"
+        },
+        {
+          "api": "SystemLibrary.execute_console_command('RebuildNavigation')",
+          "outcome": "ok"
+        }
+      ],
+      "used": "SystemLibrary.execute_console_command('RebuildNavigation')"
+    },
+    {
+      "label": "sample_navigable_point",
+      "tried": [
+        {
+          "api": "NavigationSystemV1.get_random_reachable_point_in_radius",
+          "outcome": "ok"
+        }
+      ],
+      "used": "NavigationSystemV1.get_random_reachable_point_in_radius"
+    }
+  ],
+  "status": "fail",
+  "engine_version": "5.8.0-0+UE5",
+  "actor_count": 3300,
+  "nav_actors_before": [
+    {
+      "name": "AbstractNavData-Default",
+      "class": "AbstractNavData"
+    }
+  ],
+  "map_ships_with_navmesh_bounds": false,
+  "nav_actors_after": [
+    {
+      "name": "AbstractNavData-Default",
+      "class": "AbstractNavData"
+    },
+    {
+      "name": "NavMeshBoundsVolume_0",
+      "class": "NavMeshBoundsVolume"
+    }
+  ],
+  "points": [],
+  "sampler_api": "NavigationSystemV1.get_random_reachable_point_in_radius"
+}

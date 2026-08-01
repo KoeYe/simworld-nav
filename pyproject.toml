@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "embodiedbench"
+version = "0.1.0"
+description = "Autonomous embodied agent environment and benchmark (CityCore Paris + DeliveryBench vertical slice)"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.9",
+    "gymnasium>=1.0",
+    "numpy>=1.26",
+    "pillow>=10.0",
+    "jsonschema>=4.20",
+    "networkx>=3.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.24", "pandas>=2.0", "pyarrow>=15.0"]
+
+[tool.setuptools.packages.find]
+include = ["embodiedbench*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = ["error::DeprecationWarning:embodiedbench.*"]

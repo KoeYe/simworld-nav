@@ -1,0 +1,377 @@
+{
+  "schema": "embodiedbench/baseline_manifest/v0.1",
+  "generated_at": "2026-08-01T01:15:58+00:00",
+  "generator": {
+    "tool": "embodiedbench.baseline.cli",
+    "package_version": "0.1.0",
+    "spec_sha256": "73d8e763dba88ecca2eea8531301beebe3cf716372046ded71c509c31e730f76",
+    "manifest_module_sha256": "160dddf02da4893aa3cca3a4bd84c44c284c626fa65f211d5d51248b3617a02f"
+  },
+  "entries": [
+    {
+      "id": "vagen",
+      "kind": "git_repo",
+      "role": "Read-only reference checkout. Source of the pure-Python DeliveryBench transition engine, cached FPV loader, MOVE_TO/waypoint marks, benchmark helpers, and the CityCore Paris export. PLAN.md 14: adapt behind our contracts, do not fork into a fifth copy.",
+      "root": "$REPO",
+      "relpath": "vendor/vagen",
+      "remote": "https://github.com/ymzhang0303/VAGEN.git",
+      "branch": "dev/env_v2",
+      "commit": "b93deaacba0c27eef4f26ffadc06710a5221c180",
+      "worktree_dirty": false,
+      "license": "MIT (RAGEN.AI, 2025) \u2014 see vendor/vagen/LICENSE",
+      "publishable": false,
+      "access_note": "Public GitHub repository; cloned, not redistributed by us.",
+      "notes": [
+        "Not committed to this repository (.gitignore excludes /vendor/).",
+        "Pinned by commit; the worktree digest detects local edits."
+      ]
+    },
+    {
+      "id": "vagen_delivery_engine",
+      "kind": "content_tree",
+      "role": "The DeliveryBench state transition engine itself (entities, gameplay, actions, graph). M0 names this the authoritative Delivery transition implementation; M1 wraps it without behavior change.",
+      "root": "$REPO",
+      "relpath": "vendor/vagen/vagen/envs/deliverybench/vlm_delivery",
+      "digests": [
+        {
+          "level": "structure",
+          "digest": "d059515f7969e41fc1e03972eccfd0b4d921a136f11c178ef9a97805cf176bff",
+          "file_count": 101,
+          "total_bytes": 1207441
+        },
+        {
+          "level": "content",
+          "digest": "14db97bc2b5c9333800129e217c8ad9128900905f9fada43ba1f76a0850e29f7",
+          "file_count": 101,
+          "total_bytes": 1207441
+        }
+      ],
+      "license": "MIT (inherited from vagen)",
+      "publishable": false
+    },
+    {
+      "id": "vagen_paris_export",
+      "kind": "content_tree",
+      "role": "The existing Paris export that M2 turns into WorldBundle v0.1. Carries the 190 road segments, 568 world nodes, and 4 component connectors that PLAN.md 3.2 records.",
+      "root": "$REPO",
+      "relpath": "vendor/vagen/vagen/envs/deliverybench/maps/citycore-paris",
+      "digests": [
+        {
+          "level": "structure",
+          "digest": "a6b946d88ba40e1426aa7e027ff2957a5b684ed9b911eed00abe6e4db5b0808b",
+          "file_count": 9,
+          "total_bytes": 2750372
+        },
+        {
+          "level": "content",
+          "digest": "249c1d0b4208c3e22426a91968051b411d3b65a40ae28e0244d9384612460329",
+          "file_count": 9,
+          "total_bytes": 2750372
+        }
+      ],
+      "files": [
+        {
+          "relpath": "export_report.json",
+          "size": 2350,
+          "sha256": "6f540b72c46b5cca06fc3a6e9921480b8882264721eda8f40d29368e410e0d9e"
+        },
+        {
+          "relpath": "progen_world_enriched.json",
+          "size": 470128,
+          "sha256": "a2dbb2e7d94d99760cdd9135e6e1e949768fc21826fd1894add12efc002c1a40"
+        },
+        {
+          "relpath": "roads.json",
+          "size": 34019,
+          "sha256": "bab160219c43283efe8b5f53bff6fe8e7744c4ce22b14f0f46aed988fce70c30"
+        },
+        {
+          "relpath": "roads_detailed.json",
+          "size": 63903,
+          "sha256": "8b411e0708be418f90e1ef85ed039c85cff26594a25b74e10a82e6c064589508"
+        },
+        {
+          "relpath": "buildings.json",
+          "size": 1992814,
+          "sha256": "6041b78b90bd2f98deff4a3b5f413f848acff173df9a1df42dd4d08e96791601"
+        },
+        {
+          "relpath": "map_transform.json",
+          "size": 318,
+          "sha256": "e853fe4f1c7c448f9191e7fbe53eacf0da0ddea15e45b2b68e8416d1b87290c1"
+        }
+      ],
+      "license": "derived metadata from licensed UE content; redistribution undecided",
+      "publishable": false,
+      "access_note": "Publishability decision deferred to M5 (test-pack delivery model)."
+    },
+    {
+      "id": "vagen_procgen_maps",
+      "kind": "content_tree",
+      "role": "Procgen city maps (small/medium/large 11..30). PLAN.md 16: R1 and the M1 walking skeleton run on these so Paris access cannot block them. Includes medium-city-22, whose golden trajectory M4 must preserve.",
+      "root": "$REPO",
+      "relpath": "vendor/vagen/vagen/envs/deliverybench/maps",
+      "digests": [
+        {
+          "level": "structure",
+          "digest": "71d4bfc2a0d6776541e54073b6c1871cd40c0e33b384c1c2ec7c2ff0ebe6be44",
+          "file_count": 55,
+          "total_bytes": 6516058
+        },
+        {
+          "level": "content",
+          "digest": "b673b3981aa91dc02c4d70aa84d28dbcfe30d577ed801473ef1d43d2814fd179",
+          "file_count": 55,
+          "total_bytes": 6516058
+        }
+      ],
+      "license": "MIT (inherited from vagen)",
+      "publishable": true
+    },
+    {
+      "id": "vagen_fpv_albums",
+      "kind": "content_tree",
+      "role": "Cached FPV image albums for the procgen maps (303 MB, 671 files). The cached-runtime input for R1 and M1. PLAN.md 3.2: no Paris album exists yet.",
+      "root": "$REPO",
+      "relpath": "vendor/vagen/vagen/envs/deliverybench/deliverybench_fpv",
+      "digests": [
+        {
+          "level": "structure",
+          "digest": "2822cca8abe71e4c8327d641c6721028d4ec0862027d0b2f70a01e7cd8867869",
+          "file_count": 670,
+          "total_bytes": 314631388
+        }
+      ],
+      "license": "MIT (inherited from vagen)",
+      "publishable": true,
+      "notes": [
+        "structure-level digest only: image bytes are large and are re-pinned per observation manifest row at M5."
+      ]
+    },
+    {
+      "id": "spear_task_utils",
+      "kind": "content_tree",
+      "role": "Substitute for the absent nav_task checkout (see ADR-0001). Supplies NavMesh payload helpers, the SPEAR navigation_service request contract, session/runtime plumbing, and capture helpers reused by the M2 topology validation.",
+      "root": "$SPEAR_ROOT",
+      "relpath": "utils/simworld_task",
+      "digests": [
+        {
+          "level": "structure",
+          "digest": "0d9ad1ec56316ca953e4a3caf26475f329bbc89277479f3e1bdd38666e5577e3",
+          "file_count": 59,
+          "total_bytes": 631976
+        },
+        {
+          "level": "content",
+          "digest": "8a8e3ad518eb0958b097b325c7b0536a3d0e82c2178a14a38a083472ca0daa02",
+          "file_count": 59,
+          "total_bytes": 631976
+        }
+      ],
+      "files": [
+        {
+          "relpath": "navmesh.py",
+          "size": 11829,
+          "sha256": "f9c076bf903c63a92b503b3246e17d19687408631e1f5549d9d5d4a2d5f2c9b4"
+        },
+        {
+          "relpath": "gym_env.py",
+          "size": 9004,
+          "sha256": "ff70302f7b9b15afb0ee17d48dc5a4c44230c26fe0ee53d1a0b9848327f47a1d"
+        },
+        {
+          "relpath": "runtime.py",
+          "size": 14362,
+          "sha256": "838777cb87c664dab8dc322596f8a00ea653fd9d185b87b2f233869441cf88ce"
+        },
+        {
+          "relpath": "spec.py",
+          "size": 18697,
+          "sha256": "c587ab496593031834430736c50cee2aaee8c25c8ba39464a707bb775cfb508f"
+        },
+        {
+          "relpath": "session.py",
+          "size": 61262,
+          "sha256": "fb2499a8bd98ff6f5a8d9c996aff59fc075197c86cb3f9ad9efb079541b386ce"
+        }
+      ],
+      "license": "see $SPEAR_ROOT/LICENSE and LICENSE-3RD-PARTY.md",
+      "publishable": false,
+      "access_note": "Read-only mount; we do not modify it.",
+      "notes": [
+        "navmesh.py documents `vget /nav/...` as LEGACY; the supported public backend is SPEAR navigation_service. See ADR-0002."
+      ]
+    },
+    {
+      "id": "spear_unrealcv_plugin",
+      "kind": "content_tree",
+      "role": "UnrealCV plugin source used by the live UE runtime (M10).",
+      "root": "$SPEAR_ROOT",
+      "relpath": "Plugins/unrealcv",
+      "digests": [
+        {
+          "level": "structure",
+          "digest": "802217e1079c54ae27ad83a752295fd4a6429c05f22d9bc17fa7c486663a3b87",
+          "file_count": 16,
+          "total_bytes": 106608
+        },
+        {
+          "level": "content",
+          "digest": "2d5c8c3bb08515ab14227b6a996e07806798d25f0881243bc1a395a44ca510a9",
+          "file_count": 16,
+          "total_bytes": 106608
+        }
+      ],
+      "license": "see $SPEAR_ROOT/LICENSE-3RD-PARTY.md",
+      "publishable": false,
+      "notes": [
+        "Source only; no built Linux binaries under Plugins/unrealcv/Binaries."
+      ]
+    },
+    {
+      "id": "spear_project",
+      "kind": "file_set",
+      "role": "UE project descriptor naming the enabled plugin set.",
+      "root": "$SPEAR_ROOT",
+      "relpath": ".",
+      "files": [
+        {
+          "relpath": "SimWorld.uproject",
+          "size": 8821,
+          "sha256": "c4a5d23c4c4818547afe2a7b0770010948190a621d87b9e23c35733cc0ec7546"
+        }
+      ],
+      "license": "see $SPEAR_ROOT/LICENSE",
+      "publishable": false
+    },
+    {
+      "id": "unreal_engine_5_8",
+      "kind": "file_set",
+      "role": "Engine used to open ParisCity_FinalBlueprints, build NavMesh, and drive the M5 sensor bake. PLAN.md M0 requires the exact engine identity.",
+      "root": "$UE_ROOT",
+      "relpath": ".",
+      "files": [
+        {
+          "relpath": "Engine/Build/Build.version",
+          "size": 180,
+          "sha256": "978817f6af35ba18c82db54f19fa76d946fc44aa65333177fb438a0a58ec9e81"
+        },
+        {
+          "relpath": "Engine/Binaries/Linux/UnrealEditor",
+          "size": 450840,
+          "sha256": "4fd981ef9a4a7f99be58efbd827147a5a95ce55b22cba3514e43aeffcbcec987"
+        },
+        {
+          "relpath": "Engine/Binaries/Linux/UnrealEditor-Cmd",
+          "size": 450848,
+          "sha256": "91dfcea855c062c4e9fa58235cc72e9caec7ce21e302769de3c519669e09607c"
+        }
+      ],
+      "license": "Unreal Engine EULA \u2014 not redistributable",
+      "publishable": false,
+      "access_note": "5.8.0-preview-1, BranchName UE5, licensee=0, promoted=0.",
+      "notes": [
+        "Engine tree is ~100 GB; only the version file and editor launchers are pinned. A full tree digest is not runnable as a milestone gate."
+      ]
+    },
+    {
+      "id": "citycore_paris_content",
+      "kind": "content_tree",
+      "role": "Licensed CityCore Paris asset pack (7.3 GB, ~2962 files). The source map for the M2 WorldBundle and the M3 overlay.",
+      "root": "$CONTENT_STORE",
+      "relpath": "releases/ue58-baidu-20260705/CityCore_Paris",
+      "digests": [
+        {
+          "level": "structure",
+          "digest": "ebfec8735abfad5bc83aa8e38be8712b49ccd6c4170acbb08786fdfd13620fd5",
+          "file_count": 2962,
+          "total_bytes": 7752970148
+        }
+      ],
+      "files": [
+        {
+          "relpath": "Scenes/ParisCity_FinalBlueprints.umap",
+          "size": 80465781,
+          "sha256": "58d51ddcbccb05af2bde92c27305fd397b1f2109839b81bc229cc2b31e56e3c1"
+        },
+        {
+          "relpath": "Scenes/ParisCity_FinalBlueprints_Night.umap",
+          "size": 80736090,
+          "sha256": "8b31762eee4a2eb7a0aabc35281ca6128e729da9a848f7b0b1e33e91e6022236"
+        },
+        {
+          "relpath": "Scenes/ParisCity_Editable.umap",
+          "size": 129031325,
+          "sha256": "796f8092d69c619fa6ede1838942e73eed8e874dba2c8e9ccacded444995d72a"
+        }
+      ],
+      "license": "third-party licensed UE content \u2014 NOT redistributable",
+      "publishable": false,
+      "access_note": "Mounted read-only under the content store. Absolute mount point lives in baseline_roots.local.json, never in this manifest. The shared-mount Paris path PLAN.md 3.1 warns about is not mounted here and must not appear in build scripts.",
+      "notes": [
+        "structure-level tree digest plus full sha256 of the three .umap payloads: a byte walk of 7.3 GB on every gate run is not justified when the maps are the only files the compiler reads."
+      ]
+    },
+    {
+      "id": "verification_tool_env",
+      "kind": "tool_env",
+      "role": "Interpreter and package versions used to produce milestone verification evidence. Pinned so a re-run on another machine is comparable.",
+      "env": {
+        "python": "3.11.15",
+        "python_executable": "python",
+        "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+        "packages": {
+          "pydantic": "2.13.4",
+          "gymnasium": "1.3.0",
+          "numpy": "2.4.6",
+          "pillow": "12.3.0",
+          "jsonschema": "4.26.0",
+          "networkx": "3.6.1",
+          "pytest": "9.1.1",
+          "pytest-asyncio": "1.4.0",
+          "pandas": "3.0.5",
+          "pyarrow": "25.0.0"
+        }
+      },
+      "license": "n/a",
+      "publishable": true
+    }
+  ],
+  "missing_baselines": [
+    {
+      "id": "deliverybench_released",
+      "planned_path": "/home/murray/deliverybench",
+      "plan_reference": "PLAN.md 2.2",
+      "status": "absent",
+      "impact": "The released live-UE gym wrapper with the placeholder reward is unavailable. PLAN.md 2.2 already judges VAGEN@dev/env_v2 the better baseline, so the M0 authoritative-implementation decision is unaffected. The de-vendoring milestone in PLAN.md 14 loses one of its two inputs."
+    },
+    {
+      "id": "nav_task",
+      "planned_path": "/home/murray/nav_task",
+      "plan_reference": "PLAN.md 2.2, 14",
+      "status": "substituted",
+      "impact": "Navigation measures and the NavMesh client are taken from $SPEAR_ROOT/utils/simworld_task instead. SPL/SoftSPL measures are not present there and must be implemented at M7."
+    },
+    {
+      "id": "simworld_arena",
+      "planned_path": "/home/murray/simworld_arena",
+      "plan_reference": "PLAN.md 2.2, 13",
+      "status": "absent",
+      "impact": "No React/Node streaming portal to reuse. M12 portal work starts from scratch or from $SPEAR_ROOT/utils/city_livestream. Not on the M0-M7 path."
+    },
+    {
+      "id": "molmo_motion",
+      "planned_path": "/home/murray/embodied_data/molmo-motion",
+      "plan_reference": "PLAN.md 9.7, M11",
+      "status": "absent",
+      "impact": "The pointing-supervision source R2/M11 was told to audit before generating new data is unavailable. Blocks the M11 dataset audit only."
+    },
+    {
+      "id": "prior_planning_docs",
+      "planned_path": "/home/murray/IMPLEMENTATION_PLAN.md, /home/murray/PLAN_REVIEW_FEEDBACK.md",
+      "plan_reference": "PLAN.md 2, header",
+      "status": "absent",
+      "impact": "The reviewed predecessor plan and its review feedback are unavailable. PLAN.md states accepted items are already integrated, so this affects provenance auditing rather than execution."
+    }
+  ]
+}

@@ -1,0 +1,332 @@
+{
+  "status": "pass",
+  "assertion_count": 28,
+  "failed_count": 0,
+  "wall_clock_s": 87.622,
+  "determinism_patches": {
+    "patch_count": 2,
+    "applied_count": 2,
+    "patches": [
+      {
+        "target": "vlm_delivery.base.graph.Graph.shortest_path_nodes",
+        "reason": "Dijkstra used id(node) \u2014 a CPython memory address \u2014 to break equal-cost ties in the priority queue. Equal-cost routes are common on a street grid, so route choice varied per process and per episode, breaking replay determinism (PLAN.md M0) and cross-process EpisodeSpec equality (PLAN.md M4). Replaced with a stable key: the node's waypoint id when present, otherwise its rounded position. Path *costs* are unchanged; only which of several equally short routes is returned becomes deterministic.",
+        "original_source_sha256": "b3834bda23a9dd71fb776ab1633b6046075c94e21f14c5b15d6886cfe019bbfe",
+        "applied": true
+      },
+      {
+        "target": "vlm_delivery.base.graph.Graph.shortest_path_xy_to_node",
+        "reason": "Dijkstra used id(node) \u2014 a CPython memory address \u2014 to break equal-cost ties in the priority queue. Equal-cost routes are common on a street grid, so route choice varied per process and per episode, breaking replay determinism (PLAN.md M0) and cross-process EpisodeSpec equality (PLAN.md M4). Replaced with a stable key: the node's waypoint id when present, otherwise its rounded position. Path *costs* are unchanged; only which of several equally short routes is returned becomes deterministic.",
+        "original_source_sha256": "cf6b2d7d436d649777f12ba7ac2b5a9917630db79e70a4efc6817e275f52edeb",
+        "applied": true
+      }
+    ]
+  },
+  "state_digest_exclusions": [
+    {
+      "attribute": "run_dir",
+      "reason": "vlm_delivery/gym_like_interface/text_env.py:216-219 builds a per-episode output folder named `run_%Y%m%d_%H%M%S` from host wall-clock and stores its absolute path on the delivery agent. It is an artifact sink, not simulation state: nothing reads it to decide a transition, and the trajectory recorder only writes into it. It is also an absolute machine-specific path, which PLAN.md 5.1 bars from portable artifacts, so it could not appear in a cross-machine conformance hash even if it were deterministic. Tracked as M0-F3."
+    },
+    {
+      "attribute": "start_time",
+      "reason": "vlm_delivery/entities/order.py:117 declares `start_time: float = field(init=False, default_factory=time.time)`. It samples host wall-clock at Order construction, so two identical episodes never agree on it. A search of the whole DeliveryBench tree finds no read of Order.start_time -- it is written and never used, so it cannot influence a transition, a reward, or a termination. Excluding it keeps the digest a statement about simulation state instead of about when the process ran. Tracked as M0-F2; if a future revision starts reading it, the field must become sim-clock derived and this exclusion must be deleted."
+    }
+  ],
+  "episodes": [
+    {
+      "label": "procgen_text",
+      "spec": {
+        "label": "procgen_text",
+        "map_name": "small-city-11",
+        "preset": "nav",
+        "render_mode": "text",
+        "seed": 42,
+        "max_steps": 200
+      },
+      "config_overrides": {},
+      "step_count": 32,
+      "score": {
+        "cumulative_reward": 7.828507,
+        "steps_taken": 32,
+        "earnings_total": 107.828507,
+        "energy_pct": 100.0,
+        "delivered_count": 1,
+        "sim_hours": 0.040008347,
+        "success": true
+      },
+      "recorded_hashes": {
+        "reset_state_digest": "96505695428e219376f125155e5483b773459ad8ecc3b537fe312b7868b2491c",
+        "transition_hash": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+        "terminal_hash": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+        "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+        "observation_media_hash": null
+      },
+      "replay_hashes": [
+        {
+          "reset_state_digest": "96505695428e219376f125155e5483b773459ad8ecc3b537fe312b7868b2491c",
+          "transition_hash": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+          "terminal_hash": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+          "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+          "observation_media_hash": null
+        },
+        {
+          "reset_state_digest": "96505695428e219376f125155e5483b773459ad8ecc3b537fe312b7868b2491c",
+          "transition_hash": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+          "terminal_hash": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+          "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+          "observation_media_hash": null
+        },
+        {
+          "reset_state_digest": "96505695428e219376f125155e5483b773459ad8ecc3b537fe312b7868b2491c",
+          "transition_hash": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+          "terminal_hash": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+          "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+          "observation_media_hash": null
+        }
+      ],
+      "extraction_stats": {
+        "nodes": 3104759,
+        "truncated_sequences": 0,
+        "depth_limited": 0,
+        "dropped_types": {
+          "Random": 30
+        }
+      }
+    },
+    {
+      "label": "procgen_visual",
+      "spec": {
+        "label": "procgen_visual",
+        "map_name": "small-city-11",
+        "preset": "nav",
+        "render_mode": "vision",
+        "seed": 42,
+        "max_steps": 200
+      },
+      "config_overrides": {
+        "enable_fpv": true,
+        "enable_map_images": true,
+        "use_gmaps_renderer": true,
+        "gmaps_out_scale": 0.5,
+        "map_renderer": "pil"
+      },
+      "step_count": 32,
+      "score": {
+        "cumulative_reward": 7.828507,
+        "steps_taken": 32,
+        "earnings_total": 107.828507,
+        "energy_pct": 100.0,
+        "delivered_count": 1,
+        "sim_hours": 0.040008347,
+        "success": true
+      },
+      "recorded_hashes": {
+        "reset_state_digest": "a719bcb1e408e42e07c1fd26fc984a1b206c18b57fe72c6d4f4feb284e61c38b",
+        "transition_hash": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+        "terminal_hash": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+        "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+        "observation_media_hash": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559"
+      },
+      "replay_hashes": [
+        {
+          "reset_state_digest": "a719bcb1e408e42e07c1fd26fc984a1b206c18b57fe72c6d4f4feb284e61c38b",
+          "transition_hash": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+          "terminal_hash": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+          "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+          "observation_media_hash": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559"
+        },
+        {
+          "reset_state_digest": "a719bcb1e408e42e07c1fd26fc984a1b206c18b57fe72c6d4f4feb284e61c38b",
+          "transition_hash": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+          "terminal_hash": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+          "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+          "observation_media_hash": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559"
+        },
+        {
+          "reset_state_digest": "a719bcb1e408e42e07c1fd26fc984a1b206c18b57fe72c6d4f4feb284e61c38b",
+          "transition_hash": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+          "terminal_hash": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+          "score_hash": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+          "observation_media_hash": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559"
+        }
+      ],
+      "extraction_stats": {
+        "nodes": 4621373,
+        "truncated_sequences": 0,
+        "depth_limited": 0,
+        "dropped_types": {
+          "Random": 30
+        }
+      }
+    }
+  ],
+  "assertions": [
+    {
+      "name": "procgen_text.replay1.transition_hash",
+      "expected": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "observed": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay1.terminal_hash",
+      "expected": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "observed": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay1.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay1.observation_media_hash",
+      "expected": null,
+      "observed": null,
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay1.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay2.transition_hash",
+      "expected": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "observed": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay2.terminal_hash",
+      "expected": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "observed": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay2.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay2.observation_media_hash",
+      "expected": null,
+      "observed": null,
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.replay2.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.clean_process.transition_hash",
+      "expected": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "observed": "eda40158ba2e94d39ba9e3df3c6098bb36cafe87a19bbcf8f49c8746c2ede057",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.clean_process.terminal_hash",
+      "expected": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "observed": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.clean_process.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_text.clean_process.observation_media_hash",
+      "expected": null,
+      "observed": null,
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay1.transition_hash",
+      "expected": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "observed": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay1.terminal_hash",
+      "expected": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "observed": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay1.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay1.observation_media_hash",
+      "expected": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "observed": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay1.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay2.transition_hash",
+      "expected": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "observed": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay2.terminal_hash",
+      "expected": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "observed": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay2.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay2.observation_media_hash",
+      "expected": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "observed": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.replay2.step_count",
+      "expected": 32,
+      "observed": 32,
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.clean_process.transition_hash",
+      "expected": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "observed": "37d8047e74d19b268527741c560729a77342858e6eb3ff0edd264520634c4515",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.clean_process.terminal_hash",
+      "expected": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "observed": "02d4a27516fac6f1270f3ad1a07a654ec8a9c05102531b52e079e8be12a288be",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.clean_process.score_hash",
+      "expected": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "observed": "9798c98e716ae1c3c283af50d155ed60ac53c921b4c4f4ccb55db5503dba97bd",
+      "status": "pass"
+    },
+    {
+      "name": "procgen_visual.clean_process.observation_media_hash",
+      "expected": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "observed": "4eca84c8ae8fde8bacc491de7b7f34d23c249805e7e11406688f8090b0bb1559",
+      "status": "pass"
+    }
+  ]
+}

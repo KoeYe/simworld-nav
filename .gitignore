@@ -1,0 +1,31 @@
+# Vendored read-only reference checkouts (3.6 GB; pinned by BASELINE_MANIFEST.json)
+/vendor/
+
+# Verification logs and bulky generated artifacts.
+# Milestone report.json files ARE tracked; their raw logs and bakes are not.
+/artifacts/**/logs/
+/artifacts/**/raw/
+/artifacts/worldbundle/
+/artifacts/environmentbundle/
+/artifacts/store/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Editors / OS
+.DS_Store
+*.swp
+baseline_roots.local.json
+
+# Vendored engine writes per-episode trajectory folders relative to cwd
+/outputs/
+
+# Vendored engine writes these into the process cwd
+/log/

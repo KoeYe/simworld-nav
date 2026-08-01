@@ -1,0 +1,332 @@
+{
+  "status": "pass",
+  "assertion_count": 54,
+  "failed_count": 0,
+  "errors": [],
+  "assertions": [
+    {
+      "name": "vagen.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "vagen.commit",
+      "expected": "b93deaacba0c27eef4f26ffadc06710a5221c180",
+      "observed": "b93deaacba0c27eef4f26ffadc06710a5221c180",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_delivery_engine.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_delivery_engine.tree[structure].digest",
+      "expected": "d059515f7969e41fc1e03972eccfd0b4d921a136f11c178ef9a97805cf176bff",
+      "observed": "d059515f7969e41fc1e03972eccfd0b4d921a136f11c178ef9a97805cf176bff",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_delivery_engine.tree[structure].file_count",
+      "expected": 101,
+      "observed": 101,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_delivery_engine.tree[content].digest",
+      "expected": "14db97bc2b5c9333800129e217c8ad9128900905f9fada43ba1f76a0850e29f7",
+      "observed": "14db97bc2b5c9333800129e217c8ad9128900905f9fada43ba1f76a0850e29f7",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_delivery_engine.tree[content].file_count",
+      "expected": 101,
+      "observed": 101,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.tree[structure].digest",
+      "expected": "a6b946d88ba40e1426aa7e027ff2957a5b684ed9b911eed00abe6e4db5b0808b",
+      "observed": "a6b946d88ba40e1426aa7e027ff2957a5b684ed9b911eed00abe6e4db5b0808b",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.tree[structure].file_count",
+      "expected": 9,
+      "observed": 9,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.tree[content].digest",
+      "expected": "249c1d0b4208c3e22426a91968051b411d3b65a40ae28e0244d9384612460329",
+      "observed": "249c1d0b4208c3e22426a91968051b411d3b65a40ae28e0244d9384612460329",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.tree[content].file_count",
+      "expected": 9,
+      "observed": 9,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.file[export_report.json].sha256",
+      "expected": "6f540b72c46b5cca06fc3a6e9921480b8882264721eda8f40d29368e410e0d9e",
+      "observed": "6f540b72c46b5cca06fc3a6e9921480b8882264721eda8f40d29368e410e0d9e",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.file[progen_world_enriched.json].sha256",
+      "expected": "a2dbb2e7d94d99760cdd9135e6e1e949768fc21826fd1894add12efc002c1a40",
+      "observed": "a2dbb2e7d94d99760cdd9135e6e1e949768fc21826fd1894add12efc002c1a40",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.file[roads.json].sha256",
+      "expected": "bab160219c43283efe8b5f53bff6fe8e7744c4ce22b14f0f46aed988fce70c30",
+      "observed": "bab160219c43283efe8b5f53bff6fe8e7744c4ce22b14f0f46aed988fce70c30",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.file[roads_detailed.json].sha256",
+      "expected": "8b411e0708be418f90e1ef85ed039c85cff26594a25b74e10a82e6c064589508",
+      "observed": "8b411e0708be418f90e1ef85ed039c85cff26594a25b74e10a82e6c064589508",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.file[buildings.json].sha256",
+      "expected": "6041b78b90bd2f98deff4a3b5f413f848acff173df9a1df42dd4d08e96791601",
+      "observed": "6041b78b90bd2f98deff4a3b5f413f848acff173df9a1df42dd4d08e96791601",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_paris_export.file[map_transform.json].sha256",
+      "expected": "e853fe4f1c7c448f9191e7fbe53eacf0da0ddea15e45b2b68e8416d1b87290c1",
+      "observed": "e853fe4f1c7c448f9191e7fbe53eacf0da0ddea15e45b2b68e8416d1b87290c1",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_procgen_maps.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_procgen_maps.tree[structure].digest",
+      "expected": "71d4bfc2a0d6776541e54073b6c1871cd40c0e33b384c1c2ec7c2ff0ebe6be44",
+      "observed": "71d4bfc2a0d6776541e54073b6c1871cd40c0e33b384c1c2ec7c2ff0ebe6be44",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_procgen_maps.tree[structure].file_count",
+      "expected": 55,
+      "observed": 55,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_procgen_maps.tree[content].digest",
+      "expected": "b673b3981aa91dc02c4d70aa84d28dbcfe30d577ed801473ef1d43d2814fd179",
+      "observed": "b673b3981aa91dc02c4d70aa84d28dbcfe30d577ed801473ef1d43d2814fd179",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_procgen_maps.tree[content].file_count",
+      "expected": 55,
+      "observed": 55,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_fpv_albums.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "vagen_fpv_albums.tree[structure].digest",
+      "expected": "2822cca8abe71e4c8327d641c6721028d4ec0862027d0b2f70a01e7cd8867869",
+      "observed": "2822cca8abe71e4c8327d641c6721028d4ec0862027d0b2f70a01e7cd8867869",
+      "status": "pass"
+    },
+    {
+      "name": "vagen_fpv_albums.tree[structure].file_count",
+      "expected": 670,
+      "observed": 670,
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.tree[structure].digest",
+      "expected": "0d9ad1ec56316ca953e4a3caf26475f329bbc89277479f3e1bdd38666e5577e3",
+      "observed": "0d9ad1ec56316ca953e4a3caf26475f329bbc89277479f3e1bdd38666e5577e3",
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.tree[structure].file_count",
+      "expected": 59,
+      "observed": 59,
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.tree[content].digest",
+      "expected": "8a8e3ad518eb0958b097b325c7b0536a3d0e82c2178a14a38a083472ca0daa02",
+      "observed": "8a8e3ad518eb0958b097b325c7b0536a3d0e82c2178a14a38a083472ca0daa02",
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.tree[content].file_count",
+      "expected": 59,
+      "observed": 59,
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.file[navmesh.py].sha256",
+      "expected": "f9c076bf903c63a92b503b3246e17d19687408631e1f5549d9d5d4a2d5f2c9b4",
+      "observed": "f9c076bf903c63a92b503b3246e17d19687408631e1f5549d9d5d4a2d5f2c9b4",
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.file[gym_env.py].sha256",
+      "expected": "ff70302f7b9b15afb0ee17d48dc5a4c44230c26fe0ee53d1a0b9848327f47a1d",
+      "observed": "ff70302f7b9b15afb0ee17d48dc5a4c44230c26fe0ee53d1a0b9848327f47a1d",
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.file[runtime.py].sha256",
+      "expected": "838777cb87c664dab8dc322596f8a00ea653fd9d185b87b2f233869441cf88ce",
+      "observed": "838777cb87c664dab8dc322596f8a00ea653fd9d185b87b2f233869441cf88ce",
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.file[spec.py].sha256",
+      "expected": "c587ab496593031834430736c50cee2aaee8c25c8ba39464a707bb775cfb508f",
+      "observed": "c587ab496593031834430736c50cee2aaee8c25c8ba39464a707bb775cfb508f",
+      "status": "pass"
+    },
+    {
+      "name": "spear_task_utils.file[session.py].sha256",
+      "expected": "fb2499a8bd98ff6f5a8d9c996aff59fc075197c86cb3f9ad9efb079541b386ce",
+      "observed": "fb2499a8bd98ff6f5a8d9c996aff59fc075197c86cb3f9ad9efb079541b386ce",
+      "status": "pass"
+    },
+    {
+      "name": "spear_unrealcv_plugin.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "spear_unrealcv_plugin.tree[structure].digest",
+      "expected": "802217e1079c54ae27ad83a752295fd4a6429c05f22d9bc17fa7c486663a3b87",
+      "observed": "802217e1079c54ae27ad83a752295fd4a6429c05f22d9bc17fa7c486663a3b87",
+      "status": "pass"
+    },
+    {
+      "name": "spear_unrealcv_plugin.tree[structure].file_count",
+      "expected": 16,
+      "observed": 16,
+      "status": "pass"
+    },
+    {
+      "name": "spear_unrealcv_plugin.tree[content].digest",
+      "expected": "2d5c8c3bb08515ab14227b6a996e07806798d25f0881243bc1a395a44ca510a9",
+      "observed": "2d5c8c3bb08515ab14227b6a996e07806798d25f0881243bc1a395a44ca510a9",
+      "status": "pass"
+    },
+    {
+      "name": "spear_unrealcv_plugin.tree[content].file_count",
+      "expected": 16,
+      "observed": 16,
+      "status": "pass"
+    },
+    {
+      "name": "spear_project.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "spear_project.file[SimWorld.uproject].sha256",
+      "expected": "c4a5d23c4c4818547afe2a7b0770010948190a621d87b9e23c35733cc0ec7546",
+      "observed": "c4a5d23c4c4818547afe2a7b0770010948190a621d87b9e23c35733cc0ec7546",
+      "status": "pass"
+    },
+    {
+      "name": "unreal_engine_5_8.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "unreal_engine_5_8.file[Engine/Build/Build.version].sha256",
+      "expected": "978817f6af35ba18c82db54f19fa76d946fc44aa65333177fb438a0a58ec9e81",
+      "observed": "978817f6af35ba18c82db54f19fa76d946fc44aa65333177fb438a0a58ec9e81",
+      "status": "pass"
+    },
+    {
+      "name": "unreal_engine_5_8.file[Engine/Binaries/Linux/UnrealEditor].sha256",
+      "expected": "4fd981ef9a4a7f99be58efbd827147a5a95ce55b22cba3514e43aeffcbcec987",
+      "observed": "4fd981ef9a4a7f99be58efbd827147a5a95ce55b22cba3514e43aeffcbcec987",
+      "status": "pass"
+    },
+    {
+      "name": "unreal_engine_5_8.file[Engine/Binaries/Linux/UnrealEditor-Cmd].sha256",
+      "expected": "91dfcea855c062c4e9fa58235cc72e9caec7ce21e302769de3c519669e09607c",
+      "observed": "91dfcea855c062c4e9fa58235cc72e9caec7ce21e302769de3c519669e09607c",
+      "status": "pass"
+    },
+    {
+      "name": "citycore_paris_content.exists",
+      "expected": true,
+      "observed": true,
+      "status": "pass"
+    },
+    {
+      "name": "citycore_paris_content.tree[structure].digest",
+      "expected": "ebfec8735abfad5bc83aa8e38be8712b49ccd6c4170acbb08786fdfd13620fd5",
+      "observed": "ebfec8735abfad5bc83aa8e38be8712b49ccd6c4170acbb08786fdfd13620fd5",
+      "status": "pass"
+    },
+    {
+      "name": "citycore_paris_content.tree[structure].file_count",
+      "expected": 2962,
+      "observed": 2962,
+      "status": "pass"
+    },
+    {
+      "name": "citycore_paris_content.file[Scenes/ParisCity_FinalBlueprints.umap].sha256",
+      "expected": "58d51ddcbccb05af2bde92c27305fd397b1f2109839b81bc229cc2b31e56e3c1",
+      "observed": "58d51ddcbccb05af2bde92c27305fd397b1f2109839b81bc229cc2b31e56e3c1",
+      "status": "pass"
+    },
+    {
+      "name": "citycore_paris_content.file[Scenes/ParisCity_FinalBlueprints_Night.umap].sha256",
+      "expected": "8b31762eee4a2eb7a0aabc35281ca6128e729da9a848f7b0b1e33e91e6022236",
+      "observed": "8b31762eee4a2eb7a0aabc35281ca6128e729da9a848f7b0b1e33e91e6022236",
+      "status": "pass"
+    },
+    {
+      "name": "citycore_paris_content.file[Scenes/ParisCity_Editable.umap].sha256",
+      "expected": "796f8092d69c619fa6ede1838942e73eed8e874dba2c8e9ccacded444995d72a",
+      "observed": "796f8092d69c619fa6ede1838942e73eed8e874dba2c8e9ccacded444995d72a",
+      "status": "pass"
+    },
+    {
+      "name": "verification_tool_env.env.python",
+      "expected": "3.11.15",
+      "observed": "3.11.15",
+      "status": "pass"
+    }
+  ]
+}
