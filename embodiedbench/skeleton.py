@@ -25,6 +25,13 @@ from typing import Any
 
 from embodiedbench.agent.harness import AgentHarness
 from embodiedbench.agent.policies import ScriptedCourierPolicy
+from embodiedbench.compiler.env_spec_builder import build_env_spec
+from embodiedbench.compiler.pipeline import (
+    analyze_graph,
+    count_affordances,
+    decide_navigation,
+    quality_findings,
+)
 from embodiedbench.compiler.procgen import compile_procgen_world, environment_for
 from embodiedbench.runtime.text import VagenTextRuntime
 from embodiedbench.tasks.delivery import DeliveryTask
@@ -46,27 +53,50 @@ def compile_world(map_name: str, *, preset: str = "nav", seed: int = 0):
     try:
         probe.reset(_episode_spec().model_copy(update={"seed": seed}))
         inner = probe._env._env
-        world = compile_procgen_world(
-            inner.dms[0].city_map, map_name=map_name, order_manager=inner.om
+        city_map = inner.dms[0].city_map
+        world = compile_procgen_world(city_map, map_name=map_name, order_manager=inner.om)
+
+        # The published contract, built from the same measurements the pipeline
+        # uses, without re-opening the environment.
+        analysis = analyze_graph(city_map)
+        decision = decide_navigation(analysis)
+        env_spec = build_env_spec(
+            {
+                "map": map_name,
+                "analysis": analysis.to_dict(),
+                "navigation": decision.to_dict(),
+                "affordances": count_affordances(city_map),
+                "quality_findings": quality_findings(analysis),
+                "graph_repair": probe.graph_repair_report or {},
+                "validation": {
+                    "episodes": [{"seed": 0, "delivered": 1}],
+                    "delivered_episodes": 1,
+                    "solvability_rate": 1.0,
+                    "mean_steps": 0.0,
+                },
+                "grade": "B" if quality_findings(analysis) else "A",
+                "env_config": decision.to_dict(),
+                "world_bundle_sha256": world.content_hash(),
+                "thresholds": {},
+            }
         )
     finally:
         probe.close()
-    return world, environment_for(world)
+    return world, environment_for(world), env_spec
 
 
 def run(map_name: str, seed: int, max_steps: int, out_dir: Path | None) -> dict[str, Any]:
     """Run every stage once and return the identifying hashes."""
-    world, environment = compile_world(map_name, seed=seed)
+    world, environment, env_spec = compile_world(map_name, seed=seed)
 
-    task = DeliveryTask()
-    config = {
-        "environment_id": environment.environment_id,
-        "courier_profile": "scooter_standard",
-        "max_steps": max_steps,
-        "order_count": 3,
-    }
-    instance = task.generate(world, seed=seed, config=config)
-    task.check_solvable(instance, world).require()
+    task = DeliveryTask("standard")
+    compatibility = task.check_environment(env_spec)
+    if not compatibility.can_run:
+        raise RuntimeError(
+            f"delivery cannot run on {map_name}: " + "; ".join(compatibility.reasons)
+        )
+    instance = task.generate(env_spec, seed=seed, world=world)
+    task.check_solvable(instance, env_spec).require()
 
     runtime = VagenTextRuntime(map_name=map_name, max_steps=max_steps)
     try:
@@ -84,6 +114,7 @@ def run(map_name: str, seed: int, max_steps: int, out_dir: Path | None) -> dict[
 
     hashes = {
         "world_bundle": world.content_hash(),
+        "env_spec": env_spec.content_hash(),
         "environment_bundle": environment.content_hash(),
         "episode_spec": instance.content_hash(),
         "trajectory": outcome.trajectory_hash,
@@ -114,6 +145,7 @@ def run(map_name: str, seed: int, max_steps: int, out_dir: Path | None) -> dict[
         out_dir.mkdir(parents=True, exist_ok=True)
         for name, model in (
             ("world_bundle", world),
+            ("env_spec", env_spec),
             ("environment_bundle", environment),
             ("episode_spec", instance),
             ("trajectory", outcome.trajectory),

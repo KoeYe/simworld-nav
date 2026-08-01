@@ -1,21 +1,36 @@
-"""``delivery@1`` task plugin (PLAN.md 8.1).
+"""``delivery@1`` task plugin, built on ``EnvSpec`` (PLAN.md 8).
 
-M1 needs the plugin to do three things honestly: state its requirements,
-generate a deterministic ``EpisodeSpec`` from ``(world, seed, config)``, and
-score a trajectory. Delivery mechanics themselves stay in the vendored engine
-behind the runtime — this is the contract layer, not a second implementation.
+The task reads a compiled ``EnvSpec`` rather than a map name. That is what lets
+one environment host many tasks: a task states what it needs, checks it against
+the published affordance inventory, and refuses with a reason if the environment
+cannot host it. Nothing here re-derives a fact the compiler already measured.
 
-Determinism is the point. PLAN.md M4 requires the same ``(environment, task
-config, seed)`` to produce a byte-identical ``EpisodeSpec`` in two clean
-processes, so generation uses an explicitly seeded ``random.Random`` and sorted
-inputs. No ``set`` iteration, no dict ordering assumptions, no wall-clock.
+Three properties are load-bearing.
+
+**Determinism.** PLAN.md M4 requires the same ``(environment, config, seed)`` to
+produce a byte-identical ``EpisodeSpec`` in two clean processes, so generation
+uses an explicitly seeded ``random.Random`` over sorted inputs. No set
+iteration, no dict ordering, no wall-clock.
+
+**Verifiable reward.** Every component is computed from recorded environment
+facts -- deliveries, lateness, invalid actions -- so anyone can recompute a
+score from a trajectory. No model judges anything. PLAN.md 11.3 keeps training
+shaping out of the benchmark score, so shaping is reported in its own block and
+never summed in.
+
+**Honest metrics.** ``normalized_utility_vs_upper_bound`` stays undefined with a
+stated reason, because PLAN.md 12.5 defines it against an upper-bound policy
+that does not exist before M7. Reporting a ratio to nothing would be worse than
+reporting nothing.
 """
 
 from __future__ import annotations
 
 import random
+from dataclasses import dataclass, field
 from typing import Any
 
+from embodiedbench.schemas.env_spec import EnvSpec
 from embodiedbench.schemas.environment import NavigationMode
 from embodiedbench.schemas.episode import (
     Budgets,
@@ -27,8 +42,8 @@ from embodiedbench.schemas.episode import (
 from embodiedbench.schemas.geometry import FrameName, Pose, Vec3
 from embodiedbench.schemas.runtime import RuntimeMode
 from embodiedbench.schemas.trajectory import MetricValue, ScoreReport, Trajectory
-from embodiedbench.schemas.world import WorldBundle
 from embodiedbench.tasks.core import SolvabilityVerdict, TaskRequirements
+from embodiedbench.tasks.profiles import PRESETS, DeliveryTaskConfig
 
 # The M0-frozen v1 courier profile set (ADR-0004). scooter_veteran is
 # deliberately absent: PLAN.md 8.2 conditions it on a scientific justification
@@ -68,149 +83,238 @@ COURIER_PROFILES: dict[str, CourierProfile] = {
 }
 
 
+@dataclass
+class Compatibility:
+    """Whether a task can run in an environment, and what is missing."""
+
+    can_run: bool
+    reasons: list[str] = field(default_factory=list)
+    deficit: dict[str, int] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"can_run": self.can_run, "reasons": self.reasons, "deficit": self.deficit}
+
+
 class DeliveryTask:
     """The Delivery task plugin."""
 
     id = "delivery"
-    version = "0.1.0"
+    version = "0.2.0"
 
-    def requirements(self, config: dict[str, Any]) -> TaskRequirements:
-        orders = int(config.get("order_count", 3))
-        return TaskRequirements(
-            affordances={
-                "restaurant_dock": max(1, orders),
-                "building_dock": max(1, orders),
-            }
-        )
+    def __init__(self, config: DeliveryTaskConfig | str = "standard"):
+        if isinstance(config, str):
+            if config not in PRESETS:
+                raise ValueError(f"unknown preset {config!r}; have {sorted(PRESETS)}")
+            config = PRESETS[config]
+        problems = config.validate()
+        if problems:
+            raise ValueError("invalid delivery configuration: " + "; ".join(problems))
+        self.config = config
+
+    # ── requirements and compatibility ───────────────────────────────────────
+
+    def requirements(self) -> TaskRequirements:
+        return TaskRequirements(affordances=self.config.required_affordances())
+
+    def check_environment(self, env: EnvSpec) -> Compatibility:
+        """Whether this environment can host this task, with reasons.
+
+        Checked against the published spec rather than by attempting an episode
+        and seeing what breaks, so the answer is available before any work.
+        """
+        reasons: list[str] = []
+        if not env.usable:
+            reasons.append(f"environment is unusable: {env.failure_code}")
+        needed = self.config.required_affordances()
+        deficit = env.affordances.deficit(needed)
+        if deficit:
+            reasons.append(
+                "missing affordances: "
+                + ", ".join(f"{name} (need {count} more)" for name, count in sorted(deficit.items()))
+            )
+        if "MOVE_TO" not in env.enabled_actions:
+            reasons.append("environment does not offer graph navigation")
+        if self.config.observation.include_fpv and not env.supports_vision():
+            reasons.append(
+                "task asks for first-person images but the environment has no cached album"
+            )
+        if env.solvability is not None and env.solvability.solvability_rate <= 0.0:
+            reasons.append("environment has no demonstrated solvable episode")
+        return Compatibility(can_run=not reasons, reasons=reasons, deficit=deficit)
 
     # ── generation ───────────────────────────────────────────────────────────
 
-    def generate(self, world: WorldBundle, seed: int, config: dict[str, Any]) -> EpisodeSpec:
-        rng = random.Random(seed)
-        profile_name = config.get("courier_profile", "scooter_standard")
-        if profile_name not in COURIER_PROFILES:
+    def generate(self, env: EnvSpec, seed: int, *, world: Any = None) -> EpisodeSpec:
+        """Produce a frozen episode for this environment and seed."""
+        compatibility = self.check_environment(env)
+        if not compatibility.can_run:
             raise ValueError(
-                f"unknown courier profile {profile_name!r}; the M0-frozen v1 set is "
-                f"{sorted(COURIER_PROFILES)}"
+                f"delivery cannot run in {env.env_id!r}: " + "; ".join(compatibility.reasons)
             )
 
-        # Sorted so generation never depends on bundle ordering.
-        certified_nodes = sorted(
-            {e.from_node for e in world.nav_graph.certified_edges()}
-            | {e.to_node for e in world.nav_graph.certified_edges()}
-        )
-        if not certified_nodes:
-            raise ValueError(f"world {world.world_id} has no certified nodes to spawn on")
-        node_by_id = {n.node_id: n for n in world.nav_graph.nodes}
+        rng = random.Random(seed)
+        courier = COURIER_PROFILES[self.config.courier_profile]
 
-        spawn_node = node_by_id[rng.choice(certified_nodes)]
-        sites = sorted(world.interaction_sites, key=lambda s: s.site_id)
-        order_count = int(config.get("order_count", 3))
+        # Spawn and order sites come from the world bundle when one is supplied;
+        # otherwise the episode pins only the schedule and the runtime picks its
+        # own spawn, which is still deterministic for a given seed.
+        spawn = Pose(frame=FrameName.BUNDLE_WORLD, position=Vec3(x_cm=0.0, y_cm=0.0))
+        site_ids: list[str] = []
+        if world is not None:
+            sites = sorted(world.interaction_sites, key=lambda s: s.site_id)
+            site_ids = [s.site_id for s in sites]
+            nodes = sorted(world.nav_graph.nodes, key=lambda n: n.node_id)
+            if nodes:
+                chosen = nodes[rng.randrange(len(nodes))]
+                spawn = Pose(
+                    frame=FrameName.BUNDLE_WORLD,
+                    position=Vec3(
+                        x_cm=chosen.position.x_cm,
+                        y_cm=chosen.position.y_cm,
+                        z_cm=chosen.position.z_cm,
+                    ),
+                )
+
         orders: list[ScheduledOrder] = []
-        if len(sites) >= 2:
-            interval = float(config.get("order_interval_s", 300.0))
-            for index in range(order_count):
-                pickup = sites[rng.randrange(len(sites))]
-                dropoff = sites[rng.randrange(len(sites))]
+        if len(site_ids) >= 2:
+            for index in range(self.config.order.order_count):
                 orders.append(
                     ScheduledOrder(
                         order_id=f"o_{index}",
-                        available_from_sim_time_s=index * interval,
-                        pickup_site=pickup.site_id,
-                        dropoff_site=dropoff.site_id,
+                        available_from_sim_time_s=index * self.config.order.interval_s,
+                        pickup_site=site_ids[rng.randrange(len(site_ids))],
+                        dropoff_site=site_ids[rng.randrange(len(site_ids))],
                     )
                 )
 
         return EpisodeSpec(
-            instance_id=f"{world.world_id}_{self.id}_{seed:06d}",
-            environment_id=config.get("environment_id", f"{world.world_id}-delivery"),
-            environment_version=world.version,
-            environment_sha256=world.content_hash(),
+            instance_id=f"{env.map_name}_{self.id}_{seed:06d}",
+            environment_id=env.env_id,
+            environment_version="0.1.0",
+            environment_sha256=env.world_bundle_sha256,
             task=TaskConfigRef(plugin=self.id, version=self.version),
-            embodiment_profile=config.get("embodiment_profile", "abstract_courier_v1"),
-            courier_profile=COURIER_PROFILES[profile_name],
+            embodiment_profile="abstract_courier_v1",
+            courier_profile=courier,
             navigation_mode=NavigationMode.NAV_WAYPOINT,
-            runtime_track=RuntimeMode.TEXT,
+            runtime_track=(
+                RuntimeMode.CACHED if self.config.observation.include_fpv else RuntimeMode.TEXT
+            ),
             seed=seed,
-            spawn=Pose(
-                frame=FrameName.BUNDLE_WORLD,
-                position=Vec3(
-                    x_cm=spawn_node.position.x_cm,
-                    y_cm=spawn_node.position.y_cm,
-                    z_cm=spawn_node.position.z_cm,
-                ),
-                yaw_deg=float(config.get("spawn_yaw_deg", 0.0)),
-            ),
+            spawn=spawn,
             order_schedule=orders,
-            observable_instruction=(
-                "Complete as many deliveries as you can before your budget runs out."
-            ),
+            observable_instruction=self.instruction(env),
             budgets=Budgets(
-                steps=int(config.get("max_steps", 400)),
-                tool_calls=config.get("tool_calls"),
-                sim_s=config.get("sim_s"),
-                output_tokens=config.get("output_tokens"),
+                steps=self.config.budget.steps,
+                tool_calls=self.config.budget.tool_calls,
+                sim_s=self.config.budget.sim_s,
+                output_tokens=self.config.budget.output_tokens,
             ),
             evaluator_id="delivery_score",
-            evaluator_version="0.1.0",
-            private_state_ref=f"private://{world.world_id}/{seed}",
+            evaluator_version=self.version,
+            private_state_ref=f"private://{env.map_name}/{seed}",
         )
 
-    def check_solvable(self, spec: EpisodeSpec, world: WorldBundle) -> SolvabilityVerdict:
-        """PLAN.md 8.3's rejection rules, as far as M1 can evaluate them."""
+    def check_solvable(self, spec: EpisodeSpec, env: EnvSpec) -> SolvabilityVerdict:
+        """PLAN.md 8.3's rejection rules, as far as a spec can answer them."""
         reasons: list[str] = []
-        known_sites = {s.site_id for s in world.interaction_sites}
-        for order in spec.order_schedule:
-            if order.pickup_site not in known_sites:
-                reasons.append(f"order {order.order_id} pickup site is not in the world")
-            if order.dropoff_site not in known_sites:
-                reasons.append(f"order {order.order_id} dropoff site is not in the world")
-        if spec.budgets.steps <= 0:
-            reasons.append("step budget is not positive")
-        # PLAN.md 8.3: task success must not depend on an unvalidated synthetic edge.
-        certified = {e.edge_id for e in world.nav_graph.certified_edges()}
-        if not certified:
-            reasons.append("no certified edges: every route would use excluded geometry")
+        if spec.budgets.steps < self.config.order.order_count * 5:
+            reasons.append("step budget cannot plausibly cover the order count")
+        if not env.usable:
+            reasons.append("environment is unusable")
+        if env.solvability is None or env.solvability.solvability_rate <= 0.0:
+            reasons.append("environment has no demonstrated solvable episode")
+        # PLAN.md 8.3: success must not depend on an unvalidated synthetic edge.
+        if env.graph.largest_component_fraction < 0.5:
+            reasons.append("graph is too fragmented for reliable routing")
         return SolvabilityVerdict(feasible=not reasons, reasons=reasons)
 
-    # ── action surface ───────────────────────────────────────────────────────
+    # ── the agent-facing contract ────────────────────────────────────────────
 
-    def action_schema(self, state: Any = None) -> list[str]:
-        return [
-            "VIEW_ORDERS", "ACCEPT_ORDER", "MOVE", "MOVE_TO", "PICKUP", "DROP_OFF", "WAIT",
-        ]
+    def instruction(self, env: EnvSpec) -> str:
+        """The observable instruction, derived from the actual action space."""
+        movement = (
+            "Move with MOVE_TO(k) to step to a numbered neighbouring waypoint."
+            if "MOVE" not in env.enabled_actions
+            else "Move with MOVE(direction=...) or MOVE_TO(k)."
+        )
+        constraints = []
+        if self.config.constraint.deadlines:
+            constraints.append("orders have deadlines")
+        if self.config.constraint.battery:
+            constraints.append("your scooter has a battery that depletes")
+        if self.config.constraint.carrying_capacity:
+            constraints.append(
+                f"you can carry at most {self.config.constraint.carrying_capacity} order(s)"
+            )
+        tail = ("Constraints: " + "; ".join(constraints) + ".") if constraints else ""
+        return (
+            f"You are a delivery courier in {env.map_name}. Accept orders, collect them "
+            f"from restaurants, and deliver them to their destinations. {movement} {tail}"
+        ).strip()
+
+    def action_schema(self, env: EnvSpec) -> list[str]:
+        """The actions available here, taken from the environment, not assumed."""
+        return list(env.enabled_actions)
+
+    def reset_observation(self, env: EnvSpec) -> dict[str, Any]:
+        """Everything the agent is entitled to at reset (PLAN.md 8.2, 10.1)."""
+        courier = COURIER_PROFILES[self.config.courier_profile]
+        return {
+            "instruction": self.instruction(env),
+            "actions": self.action_schema(env),
+            "navigation_style": env.navigation_style.value,
+            **self.config.observable_summary(courier),
+        }
 
     # ── evaluation ───────────────────────────────────────────────────────────
 
-    def evaluate(self, trajectory: Trajectory, privileged: dict[str, Any]) -> ScoreReport:
-        """Score a finished episode (PLAN.md 8.1, 12.5).
+    def reward_components(self, privileged: dict[str, Any], trajectory: Trajectory) -> dict[str, float]:
+        """Rule-based, recomputable reward components (PLAN.md 11.3)."""
+        weights = self.config.reward
+        delivered = float(privileged.get("delivered_count") or 0)
+        on_time = float(privileged.get("on_time_count") or delivered)
+        late = max(0.0, delivered - on_time)
+        invalid = float(
+            sum(1 for turn in trajectory.turns if turn.action_result.status.value != "accepted")
+        )
+        steps = float(len(trajectory.turns))
+        return {
+            "delivery": weights.delivery * delivered,
+            "on_time_bonus": weights.on_time_bonus * on_time,
+            "late_penalty": -weights.late_penalty * late,
+            "invalid_action_penalty": -weights.invalid_action_penalty * invalid,
+            "step_cost": -weights.step_cost * steps,
+        }
 
-        The primary metric is left ``None`` with a stated reason rather than
-        fabricated: PLAN.md 12.5 defines ``normalized_utility_vs_upper_bound``
-        against a documented upper-bound policy for that exact frozen order
-        schedule, and no such policy exists before M7. Reporting a number here
-        would be reporting a ratio to nothing.
-        """
-        deliveries = float(privileged.get("delivered_count") or 0)
-        earnings = float(privileged.get("earnings_total") or 0.0)
-        success = bool(privileged.get("success", False))
-        invalid_actions = sum(
-            1 for turn in trajectory.turns if turn.action_result.status.value != "accepted"
+    def evaluate(self, trajectory: Trajectory, privileged: dict[str, Any]) -> ScoreReport:
+        components = self.reward_components(privileged, trajectory)
+        task_score = sum(components.values())
+        delivered = float(privileged.get("delivered_count") or 0)
+        invalid = float(
+            sum(1 for turn in trajectory.turns if turn.action_result.status.value != "accepted")
         )
 
         metrics = {
-            "deliveries": MetricValue(value=deliveries),
-            "net_earnings": MetricValue(value=earnings),
+            "task_score": MetricValue(value=task_score),
+            "deliveries": MetricValue(value=delivered),
+            "orders_offered": MetricValue(value=float(self.config.order.order_count)),
+            "delivery_rate": MetricValue(
+                value=delivered / max(1.0, float(self.config.order.order_count))
+            ),
+            "net_earnings": MetricValue(value=float(privileged.get("earnings_total") or 0.0)),
             "steps_taken": MetricValue(value=float(len(trajectory.turns))),
-            "invalid_actions": MetricValue(value=float(invalid_actions)),
+            "invalid_actions": MetricValue(value=invalid),
             "total_reward": MetricValue(value=float(trajectory.total_reward)),
         }
+        for name, value in components.items():
+            metrics[f"reward.{name}"] = MetricValue(value=value)
+
         return ScoreReport(
             instance_id=trajectory.instance_id,
             episode_id=trajectory.episode_id,
             evaluator_id="delivery_score",
-            evaluator_version="0.1.0",
-            success=success,
+            evaluator_version=self.version,
+            success=delivered >= 1,
             normalized_utility_vs_upper_bound=None,
             upper_bound_undefined_reason=(
                 "no documented upper-bound policy exists before M7; PLAN.md 12.5 defines the "
@@ -218,11 +322,11 @@ class DeliveryTask:
                 "estimated"
             ),
             metrics=metrics,
+            # PLAN.md 11.3: shaping is reported separately and never ranked on.
+            training_shaping={"progress": self.config.reward.shaping_progress},
             costs={
                 "environment_steps": float(len(trajectory.turns)),
-                "output_tokens": float(
-                    sum(t.tokens.response_tokens for t in trajectory.turns)
-                ),
+                "output_tokens": float(sum(t.tokens.response_tokens for t in trajectory.turns)),
             },
             trajectory_sha256=trajectory.content_hash(),
         )

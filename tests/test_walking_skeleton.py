@@ -129,15 +129,16 @@ def test_generated_episode_spec_is_reproducible_across_processes():
 
 def _run_once_spec_hash() -> tuple[int, str]:
     script = (
-        "import json,contextlib,io;"
-        "from embodiedbench.skeleton import compile_world;"
-        "from embodiedbench.tasks.delivery import DeliveryTask;"
-        "buf=io.StringIO();"
-        "t=DeliveryTask()\n"
+        "import json,contextlib,io\n"
+        "from embodiedbench.skeleton import compile_world\n"
+        "from embodiedbench.tasks.delivery import DeliveryTask\n"
+        "buf=io.StringIO()\n"
+        "t=DeliveryTask('standard')\n"
         "with contextlib.redirect_stdout(buf):\n"
-        "    w,e=compile_world('small-city-11', seed=7)\n"
-        "    s=t.generate(w, seed=7, config={'environment_id': e.environment_id})\n"
-        "print(json.dumps({'world': w.content_hash(), 'spec': s.content_hash()}))\n"
+        "    w,e,spec=compile_world('small-city-11', seed=7)\n"
+        "    ep=t.generate(spec, seed=7, world=w)\n"
+        "print(json.dumps({'world': w.content_hash(), 'env_spec': spec.content_hash(),"
+        " 'episode': ep.content_hash()}))\n"
     )
     env = dict(os.environ)
     env.pop("PYTHONHASHSEED", None)
