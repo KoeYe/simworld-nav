@@ -1,0 +1,307 @@
+{
+  "schema": "embodiedbench/env_readiness/v0.1",
+  "map": "small-city-11",
+  "seed": 42,
+  "config_source": "vendor/vagen/vagen/envs/deliverybench/configs/rollout_config.yaml",
+  "unknown_config_keys": [],
+  "config": {
+    "map_name": "small-city-11",
+    "max_steps": 20,
+    "render_mode": "vision",
+    "image_placeholder": "<image>",
+    "enable_map_images": true,
+    "map_renderer": "pil",
+    "prompt_format": "free_think",
+    "format_reward": 0.0,
+    "success_reward": 1.0,
+    "delivery_reward": 0.5,
+    "use_example_in_sys_prompt": true,
+    "time_scale": 0.0,
+    "time_limit_hours": 2.0,
+    "map_poi_in_system_prompt": false,
+    "store_catalog_in_system_prompt": true,
+    "enable_battery": false,
+    "enable_walking_energy": false,
+    "enable_food_temperature": false,
+    "enable_food_smell": false,
+    "enable_food_fragility": false,
+    "enable_bag_compartments": false,
+    "enable_advanced_transport": false,
+    "enable_delivery_methods": false,
+    "enable_special_notes": false,
+    "enable_multi_agent": false,
+    "enabled_actions": [
+      "VIEW_ORDERS",
+      "ACCEPT_ORDER",
+      "PICKUP",
+      "DROP_OFF",
+      "WAIT",
+      "MOVE",
+      "NAVIGATE"
+    ],
+    "enable_prep_time": false,
+    "initial_transport_mode": "walk",
+    "deadline_multiplier": 1.5,
+    "max_orders_in_pool": 3,
+    "num_restaurants": 1,
+    "num_customers": 1,
+    "require_single_item": true,
+    "enable_earning_jitter": false,
+    "fixed_spawn_position": [
+      -17.0,
+      256.58
+    ],
+    "enable_waypoints": true,
+    "enable_fpv": true,
+    "fpv_dir": "deliverybench_fpv/small-city-11",
+    "traffic_light_fpv_dir": "deliverybench_fpv/small-city-11-new",
+    "fpv_yaw_offset_deg": 90.0,
+    "map_global_only": false,
+    "use_gmaps_renderer": true,
+    "gmaps_out_scale": 0.5,
+    "enable_pedestrian_traffic_lights": true,
+    "traffic_light_control_radius_cm": 2500.0,
+    "traffic_light_red_penalty_s": 15.0,
+    "traffic_light_red_energy_multiplier": 1.0,
+    "traffic_light_require_visible_signal_view": true
+  },
+  "turns": [
+    {
+      "step": 0,
+      "kind": "reset",
+      "observation_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is walk, your location is labeled in the 2D map. Your speed is ~2.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+      "observation_chars": 539,
+      "images": [
+        {
+          "width": 1200,
+          "height": 843,
+          "mode": "RGB",
+          "bytes": 143638,
+          "sha256": "71321b71c1dd9f8a47bf776e4e42b3002cf847d9426ca9eb2c5c1d1325d19c8a",
+          "distinct_grey_levels": 256,
+          "dominant_level_fraction": 0.4715,
+          "min_max": [
+            0,
+            255
+          ],
+          "looks_blank": false,
+          "placeholder_key": "<image>",
+          "index_in_observation": 0,
+          "aspect": 1.423
+        }
+      ]
+    },
+    {
+      "step": 1,
+      "action": "VIEW_ORDERS()",
+      "reward": 0.0,
+      "done": false,
+      "action_error": null,
+      "observation_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is walk, your location is labeled in the 2D map. Your speed is ~2.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[order_pool]\nOrders (2):\nThese are open orders available for you to accept:\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 10 min\n  $$     : $4.83\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n------------------------------------------------------------\n[Order #4]\n  Pickup : 58 Poplar Ave\n  Dropoff: 171 Cherry St\n  Time Left : 5 min\n  $$     : $2.31\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. Pizza (serve=60\u00b0C) [HOT]\n------------------------------------------------------------",
+      "observation_chars": 1148,
+      "images": [
+        {
+          "width": 1200,
+          "height": 843,
+          "mode": "RGB",
+          "bytes": 143638,
+          "sha256": "71321b71c1dd9f8a47bf776e4e42b3002cf847d9426ca9eb2c5c1d1325d19c8a",
+          "distinct_grey_levels": 256,
+          "dominant_level_fraction": 0.4715,
+          "min_max": [
+            0,
+            255
+          ],
+          "looks_blank": false,
+          "placeholder_key": "<image>",
+          "index_in_observation": 0,
+          "aspect": 1.423
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "action": "ACCEPT_ORDER(0)",
+      "reward": 0.0,
+      "done": false,
+      "action_error": null,
+      "observation_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is walk, your location is labeled in the 2D map. Your speed is ~2.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 10 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "observation_chars": 745,
+      "images": [
+        {
+          "width": 1200,
+          "height": 843,
+          "mode": "RGB",
+          "bytes": 149343,
+          "sha256": "2f6c61352352b1222e19e95b1052ee86c55a1e4a2c45e6376e6825afbf0aa632",
+          "distinct_grey_levels": 256,
+          "dominant_level_fraction": 0.47,
+          "min_max": [
+            0,
+            255
+          ],
+          "looks_blank": false,
+          "placeholder_key": "<image>",
+          "index_in_observation": 0,
+          "aspect": 1.423
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "action": "NAVIGATE(target=\"restaurant 1\")",
+      "reward": 0.0,
+      "done": false,
+      "action_error": null,
+      "observation_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is walk, your location is labeled in the 2D map. Your speed is ~2.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 10 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[navigation]\nmode: walk\nfrom: 40 Church Ave\nto: 58 Poplar Ave (pickup for order #0)\ndistance_m: 381.3\nestimated_time: ~3min\nestimated_personal_energy: ~30.5%\nnext_move: move backward",
+      "observation_chars": 950,
+      "images": [
+        {
+          "width": 485,
+          "height": 603,
+          "mode": "RGB",
+          "bytes": 107817,
+          "sha256": "d4c56730c16816473bdb5cbe5a2b37ac92adc40a43ee8e4b82576e43d7053e88",
+          "distinct_grey_levels": 256,
+          "dominant_level_fraction": 0.3549,
+          "min_max": [
+            0,
+            255
+          ],
+          "looks_blank": false,
+          "placeholder_key": "<image>",
+          "index_in_observation": 0,
+          "aspect": 0.804
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "action": "MOVE(direction=\"forward\")",
+      "reward": 0.0,
+      "done": false,
+      "action_error": null,
+      "observation_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 108 Church Ave. The current time is 00:00:34. Your current transport mode is walk, your location is labeled in the 2D map. Your speed is ~2.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 9 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[navigation]\nmode: walk\nfrom: 40 Church Ave\nto: 58 Poplar Ave (pickup for order #0)\ndistance_m: 381.3\nestimated_time: ~3min\nestimated_personal_energy: ~30.5%\nnext_move: move backward",
+      "observation_chars": 950,
+      "images": [
+        {
+          "width": 485,
+          "height": 665,
+          "mode": "RGB",
+          "bytes": 109801,
+          "sha256": "cff155c4fa59f1bf348f32e4eb62d4cc19a57cbe6a66d9086f6f632470e31d4f",
+          "distinct_grey_levels": 256,
+          "dominant_level_fraction": 0.3684,
+          "min_max": [
+            0,
+            255
+          ],
+          "looks_blank": false,
+          "placeholder_key": "<image>",
+          "index_in_observation": 0,
+          "aspect": 0.729
+        }
+      ]
+    },
+    {
+      "step": 5,
+      "action": "MOVE(direction=\"forward\")",
+      "reward": 0.0,
+      "done": false,
+      "action_error": null,
+      "observation_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 134 Church Ave. The current time is 00:00:47. Your current transport mode is walk, your location is labeled in the 2D map. Your speed is ~2.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 9 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[navigation]\nmode: walk\nfrom: 40 Church Ave\nto: 58 Poplar Ave (pickup for order #0)\ndistance_m: 381.3\nestimated_time: ~3min\nestimated_personal_energy: ~30.5%\nnext_move: move backward",
+      "observation_chars": 950,
+      "images": [
+        {
+          "width": 485,
+          "height": 690,
+          "mode": "RGB",
+          "bytes": 110092,
+          "sha256": "564f91711f99c3ad1c1a34bf311496d8543bebe3e07a4cd612d4a7ec48d9681f",
+          "distinct_grey_levels": 256,
+          "dominant_level_fraction": 0.3571,
+          "min_max": [
+            0,
+            255
+          ],
+          "looks_blank": false,
+          "placeholder_key": "<image>",
+          "index_in_observation": 0,
+          "aspect": 0.703
+        }
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "name": "system_prompt_non_empty",
+      "status": "pass",
+      "chars": 5917
+    },
+    {
+      "name": "every_turn_has_at_least_one_image",
+      "status": "pass",
+      "turns": 6,
+      "turns_without_images": []
+    },
+    {
+      "name": "no_blank_images",
+      "status": "pass",
+      "blank_count": 0
+    },
+    {
+      "name": "fpv_album_loaded",
+      "status": "pass",
+      "fpv_enabled": true,
+      "fpv_dir": "deliverybench_fpv/small-city-11",
+      "lookup_loaded": true,
+      "lookup_positions": 3,
+      "distinct_headings": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+      ],
+      "heading_count": 4
+    },
+    {
+      "name": "expected_images_per_turn",
+      "status": "fail",
+      "observed_counts": [
+        1
+      ],
+      "note": "config enables both enable_fpv and enable_map_images, so a turn should carry a first-person frame and a map frame"
+    },
+    {
+      "name": "observation_text_non_trivial",
+      "status": "pass",
+      "min_chars": 539
+    },
+    {
+      "name": "no_unknown_config_keys",
+      "status": "pass",
+      "unknown": []
+    }
+  ],
+  "system_prompt": {
+    "text": "You are a food-delivery courier in a simulated city. Your primary goal is to earn as much money as possible through delivering food to customers within two hours. Do your best to complete each delivery and don't let your energy drop to 0.\n\n**Action space:**\n\nCOMMANDS (UPPERCASE):\n- VIEW_ORDERS()     # view all available orders\n- ACCEPT_ORDER(order_id) or ACCEPT_ORDER([order_id, ...])\n- MOVE(direction=\"forward\"|\"left\"|\"right\"|\"backward\")  # step to the adjacent waypoint in that direction relative to your facing; your facing turns to match (right=+90, backward=180, left=-90)\n- PICKUP(orders=[12, 18])\n- WAIT(minutes=NN) or WAIT(\"charge_done\")\n- DROP_OFF(oid=<int>)\n- NAVIGATE(target=\"<address or waypoint>\", mode=\"walk\")  # Plan a route to target (an order pickup/dropoff address, place name, or waypoint id). It highlights the active route on the 2D city map as a blue line from your current location toward the destination, and re-draws it from your new position after every move so the blue line continues to show the route. Small arrows on longer blue segments show route direction when present, but they may be absent on short segments or near the final step. The orange arrow attached to your marker shows only your current facing direction; compare it with the nearby blue line segment to choose forward/left/right/backward. It also reports the remaining distance and estimated travel time/energy. Use it once whenever you choose a new destination; do not repeat NAVIGATE every turn. After a successful NAVIGATE, later observations keep the [navigation] block and refresh next_move until you arrive or choose a different destination. Treat next_move as authoritative and translate it directly to MOVE: move forward -> MOVE(direction=\"forward\"), move backward -> MOVE(direction=\"backward\"), turn left -> MOVE(direction=\"left\"), turn right -> MOVE(direction=\"right\"). Do not override next_move based on street numbers or your own guess. Only otherwise deviate if the move is impossible or the direction is blocked/action failed. mode defaults to \"walk\".\nYou can refer to the following concrete action examples:\n\nVIEW_ORDERS()\nMOVE(direction=\"forward\")\nMOVE(direction=\"left\")\nMOVE(direction=\"right\")\nWAIT(minutes=3)\nWAIT(\"charge_done\")\nNAVIGATE(target=\"restaurant 1\")\n\n**Delivery workflow and navigation discipline:**\nWhen you have no active orders, call `VIEW_ORDERS()` and compare the available orders before accepting. Prefer orders that are reachable quickly from your current position, pay well, and have enough time left. If several orders share a nearby pickup or route, you may accept multiple ids with `ACCEPT_ORDER([id1, id2, ...])`; otherwise accept one good order first and finish it.\n\nWhen `active_orders` shows a known Pickup or Dropoff address, treat that address as your destination. After accepting an order, call NAVIGATE with the actual Pickup address string shown in `active_orders` before moving toward the pickup; for example, if the observation says `Pickup : 146 Church Ave`, call `NAVIGATE(target=\"146 Church Ave\")`. Do not write placeholder text such as `<exact Pickup address>`, and do not guess the route from street names or the map alone. After `PICKUP` succeeds, call NAVIGATE with the actual Dropoff address string shown in `active_orders` before moving toward the customer. Use the exact address string shown in `active_orders` whenever possible, rather than a generic place name.\n\nAfter NAVIGATE succeeds, follow the refreshed `next_move` exactly until it says `you have arrived`. Translate `next_move` directly to MOVE. When `next_move` says `you have arrived`, stop moving: call `PICKUP` if you are at the pickup and the order is ready, or call `DROP_OFF` if you are carrying the order at the dropoff.\n\n\n**Output:**\nMake your decision based on your observation while following the rules. \nReturn ONLY a valid JSON object with the following three keys:\n{\n\"reasoning_and_reflection\": \"<=60 tokens: state the relevant observation and why the chosen action follows the rules>\",\n\"action\": \"Your next action as a single-line function call, strictly following the Action space specification\",\n\"future_plan\": \"<=40 tokens: a concise next-step plan in natural language\"\n}\nDo not include prose, code fences, or text outside the JSON.\n\n\n### vision_inputs\nEach observation includes two images in this order:\n1. First-person views: a single image tiling the four egocentric views around you \u2014 FRONT (centre, largest), BACK (top), LEFT and RIGHT (sides), each labelled. Use it to check if there is any abnormal situation.\n2. Top-down city map (North is up), zoomed in around you and your active task. Markers:\n   - YOU: a blue dot with an orange arrow attached to it. The orange arrow shows only your current facing direction; it is not a route arrow.\n   - PICKUP (start of a delivery): a RED teardrop pin labelled \"#N\u2191\" (N = order id), placed at the restaurant you collect from. Restaurants are shown as YELLOW circles.\n   - DROP-OFF: a GRAY teardrop pin labelled \"#N\u2193\" at the customer's address.\n   - ROUTE: when you have called NAVIGATE, a blue highlighted line shows the active route from your current marker toward the destination. Small arrows may appear on longer blue segments to show route direction, but they may be absent on short segments or near the final step. The line updates as you move.\n   - A legend in the bottom-right corner restates these symbols.\nAfter NAVIGATE succeeds, keep following the persistent route and the refreshed next_move hint instead of calling NAVIGATE again every turn. Treat next_move as authoritative: move forward, move backward, turn left, and turn right map directly to the same MOVE direction. Do not override it based on street numbers or your own guess. Only deviate if energy/battery is insufficient or the direction is blocked/action failed.\nCross-check the views against the top-down map and current-facing arrow so you don't get lost.",
+    "chars": 5917,
+    "approx_tokens": 1479
+  },
+  "fpv_album": {
+    "fpv_enabled": true,
+    "fpv_dir": "deliverybench_fpv/small-city-11",
+    "lookup_loaded": true,
+    "lookup_positions": 3,
+    "distinct_headings": [
+      0.0,
+      90.0,
+      180.0,
+      270.0
+    ],
+    "heading_count": 4
+  },
+  "image_count": 6,
+  "status": "fail",
+  "failed_count": 1
+}

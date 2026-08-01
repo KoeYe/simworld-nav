@@ -29,3 +29,6 @@ baseline_roots.local.json
 
 # Vendored engine writes these into the process cwd
 /log/
+
+# Environment-readiness contact sheets (regenerate with env_readiness)
+/artifacts/verification/ENV*/images/

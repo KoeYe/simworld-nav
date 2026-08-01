@@ -161,6 +161,17 @@ STATE_POLICY = ExtractionPolicy(
             "so it could not appear in a cross-machine conformance hash even if it "
             "were deterministic. Tracked as M0-F3."
         ),
+        "map_exportor": (
+            "A renderer handle the engine attaches to the delivery agent when "
+            "`enable_map_images` is on (text_env.py:277,281). It is only ever "
+            "invoked as `.export(...)` to produce a map image "
+            "(deliverybench_env.py:1457-1460); nothing reads it to decide a "
+            "transition, and it holds no task, economy, inventory, or clock state. "
+            "Its presence therefore depends solely on the observation channel, so "
+            "including it would make the text and cached runtimes differ by "
+            "construction -- precisely the comparison PLAN.md 7.2 excludes when it "
+            "says pixels need not match while state must. Tracked as M1-F5."
+        ),
     }
 )
 
