@@ -1,0 +1,130 @@
+{
+  "schema": "embodiedbench/map_pipeline/v0.1",
+  "map": "small-city-15",
+  "thresholds": {
+    "min_edge_m": 0.5,
+    "cardinal_tolerance_deg": 6.0,
+    "cardinal_fraction_for_move": 0.6,
+    "max_plausible_degree": 6,
+    "long_edge_m": 100.0,
+    "min_largest_component_fraction": 0.9,
+    "solvability_seeds": 5,
+    "min_solvability_rate": 0.8
+  },
+  "analysis": {
+    "node_count": 185,
+    "edge_count": 207,
+    "mean_degree": 2.238,
+    "degree_histogram": {
+      "1": 5,
+      "2": 149,
+      "3": 13,
+      "4": 18
+    },
+    "over_connected_nodes": 0,
+    "dock_nodes": 0,
+    "junction_nodes": 43,
+    "edge_length_m": {
+      "min": 0.234,
+      "p50": 27.93,
+      "p90": 51.02,
+      "p99": 100.94,
+      "max": 128.3
+    },
+    "degenerate_edges": 1,
+    "long_edges": 3,
+    "cardinal_fraction": 1.0,
+    "largest_component_fraction": 1.0,
+    "component_count": 1
+  },
+  "navigation": {
+    "mode": "cardinal+graph",
+    "enabled_actions": [
+      "VIEW_ORDERS",
+      "ACCEPT_ORDER",
+      "PICKUP",
+      "DROP_OFF",
+      "WAIT",
+      "MOVE_TO",
+      "MOVE",
+      "NAVIGATE"
+    ],
+    "enable_waypoint_marks": true,
+    "rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+    "cardinal_fraction": 1.0
+  },
+  "quality_findings": [
+    {
+      "code": "degenerate_edges",
+      "count": 1,
+      "detail": "edges shorter than 0.5 m carry no direction"
+    },
+    {
+      "code": "long_unvalidated_edges",
+      "count": 3,
+      "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
+    }
+  ],
+  "validation": {
+    "episodes": [
+      {
+        "seed": 42,
+        "delivered": 1,
+        "steps": 29,
+        "earnings": 107.47,
+        "failure": null
+      },
+      {
+        "seed": 43,
+        "delivered": 1,
+        "steps": 40,
+        "earnings": 112.54,
+        "failure": null
+      },
+      {
+        "seed": 44,
+        "delivered": 1,
+        "steps": 21,
+        "earnings": 106.13,
+        "failure": null
+      },
+      {
+        "seed": 45,
+        "delivered": 1,
+        "steps": 31,
+        "earnings": 106.71,
+        "failure": null
+      },
+      {
+        "seed": 46,
+        "delivered": 1,
+        "steps": 18,
+        "earnings": 104.44,
+        "failure": null
+      }
+    ],
+    "delivered_episodes": 5,
+    "solvability_rate": 1.0,
+    "passes": true,
+    "mean_steps": 27.8
+  },
+  "grade": "B",
+  "env_config": {
+    "map_name": "small-city-15",
+    "enabled_actions": [
+      "VIEW_ORDERS",
+      "ACCEPT_ORDER",
+      "PICKUP",
+      "DROP_OFF",
+      "WAIT",
+      "MOVE_TO",
+      "MOVE",
+      "NAVIGATE"
+    ],
+    "enable_waypoint_marks": true,
+    "render_mode": "text"
+  },
+  "world_bundle_sha256": "3e512c1a883f9839d3c55e487fdba48e07f88d0a4cb935b6a1650e4777b55d49",
+  "world_nodes": 185,
+  "world_edges": 207
+}

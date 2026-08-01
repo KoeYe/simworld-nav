@@ -1,0 +1,179 @@
+{
+  "schema": "embodiedbench/map_pipeline/v0.1",
+  "map": "citycore-paris",
+  "thresholds": {
+    "min_edge_m": 0.5,
+    "cardinal_tolerance_deg": 6.0,
+    "cardinal_fraction_for_move": 0.6,
+    "max_plausible_degree": 6,
+    "long_edge_m": 100.0,
+    "min_largest_component_fraction": 0.9,
+    "solvability_seeds": 5,
+    "min_solvability_rate": 0.8
+  },
+  "analysis": {
+    "node_count": 1162,
+    "edge_count": 7230,
+    "mean_degree": 12.444,
+    "degree_histogram": {
+      "1": 436,
+      "2": 14,
+      "3": 11,
+      "4": 17,
+      "5": 34,
+      "6": 38,
+      "7": 17,
+      "8": 21,
+      "9": 21,
+      "10": 22,
+      "11": 19,
+      "12": 14,
+      "13": 17,
+      "14": 23,
+      "15": 30,
+      "16": 34,
+      "17": 30,
+      "18": 15,
+      "19": 12,
+      "20": 22,
+      "21": 19,
+      "22": 31,
+      "23": 32,
+      "24": 17,
+      "25": 25,
+      "26": 21,
+      "27": 13,
+      "28": 13,
+      "29": 11,
+      "30": 15,
+      "31": 7,
+      "32": 10,
+      "33": 8,
+      "34": 4,
+      "35": 10,
+      "36": 13,
+      "37": 6,
+      "38": 9,
+      "39": 8,
+      "40": 8,
+      "41": 6,
+      "42": 3,
+      "43": 6,
+      "45": 2,
+      "46": 5,
+      "48": 2,
+      "49": 3,
+      "51": 3,
+      "52": 3,
+      "53": 2
+    },
+    "over_connected_nodes": 612,
+    "dock_nodes": 0,
+    "junction_nodes": 719,
+    "edge_length_m": {
+      "min": 0.037,
+      "p50": 25.02,
+      "p90": 34.15,
+      "p99": 268.86,
+      "max": 639.96
+    },
+    "degenerate_edges": 17,
+    "long_edges": 271,
+    "cardinal_fraction": 0.1954,
+    "largest_component_fraction": 1.0,
+    "component_count": 1
+  },
+  "navigation": {
+    "mode": "graph",
+    "enabled_actions": [
+      "VIEW_ORDERS",
+      "ACCEPT_ORDER",
+      "PICKUP",
+      "DROP_OFF",
+      "WAIT",
+      "MOVE_TO",
+      "NAVIGATE"
+    ],
+    "enable_waypoint_marks": true,
+    "rationale": "only 19.5% of edges are near-cardinal (< 60%), so directional MOVE would leave most shortest-path steps unreachable. Graph navigation (MOVE_TO) is the primary action, per PLAN.md 3.3.4.",
+    "cardinal_fraction": 0.1954
+  },
+  "quality_findings": [
+    {
+      "code": "degenerate_edges",
+      "count": 17,
+      "detail": "edges shorter than 0.5 m carry no direction"
+    },
+    {
+      "code": "over_connected_nodes",
+      "count": 612,
+      "detail": "nodes with degree > 6; a road junction rarely exceeds this, so these are probably endpoints merged in error (false intersections, PLAN.md 3.2)"
+    },
+    {
+      "code": "long_unvalidated_edges",
+      "count": 271,
+      "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
+    }
+  ],
+  "validation": {
+    "episodes": [
+      {
+        "seed": 42,
+        "delivered": 1,
+        "steps": 25,
+        "earnings": 109.26,
+        "failure": null
+      },
+      {
+        "seed": 43,
+        "delivered": 1,
+        "steps": 20,
+        "earnings": 108.74,
+        "failure": null
+      },
+      {
+        "seed": 44,
+        "delivered": 1,
+        "steps": 10,
+        "earnings": 108.13,
+        "failure": null
+      },
+      {
+        "seed": 45,
+        "delivered": 1,
+        "steps": 19,
+        "earnings": 106.73,
+        "failure": null
+      },
+      {
+        "seed": 46,
+        "delivered": 1,
+        "steps": 21,
+        "earnings": 105.94,
+        "failure": null
+      }
+    ],
+    "delivered_episodes": 5,
+    "solvability_rate": 1.0,
+    "passes": true,
+    "mean_steps": 19
+  },
+  "grade": "B",
+  "env_config": {
+    "map_name": "citycore-paris",
+    "enabled_actions": [
+      "VIEW_ORDERS",
+      "ACCEPT_ORDER",
+      "PICKUP",
+      "DROP_OFF",
+      "WAIT",
+      "MOVE_TO",
+      "NAVIGATE"
+    ],
+    "enable_waypoint_marks": true,
+    "render_mode": "text"
+  },
+  "world_bundle_sha256": "70bc559f079de03a0bf75cd78b6b797ae5d6b2915cb537e2dea79d25a4b5844c",
+  "world_nodes": 1162,
+  "world_edges": 7230
+}
