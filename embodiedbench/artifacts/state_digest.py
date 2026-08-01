@@ -178,9 +178,14 @@ def _extract(
         if truncated:
             stats.truncated_sequences += 1
             items = items[: policy.max_sequence]
+        # Exclusions apply to names wherever they appear, not only to object
+        # attributes: configuration lives in nested dicts, so a field like
+        # cfg["traffic_lights"]["visible_signal_views"] is a dict key rather than
+        # an attribute and would otherwise slip past a documented exclusion.
         out = {
             str(k): _extract(v, policy, stats, depth + 1, seen)
             for k, v in sorted(items, key=lambda kv: str(kv[0]))
+            if not policy.excluded(str(k))
         }
         if truncated:
             out["__truncated_at__"] = policy.max_sequence

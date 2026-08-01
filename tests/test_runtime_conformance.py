@@ -210,3 +210,46 @@ def test_text_runtime_produces_no_media(tmp_path):
     finally:
         text.close()
         cached.close()
+
+
+def test_traffic_lights_are_disabled_where_this_exclusion_applies():
+    """The precondition for excluding ``visible_signal_views`` from the digest.
+
+    That field is album-derived and genuinely read by the traffic-light rules
+    (traffic_lights.py:293), so excluding it is only safe while traffic lights
+    are off. If a profile ever turns them on, text and cached would diverge for
+    a real reason and the exclusion would be hiding it -- so the precondition is
+    asserted here rather than assumed.
+    """
+    import dataclasses
+
+    from embodiedbench.baseline.replay import load_vendor_env_module
+
+    module = load_vendor_env_module()
+    for preset_name in ("nav",):
+        config = dataclasses.asdict(module.PRESETS[preset_name])
+        assert config.get("enable_pedestrian_traffic_lights") is False, (
+            f"preset {preset_name!r} enables pedestrian traffic lights; the "
+            "visible_signal_views digest exclusion is no longer safe (BASELINE-F2)"
+        )
+
+
+def test_cached_runtime_resolves_the_real_album(tmp_path):
+    """The album the EnvSpec advertises must be the one the runtime loads.
+
+    The first zero-shot baseline ran with vision nominally on and received only
+    the map image, because the engine was pointed at the album root's 12-row
+    stub manifest instead of the 665-row one below it.
+    """
+    instance, text, cached = _pair(tmp_path)
+    try:
+        assert cached.album.get("found")
+        assert cached.album["waypoints"] > 100, cached.album
+        observation, _info = cached.reset(instance)
+        # Both a first-person frame and a map, not just the map.
+        assert len(observation.media) == 2, [m.width_px for m in observation.media]
+        sizes = {(m.width_px, m.height_px) for m in observation.media}
+        assert any(w == 640 for w, _h in sizes), sizes
+    finally:
+        text.close()
+        cached.close()

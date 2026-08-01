@@ -58,6 +58,7 @@ def find_album(map_name: str, album_root: Path | None = None) -> dict[str, Any]:
             continue
         positions: set[tuple[float, float]] = set()
         headings: set[float] = set()
+        sample_entries: list[dict[str, Any]] = []
         rows = 0
         for line in manifest.read_text(encoding="utf-8").splitlines():
             line = line.strip()
@@ -70,19 +71,64 @@ def find_album(map_name: str, album_root: Path | None = None) -> dict[str, Any]:
             if entry.get("status") != "ok":
                 continue
             rows += 1
+            if len(sample_entries) < 40:
+                sample_entries.append(entry)
             try:
                 positions.add((round(float(entry["x_cm"]), 1), round(float(entry["y_cm"]), 1)))
                 headings.add(float(entry["yaw"]))
             except (KeyError, TypeError, ValueError):
                 continue
-        if rows and len(positions) > best.get("waypoints", 0):
+        if not rows or len(positions) <= best.get("waypoints", 0):
+            continue
+
+        # A manifest is a statement of intent, not evidence. Eight of the nine
+        # procgen "albums" in this checkout carry a full manifest and zero image
+        # files, so counting rows reported vision support for maps that have no
+        # pixels at all. Resolve a sample of rows to real files before claiming
+        # an album exists.
+        resolved, sampled = 0, 0
+        for entry in sample_entries:
+            name = Path(entry["image_path"]).name if entry.get("image_path") else None
+            waypoint = str(entry.get("waypoint_id") or "")
+            if not name or "_" not in waypoint:
+                continue
+            kind, number = waypoint.rsplit("_", 1)
+            try:
+                directory = f"{kind}_{int(number):03d}"
+            except ValueError:
+                directory = waypoint
+            sampled += 1
+            for candidate in (
+                manifest.parent / "images" / directory / name,
+                Path(entry["image_path"]),
+                manifest.parent.parent / "images" / directory / name,
+                root / "images" / directory / name,
+            ):
+                if candidate.exists():
+                    resolved += 1
+                    break
+        present = (resolved / sampled) if sampled else 0.0
+        if present < 0.5:
             best = {
-                "found": True,
-                "manifest": str(manifest.relative_to(root.parent)),
-                "rows": rows,
-                "waypoints": len(positions),
-                "headings": len(headings),
+                "found": False,
+                "reason": (
+                    f"manifest {manifest.name} lists {rows} rows but only "
+                    f"{resolved}/{sampled} sampled images exist on disk; a manifest "
+                    "without images is not an album"
+                ),
+                "manifest_rows": rows,
+                "images_present_fraction": round(present, 3),
             }
+            continue
+
+        best = {
+            "found": True,
+            "manifest": str(manifest.relative_to(root.parent)),
+            "rows": rows,
+            "waypoints": len(positions),
+            "headings": len(headings),
+            "images_present_fraction": round(present, 3),
+        }
     return best
 
 

@@ -172,6 +172,27 @@ STATE_POLICY = ExtractionPolicy(
             "construction -- precisely the comparison PLAN.md 7.2 excludes when it "
             "says pixels need not match while state must. Tracked as M1-F5."
         ),
+        "visible_signal_views": (
+            "Album-derived observation metadata: deliverybench_env.py:791 fills "
+            "cfg['traffic_lights']['visible_signal_views'] from the FPV manifest's "
+            "traffic-light rows, listing the (x, y, yaw) views in which a signal is "
+            "actually visible. A text runtime has no album and so cannot have this "
+            "by construction, which is why it appears on the cached side only.\n\n"
+            "This exclusion is CONDITIONAL and narrower than the others. Unlike "
+            "start_time, run_dir and map_exportor, this field is genuinely read -- "
+            "traffic_lights.py:293 consults it when deciding whether a signal "
+            "constrains a crossing. It is inert here only because "
+            "enable_pedestrian_traffic_lights is False in every profile we run, and "
+            "test_traffic_lights_are_disabled_where_this_exclusion_applies checks "
+            "that precondition rather than trusting it.\n\n"
+            "If traffic lights are ever enabled, text and cached genuinely diverge: "
+            "the text runtime cannot know which signals are visible, so it would "
+            "apply a different rule. At that point this exclusion must be deleted "
+            "and one of two things done -- declare text unsupported for "
+            "traffic-light configurations, or move visible_signal_views out of the "
+            "album and into the map artifact so both runtimes share it. Tracked as "
+            "BASELINE-F2."
+        ),
     }
 )
 

@@ -1,0 +1,2090 @@
+{
+  "citycore-paris": {
+    "map": "citycore-paris",
+    "manifest": "",
+    "rows_total": 0,
+    "rows_ok_status": 0,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "no_album": 1
+    },
+    "by_kind": {},
+    "sizes_by_kind": {},
+    "duplicate_keys": 0,
+    "positions": 0,
+    "complete_waypoints": 0,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [],
+    "status": "absent"
+  },
+  "large-city-26": {
+    "map": "large-city-26",
+    "manifest": "large-city-26/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 1390,
+    "rows_ok_status": 1390,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 1390,
+      "duplicate_key": 126
+    },
+    "by_kind": {
+      "plain": 1128,
+      "traffic_light": 252,
+      "obstacle": 10
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 126,
+    "positions": 282,
+    "complete_waypoints": 282,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(-18300.0, -34326.7, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -34326.7, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -34326.7, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -34326.7, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -19709.3, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -19709.3, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -19709.3, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -19709.3, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(61700.0, 13022.2, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(61700.0, 13022.2, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(61700.0, 13022.2, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(61700.0, 13022.2, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(51295.1, 21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(51295.1, 21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(51295.1, 21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(51295.1, 21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1805.5, 1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1805.5, 1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1805.5, 1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1805.5, 1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3634.1, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3634.1, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3634.1, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3634.1, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 33424.5, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 33424.5, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 33424.5, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 33424.5, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(30924.1, 18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(30924.1, 18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(30924.1, 18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(30924.1, 18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32600.5, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32600.5, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32600.5, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32600.5, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(28962.5, 21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(28962.5, 21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(28962.5, 21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(28962.5, 21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "large-city-28": {
+    "map": "large-city-28",
+    "manifest": "large-city-28/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 1539,
+    "rows_ok_status": 1539,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 1539,
+      "duplicate_key": 138
+    },
+    "by_kind": {
+      "plain": 1252,
+      "traffic_light": 276,
+      "obstacle": 11
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 138,
+    "positions": 313,
+    "complete_waypoints": 313,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(-18300.0, -32653.5, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -32653.5, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -32653.5, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -32653.5, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8129.1, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8129.1, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8129.1, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8129.1, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46882.4, 41700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46882.4, 41700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46882.4, 41700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46882.4, 41700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(4313.1, 18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(4313.1, 18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(4313.1, 18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(4313.1, 18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25016.7, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25016.7, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25016.7, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25016.7, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-27338.4, 38300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-27338.4, 38300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-27338.4, 38300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-27338.4, 38300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(27927.1, -18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(27927.1, -18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(27927.1, -18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(27927.1, -18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1477.8, 1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1477.8, 1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1477.8, 1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1477.8, 1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10947.1, 41700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10947.1, 41700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10947.1, 41700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10947.1, 41700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(8628.5, -21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(8628.5, -21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(8628.5, -21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(8628.5, -21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "large-city-30": {
+    "map": "large-city-30",
+    "manifest": "large-city-30/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 1591,
+    "rows_ok_status": 1591,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 1591,
+      "duplicate_key": 142
+    },
+    "by_kind": {
+      "plain": 1296,
+      "traffic_light": 284,
+      "obstacle": 11
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 142,
+    "positions": 324,
+    "complete_waypoints": 324,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(-8324.5, -58300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8324.5, -58300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8324.5, -58300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8324.5, -58300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -28215.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -28215.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -28215.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -28215.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -47040.9, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -47040.9, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -47040.9, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -47040.9, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-58810.2, -18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-58810.2, -18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-58810.2, -18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-58810.2, -18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35001.1, 18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35001.1, 18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35001.1, 18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35001.1, 18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 7029.6, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 7029.6, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 7029.6, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 7029.6, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-60874.6, -41700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-60874.6, -41700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-60874.6, -41700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-60874.6, -41700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-54450.6, 38300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-54450.6, 38300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-54450.6, 38300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-54450.6, 38300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16457.7, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16457.7, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16457.7, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16457.7, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -15218.8, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -15218.8, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -15218.8, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-41700.0, -15218.8, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "medium-city-18": {
+    "map": "medium-city-18",
+    "manifest": "medium-city-18/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 995,
+    "rows_ok_status": 995,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 995,
+      "duplicate_key": 82
+    },
+    "by_kind": {
+      "plain": 824,
+      "traffic_light": 164,
+      "obstacle": 7
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 82,
+    "positions": 206,
+    "complete_waypoints": 206,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(41700.0, -22641.2, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -22641.2, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -22641.2, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -22641.2, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-48358.4, 21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-48358.4, 21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-48358.4, 21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-48358.4, 21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32901.4, -18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32901.4, -18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32901.4, -18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(32901.4, -18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(6779.4, 18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(6779.4, 18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(6779.4, 18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(6779.4, 18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3400.6, 1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3400.6, 1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3400.6, 1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3400.6, 1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-33417.2, 21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-33417.2, 21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-33417.2, 21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-33417.2, 21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -44781.8, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -44781.8, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -44781.8, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -44781.8, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21153.2, -21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21153.2, -21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21153.2, -21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21153.2, -21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 14511.3, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 14511.3, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 14511.3, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 14511.3, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-59992.2, 21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-59992.2, 21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-59992.2, 21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-59992.2, 21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "medium-city-20": {
+    "map": "medium-city-20",
+    "manifest": "medium-city-20/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 1072,
+    "rows_ok_status": 1072,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 1072,
+      "duplicate_key": 92
+    },
+    "by_kind": {
+      "plain": 880,
+      "traffic_light": 184,
+      "obstacle": 8
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 92,
+    "positions": 220,
+    "complete_waypoints": 220,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(41700.0, -53574.8, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -53574.8, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -53574.8, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -53574.8, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(31818.9, -21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(31818.9, -21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(31818.9, -21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(31818.9, -21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 13327.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 13327.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 13327.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 13327.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-11247.4, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-11247.4, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-11247.4, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-11247.4, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -15603.7, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -15603.7, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -15603.7, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(41700.0, -15603.7, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-6173.5, 18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-6173.5, 18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-6173.5, 18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-6173.5, 18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-12921.2, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-12921.2, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-12921.2, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-12921.2, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(38300.0, 14952.9, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(38300.0, 14952.9, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(38300.0, 14952.9, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(38300.0, 14952.9, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35349.3, 21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35349.3, 21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35349.3, 21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-35349.3, 21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3213.1, 1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3213.1, 1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3213.1, 1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-3213.1, 1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "medium-city-22": {
+    "map": "medium-city-22",
+    "manifest": "medium-city-22/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 1208,
+    "rows_ok_status": 1208,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 1208,
+      "duplicate_key": 110
+    },
+    "by_kind": {
+      "plain": 980,
+      "traffic_light": 220,
+      "obstacle": 8
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 110,
+    "positions": 245,
+    "complete_waypoints": 245,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(-38300.0, -14158.7, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, -14158.7, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, -14158.7, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, -14158.7, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -19005.3, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -19005.3, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -19005.3, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -19005.3, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -39385.5, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -39385.5, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -39385.5, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -39385.5, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, 35014.1, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, 35014.1, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, 35014.1, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, 35014.1, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 29628.4, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 29628.4, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 29628.4, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, 29628.4, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-32543.7, 21700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-32543.7, 21700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-32543.7, 21700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-32543.7, 21700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -25515.2, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -25515.2, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -25515.2, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -25515.2, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, -19200.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, -19200.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, -19200.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38300.0, -19200.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16498.2, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16498.2, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16498.2, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(16498.2, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3668.8, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3668.8, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3668.8, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -3668.8, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "small-city-11": {
+    "map": "small-city-11",
+    "manifest": "small-city-11/main_base_floor_road_full_1280x960/manifest.jsonl",
+    "rows_total": 665,
+    "rows_ok_status": 665,
+    "images_checked": 544,
+    "images_valid": 544,
+    "problems": {
+      "image_missing": 121,
+      "duplicate_key": 58
+    },
+    "by_kind": {
+      "plain": 544,
+      "traffic_light": 116,
+      "obstacle": 5
+    },
+    "sizes_by_kind": {
+      "plain": {
+        "640x480": 544
+      }
+    },
+    "duplicate_keys": 58,
+    "positions": 136,
+    "complete_waypoints": 136,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(-18300.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 1700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 1700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 21700.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 21700.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 21700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 21700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 38300.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(1700.0, 38300.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, -18300.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, -18300.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, -1700.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, -1700.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 1700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 1700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 1700.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 1700.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 18300.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 18300.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 18300.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 18300.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 21700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 21700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 21700.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18300.0, 21700.0, 0.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -18300.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -18300.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -1700.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -1700.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 1700.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 1700.0, 180.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 1700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(21700.0, 1700.0, 270.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-1700.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-1700.0, -1700.0, 90.0, 'traffic_light')",
+        "kind": "traffic_light",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "small-city-13": {
+    "map": "small-city-13",
+    "manifest": "small-city-13/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 717,
+    "rows_ok_status": 717,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 717,
+      "duplicate_key": 60
+    },
+    "by_kind": {
+      "plain": 592,
+      "traffic_light": 120,
+      "obstacle": 5
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 60,
+    "positions": 148,
+    "complete_waypoints": 148,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(-28346.1, -58300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-28346.1, -58300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-28346.1, -58300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-28346.1, -58300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8066.3, -18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8066.3, -18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8066.3, -18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-8066.3, -18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -45437.9, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -45437.9, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -45437.9, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -45437.9, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-30731.2, -41700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-30731.2, -41700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-30731.2, -41700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-30731.2, -41700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -30349.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -30349.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -30349.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -30349.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10235.3, -18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10235.3, -18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10235.3, -18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-10235.3, -18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-9893.8, -18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-9893.8, -18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-9893.8, -18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-9893.8, -18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49790.2, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49790.2, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49790.2, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49790.2, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49399.5, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49399.5, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49399.5, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -49399.5, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-29363.5, -61700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-29363.5, -61700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-29363.5, -61700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-29363.5, -61700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  },
+  "small-city-15": {
+    "map": "small-city-15",
+    "manifest": "small-city-15/main_base_floor_road_full_1280x960_clean_floor/manifest.jsonl",
+    "rows_total": 887,
+    "rows_ok_status": 887,
+    "images_checked": 0,
+    "images_valid": 0,
+    "problems": {
+      "image_missing": 887,
+      "duplicate_key": 70
+    },
+    "by_kind": {
+      "plain": 740,
+      "traffic_light": 140,
+      "obstacle": 7
+    },
+    "sizes_by_kind": {},
+    "duplicate_keys": 70,
+    "positions": 185,
+    "complete_waypoints": 185,
+    "incomplete_waypoints": [],
+    "graph_nodes": 0,
+    "nodes_with_full_coverage": 0,
+    "node_coverage_fraction": null,
+    "album_positions_without_node": 0,
+    "failures": [
+      {
+        "key": "(-21700.0, -17356.9, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -17356.9, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -17356.9, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-21700.0, -17356.9, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-28339.1, -38300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-28339.1, -38300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-28339.1, -38300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-28339.1, -38300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46802.3, 18300.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46802.3, 18300.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46802.3, 18300.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-46802.3, 18300.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 2815.6, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 2815.6, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 2815.6, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 2815.6, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18526.6, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18526.6, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18526.6, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(18526.6, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 26153.8, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 26153.8, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 26153.8, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 26153.8, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(19837.4, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(19837.4, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(19837.4, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(19837.4, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25559.8, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25559.8, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25559.8, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-18300.0, 25559.8, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(13959.3, -1700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(13959.3, -1700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(13959.3, -1700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(13959.3, -1700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38529.8, -41700.0, 0.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38529.8, -41700.0, 90.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38529.8, -41700.0, 180.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      },
+      {
+        "key": "(-38529.8, -41700.0, 270.0, 'plain')",
+        "kind": "plain",
+        "problem": "image_missing"
+      }
+    ],
+    "status": "fail"
+  }
+}

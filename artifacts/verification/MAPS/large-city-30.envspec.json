@@ -61,13 +61,11 @@
   },
   "observation": {
     "channels": [
-      "text",
-      "rgb"
+      "text"
     ],
-    "has_cached_album": true,
-    "album_waypoints": 324,
-    "album_headings": 4,
-    "album_coverage_fraction": 1.0
+    "has_cached_album": false,
+    "album_waypoints": 0,
+    "album_headings": 0
   },
   "grade": "B",
   "quality_flags": [

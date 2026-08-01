@@ -1,0 +1,2331 @@
+{
+  "schema": "embodiedbench/vlm_baseline/v0.1",
+  "model": "/data/murray/models/Qwen3-VL-4B-Instruct",
+  "map": "small-city-11",
+  "preset": "standard",
+  "vision": true,
+  "episodes": 3,
+  "mean_task_score": 0.49,
+  "max_task_score": 1.49,
+  "mean_deliveries": 0.333,
+  "any_delivery": true,
+  "nonzero_reward": true,
+  "total_parse_failures": 0,
+  "records": [
+    {
+      "seed": 42,
+      "steps": 80,
+      "wall_clock_s": 939.0,
+      "deliveries": 0,
+      "success": false,
+      "task_score": -0.01,
+      "reward_components": {
+        "delivery": 0.0,
+        "on_time_bonus": 0.0,
+        "late_penalty": -0.0,
+        "invalid_action_penalty": -0.01,
+        "step_cost": -0.0
+      },
+      "parse_failures": 0,
+      "invalid_actions": 1,
+      "system_prompt": "You are a delivery courier in small-city-11. Accept orders, collect them from restaurants, and deliver them to their destinations. Move with MOVE(direction=...) or MOVE_TO(k). Constraints: orders have deadlines; you can carry at most 3 order(s).\n\nEach turn you receive the current state and, when available, a first-person view and a map. Reply with EXACTLY ONE action and nothing else.\n\nAvailable actions:\n  VIEW_ORDERS()  - list orders you could accept\n  ACCEPT_ORDER(k)  - accept order number k\n  PICKUP(orders=[k])  - collect order k at a restaurant\n  DROP_OFF(oid=k)  - deliver order k at its destination\n  WAIT()  - do nothing this turn\n  MOVE_TO(k)  - step to numbered neighbouring waypoint k\n  MOVE(direction=\"forward\"|\"left\"|\"right\"|\"backward\")  - step in a direction\n  NAVIGATE(target=\"restaurant 1\")  - ask for a route (does not move you)\n\nReply with one action only, for example: MOVE_TO(1)",
+      "turns": [
+        {
+          "step": 0,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "VIEW_ORDERS()",
+          "parsed_action": "VIEW_ORDERS({})",
+          "parsed_ok": true,
+          "prompt_tokens": 1388,
+          "response_tokens": 5,
+          "latency_s": 1.142
+        },
+        {
+          "step": 1,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[order_pool]\nOrders (1):\nThese are open orders available for you to accept:\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n------------------------------------------------------------",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "ACCEPT_ORDER(0)",
+          "parsed_action": "ACCEPT_ORDER({'_args': [0]})",
+          "parsed_ok": true,
+          "prompt_tokens": 2652,
+          "response_tokens": 6,
+          "latency_s": 0.401
+        },
+        {
+          "step": 2,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE_TO(58)",
+          "parsed_action": "MOVE_TO({'_args': [58]})",
+          "parsed_ok": true,
+          "prompt_tokens": 3894,
+          "response_tokens": 7,
+          "latency_s": 0.545
+        },
+        {
+          "step": 3,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n[previous action failed: Action 'MOVE_TO' is disabled in current stage config.]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 5154,
+          "response_tokens": 6,
+          "latency_s": 0.67
+        },
+        {
+          "step": 4,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 108 Church Ave. The current time is 00:00:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 6397,
+          "response_tokens": 6,
+          "latency_s": 0.835
+        },
+        {
+          "step": 5,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 134 Church Ave. The current time is 00:00:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 7640,
+          "response_tokens": 6,
+          "latency_s": 0.999
+        },
+        {
+          "step": 6,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 174 Church Ave. The current time is 00:00:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 8882,
+          "response_tokens": 6,
+          "latency_s": 1.161
+        },
+        {
+          "step": 7,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 176 Church Ave. The current time is 00:00:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 10125,
+          "response_tokens": 6,
+          "latency_s": 1.338
+        },
+        {
+          "step": 8,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 174 Church Ave. The current time is 00:00:32. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 11367,
+          "response_tokens": 6,
+          "latency_s": 1.526
+        },
+        {
+          "step": 9,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 134 Church Ave. The current time is 00:00:37. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 12610,
+          "response_tokens": 6,
+          "latency_s": 1.665
+        },
+        {
+          "step": 10,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Church Ave. The current time is 00:00:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 13853,
+          "response_tokens": 6,
+          "latency_s": 1.792
+        },
+        {
+          "step": 11,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 40 Church Ave. The current time is 00:00:53. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 15095,
+          "response_tokens": 6,
+          "latency_s": 2.036
+        },
+        {
+          "step": 12,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:01:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 16335,
+          "response_tokens": 6,
+          "latency_s": 2.166
+        },
+        {
+          "step": 13,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:01:05. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 17575,
+          "response_tokens": 6,
+          "latency_s": 2.361
+        },
+        {
+          "step": 14,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 42 Cherry St. The current time is 00:01:12. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 18817,
+          "response_tokens": 6,
+          "latency_s": 2.568
+        },
+        {
+          "step": 15,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 82 Cherry St. The current time is 00:01:19. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 20059,
+          "response_tokens": 6,
+          "latency_s": 2.771
+        },
+        {
+          "step": 16,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 104 Cherry St. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 21302,
+          "response_tokens": 6,
+          "latency_s": 2.996
+        },
+        {
+          "step": 17,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 128 Cherry St. The current time is 00:01:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 22571,
+          "response_tokens": 6,
+          "latency_s": 3.225
+        },
+        {
+          "step": 18,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 126 Cherry St. The current time is 00:01:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 23840,
+          "response_tokens": 6,
+          "latency_s": 3.436
+        },
+        {
+          "step": 19,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 130 Cherry St. The current time is 00:01:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 25109,
+          "response_tokens": 6,
+          "latency_s": 3.694
+        },
+        {
+          "step": 20,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 148 Cherry St. The current time is 00:01:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 26352,
+          "response_tokens": 6,
+          "latency_s": 3.93
+        },
+        {
+          "step": 21,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 27594,
+          "response_tokens": 6,
+          "latency_s": 4.183
+        },
+        {
+          "step": 22,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:01:36. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 28837,
+          "response_tokens": 6,
+          "latency_s": 4.436
+        },
+        {
+          "step": 23,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:39. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 30079,
+          "response_tokens": 6,
+          "latency_s": 4.638
+        },
+        {
+          "step": 24,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:01:43. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 31322,
+          "response_tokens": 6,
+          "latency_s": 4.932
+        },
+        {
+          "step": 25,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:46. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 32564,
+          "response_tokens": 6,
+          "latency_s": 5.162
+        },
+        {
+          "step": 26,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:01:49. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 33807,
+          "response_tokens": 6,
+          "latency_s": 5.492
+        },
+        {
+          "step": 27,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:52. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 35049,
+          "response_tokens": 6,
+          "latency_s": 5.778
+        },
+        {
+          "step": 28,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:01:55. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 36292,
+          "response_tokens": 6,
+          "latency_s": 6.031
+        },
+        {
+          "step": 29,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:59. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 37534,
+          "response_tokens": 6,
+          "latency_s": 6.344
+        },
+        {
+          "step": 30,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:02. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 38777,
+          "response_tokens": 6,
+          "latency_s": 6.726
+        },
+        {
+          "step": 31,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:05. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 40019,
+          "response_tokens": 6,
+          "latency_s": 6.894
+        },
+        {
+          "step": 32,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 41262,
+          "response_tokens": 6,
+          "latency_s": 7.246
+        },
+        {
+          "step": 33,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:12. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 42504,
+          "response_tokens": 6,
+          "latency_s": 7.534
+        },
+        {
+          "step": 34,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 43747,
+          "response_tokens": 6,
+          "latency_s": 8.006
+        },
+        {
+          "step": 35,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:18. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 44989,
+          "response_tokens": 6,
+          "latency_s": 8.213
+        },
+        {
+          "step": 36,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 46232,
+          "response_tokens": 6,
+          "latency_s": 8.53
+        },
+        {
+          "step": 37,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:24. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 47474,
+          "response_tokens": 6,
+          "latency_s": 8.882
+        },
+        {
+          "step": 38,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:28. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 48717,
+          "response_tokens": 6,
+          "latency_s": 9.176
+        },
+        {
+          "step": 39,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:31. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 49959,
+          "response_tokens": 6,
+          "latency_s": 9.494
+        },
+        {
+          "step": 40,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 51202,
+          "response_tokens": 6,
+          "latency_s": 9.866
+        },
+        {
+          "step": 41,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:37. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 52444,
+          "response_tokens": 6,
+          "latency_s": 10.227
+        },
+        {
+          "step": 42,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:41. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 53687,
+          "response_tokens": 6,
+          "latency_s": 10.626
+        },
+        {
+          "step": 43,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:44. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 54929,
+          "response_tokens": 6,
+          "latency_s": 10.971
+        },
+        {
+          "step": 44,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:47. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 56172,
+          "response_tokens": 6,
+          "latency_s": 11.378
+        },
+        {
+          "step": 45,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:50. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 57414,
+          "response_tokens": 6,
+          "latency_s": 11.734
+        },
+        {
+          "step": 46,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:02:53. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 58657,
+          "response_tokens": 6,
+          "latency_s": 12.31
+        },
+        {
+          "step": 47,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:02:57. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 59899,
+          "response_tokens": 6,
+          "latency_s": 12.485
+        },
+        {
+          "step": 48,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 61142,
+          "response_tokens": 6,
+          "latency_s": 12.812
+        },
+        {
+          "step": 49,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:03. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 62384,
+          "response_tokens": 6,
+          "latency_s": 13.156
+        },
+        {
+          "step": 50,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:06. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 63627,
+          "response_tokens": 6,
+          "latency_s": 13.724
+        },
+        {
+          "step": 51,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:10. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 64869,
+          "response_tokens": 6,
+          "latency_s": 14.062
+        },
+        {
+          "step": 52,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:13. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 66112,
+          "response_tokens": 6,
+          "latency_s": 14.365
+        },
+        {
+          "step": 53,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:16. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 67354,
+          "response_tokens": 6,
+          "latency_s": 14.712
+        },
+        {
+          "step": 54,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:19. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 68597,
+          "response_tokens": 6,
+          "latency_s": 15.207
+        },
+        {
+          "step": 55,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:23. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 69839,
+          "response_tokens": 6,
+          "latency_s": 15.623
+        },
+        {
+          "step": 56,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 71082,
+          "response_tokens": 6,
+          "latency_s": 16.214
+        },
+        {
+          "step": 57,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:29. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 72324,
+          "response_tokens": 6,
+          "latency_s": 16.422
+        },
+        {
+          "step": 58,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:32. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 73567,
+          "response_tokens": 6,
+          "latency_s": 16.856
+        },
+        {
+          "step": 59,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:35. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 74809,
+          "response_tokens": 6,
+          "latency_s": 17.322
+        },
+        {
+          "step": 60,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:39. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 76052,
+          "response_tokens": 6,
+          "latency_s": 17.9
+        },
+        {
+          "step": 61,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 77294,
+          "response_tokens": 6,
+          "latency_s": 18.29
+        },
+        {
+          "step": 62,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:45. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 78537,
+          "response_tokens": 6,
+          "latency_s": 18.734
+        },
+        {
+          "step": 63,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 79779,
+          "response_tokens": 6,
+          "latency_s": 19.364
+        },
+        {
+          "step": 64,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:52. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 81022,
+          "response_tokens": 6,
+          "latency_s": 19.68
+        },
+        {
+          "step": 65,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:03:55. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 82264,
+          "response_tokens": 6,
+          "latency_s": 20.187
+        },
+        {
+          "step": 66,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:03:58. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 83507,
+          "response_tokens": 6,
+          "latency_s": 20.878
+        },
+        {
+          "step": 67,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:04:01. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 84749,
+          "response_tokens": 6,
+          "latency_s": 20.925
+        },
+        {
+          "step": 68,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:04:04. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 85992,
+          "response_tokens": 6,
+          "latency_s": 21.395
+        },
+        {
+          "step": 69,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:04:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 87234,
+          "response_tokens": 6,
+          "latency_s": 22.281
+        },
+        {
+          "step": 70,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:04:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 88477,
+          "response_tokens": 6,
+          "latency_s": 22.453
+        },
+        {
+          "step": 71,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:04:14. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 3 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 89719,
+          "response_tokens": 6,
+          "latency_s": 23.23
+        },
+        {
+          "step": 72,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:04:17. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 90962,
+          "response_tokens": 6,
+          "latency_s": 23.417
+        },
+        {
+          "step": 73,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:04:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 92204,
+          "response_tokens": 6,
+          "latency_s": 24.425
+        },
+        {
+          "step": 74,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:04:24. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 93447,
+          "response_tokens": 6,
+          "latency_s": 24.703
+        },
+        {
+          "step": 75,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:04:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 94689,
+          "response_tokens": 6,
+          "latency_s": 25.331
+        },
+        {
+          "step": 76,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:04:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 95932,
+          "response_tokens": 6,
+          "latency_s": 25.488
+        },
+        {
+          "step": 77,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:04:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 97174,
+          "response_tokens": 6,
+          "latency_s": 26.54
+        },
+        {
+          "step": 78,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:04:37. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 98417,
+          "response_tokens": 6,
+          "latency_s": 27.068
+        },
+        {
+          "step": 79,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:04:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 99659,
+          "response_tokens": 6,
+          "latency_s": 27.367
+        },
+        {
+          "step": 80,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 148 Cherry St. The current time is 00:04:43. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 2 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(direction=backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 100902,
+          "response_tokens": 6,
+          "latency_s": 28.101
+        }
+      ],
+      "token_summary": {
+        "total_tokens": 100908,
+        "assistant_tokens": 486,
+        "environment_tokens": 100422,
+        "image_tokens": 80028,
+        "turns": 163
+      },
+      "trajectory_sha256": "ee97fde36d6afc589864d8aca94dffa9bf952af9f202ac2fcf90ee80543b1cfb"
+    },
+    {
+      "seed": 43,
+      "steps": 25,
+      "wall_clock_s": 65.6,
+      "deliveries": 0,
+      "success": false,
+      "task_score": -0.01,
+      "reward_components": {
+        "delivery": 0.0,
+        "on_time_bonus": 0.0,
+        "late_penalty": -0.0,
+        "invalid_action_penalty": -0.01,
+        "step_cost": -0.0
+      },
+      "parse_failures": 0,
+      "invalid_actions": 1,
+      "system_prompt": "You are a delivery courier in small-city-11. Accept orders, collect them from restaurants, and deliver them to their destinations. Move with MOVE(direction=...) or MOVE_TO(k). Constraints: orders have deadlines; you can carry at most 3 order(s).\n\nEach turn you receive the current state and, when available, a first-person view and a map. Reply with EXACTLY ONE action and nothing else.\n\nAvailable actions:\n  VIEW_ORDERS()  - list orders you could accept\n  ACCEPT_ORDER(k)  - accept order number k\n  PICKUP(orders=[k])  - collect order k at a restaurant\n  DROP_OFF(oid=k)  - deliver order k at its destination\n  WAIT()  - do nothing this turn\n  MOVE_TO(k)  - step to numbered neighbouring waypoint k\n  MOVE(direction=\"forward\"|\"left\"|\"right\"|\"backward\")  - step in a direction\n  NAVIGATE(target=\"restaurant 1\")  - ask for a route (does not move you)\n\nReply with one action only, for example: MOVE_TO(1)",
+      "turns": [
+        {
+          "step": 0,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "VIEW_ORDERS()",
+          "parsed_action": "VIEW_ORDERS({})",
+          "parsed_ok": true,
+          "prompt_tokens": 1388,
+          "response_tokens": 5,
+          "latency_s": 0.198
+        },
+        {
+          "step": 1,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[order_pool]\nOrders (1):\nThese are open orders available for you to accept:\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]\n------------------------------------------------------------",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "ACCEPT_ORDER(0)",
+          "parsed_action": "ACCEPT_ORDER({'_args': [0]})",
+          "parsed_ok": true,
+          "prompt_tokens": 2653,
+          "response_tokens": 6,
+          "latency_s": 0.338
+        },
+        {
+          "step": 2,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE_TO(146)",
+          "parsed_action": "MOVE_TO({'_args': [146]})",
+          "parsed_ok": true,
+          "prompt_tokens": 3896,
+          "response_tokens": 8,
+          "latency_s": 0.508
+        },
+        {
+          "step": 3,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]\n[previous action failed: Action 'MOVE_TO' is disabled in current stage config.]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 5158,
+          "response_tokens": 5,
+          "latency_s": 0.603
+        },
+        {
+          "step": 4,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 108 Church Ave. The current time is 00:00:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 6401,
+          "response_tokens": 5,
+          "latency_s": 0.762
+        },
+        {
+          "step": 5,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 134 Church Ave. The current time is 00:00:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 7644,
+          "response_tokens": 5,
+          "latency_s": 0.923
+        },
+        {
+          "step": 6,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 174 Church Ave. The current time is 00:00:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 8886,
+          "response_tokens": 5,
+          "latency_s": 1.089
+        },
+        {
+          "step": 7,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 134 Church Ave. The current time is 00:00:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 10129,
+          "response_tokens": 5,
+          "latency_s": 1.26
+        },
+        {
+          "step": 8,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Church Ave. The current time is 00:00:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 11372,
+          "response_tokens": 5,
+          "latency_s": 1.442
+        },
+        {
+          "step": 9,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 40 Church Ave. The current time is 00:00:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 12614,
+          "response_tokens": 5,
+          "latency_s": 1.628
+        },
+        {
+          "step": 10,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:00:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 13854,
+          "response_tokens": 4,
+          "latency_s": 1.781
+        },
+        {
+          "step": 11,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:00:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 15093,
+          "response_tokens": 5,
+          "latency_s": 1.996
+        },
+        {
+          "step": 12,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 42 Cherry St. The current time is 00:01:01. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 16340,
+          "response_tokens": 5,
+          "latency_s": 2.183
+        },
+        {
+          "step": 13,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Cherry St & Church Ave. The current time is 00:01:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 17585,
+          "response_tokens": 5,
+          "latency_s": 2.39
+        },
+        {
+          "step": 14,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 6 Church Ave. The current time is 00:01:13. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 18830,
+          "response_tokens": 4,
+          "latency_s": 2.582
+        },
+        {
+          "step": 15,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 172 Church Ave. The current time is 00:01:19. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 20076,
+          "response_tokens": 5,
+          "latency_s": 2.798
+        },
+        {
+          "step": 16,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 146 Church Ave. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]\n### ephemeral_context\n[pickup_hint]\nYou have arrived at the pickup location: Church Ave (right).\nOrders ready for pickup: #0\n\nYou can execute: PICKUP(orders=[0]) to collect the ready orders.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "PICKUP(orders=[0])",
+          "parsed_action": "PICKUP({'orders': [0]})",
+          "parsed_ok": true,
+          "prompt_tokens": 21372,
+          "response_tokens": 9,
+          "latency_s": 3.144
+        },
+        {
+          "step": 17,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 146 Church Ave. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 22634,
+          "response_tokens": 5,
+          "latency_s": 3.255
+        },
+        {
+          "step": 18,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 172 Church Ave. The current time is 00:01:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 23891,
+          "response_tokens": 5,
+          "latency_s": 3.487
+        },
+        {
+          "step": 19,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 6 Church Ave. The current time is 00:01:32. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 25146,
+          "response_tokens": 4,
+          "latency_s": 3.693
+        },
+        {
+          "step": 20,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:01:37. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 26400,
+          "response_tokens": 5,
+          "latency_s": 3.978
+        },
+        {
+          "step": 21,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 42 Cherry St. The current time is 00:01:44. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 27657,
+          "response_tokens": 5,
+          "latency_s": 4.232
+        },
+        {
+          "step": 22,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Cherry St & Church Ave. The current time is 00:01:51. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 28912,
+          "response_tokens": 5,
+          "latency_s": 4.455
+        },
+        {
+          "step": 23,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 6 Church Ave. The current time is 00:01:57. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 30167,
+          "response_tokens": 4,
+          "latency_s": 4.687
+        },
+        {
+          "step": 24,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 172 Church Ave. The current time is 00:02:02. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 2 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. Curry (serve=60\u00b0C) [HOT][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 31423,
+          "response_tokens": 5,
+          "latency_s": 4.957
+        }
+      ],
+      "token_summary": {
+        "total_tokens": 31428,
+        "assistant_tokens": 129,
+        "environment_tokens": 31299,
+        "image_tokens": 24700,
+        "turns": 51
+      },
+      "trajectory_sha256": "e26b31bb20b71c8d383721cb690751f0893ee61e260911a55e5c72a8ce33ceb4"
+    },
+    {
+      "seed": 44,
+      "steps": 25,
+      "wall_clock_s": 65.8,
+      "deliveries": 1,
+      "success": true,
+      "task_score": 1.49,
+      "reward_components": {
+        "delivery": 1.0,
+        "on_time_bonus": 0.5,
+        "late_penalty": -0.0,
+        "invalid_action_penalty": -0.01,
+        "step_cost": -0.0
+      },
+      "parse_failures": 0,
+      "invalid_actions": 1,
+      "system_prompt": "You are a delivery courier in small-city-11. Accept orders, collect them from restaurants, and deliver them to their destinations. Move with MOVE(direction=...) or MOVE_TO(k). Constraints: orders have deadlines; you can carry at most 3 order(s).\n\nEach turn you receive the current state and, when available, a first-person view and a map. Reply with EXACTLY ONE action and nothing else.\n\nAvailable actions:\n  VIEW_ORDERS()  - list orders you could accept\n  ACCEPT_ORDER(k)  - accept order number k\n  PICKUP(orders=[k])  - collect order k at a restaurant\n  DROP_OFF(oid=k)  - deliver order k at its destination\n  WAIT()  - do nothing this turn\n  MOVE_TO(k)  - step to numbered neighbouring waypoint k\n  MOVE(direction=\"forward\"|\"left\"|\"right\"|\"backward\")  - step in a direction\n  NAVIGATE(target=\"restaurant 1\")  - ask for a route (does not move you)\n\nReply with one action only, for example: MOVE_TO(1)",
+      "turns": [
+        {
+          "step": 0,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "VIEW_ORDERS()",
+          "parsed_action": "VIEW_ORDERS({})",
+          "parsed_ok": true,
+          "prompt_tokens": 1388,
+          "response_tokens": 5,
+          "latency_s": 0.195
+        },
+        {
+          "step": 1,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[order_pool]\nOrders (1):\nThese are open orders available for you to accept:\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]\n------------------------------------------------------------",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "ACCEPT_ORDER(0)",
+          "parsed_action": "ACCEPT_ORDER({'_args': [0]})",
+          "parsed_ok": true,
+          "prompt_tokens": 2656,
+          "response_tokens": 6,
+          "latency_s": 0.335
+        },
+        {
+          "step": 2,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE_TO(146)",
+          "parsed_action": "MOVE_TO({'_args': [146]})",
+          "parsed_ok": true,
+          "prompt_tokens": 3902,
+          "response_tokens": 8,
+          "latency_s": 0.502
+        },
+        {
+          "step": 3,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]\n[previous action failed: Action 'MOVE_TO' is disabled in current stage config.]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 5167,
+          "response_tokens": 5,
+          "latency_s": 0.597
+        },
+        {
+          "step": 4,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 108 Church Ave. The current time is 00:00:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 6413,
+          "response_tokens": 5,
+          "latency_s": 0.76
+        },
+        {
+          "step": 5,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 134 Church Ave. The current time is 00:00:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 7659,
+          "response_tokens": 5,
+          "latency_s": 0.919
+        },
+        {
+          "step": 6,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 174 Church Ave. The current time is 00:00:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 8904,
+          "response_tokens": 5,
+          "latency_s": 1.086
+        },
+        {
+          "step": 7,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 134 Church Ave. The current time is 00:00:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 10150,
+          "response_tokens": 5,
+          "latency_s": 1.255
+        },
+        {
+          "step": 8,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Church Ave. The current time is 00:00:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 11396,
+          "response_tokens": 5,
+          "latency_s": 1.448
+        },
+        {
+          "step": 9,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 40 Church Ave. The current time is 00:00:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 12641,
+          "response_tokens": 5,
+          "latency_s": 1.627
+        },
+        {
+          "step": 10,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:00:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 13884,
+          "response_tokens": 5,
+          "latency_s": 1.798
+        },
+        {
+          "step": 11,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 172 Church Ave. The current time is 00:00:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  Time Left : 1 min\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 15129,
+          "response_tokens": 4,
+          "latency_s": 1.973
+        },
+        {
+          "step": 12,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:01:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 0 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 16376,
+          "response_tokens": 5,
+          "latency_s": 2.184
+        },
+        {
+          "step": 13,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 38 Cherry St. The current time is 00:01:06. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 17626,
+          "response_tokens": 5,
+          "latency_s": 2.388
+        },
+        {
+          "step": 14,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Cherry St & Church Ave. The current time is 00:01:12. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 18874,
+          "response_tokens": 5,
+          "latency_s": 2.602
+        },
+        {
+          "step": 15,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 172 Church Ave. The current time is 00:01:18. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 20124,
+          "response_tokens": 4,
+          "latency_s": 2.788
+        },
+        {
+          "step": 16,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 146 Church Ave. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Ready for pickup\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]\n### ephemeral_context\n[pickup_hint]\nYou have arrived at the pickup location: Church Ave (right).\nOrders ready for pickup: #0\n\nYou can execute: PICKUP(orders=[0]) to collect the ready orders.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "PICKUP(orders=[0])",
+          "parsed_action": "PICKUP({'orders': [0]})",
+          "parsed_ok": true,
+          "prompt_tokens": 21422,
+          "response_tokens": 9,
+          "latency_s": 3.151
+        },
+        {
+          "step": 17,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 146 Church Ave. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 22687,
+          "response_tokens": 5,
+          "latency_s": 3.265
+        },
+        {
+          "step": 18,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 122 Church Ave. The current time is 00:01:25. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 146 Church Ave\n  Dropoff: 122 Church Ave\n  OVERTIME  : 1 min \u2014 Deliver ASAP!\n  $$     : $0.23\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. PokeBowl (serve=5\u00b0C) [FROZEN][FRAGILE]\n### ephemeral_context\n[dropoff_hint]\nYou are at the drop-off for order #0. Call DROP_OFF(oid=0) to complete the delivery.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "DROP_OFF(oid=0)",
+          "parsed_action": "DROP_OFF({'oid': 0})",
+          "parsed_ok": true,
+          "prompt_tokens": 23982,
+          "response_tokens": 8,
+          "latency_s": 3.589
+        },
+        {
+          "step": 19,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 122 Church Ave. The current time is 00:01:25. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $101.73. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "VIEW_ORDERS()",
+          "parsed_action": "VIEW_ORDERS({})",
+          "parsed_ok": true,
+          "prompt_tokens": 25146,
+          "response_tokens": 5,
+          "latency_s": 3.73
+        },
+        {
+          "step": 20,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 122 Church Ave. The current time is 00:01:25. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $101.73. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[order_pool]\nOrders (1):\nThese are open orders available for you to accept:\n[Order #13]\n  Pickup : 170 Church Ave\n  Dropoff: 166 Church Ave\n  Time Left : 1 min\n  $$     : $0.26\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. Fries (serve=60\u00b0C) [HOT]\n------------------------------------------------------------",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "ACCEPT_ORDER(13)",
+          "parsed_action": "ACCEPT_ORDER({'_args': [13]})",
+          "parsed_ok": true,
+          "prompt_tokens": 26410,
+          "response_tokens": 7,
+          "latency_s": 4.033
+        },
+        {
+          "step": 21,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 122 Church Ave. The current time is 00:01:25. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $101.73. Active orders: #13. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #13]\n  Pickup : 170 Church Ave\n  Dropoff: 166 Church Ave\n  Time Left : 1 min\n  $$     : $0.26\n  Status : Ready for pickup\n  Items  :\n    1. Fries (serve=60\u00b0C) [HOT]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 27654,
+          "response_tokens": 5,
+          "latency_s": 4.229
+        },
+        {
+          "step": 22,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 100 Church Ave. The current time is 00:01:29. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $101.73. Active orders: #13. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #13]\n  Pickup : 170 Church Ave\n  Dropoff: 166 Church Ave\n  Time Left : 1 min\n  $$     : $0.26\n  Status : Ready for pickup\n  Items  :\n    1. Fries (serve=60\u00b0C) [HOT]",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 29120,
+          "response_tokens": 5,
+          "latency_s": 4.521
+        },
+        {
+          "step": 23,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at Church Ave & Court St. The current time is 00:01:46. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $101.73. Active orders: #13. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #13]\n  Pickup : 170 Church Ave\n  Dropoff: 166 Church Ave\n  Time Left : 1 min\n  $$     : $0.26\n  Status : Ready for pickup\n  Items  :\n    1. Fries (serve=60\u00b0C) [HOT]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 30359,
+          "response_tokens": 5,
+          "latency_s": 4.741
+        },
+        {
+          "step": 24,
+          "prompt_text": "<image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 178 Court St. The current time is 00:01:51. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $101.73. Active orders: #13. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #13]\n  Pickup : 170 Church Ave\n  Dropoff: 166 Church Ave\n  Time Left : 1 min\n  $$     : $0.26\n  Status : Ready for pickup\n  Items  :\n    1. Fries (serve=60\u00b0C) [HOT]",
+          "image_count": 1,
+          "image_shapes": [
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 31600,
+          "response_tokens": 4,
+          "latency_s": 4.96
+        }
+      ],
+      "token_summary": {
+        "total_tokens": 31604,
+        "assistant_tokens": 135,
+        "environment_tokens": 31469,
+        "image_tokens": 24920,
+        "turns": 51
+      },
+      "trajectory_sha256": "cf048a0ddeeb4f9a8d44647ad4c033a7017d3896481d89f858e0197372e54a66"
+    }
+  ]
+}

@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from embodiedbench.artifacts.media_store import MediaStore
+from embodiedbench.compiler.env_spec_builder import find_album
 from embodiedbench.runtime.text.vagen_adapter import VagenTextRuntime
 from embodiedbench.schemas.episode import EpisodeSpec
 from embodiedbench.schemas.runtime import (
@@ -62,6 +63,24 @@ class VagenCachedRuntime(VagenTextRuntime):
         max_images_per_observation: int = 2,
     ):
         merged = dict(CACHED_CONFIG)
+        # Point the engine at the album the EnvSpec actually found. The album
+        # root often holds a stub manifest -- small-city-11 keeps a 12-row one
+        # above its real 665-row manifest -- and the engine does not search
+        # below it. Without this the FPV lookup resolves 3 waypoints instead of
+        # 136, the first-person view almost never matches, and a "vision"
+        # rollout silently degrades to map-only. That is exactly what the first
+        # zero-shot baseline did: every turn carried one 1200x843 map image and
+        # no first-person frame at all.
+        album = find_album(map_name)
+        if album.get("found"):
+            album_dir = Path("deliverybench_fpv") / map_name
+            manifest = album.get("manifest", "")
+            # find_album reports the manifest relative to the album's parent.
+            parent = Path(manifest).parent if manifest else Path(map_name)
+            merged["fpv_dir"] = str(Path("deliverybench_fpv") / parent)
+            self.album = album
+        else:
+            self.album = {"found": False}
         merged.update(config_overrides or {})
         super().__init__(
             map_name=map_name, preset=preset, max_steps=max_steps, config_overrides=merged
