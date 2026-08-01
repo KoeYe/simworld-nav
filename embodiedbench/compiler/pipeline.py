@@ -254,6 +254,99 @@ def decide_navigation(
     )
 
 
+def analyze_source_geometry(
+    map_dir: Path, thresholds: Thresholds = THRESHOLDS
+) -> dict[str, Any]:
+    """Inspect ``roads.json`` before the engine normalizes it.
+
+    The runtime graph cannot reveal degenerate input. The engine interpolates
+    waypoints, so its shortest edge is about 1 m even for a map whose source
+    contains sub-millimetre segments -- measuring the graph therefore reports
+    zero degenerate edges however broken the export is.
+
+    The damage is still real: a stress map with two sub-millimetre segments
+    gained 17 spurious graph edges and lost 19 points of cardinal alignment
+    against an otherwise identical baseline. That is why PLAN.md 3.3.1 says to
+    filter zero-length segments *before* normalization, and why this check reads
+    the source rather than the result.
+    """
+    roads_path = Path(map_dir) / "roads.json"
+    if not roads_path.exists():
+        return {"available": False}
+    try:
+        roads = json.loads(roads_path.read_text()).get("roads", [])
+    except (OSError, ValueError) as exc:
+        return {"available": False, "error": str(exc)[:200]}
+
+    degenerate = 0
+    self_loops = 0
+    nonfinite = 0
+    lengths: list[float] = []
+    for road in roads:
+        try:
+            start, end = road["start"], road["end"]
+            x1, y1 = float(start["x"]), float(start["y"])
+            x2, y2 = float(end["x"]), float(end["y"])
+        except (KeyError, TypeError, ValueError):
+            nonfinite += 1
+            continue
+        if not all(math.isfinite(v) for v in (x1, y1, x2, y2)):
+            nonfinite += 1
+            continue
+        length = math.hypot(x2 - x1, y2 - y1)
+        lengths.append(length)
+        if x1 == x2 and y1 == y2:
+            self_loops += 1
+        elif length < thresholds.min_edge_m:
+            degenerate += 1
+
+    return {
+        "available": True,
+        "segment_count": len(roads),
+        "degenerate_segments": degenerate,
+        "self_loop_segments": self_loops,
+        "nonfinite_segments": nonfinite,
+        "shortest_segment_m": round(min(lengths), 6) if lengths else 0.0,
+        "longest_segment_m": round(max(lengths), 2) if lengths else 0.0,
+    }
+
+
+def source_findings(
+    source: dict[str, Any], thresholds: Thresholds = THRESHOLDS
+) -> list[dict[str, Any]]:
+    """Flags derived from the source geometry rather than the runtime graph."""
+    findings: list[dict[str, Any]] = []
+    if not source.get("available"):
+        return findings
+    if source.get("degenerate_segments"):
+        findings.append({
+            "code": "degenerate_edges",
+            "count": source["degenerate_segments"],
+            "detail": (
+                f"roads.json declares segments shorter than {thresholds.min_edge_m} m "
+                f"(shortest {source['shortest_segment_m']} m). The engine interpolates them "
+                "away, so they are invisible in the runtime graph, but they still add "
+                "spurious edges and degrade cardinal alignment (PLAN.md 3.3.1)"
+            ),
+            "stage": "source",
+        })
+    if source.get("self_loop_segments"):
+        findings.append({
+            "code": "self_loop_segments",
+            "count": source["self_loop_segments"],
+            "detail": "roads.json declares segments whose start equals their end",
+            "stage": "source",
+        })
+    if source.get("nonfinite_segments"):
+        findings.append({
+            "code": "nonfinite_source_geometry",
+            "count": source["nonfinite_segments"],
+            "detail": "roads.json declares segments with missing or non-finite coordinates",
+            "stage": "source",
+        })
+    return findings
+
+
 def quality_findings(
     analysis: GraphAnalysis, thresholds: Thresholds = THRESHOLDS
 ) -> list[dict[str, Any]]:
@@ -301,9 +394,17 @@ def quality_findings(
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-async def _scripted_delivery(module: Any, map_name: str, seed: int, decision: NavigationDecision) -> dict[str, Any]:
+async def _scripted_delivery(
+    module: Any,
+    map_name: str,
+    seed: int,
+    decision: NavigationDecision,
+    base_dir: str | None = None,
+) -> dict[str, Any]:
     """One rule-based oracle delivery, used to prove the map is playable."""
     config = dataclasses.asdict(module.PRESETS["nav"])
+    if base_dir:
+        config["base_dir"] = str(base_dir)
     config.update(
         map_name=map_name,
         render_mode="text",
@@ -360,13 +461,27 @@ async def _scripted_delivery(module: Any, map_name: str, seed: int, decision: Na
 
 
 def validate_solvability(
-    module: Any, map_name: str, decision: NavigationDecision, thresholds: Thresholds = THRESHOLDS
+    module: Any,
+    map_name: str,
+    decision: NavigationDecision,
+    thresholds: Thresholds = THRESHOLDS,
+    base_dir: str | None = None,
 ) -> dict[str, Any]:
-    """Run scripted oracle deliveries; the map must actually be playable."""
-    results = [
-        asyncio.run(_scripted_delivery(module, map_name, seed, decision))
-        for seed in range(42, 42 + thresholds.solvability_seeds)
-    ]
+    """Run scripted oracle deliveries; the map must actually be playable.
+
+    An episode that raises is a result, not an interruption: a map that makes
+    the engine throw is exactly what a stress case is probing for, and it must
+    be reported rather than aborting the whole run.
+    """
+    results = []
+    for seed in range(42, 42 + thresholds.solvability_seeds):
+        try:
+            results.append(asyncio.run(_scripted_delivery(module, map_name, seed, decision, base_dir)))
+        except Exception as exc:  # noqa: BLE001
+            results.append({
+                "seed": seed, "delivered": 0, "steps": 0,
+                "failure": f"{type(exc).__name__}: {exc}"[:200],
+            })
     delivered = sum(1 for r in results if r["delivered"] >= 1)
     rate = delivered / len(results) if results else 0.0
     return {
@@ -383,8 +498,69 @@ def validate_solvability(
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+# Failures the engine raises for maps it cannot turn into a task, mapped to a
+# stable reason code. Matching on message text is unpleasant, but the engine
+# raises bare RuntimeError/ValueError, so the alternative is one opaque code for
+# every cause -- which would tell a caller nothing about how to fix the map.
+_UNUSABLE_REASONS: tuple[tuple[str, str, str], ...] = (
+    ("world_nodes is empty", "no_pois",
+     "the map declares no POI nodes, so no pickup or drop-off can exist"),
+    ("No valid pickup or dropoff nodes", "no_usable_pois",
+     "POIs exist but none were recognised; the engine keeps only a hardcoded "
+     "vocabulary (restaurant/store/rest_area/hospital/car_rental/customer/building, "
+     "or instance names starting with BP_Building) and silently drops the rest"),
+    ("Failed to bind pickup or dropoff node", "pois_unreachable",
+     "POIs could not be bound to the road graph; usually there are no roads, or "
+     "no road lies near enough to a POI to anchor a door"),
+    ("cannot convert float NaN to integer", "nonfinite_geometry",
+     "the map contains NaN or infinite coordinates"),
+    ("'NoneType' object has no attribute", "malformed_poi_record",
+     "a POI record is missing a structure the engine dereferences without checking"),
+)
+
+
+def classify_failure(exc: Exception) -> tuple[str, str]:
+    """Map an engine exception onto a stable (code, explanation)."""
+    message = str(exc)
+    for needle, code, explanation in _UNUSABLE_REASONS:
+        if needle in message:
+            return code, explanation
+    return "unknown_load_failure", f"{type(exc).__name__}: {message}"[:300]
+
+
+def unusable_verdict(
+    map_name: str, thresholds: Thresholds, exc: Exception, *, stage: str
+) -> dict[str, Any]:
+    """A structured 'this map cannot become an env, and here is why'."""
+    code, explanation = classify_failure(exc)
+    return {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": map_name,
+        "thresholds": dataclasses.asdict(thresholds),
+        "analysis": GraphAnalysis().to_dict(),
+        "navigation": None,
+        "quality_findings": [
+            {"code": code, "count": 1, "detail": explanation, "stage": stage}
+        ],
+        "validation": {"passes": False, "solvability_rate": 0.0, "episodes": []},
+        "grade": "fail",
+        "unusable": True,
+        "failure": {
+            "stage": stage,
+            "code": code,
+            "explanation": explanation,
+            "exception": f"{type(exc).__name__}: {exc}"[:300],
+        },
+        "env_config": None,
+    }
+
+
 def compile_map(
-    map_name: str, *, thresholds: Thresholds = THRESHOLDS, run_validation: bool = True
+    map_name: str,
+    *,
+    thresholds: Thresholds = THRESHOLDS,
+    run_validation: bool = True,
+    base_dir: str | None = None,
 ) -> dict[str, Any]:
     """Run the full map -> training-env pipeline for one map."""
     from embodiedbench.baseline.compat import apply_map_compatibility_patches
@@ -399,28 +575,46 @@ def compile_map(
     # ── 1. load ──────────────────────────────────────────────────────────────
     async def open_map():
         config = dataclasses.asdict(module.PRESETS["nav"])
+        if base_dir:
+            config["base_dir"] = str(base_dir)
         config.update(map_name=map_name, render_mode="text", max_steps=8)
         env = module.DeliveryBench(config)
         await env.reset(seed=0)
         return env
 
-    env = asyncio.run(open_map())
+    # A map that cannot be opened is a verdict, not an exception. The pipeline's
+    # contract is "any map in, a training env or a stated reason out"; crashing
+    # gives the caller neither, and every unusable-map stress case lands here.
+    try:
+        env = asyncio.run(open_map())
+    except Exception as exc:  # noqa: BLE001
+        return unusable_verdict(map_name, thresholds, exc, stage="load")
+
     try:
         agent = env._env.dms[0]
         analysis = analyze_graph(agent.city_map, thresholds)
         world = compile_procgen_world(
             agent.city_map, map_name=map_name, order_manager=env._env.om
         )
+    except Exception as exc:  # noqa: BLE001
+        return unusable_verdict(map_name, thresholds, exc, stage="analyze")
     finally:
-        asyncio.run(env.close())
+        try:
+            asyncio.run(env.close())
+        except Exception:  # noqa: BLE001 - teardown must not mask the verdict
+            pass
 
     # ── 2-3. decide ──────────────────────────────────────────────────────────
     decision = decide_navigation(analysis, thresholds)
-    findings = quality_findings(analysis, thresholds)
+    maps_root = Path(base_dir) if base_dir else (
+        REPO_ROOT / "vendor" / "vagen" / "vagen" / "envs" / "deliverybench"
+    )
+    source = analyze_source_geometry(maps_root / "maps" / map_name, thresholds)
+    findings = source_findings(source, thresholds) + quality_findings(analysis, thresholds)
 
     # ── 4. validate ──────────────────────────────────────────────────────────
     validation = (
-        validate_solvability(module, map_name, decision, thresholds)
+        validate_solvability(module, map_name, decision, thresholds, base_dir)
         if run_validation
         else {"skipped": True, "passes": False}
     )
@@ -445,6 +639,7 @@ def compile_map(
         "map": map_name,
         "thresholds": dataclasses.asdict(thresholds),
         "analysis": analysis.to_dict(),
+        "source_geometry": source,
         "navigation": decision.to_dict(),
         "quality_findings": findings,
         "validation": validation,

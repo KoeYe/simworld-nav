@@ -37,6 +37,15 @@
     "largest_component_fraction": 1.0,
     "component_count": 1
   },
+  "source_geometry": {
+    "available": true,
+    "segment_count": 18,
+    "degenerate_segments": 0,
+    "self_loop_segments": 0,
+    "nonfinite_segments": 0,
+    "shortest_segment_m": 200.0,
+    "longest_segment_m": 200.0
+  },
   "navigation": {
     "mode": "cardinal+graph",
     "enabled_actions": [

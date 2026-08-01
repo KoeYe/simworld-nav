@@ -87,6 +87,15 @@
         "largest_component_fraction": 1.0,
         "component_count": 1
       },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 190,
+        "degenerate_segments": 2,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 0.005,
+        "longest_segment_m": 147.77
+      },
       "navigation": {
         "mode": "graph",
         "enabled_actions": [
@@ -103,6 +112,12 @@
         "cardinal_fraction": 0.1954
       },
       "quality_findings": [
+        {
+          "code": "degenerate_edges",
+          "count": 2,
+          "detail": "roads.json declares segments shorter than 0.5 m (shortest 0.005 m). The engine interpolates them away, so they are invisible in the runtime graph, but they still add spurious edges and degrade cardinal alignment (PLAN.md 3.3.1)",
+          "stage": "source"
+        },
         {
           "code": "degenerate_edges",
           "count": 17,
@@ -219,6 +234,15 @@
         "cardinal_fraction": 1.0,
         "largest_component_fraction": 1.0,
         "component_count": 1
+      },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 26,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
       },
       "navigation": {
         "mode": "cardinal+graph",
@@ -350,6 +374,15 @@
         "largest_component_fraction": 1.0,
         "component_count": 1
       },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 28,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
+      },
       "navigation": {
         "mode": "cardinal+graph",
         "enabled_actions": [
@@ -479,6 +512,15 @@
         "cardinal_fraction": 1.0,
         "largest_component_fraction": 1.0,
         "component_count": 1
+      },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 30,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
       },
       "navigation": {
         "mode": "cardinal+graph",
@@ -610,6 +652,15 @@
         "largest_component_fraction": 1.0,
         "component_count": 1
       },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 18,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
+      },
       "navigation": {
         "mode": "cardinal+graph",
         "enabled_actions": [
@@ -734,6 +785,15 @@
         "cardinal_fraction": 1.0,
         "largest_component_fraction": 1.0,
         "component_count": 1
+      },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 20,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
       },
       "navigation": {
         "mode": "cardinal+graph",
@@ -865,6 +925,15 @@
         "largest_component_fraction": 1.0,
         "component_count": 1
       },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 22,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
+      },
       "navigation": {
         "mode": "cardinal+graph",
         "enabled_actions": [
@@ -994,6 +1063,15 @@
         "cardinal_fraction": 1.0,
         "largest_component_fraction": 1.0,
         "component_count": 1
+      },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 11,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
       },
       "navigation": {
         "mode": "cardinal+graph",
@@ -1125,6 +1203,15 @@
         "largest_component_fraction": 1.0,
         "component_count": 1
       },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 13,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
+      },
       "navigation": {
         "mode": "cardinal+graph",
         "enabled_actions": [
@@ -1249,6 +1336,15 @@
         "cardinal_fraction": 1.0,
         "largest_component_fraction": 1.0,
         "component_count": 1
+      },
+      "source_geometry": {
+        "available": true,
+        "segment_count": 15,
+        "degenerate_segments": 0,
+        "self_loop_segments": 0,
+        "nonfinite_segments": 0,
+        "shortest_segment_m": 200.0,
+        "longest_segment_m": 200.0
       },
       "navigation": {
         "mode": "cardinal+graph",

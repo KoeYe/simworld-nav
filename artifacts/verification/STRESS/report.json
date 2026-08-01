@@ -1,0 +1,1901 @@
+{
+  "schema": "embodiedbench/stress_suite/v0.1",
+  "cases": 15,
+  "failed": 0,
+  "workspace": "/data/murray/stress_maps",
+  "records": [
+    {
+      "case": "minimal_grid",
+      "attacks": "baseline validity",
+      "note": "",
+      "seconds": 0.4,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "navigation_mode",
+          "expected": "cardinal+graph",
+          "observed": "cardinal+graph",
+          "status": "pass"
+        },
+        {
+          "name": "solvable",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "minimal_grid",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 33,
+          "edge_count": 45,
+          "mean_degree": 2.727,
+          "degree_histogram": {
+            "1": 2,
+            "2": 18,
+            "3": 8,
+            "4": 1,
+            "6": 4
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 20,
+          "edge_length_m": {
+            "min": 1.0,
+            "p50": 34.0,
+            "p90": 86.0,
+            "p99": 86.0,
+            "max": 86.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 1.0,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 6,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 120.0,
+          "longest_segment_m": 120.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 1.0
+        },
+        "quality_findings": [],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.05,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.08,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.2,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 8.8
+        },
+        "grade": "A",
+        "env_config": {
+          "map_name": "minimal_grid",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "f08db3adbe8ecf0469b0705e7e24942812fd4ac3bfbbcc68c1cf71070689e82f",
+        "world_nodes": 33,
+        "world_edges": 45
+      }
+    },
+    {
+      "case": "single_segment",
+      "attacks": "graphs smaller than any threshold",
+      "note": "",
+      "seconds": 0.1,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "single_segment",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 14,
+          "edge_count": 14,
+          "mean_degree": 2,
+          "degree_histogram": {
+            "2": 14
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 4,
+          "edge_length_m": {
+            "min": 1.6,
+            "p50": 9.6,
+            "p90": 34.0,
+            "p99": 86.0,
+            "max": 86.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 1.0,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 1,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 120.0,
+          "longest_segment_m": 120.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 1.0
+        },
+        "quality_findings": [],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 6,
+              "earnings": 103.32,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 6,
+              "earnings": 103.13,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 103.32,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 6,
+              "earnings": 103.32,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 6,
+              "earnings": 103.22,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 6.4
+        },
+        "grade": "A",
+        "env_config": {
+          "map_name": "single_segment",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "c4c20766eb169465a59cf0d1f95b5116b4580b1561bd3672220fa68d96c92523",
+        "world_nodes": 14,
+        "world_edges": 14
+      }
+    },
+    {
+      "case": "no_roads",
+      "attacks": "a map with no navigable geometry",
+      "note": "must be rejected with a reason, not crash",
+      "seconds": 0.0,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "solvable",
+          "expected": false,
+          "observed": false,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "no_roads",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 0,
+          "edge_count": 0,
+          "mean_degree": 0.0,
+          "degree_histogram": {},
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 0,
+          "edge_length_m": {},
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 0.0,
+          "largest_component_fraction": 0.0,
+          "component_count": 0
+        },
+        "navigation": null,
+        "quality_findings": [
+          {
+            "code": "pois_unreachable",
+            "count": 1,
+            "detail": "POIs could not be bound to the road graph; usually there are no roads, or no road lies near enough to a POI to anchor a door",
+            "stage": "load"
+          }
+        ],
+        "validation": {
+          "passes": false,
+          "solvability_rate": 0.0,
+          "episodes": []
+        },
+        "grade": "fail",
+        "unusable": true,
+        "failure": {
+          "stage": "load",
+          "code": "pois_unreachable",
+          "explanation": "POIs could not be bound to the road graph; usually there are no roads, or no road lies near enough to a POI to anchor a door",
+          "exception": "RuntimeError: Failed to bind pickup or dropoff node"
+        },
+        "env_config": null
+      }
+    },
+    {
+      "case": "disconnected_islands",
+      "attacks": "connectivity assumptions",
+      "note": "",
+      "seconds": 0.3,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "flag[fragmented_graph]",
+          "expected": "fragmented_graph",
+          "observed": [
+            "fragmented_graph"
+          ],
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "disconnected_islands",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 53,
+          "edge_count": 77,
+          "mean_degree": 2.906,
+          "degree_histogram": {
+            "1": 2,
+            "2": 26,
+            "3": 16,
+            "4": 1,
+            "6": 8
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 40,
+          "edge_length_m": {
+            "min": 1.0,
+            "p50": 34.0,
+            "p90": 86.0,
+            "p99": 86.0,
+            "max": 86.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 1.0,
+          "largest_component_fraction": 0.6226,
+          "component_count": 2
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 12,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 120.0,
+          "longest_segment_m": 120.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 1.0
+        },
+        "quality_findings": [
+          {
+            "code": "fragmented_graph",
+            "count": 2,
+            "detail": "largest component holds 62.3% of nodes, below the 90% floor"
+          }
+        ],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.05,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.08,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.2,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 8.8
+        },
+        "grade": "B",
+        "env_config": {
+          "map_name": "disconnected_islands",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "b0036872ee54ed6c0443df27a68c6be0f5c601a5a65b54e4d8dca225581f1a08",
+        "world_nodes": 53,
+        "world_edges": 77
+      }
+    },
+    {
+      "case": "degenerate_segments",
+      "attacks": "zero-length edges (PLAN.md 3.3.1)",
+      "note": "",
+      "seconds": 0.3,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "flag[degenerate_edges]",
+          "expected": "degenerate_edges",
+          "observed": [
+            "degenerate_edges"
+          ],
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "degenerate_segments",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 39,
+          "edge_count": 62,
+          "mean_degree": 3.179,
+          "degree_histogram": {
+            "1": 2,
+            "2": 16,
+            "3": 4,
+            "4": 11,
+            "5": 2,
+            "6": 4
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 26,
+          "edge_length_m": {
+            "min": 1.0,
+            "p50": 32.6,
+            "p90": 86.0,
+            "p99": 86.0,
+            "max": 86.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 0.8065,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 8,
+          "degenerate_segments": 2,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 0.000141,
+          "longest_segment_m": 120.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "80.7% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 0.8065
+        },
+        "quality_findings": [
+          {
+            "code": "degenerate_edges",
+            "count": 2,
+            "detail": "roads.json declares segments shorter than 0.5 m (shortest 0.000141 m). The engine interpolates them away, so they are invisible in the runtime graph, but they still add spurious edges and degrade cardinal alignment (PLAN.md 3.3.1)",
+            "stage": "source"
+          }
+        ],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 9,
+              "earnings": 104.25,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.05,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.08,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 9,
+              "earnings": 104.25,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.2,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 9.6
+        },
+        "grade": "B",
+        "env_config": {
+          "map_name": "degenerate_segments",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "bbc294c27c6c7c0d9bde856ea0d9d100e8fc3e03d3388bf1b2bccd96917ff20a",
+        "world_nodes": 39,
+        "world_edges": 62
+      }
+    },
+    {
+      "case": "self_loop_segments",
+      "attacks": "start == end",
+      "note": "",
+      "seconds": 0.3,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "self_loop_segments",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 33,
+          "edge_count": 45,
+          "mean_degree": 2.727,
+          "degree_histogram": {
+            "1": 2,
+            "2": 18,
+            "3": 8,
+            "4": 1,
+            "6": 4
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 20,
+          "edge_length_m": {
+            "min": 1.0,
+            "p50": 34.0,
+            "p90": 86.0,
+            "p99": 86.0,
+            "max": 86.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 1.0,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 7,
+          "degenerate_segments": 0,
+          "self_loop_segments": 1,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 0.0,
+          "longest_segment_m": 120.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 1.0
+        },
+        "quality_findings": [
+          {
+            "code": "self_loop_segments",
+            "count": 1,
+            "detail": "roads.json declares segments whose start equals their end",
+            "stage": "source"
+          }
+        ],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.05,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.08,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.2,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 8.8
+        },
+        "grade": "B",
+        "env_config": {
+          "map_name": "self_loop_segments",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "813ebe6b46febee624aa0e4c70fcf68b0f8eab4c7b10d4812244de8f1903b09f",
+        "world_nodes": 33,
+        "world_edges": 45
+      }
+    },
+    {
+      "case": "star_hub",
+      "attacks": "degree far outside road norms",
+      "note": "",
+      "seconds": 1.5,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "flag[over_connected_nodes]",
+          "expected": "over_connected_nodes",
+          "observed": [
+            "over_connected_nodes",
+            "long_unvalidated_edges"
+          ],
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "star_hub",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 85,
+          "edge_count": 253,
+          "mean_degree": 5.953,
+          "degree_histogram": {
+            "1": 13,
+            "3": 47,
+            "11": 1,
+            "14": 23,
+            "19": 1
+          },
+          "over_connected_nodes": 25,
+          "dock_nodes": 0,
+          "junction_nodes": 72,
+          "edge_length_m": {
+            "min": 6.276,
+            "p50": 29.27,
+            "p90": 166.0,
+            "p99": 166.0,
+            "max": 205.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 57,
+          "cardinal_fraction": 0.1462,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 24,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 200.0,
+          "longest_segment_m": 200.0
+        },
+        "navigation": {
+          "mode": "graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "only 14.6% of edges are near-cardinal (< 60%), so directional MOVE would leave most shortest-path steps unreachable. Graph navigation (MOVE_TO) is the primary action, per PLAN.md 3.3.4.",
+          "cardinal_fraction": 0.1462
+        },
+        "quality_findings": [
+          {
+            "code": "over_connected_nodes",
+            "count": 25,
+            "detail": "nodes with degree > 6; a road junction rarely exceeds this, so these are probably endpoints merged in error (false intersections, PLAN.md 3.2)"
+          },
+          {
+            "code": "long_unvalidated_edges",
+            "count": 57,
+            "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
+          }
+        ],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 106.75,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 107.23,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 107.23,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 106.75,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 106.99,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 8
+        },
+        "grade": "B",
+        "env_config": {
+          "map_name": "star_hub",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "97aa8ecbf750fc7c54d10a539b12c9f990f6ddee7e1b176fed4d0daab942bcee",
+        "world_nodes": 85,
+        "world_edges": 253
+      }
+    },
+    {
+      "case": "rotated_grid_37deg",
+      "attacks": "cardinality is a property, not a given",
+      "note": "the Paris lesson in miniature: a rotated grid must not get cardinal MOVE",
+      "seconds": 0.4,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "navigation_mode",
+          "expected": "graph",
+          "observed": "graph",
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "rotated_grid_37deg",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 41,
+          "edge_count": 57,
+          "mean_degree": 2.78,
+          "degree_histogram": {
+            "1": 3,
+            "2": 16,
+            "3": 17,
+            "4": 1,
+            "6": 4
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 28,
+          "edge_length_m": {
+            "min": 6.751,
+            "p50": 34.0,
+            "p90": 146.0,
+            "p99": 146.0,
+            "max": 146.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 12,
+          "cardinal_fraction": 0.0,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 8,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 180.0,
+          "longest_segment_m": 180.0
+        },
+        "navigation": {
+          "mode": "graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "only 0.0% of edges are near-cardinal (< 60%), so directional MOVE would leave most shortest-path steps unreachable. Graph navigation (MOVE_TO) is the primary action, per PLAN.md 3.3.4.",
+          "cardinal_fraction": 0.0
+        },
+        "quality_findings": [
+          {
+            "code": "long_unvalidated_edges",
+            "count": 12,
+            "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
+          }
+        ],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 15,
+              "earnings": 105.83,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 13,
+              "earnings": 105.54,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 12,
+              "earnings": 104.95,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 15,
+              "earnings": 105.83,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 12,
+              "earnings": 104.81,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 13.4
+        },
+        "grade": "B",
+        "env_config": {
+          "map_name": "rotated_grid_37deg",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "56a8764fc57204cf6c8c975017d2d1893c628f472ff50edf91f83a27a808f2ec",
+        "world_nodes": 41,
+        "world_edges": 57
+      }
+    },
+    {
+      "case": "very_long_segments",
+      "attacks": "map-spanning edges",
+      "note": "",
+      "seconds": 0.4,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "flag[long_unvalidated_edges]",
+          "expected": "long_unvalidated_edges",
+          "observed": [
+            "over_connected_nodes",
+            "long_unvalidated_edges"
+          ],
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "very_long_segments",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 38,
+          "edge_count": 53,
+          "mean_degree": 2.789,
+          "degree_histogram": {
+            "1": 2,
+            "2": 19,
+            "3": 11,
+            "4": 2,
+            "6": 3,
+            "7": 1
+          },
+          "over_connected_nodes": 1,
+          "dock_nodes": 0,
+          "junction_nodes": 25,
+          "edge_length_m": {
+            "min": 1.0,
+            "p50": 34.0,
+            "p90": 86.0,
+            "p99": 1966.0,
+            "max": 1966.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 4,
+          "cardinal_fraction": 1.0,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 8,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 120.0,
+          "longest_segment_m": 2000.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 1.0
+        },
+        "quality_findings": [
+          {
+            "code": "over_connected_nodes",
+            "count": 1,
+            "detail": "nodes with degree > 6; a road junction rarely exceeds this, so these are probably endpoints merged in error (false intersections, PLAN.md 3.2)"
+          },
+          {
+            "code": "long_unvalidated_edges",
+            "count": 4,
+            "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
+          }
+        ],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 11,
+              "earnings": 104.05,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 11,
+              "earnings": 104.08,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 8,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 11,
+              "earnings": 104.2,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 9.8
+        },
+        "grade": "B",
+        "env_config": {
+          "map_name": "very_long_segments",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "aeb69e9e9e9f6cc304ed9070d4ad1056878c53af87c886ab8e52bd30130fdbbd",
+        "world_nodes": 38,
+        "world_edges": 53
+      }
+    },
+    {
+      "case": "duplicate_positions",
+      "attacks": "coincident/duplicated geometry",
+      "note": "",
+      "seconds": 0.3,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "duplicate_positions",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 33,
+          "edge_count": 45,
+          "mean_degree": 2.727,
+          "degree_histogram": {
+            "1": 2,
+            "2": 18,
+            "3": 8,
+            "4": 1,
+            "6": 4
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 20,
+          "edge_length_m": {
+            "min": 1.0,
+            "p50": 34.0,
+            "p90": 86.0,
+            "p99": 86.0,
+            "max": 86.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 1.0,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 12,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 120.0,
+          "longest_segment_m": 120.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 1.0
+        },
+        "quality_findings": [],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.05,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.08,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 7,
+              "earnings": 104.34,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 10,
+              "earnings": 104.2,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 8.8
+        },
+        "grade": "A",
+        "env_config": {
+          "map_name": "duplicate_positions",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "1c83c788b2543fa4ead98757a4ade0d96e1813f8723d95fe4e62b5883cd52a07",
+        "world_nodes": 33,
+        "world_edges": 45
+      }
+    },
+    {
+      "case": "huge_grid",
+      "attacks": "scale, not just termination",
+      "note": "",
+      "seconds": 16.6,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "huge_grid",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 249,
+          "edge_count": 385,
+          "mean_degree": 3.092,
+          "degree_histogram": {
+            "2": 13,
+            "3": 216,
+            "4": 8,
+            "5": 8,
+            "6": 4
+          },
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 233,
+          "edge_length_m": {
+            "min": 6.0,
+            "p50": 34.0,
+            "p90": 1126.0,
+            "p99": 1126.0,
+            "max": 1126.0
+          },
+          "degenerate_edges": 0,
+          "long_edges": 136,
+          "cardinal_fraction": 0.9688,
+          "largest_component_fraction": 1.0,
+          "component_count": 1
+        },
+        "source_geometry": {
+          "available": true,
+          "segment_count": 60,
+          "degenerate_segments": 0,
+          "self_loop_segments": 0,
+          "nonfinite_segments": 0,
+          "shortest_segment_m": 1160.0,
+          "longest_segment_m": 1160.0
+        },
+        "navigation": {
+          "mode": "cardinal+graph",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "rationale": "96.9% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 0.9688
+        },
+        "quality_findings": [
+          {
+            "code": "long_unvalidated_edges",
+            "count": 136,
+            "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
+          }
+        ],
+        "validation": {
+          "episodes": [
+            {
+              "seed": 42,
+              "delivered": 1,
+              "steps": 25,
+              "earnings": 109.46,
+              "failure": null
+            },
+            {
+              "seed": 43,
+              "delivered": 1,
+              "steps": 17,
+              "earnings": 109.62,
+              "failure": null
+            },
+            {
+              "seed": 44,
+              "delivered": 1,
+              "steps": 23,
+              "earnings": 110.42,
+              "failure": null
+            },
+            {
+              "seed": 45,
+              "delivered": 1,
+              "steps": 25,
+              "earnings": 109.46,
+              "failure": null
+            },
+            {
+              "seed": 46,
+              "delivered": 1,
+              "steps": 21,
+              "earnings": 109.54,
+              "failure": null
+            }
+          ],
+          "delivered_episodes": 5,
+          "solvability_rate": 1.0,
+          "passes": true,
+          "mean_steps": 22.2
+        },
+        "grade": "B",
+        "env_config": {
+          "map_name": "huge_grid",
+          "enabled_actions": [
+            "VIEW_ORDERS",
+            "ACCEPT_ORDER",
+            "PICKUP",
+            "DROP_OFF",
+            "WAIT",
+            "MOVE_TO",
+            "MOVE",
+            "NAVIGATE"
+          ],
+          "enable_waypoint_marks": true,
+          "render_mode": "text"
+        },
+        "world_bundle_sha256": "f57205a17256319b23af37bbb6cf7934f0197d6046816e8324822ada65df308c",
+        "world_nodes": 249,
+        "world_edges": 385
+      }
+    },
+    {
+      "case": "unknown_asset_names",
+      "attacks": "hardcoded POI vocabulary, silent drop",
+      "note": "a different asset pack yields zero POIs and no task",
+      "seconds": 0.0,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "solvable",
+          "expected": false,
+          "observed": false,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "unknown_asset_names",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 0,
+          "edge_count": 0,
+          "mean_degree": 0.0,
+          "degree_histogram": {},
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 0,
+          "edge_length_m": {},
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 0.0,
+          "largest_component_fraction": 0.0,
+          "component_count": 0
+        },
+        "navigation": null,
+        "quality_findings": [
+          {
+            "code": "no_usable_pois",
+            "count": 1,
+            "detail": "POIs exist but none were recognised; the engine keeps only a hardcoded vocabulary (restaurant/store/rest_area/hospital/car_rental/customer/building, or instance names starting with BP_Building) and silently drops the rest",
+            "stage": "load"
+          }
+        ],
+        "validation": {
+          "passes": false,
+          "solvability_rate": 0.0,
+          "episodes": []
+        },
+        "grade": "fail",
+        "unusable": true,
+        "failure": {
+          "stage": "load",
+          "code": "no_usable_pois",
+          "explanation": "POIs exist but none were recognised; the engine keeps only a hardcoded vocabulary (restaurant/store/rest_area/hospital/car_rental/customer/building, or instance names starting with BP_Building) and silently drops the rest",
+          "exception": "RuntimeError: No valid pickup or dropoff nodes found"
+        },
+        "env_config": null
+      }
+    },
+    {
+      "case": "unicode_and_long_names",
+      "attacks": "non-ASCII and unbounded identifiers",
+      "note": "",
+      "seconds": 0.0,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "unicode_and_long_names",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 0,
+          "edge_count": 0,
+          "mean_degree": 0.0,
+          "degree_histogram": {},
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 0,
+          "edge_length_m": {},
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 0.0,
+          "largest_component_fraction": 0.0,
+          "component_count": 0
+        },
+        "navigation": null,
+        "quality_findings": [
+          {
+            "code": "malformed_poi_record",
+            "count": 1,
+            "detail": "a POI record is missing a structure the engine dereferences without checking",
+            "stage": "load"
+          }
+        ],
+        "validation": {
+          "passes": false,
+          "solvability_rate": 0.0,
+          "episodes": []
+        },
+        "grade": "fail",
+        "unusable": true,
+        "failure": {
+          "stage": "load",
+          "code": "malformed_poi_record",
+          "explanation": "a POI record is missing a structure the engine dereferences without checking",
+          "exception": "AttributeError: 'NoneType' object has no attribute 'get'"
+        },
+        "env_config": null
+      }
+    },
+    {
+      "case": "no_pois",
+      "attacks": "navigable but untaskable",
+      "note": "",
+      "seconds": 0.0,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        },
+        {
+          "name": "solvable",
+          "expected": false,
+          "observed": false,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "no_pois",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 0,
+          "edge_count": 0,
+          "mean_degree": 0.0,
+          "degree_histogram": {},
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 0,
+          "edge_length_m": {},
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 0.0,
+          "largest_component_fraction": 0.0,
+          "component_count": 0
+        },
+        "navigation": null,
+        "quality_findings": [
+          {
+            "code": "no_pois",
+            "count": 1,
+            "detail": "the map declares no POI nodes, so no pickup or drop-off can exist",
+            "stage": "load"
+          }
+        ],
+        "validation": {
+          "passes": false,
+          "solvability_rate": 0.0,
+          "episodes": []
+        },
+        "grade": "fail",
+        "unusable": true,
+        "failure": {
+          "stage": "load",
+          "code": "no_pois",
+          "explanation": "the map declares no POI nodes, so no pickup or drop-off can exist",
+          "exception": "RuntimeError: world_nodes is empty"
+        },
+        "env_config": null
+      }
+    },
+    {
+      "case": "nonfinite_coordinates",
+      "attacks": "NaN/Inf in the export",
+      "note": "",
+      "seconds": 0.0,
+      "status": "pass",
+      "checks": [
+        {
+          "name": "reaches_a_verdict_without_crashing",
+          "expected": true,
+          "observed": true,
+          "status": "pass"
+        }
+      ],
+      "result": {
+        "schema": "embodiedbench/map_pipeline/v0.1",
+        "map": "nonfinite_coordinates",
+        "thresholds": {
+          "min_edge_m": 0.5,
+          "cardinal_tolerance_deg": 6.0,
+          "cardinal_fraction_for_move": 0.6,
+          "max_plausible_degree": 6,
+          "long_edge_m": 100.0,
+          "min_largest_component_fraction": 0.9,
+          "solvability_seeds": 5,
+          "min_solvability_rate": 0.8
+        },
+        "analysis": {
+          "node_count": 0,
+          "edge_count": 0,
+          "mean_degree": 0.0,
+          "degree_histogram": {},
+          "over_connected_nodes": 0,
+          "dock_nodes": 0,
+          "junction_nodes": 0,
+          "edge_length_m": {},
+          "degenerate_edges": 0,
+          "long_edges": 0,
+          "cardinal_fraction": 0.0,
+          "largest_component_fraction": 0.0,
+          "component_count": 0
+        },
+        "navigation": null,
+        "quality_findings": [
+          {
+            "code": "nonfinite_geometry",
+            "count": 1,
+            "detail": "the map contains NaN or infinite coordinates",
+            "stage": "load"
+          }
+        ],
+        "validation": {
+          "passes": false,
+          "solvability_rate": 0.0,
+          "episodes": []
+        },
+        "grade": "fail",
+        "unusable": true,
+        "failure": {
+          "stage": "load",
+          "code": "nonfinite_geometry",
+          "explanation": "the map contains NaN or infinite coordinates",
+          "exception": "ValueError: cannot convert float NaN to integer"
+        },
+        "env_config": null
+      }
+    }
+  ]
+}

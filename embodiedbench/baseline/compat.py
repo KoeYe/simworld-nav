@@ -53,17 +53,116 @@ def _patched_init_bus_system(self, world_data: dict[str, Any]) -> None:
         self.create_bus(f"bus_{index + 1}", route_ids[0])
 
 
+def bootstrap_vendor_import() -> dict[str, Any]:
+    """Make the vendored engine importable from any working directory.
+
+    ``vlm_delivery/utils/global_logger.py`` ends with a module-level
+    ``_global_logger = GlobalLogger()``, whose constructor calls
+    ``os.makedirs("../../log")``. The path is relative to the process cwd, so
+    merely *importing* the engine fails with PermissionError unless the cwd's
+    grandparent happens to be writable. Running the compiler from a repository
+    root is enough to break it.
+
+    Because the failure happens during import, it cannot be fixed by patching
+    the function afterwards -- there is no afterwards. Instead the import is
+    performed from a scratch directory chosen so that ``../../log`` lands
+    somewhere writable, and the previous cwd is restored immediately. The chdir
+    is scoped to the import and nothing else.
+    """
+    import os
+    import tempfile
+
+    scratch_root = os.environ.get("EB_SCRATCH_DIR") or os.path.join(
+        tempfile.gettempdir(), "embodiedbench-vendor"
+    )
+    # <root>/log is what "../../log" resolves to from <root>/a/b.
+    workdir = os.path.join(scratch_root, "a", "b")
+    os.makedirs(workdir, exist_ok=True)
+    os.makedirs(os.path.join(scratch_root, "log"), exist_ok=True)
+
+    previous = os.getcwd()
+    os.chdir(workdir)
+    try:
+        from vagen.envs.deliverybench.vlm_delivery.utils import global_logger  # noqa: F401
+    finally:
+        os.chdir(previous)
+    return {"scratch_root": scratch_root, "import_cwd": workdir, "restored_cwd": previous}
+
+
+LOG_FOLDER_REASON = (
+    "vlm_delivery/utils/global_logger.py::_setup_logger defaults log_folder to the "
+    "relative path '../../log' and calls os.makedirs on it, so the engine can only "
+    "run from a directory whose grandparent is writable. Running the compiler from "
+    "a repository root raises PermissionError on '/home/log' before any map is "
+    "loaded, which makes the whole map->env pipeline depend on the caller's cwd. "
+    "The patch resolves the log directory to EB_LOG_DIR when set, and otherwise "
+    "falls back to a temporary directory when the requested path is not writable. "
+    "Logging is a side effect; it must never decide whether a map compiles. "
+    "Tracked as STRESS-F1."
+)
+
+
+def _patched_setup_logger(self, log_folder: str = "../../log", *args: Any, **kwargs: Any):
+    """``_setup_logger`` that never fails because of an unwritable log path."""
+    import os
+    import tempfile
+
+    override = os.environ.get("EB_LOG_DIR")
+    candidates = [override, log_folder, os.path.join(tempfile.gettempdir(), "embodiedbench-logs")]
+    chosen = None
+    for candidate in candidates:
+        if not candidate:
+            continue
+        try:
+            os.makedirs(candidate, exist_ok=True)
+            if os.access(candidate, os.W_OK):
+                chosen = candidate
+                break
+        except OSError:
+            continue
+    if chosen is None:
+        chosen = tempfile.mkdtemp(prefix="embodiedbench-logs-")
+    return _ORIGINAL_SETUP_LOGGER(self, chosen, *args, **kwargs)
+
+
+_ORIGINAL_SETUP_LOGGER: Any = None
+
+
 def apply_map_compatibility_patches() -> PatchSet:
     """Apply every map-compatibility patch. Idempotent."""
+    global _ORIGINAL_SETUP_LOGGER
     from embodiedbench.baseline.replay import _ensure_vendor_on_path
 
     _ensure_vendor_on_path()
+    # Must happen before any vendored import: the logger module cannot be
+    # imported at all from an unsuitable cwd (see bootstrap_vendor_import).
+    bootstrap_vendor_import()
     from vagen.envs.deliverybench.vlm_delivery.entities import bus_manager as bus_module
+    from vagen.envs.deliverybench.vlm_delivery.utils import global_logger as logger_module
 
     if getattr(bus_module, "_embodiedbench_compat_applied", False):
         return getattr(bus_module, "_embodiedbench_compat_patchset")
 
     patches = PatchSet()
+
+    logger_original = logger_module.GlobalLogger._setup_logger
+    logger_source = inspect.getsource(logger_original)
+    logger_record = PatchRecord(
+        target="vlm_delivery.utils.global_logger.GlobalLogger._setup_logger",
+        reason=LOG_FOLDER_REASON,
+        original_source_sha256=sha256_bytes(logger_source.encode()),
+        applied=False,
+    )
+    if "../../log" not in logger_source:
+        logger_record.skipped_reason = (
+            "vendored _setup_logger no longer hardcodes a relative '../../log' path; "
+            "re-review before applying"
+        )
+    else:
+        _ORIGINAL_SETUP_LOGGER = logger_original
+        logger_module.GlobalLogger._setup_logger = _patched_setup_logger
+        logger_record.applied = True
+    patches.records.append(logger_record)
     original = bus_module.BusManager.init_bus_system
     source = inspect.getsource(original)
     record = PatchRecord(

@@ -83,6 +83,15 @@
     "largest_component_fraction": 1.0,
     "component_count": 1
   },
+  "source_geometry": {
+    "available": true,
+    "segment_count": 190,
+    "degenerate_segments": 2,
+    "self_loop_segments": 0,
+    "nonfinite_segments": 0,
+    "shortest_segment_m": 0.005,
+    "longest_segment_m": 147.77
+  },
   "navigation": {
     "mode": "graph",
     "enabled_actions": [
@@ -99,6 +108,12 @@
     "cardinal_fraction": 0.1954
   },
   "quality_findings": [
+    {
+      "code": "degenerate_edges",
+      "count": 2,
+      "detail": "roads.json declares segments shorter than 0.5 m (shortest 0.005 m). The engine interpolates them away, so they are invisible in the runtime graph, but they still add spurious edges and degrade cardinal alignment (PLAN.md 3.3.1)",
+      "stage": "source"
+    },
     {
       "code": "degenerate_edges",
       "count": 17,
