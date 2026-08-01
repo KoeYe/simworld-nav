@@ -1,0 +1,116 @@
+{
+  "schema": "embodiedbench/env_spec",
+  "schema_version": "0.1.0",
+  "env_id": "large-city-28-env",
+  "map_name": "large-city-28",
+  "compiler_version": "0.1.0",
+  "navigation_style": "cardinal+graph",
+  "navigation_modes": [
+    "nav_waypoint"
+  ],
+  "enabled_actions": [
+    "VIEW_ORDERS",
+    "ACCEPT_ORDER",
+    "PICKUP",
+    "DROP_OFF",
+    "WAIT",
+    "MOVE_TO",
+    "MOVE",
+    "NAVIGATE"
+  ],
+  "enable_waypoint_marks": true,
+  "navigation_rationale": "100.0% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+  "graph": {
+    "node_count": 313,
+    "edge_count": 358,
+    "mean_degree": 2.288,
+    "max_degree": 4,
+    "dock_nodes": 0,
+    "junction_nodes": 80,
+    "cardinal_fraction": 1.0,
+    "largest_component_fraction": 1.0,
+    "component_count": 1,
+    "median_edge_m": 33.9,
+    "longest_edge_m": 116.8,
+    "long_edge_threshold_m": 203.39
+  },
+  "graph_repair": {
+    "applied": true,
+    "converged": true,
+    "passes_note": "reached a fixpoint after 0 pass(es)",
+    "edges_before": 358,
+    "edges_after": 358,
+    "edges_split": 0,
+    "skipped_nodes_recovered": 0,
+    "mean_degree_before": 2.288,
+    "mean_degree_after": 2.288,
+    "longest_edge_before_m": 116.8,
+    "longest_edge_after_m": 116.8
+  },
+  "affordances": {
+    "counts": {
+      "building": 169,
+      "bus_station": 8,
+      "car_rental": 4,
+      "charging_station": 29,
+      "hospital": 1,
+      "rest_area": 3,
+      "restaurant": 8,
+      "store": 11
+    }
+  },
+  "observation": {
+    "channels": [
+      "text",
+      "rgb"
+    ],
+    "has_cached_album": true,
+    "album_waypoints": 313,
+    "album_headings": 4,
+    "album_coverage_fraction": 1.0
+  },
+  "grade": "B",
+  "quality_flags": [
+    {
+      "code": "degenerate_graph_edges",
+      "count": 4,
+      "detail": "edges shorter than 0.5 m carry no direction",
+      "stage": "graph"
+    }
+  ],
+  "solvability": {
+    "episodes": 5,
+    "delivered_episodes": 5,
+    "solvability_rate": 1.0,
+    "mean_steps": 48.2
+  },
+  "usable": true,
+  "world_bundle_sha256": "4d240d35e66c061362fa712fabfb272048e50edb19ed9d539c477c00b20f9b5c",
+  "thresholds": {
+    "min_edge_m": 0.5,
+    "cardinal_tolerance_deg": 6.0,
+    "cardinal_fraction_for_move": 0.6,
+    "max_plausible_degree": 6,
+    "long_edge_p50_factor": 6.0,
+    "long_edge_floor_m": 100.0,
+    "min_largest_component_fraction": 0.9,
+    "repair_graph": true,
+    "solvability_seeds": 5,
+    "min_solvability_rate": 0.8
+  },
+  "runtime_config": {
+    "map_name": "large-city-28",
+    "enabled_actions": [
+      "VIEW_ORDERS",
+      "ACCEPT_ORDER",
+      "PICKUP",
+      "DROP_OFF",
+      "WAIT",
+      "MOVE_TO",
+      "MOVE",
+      "NAVIGATE"
+    ],
+    "enable_waypoint_marks": true,
+    "render_mode": "text"
+  }
+}

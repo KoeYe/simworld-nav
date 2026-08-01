@@ -17,6 +17,16 @@ from __future__ import annotations
 from typing import Any, Iterator, NamedTuple
 
 from embodiedbench.schemas.base import SchemaModel, schema_registry
+from embodiedbench.schemas.env_spec import (
+    AffordanceInventory,
+    EnvSpec,
+    GraphRepairSummary,
+    GraphSummary,
+    NavigationStyle,
+    ObservationSupport,
+    QualityFlag,
+    SolvabilityEvidence,
+)
 from embodiedbench.schemas.embodiment import (
     ControllerOutcome,
     ControllerResult,
@@ -405,9 +415,44 @@ def _score_report() -> ScoreReport:
     )
 
 
+def _env_spec() -> EnvSpec:
+    """A compiled environment, shaped like real pipeline output for Paris."""
+    return EnvSpec(
+        env_id="citycore-paris-env",
+        map_name="citycore-paris",
+        navigation_style=NavigationStyle.GRAPH,
+        navigation_modes=[NavigationMode.NAV_WAYPOINT],
+        enabled_actions=["VIEW_ORDERS", "ACCEPT_ORDER", "PICKUP", "DROP_OFF", "WAIT", "MOVE_TO"],
+        navigation_rationale="only 23.1% of edges are near-cardinal (< 60%)",
+        graph=GraphSummary(
+            node_count=1162, edge_count=5649, mean_degree=9.72, max_degree=35,
+            dock_nodes=443, junction_nodes=719, cardinal_fraction=0.231,
+            largest_component_fraction=1.0, component_count=1,
+            median_edge_m=25.0, longest_edge_m=313.0, long_edge_threshold_m=150.1,
+        ),
+        graph_repair=GraphRepairSummary(
+            applied=True, converged=True, passes_note="reached a fixpoint after 7 pass(es)",
+            edges_before=7230, edges_after=5649, edges_split=2838,
+            skipped_nodes_recovered=4540, mean_degree_before=12.44, mean_degree_after=9.72,
+            longest_edge_before_m=640.0, longest_edge_after_m=313.0,
+        ),
+        affordances=AffordanceInventory(counts={"building": 414, "restaurant": 18, "store": 11}),
+        observation=ObservationSupport(channels=["text"]),
+        grade=CertificationGrade.B,
+        quality_flags=[
+            QualityFlag(code="over_connected_nodes", count=635, stage="graph"),
+            QualityFlag(code="degenerate_edges", count=2, stage="source"),
+        ],
+        solvability=SolvabilityEvidence(
+            episodes=5, delivered_episodes=5, solvability_rate=1.0, mean_steps=21.8
+        ),
+    )
+
+
 def valid_fixtures() -> dict[str, SchemaModel]:
     """One valid instance per versioned envelope schema."""
     return {
+        "embodiedbench/env_spec": _env_spec(),
         "embodiedbench/world_bundle": _world_bundle(),
         "embodiedbench/nav_graph": _nav_graph(),
         "embodiedbench/overlay_spec": _overlay(),

@@ -92,6 +92,11 @@
           "reached a fixpoint after 7 pass(es)"
         ]
       },
+      "affordances": {
+        "building": 414,
+        "restaurant": 18,
+        "store": 11
+      },
       "source_geometry": {
         "available": true,
         "segment_count": 190,
@@ -262,6 +267,16 @@
           "reached a fixpoint after 0 pass(es)"
         ]
       },
+      "affordances": {
+        "building": 146,
+        "bus_station": 8,
+        "car_rental": 4,
+        "charging_station": 29,
+        "hospital": 1,
+        "rest_area": 4,
+        "restaurant": 7,
+        "store": 9
+      },
       "source_geometry": {
         "available": true,
         "segment_count": 26,
@@ -416,6 +431,16 @@
         "notes": [
           "reached a fixpoint after 0 pass(es)"
         ]
+      },
+      "affordances": {
+        "building": 169,
+        "bus_station": 8,
+        "car_rental": 4,
+        "charging_station": 29,
+        "hospital": 1,
+        "rest_area": 3,
+        "restaurant": 8,
+        "store": 11
       },
       "source_geometry": {
         "available": true,
@@ -572,6 +597,16 @@
           "reached a fixpoint after 1 pass(es)"
         ]
       },
+      "affordances": {
+        "building": 183,
+        "bus_station": 8,
+        "car_rental": 3,
+        "charging_station": 24,
+        "hospital": 1,
+        "rest_area": 4,
+        "restaurant": 9,
+        "store": 9
+      },
       "source_geometry": {
         "available": true,
         "segment_count": 30,
@@ -727,6 +762,16 @@
           "reached a fixpoint after 0 pass(es)"
         ]
       },
+      "affordances": {
+        "building": 110,
+        "bus_station": 6,
+        "car_rental": 3,
+        "charging_station": 20,
+        "hospital": 1,
+        "rest_area": 2,
+        "restaurant": 6,
+        "store": 7
+      },
       "source_geometry": {
         "available": true,
         "segment_count": 18,
@@ -875,6 +920,16 @@
         "notes": [
           "reached a fixpoint after 0 pass(es)"
         ]
+      },
+      "affordances": {
+        "building": 114,
+        "bus_station": 6,
+        "car_rental": 3,
+        "charging_station": 24,
+        "hospital": 1,
+        "rest_area": 3,
+        "restaurant": 5,
+        "store": 7
       },
       "source_geometry": {
         "available": true,
@@ -1031,6 +1086,16 @@
           "reached a fixpoint after 0 pass(es)"
         ]
       },
+      "affordances": {
+        "building": 131,
+        "bus_station": 8,
+        "car_rental": 3,
+        "charging_station": 22,
+        "hospital": 1,
+        "rest_area": 3,
+        "restaurant": 7,
+        "store": 7
+      },
       "source_geometry": {
         "available": true,
         "segment_count": 22,
@@ -1185,6 +1250,16 @@
         "notes": [
           "reached a fixpoint after 0 pass(es)"
         ]
+      },
+      "affordances": {
+        "building": 77,
+        "bus_station": 4,
+        "car_rental": 1,
+        "charging_station": 10,
+        "hospital": 1,
+        "rest_area": 1,
+        "restaurant": 4,
+        "store": 4
       },
       "source_geometry": {
         "available": true,
@@ -1341,6 +1416,16 @@
           "reached a fixpoint after 0 pass(es)"
         ]
       },
+      "affordances": {
+        "building": 77,
+        "bus_station": 6,
+        "car_rental": 2,
+        "charging_station": 15,
+        "hospital": 1,
+        "rest_area": 1,
+        "restaurant": 5,
+        "store": 4
+      },
       "source_geometry": {
         "available": true,
         "segment_count": 13,
@@ -1489,6 +1574,16 @@
         "notes": [
           "reached a fixpoint after 1 pass(es)"
         ]
+      },
+      "affordances": {
+        "building": 104,
+        "bus_station": 6,
+        "car_rental": 2,
+        "charging_station": 18,
+        "hospital": 1,
+        "rest_area": 2,
+        "restaurant": 4,
+        "store": 5
       },
       "source_geometry": {
         "available": true,

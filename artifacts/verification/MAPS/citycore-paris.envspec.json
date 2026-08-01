@@ -1,0 +1,125 @@
+{
+  "schema": "embodiedbench/env_spec",
+  "schema_version": "0.1.0",
+  "env_id": "citycore-paris-env",
+  "map_name": "citycore-paris",
+  "compiler_version": "0.1.0",
+  "navigation_style": "graph",
+  "navigation_modes": [
+    "nav_waypoint"
+  ],
+  "enabled_actions": [
+    "VIEW_ORDERS",
+    "ACCEPT_ORDER",
+    "PICKUP",
+    "DROP_OFF",
+    "WAIT",
+    "MOVE_TO",
+    "NAVIGATE"
+  ],
+  "enable_waypoint_marks": true,
+  "navigation_rationale": "only 23.1% of edges are near-cardinal (< 60%), so directional MOVE would leave most shortest-path steps unreachable. Graph navigation (MOVE_TO) is the primary action, per PLAN.md 3.3.4.",
+  "graph": {
+    "node_count": 1162,
+    "edge_count": 5649,
+    "mean_degree": 9.723,
+    "max_degree": 35,
+    "dock_nodes": 0,
+    "junction_nodes": 719,
+    "cardinal_fraction": 0.231,
+    "largest_component_fraction": 1.0,
+    "component_count": 1,
+    "median_edge_m": 21.01,
+    "longest_edge_m": 312.59,
+    "long_edge_threshold_m": 126.04
+  },
+  "graph_repair": {
+    "applied": true,
+    "converged": true,
+    "passes_note": "reached a fixpoint after 7 pass(es)",
+    "edges_before": 7230,
+    "edges_after": 5649,
+    "edges_split": 2838,
+    "skipped_nodes_recovered": 4540,
+    "mean_degree_before": 12.444,
+    "mean_degree_after": 9.723,
+    "longest_edge_before_m": 639.96,
+    "longest_edge_after_m": 312.59
+  },
+  "affordances": {
+    "counts": {
+      "building": 414,
+      "restaurant": 18,
+      "store": 11
+    }
+  },
+  "observation": {
+    "channels": [
+      "text"
+    ],
+    "has_cached_album": false,
+    "album_waypoints": 0,
+    "album_headings": 0
+  },
+  "grade": "B",
+  "quality_flags": [
+    {
+      "code": "degenerate_edges",
+      "count": 2,
+      "detail": "roads.json declares segments shorter than 0.5 m (shortest 0.005 m). The engine interpolates them away, so they are invisible in the runtime graph, but they still add spurious edges and degrade cardinal alignment (PLAN.md 3.3.1)",
+      "stage": "source"
+    },
+    {
+      "code": "degenerate_graph_edges",
+      "count": 17,
+      "detail": "edges shorter than 0.5 m carry no direction",
+      "stage": "graph"
+    },
+    {
+      "code": "over_connected_nodes",
+      "count": 635,
+      "detail": "nodes with degree > 6; a road junction rarely exceeds this, so these are probably endpoints merged in error (false intersections, PLAN.md 3.2)",
+      "stage": "graph"
+    },
+    {
+      "code": "long_unvalidated_edges",
+      "count": 122,
+      "detail": "edges longer than 126.04 m, this map's own outlier threshold (6.0x its median edge, floored at 100.0 m). Such edges may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)",
+      "stage": "graph"
+    }
+  ],
+  "solvability": {
+    "episodes": 5,
+    "delivered_episodes": 5,
+    "solvability_rate": 1.0,
+    "mean_steps": 21.8
+  },
+  "usable": true,
+  "world_bundle_sha256": "9bf82a103cb4b47b1622b7889773e7963fa72aa7921bf114b6fcb83924de96ca",
+  "thresholds": {
+    "min_edge_m": 0.5,
+    "cardinal_tolerance_deg": 6.0,
+    "cardinal_fraction_for_move": 0.6,
+    "max_plausible_degree": 6,
+    "long_edge_p50_factor": 6.0,
+    "long_edge_floor_m": 100.0,
+    "min_largest_component_fraction": 0.9,
+    "repair_graph": true,
+    "solvability_seeds": 5,
+    "min_solvability_rate": 0.8
+  },
+  "runtime_config": {
+    "map_name": "citycore-paris",
+    "enabled_actions": [
+      "VIEW_ORDERS",
+      "ACCEPT_ORDER",
+      "PICKUP",
+      "DROP_OFF",
+      "WAIT",
+      "MOVE_TO",
+      "NAVIGATE"
+    ],
+    "enable_waypoint_marks": true,
+    "render_mode": "text"
+  }
+}

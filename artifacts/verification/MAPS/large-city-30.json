@@ -58,6 +58,16 @@
       "reached a fixpoint after 1 pass(es)"
     ]
   },
+  "affordances": {
+    "building": 183,
+    "bus_station": 8,
+    "car_rental": 3,
+    "charging_station": 24,
+    "hospital": 1,
+    "rest_area": 4,
+    "restaurant": 9,
+    "store": 9
+  },
   "source_geometry": {
     "available": true,
     "segment_count": 30,

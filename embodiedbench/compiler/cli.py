@@ -13,6 +13,7 @@ import json
 import sys
 from pathlib import Path
 
+from embodiedbench.compiler.env_spec_builder import build_env_spec
 from embodiedbench.compiler.pipeline import compile_map
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -50,6 +51,17 @@ def main(argv: list[str] | None = None) -> int:
             result = {"map": map_name, "grade": "fail", "error": f"{type(exc).__name__}: {exc}"}
         results.append(result)
         (out_dir / f"{map_name}.json").write_text(json.dumps(result, indent=2, default=str) + "\n")
+
+        # The published contract. Building it here means every pipeline run is
+        # also a validation of the schema against real output.
+        try:
+            spec = build_env_spec(result)
+            (out_dir / f"{map_name}.envspec.json").write_text(
+                json.dumps(spec.to_dict(), indent=2) + "\n"
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"  {map_name:20s} ENVSPEC FAILED {type(exc).__name__}: {str(exc)[:200]}")
+            failures += 1
 
         if "error" in result:
             print(f"  {map_name:20s} FAIL  {result['error'][:90]}")

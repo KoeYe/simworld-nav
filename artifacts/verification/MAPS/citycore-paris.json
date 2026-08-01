@@ -88,6 +88,11 @@
       "reached a fixpoint after 7 pass(es)"
     ]
   },
+  "affordances": {
+    "building": 414,
+    "restaurant": 18,
+    "store": 11
+  },
   "source_geometry": {
     "available": true,
     "segment_count": 190,

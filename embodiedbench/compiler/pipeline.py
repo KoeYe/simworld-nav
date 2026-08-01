@@ -277,6 +277,20 @@ def decide_navigation(
     )
 
 
+def count_affordances(city_map: Any) -> dict[str, int]:
+    """POI types present on this map, and how many of each.
+
+    This is what lets one environment host many tasks: a task declares what it
+    needs (restaurants, customers, chargers) and checks it against this, instead
+    of hardcoding which map names it knows how to run on.
+    """
+    counts: dict[str, int] = {}
+    for poi in getattr(city_map, "pois", []) or []:
+        name = str(getattr(poi, "type", None) or "unknown")
+        counts[name] = counts.get(name, 0) + 1
+    return dict(sorted(counts.items()))
+
+
 def analyze_source_geometry(
     map_dir: Path, thresholds: Thresholds = THRESHOLDS
 ) -> dict[str, Any]:
@@ -629,6 +643,7 @@ def compile_map(
 
             repair = _node_graph(agent.city_map).to_dict()
         analysis = analyze_graph(agent.city_map, thresholds)
+        affordances = count_affordances(agent.city_map)
         world = compile_procgen_world(
             agent.city_map, map_name=map_name, order_manager=env._env.om
         )
@@ -676,6 +691,7 @@ def compile_map(
         "thresholds": dataclasses.asdict(thresholds),
         "analysis": analysis.to_dict(),
         "graph_repair": repair,
+        "affordances": affordances,
         "source_geometry": source,
         "navigation": decision.to_dict(),
         "quality_findings": findings,
