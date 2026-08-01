@@ -6,7 +6,8 @@
     "cardinal_tolerance_deg": 6.0,
     "cardinal_fraction_for_move": 0.6,
     "max_plausible_degree": 6,
-    "long_edge_m": 100.0,
+    "long_edge_p50_factor": 6.0,
+    "long_edge_floor_m": 100.0,
     "min_largest_component_fraction": 0.9,
     "solvability_seeds": 5,
     "min_solvability_rate": 0.8
@@ -32,10 +33,11 @@
       "max": 135.86
     },
     "degenerate_edges": 2,
-    "long_edges": 5,
+    "long_edges": 0,
     "cardinal_fraction": 1.0,
     "largest_component_fraction": 1.0,
-    "component_count": 1
+    "component_count": 1,
+    "long_edge_threshold_m": 191.59
   },
   "source_geometry": {
     "available": true,
@@ -64,14 +66,9 @@
   },
   "quality_findings": [
     {
-      "code": "degenerate_edges",
+      "code": "degenerate_graph_edges",
       "count": 2,
       "detail": "edges shorter than 0.5 m carry no direction"
-    },
-    {
-      "code": "long_unvalidated_edges",
-      "count": 5,
-      "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
     }
   ],
   "validation": {

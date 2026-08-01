@@ -63,9 +63,16 @@ class Thresholds:
     # A road-network junction with more neighbours than this is implausible and
     # usually indicates endpoints merged that should not have been.
     max_plausible_degree: int = 6
-    # An edge longer than this needs external validation before it can be
-    # trusted as traversable (PLAN.md 6.1 P2 on synthetic links).
-    long_edge_m: float = 100.0
+    # An edge needs external validation when it is long *for its own map*.
+    # An absolute cut cannot work: procgen maps legitimately reach 100-141 m
+    # because they contain long straight roads, so a fixed 100 m flagged all ten
+    # real maps and said nothing. Measured across the ten, procgen maps have a
+    # max/median edge ratio of 3.0-4.6x while Paris reaches 25.6x, so a multiple
+    # of the map's own median separates "long road" from "implausible link".
+    # The absolute floor stops the rule over-firing on a map whose median edge
+    # is tiny.
+    long_edge_p50_factor: float = 6.0
+    long_edge_floor_m: float = 100.0
     # The certified region must be one dominant component, not a scatter.
     min_largest_component_fraction: float = 0.90
     # Scripted oracle deliveries that must succeed for the map to be usable.
@@ -98,9 +105,19 @@ class GraphAnalysis:
     cardinal_fraction: float = 0.0
     largest_component_fraction: float = 0.0
     component_count: int = 0
+    long_edge_threshold_m: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
+
+
+def _long_edge_threshold(lengths: list[float], thresholds: Thresholds) -> float:
+    """The per-map length above which an edge is treated as implausible."""
+    if not lengths:
+        return thresholds.long_edge_floor_m
+    ordered = sorted(lengths)
+    median = ordered[len(ordered) // 2]
+    return max(thresholds.long_edge_floor_m, thresholds.long_edge_p50_factor * median)
 
 
 def analyze_graph(city_map: Any, thresholds: Thresholds = THRESHOLDS) -> GraphAnalysis:
@@ -185,7 +202,8 @@ def analyze_graph(city_map: Any, thresholds: Thresholds = THRESHOLDS) -> GraphAn
             "max": round(lengths[-1], 2) if lengths else 0.0,
         },
         degenerate_edges=sum(1 for length in lengths if length < thresholds.min_edge_m),
-        long_edges=sum(1 for length in lengths if length > thresholds.long_edge_m),
+        long_edges=sum(1 for length in lengths if length > _long_edge_threshold(lengths, thresholds)),
+        long_edge_threshold_m=round(_long_edge_threshold(lengths, thresholds), 2),
         cardinal_fraction=round(cardinal_hits / len(lengths), 4) if lengths else 0.0,
         largest_component_fraction=round(largest / len(nodes), 4) if nodes else 0.0,
         component_count=components,
@@ -354,7 +372,7 @@ def quality_findings(
     findings: list[dict[str, Any]] = []
     if analysis.degenerate_edges:
         findings.append({
-            "code": "degenerate_edges",
+            "code": "degenerate_graph_edges",
             "count": analysis.degenerate_edges,
             "detail": f"edges shorter than {thresholds.min_edge_m} m carry no direction",
         })
@@ -373,9 +391,12 @@ def quality_findings(
             "code": "long_unvalidated_edges",
             "count": analysis.long_edges,
             "detail": (
-                f"edges longer than {thresholds.long_edge_m} m may cross non-road space and "
+                f"edges longer than {analysis.long_edge_threshold_m} m, this map's own outlier "
+                f"threshold ({thresholds.long_edge_p50_factor}x its median edge, floored at "
+                f"{thresholds.long_edge_floor_m} m). Such edges may cross non-road space and "
                 "need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
             ),
+            "stage": "graph",
         })
     if analysis.largest_component_fraction < thresholds.min_largest_component_fraction:
         findings.append({

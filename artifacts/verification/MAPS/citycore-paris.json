@@ -6,7 +6,8 @@
     "cardinal_tolerance_deg": 6.0,
     "cardinal_fraction_for_move": 0.6,
     "max_plausible_degree": 6,
-    "long_edge_m": 100.0,
+    "long_edge_p50_factor": 6.0,
+    "long_edge_floor_m": 100.0,
     "min_largest_component_fraction": 0.9,
     "solvability_seeds": 5,
     "min_solvability_rate": 0.8
@@ -78,10 +79,11 @@
       "max": 639.96
     },
     "degenerate_edges": 17,
-    "long_edges": 271,
+    "long_edges": 215,
     "cardinal_fraction": 0.1954,
     "largest_component_fraction": 1.0,
-    "component_count": 1
+    "component_count": 1,
+    "long_edge_threshold_m": 150.1
   },
   "source_geometry": {
     "available": true,
@@ -115,7 +117,7 @@
       "stage": "source"
     },
     {
-      "code": "degenerate_edges",
+      "code": "degenerate_graph_edges",
       "count": 17,
       "detail": "edges shorter than 0.5 m carry no direction"
     },
@@ -126,8 +128,9 @@
     },
     {
       "code": "long_unvalidated_edges",
-      "count": 271,
-      "detail": "edges longer than 100.0 m may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)"
+      "count": 215,
+      "detail": "edges longer than 150.1 m, this map's own outlier threshold (6.0x its median edge, floored at 100.0 m). Such edges may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)",
+      "stage": "graph"
     }
   ],
   "validation": {
