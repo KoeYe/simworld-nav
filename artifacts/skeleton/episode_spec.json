@@ -1,0 +1,54 @@
+{
+  "schema": "embodiedbench/episode_spec",
+  "schema_version": "0.1.0",
+  "instance_id": "small-city-11_delivery_000042",
+  "environment_id": "small-city-11-delivery",
+  "environment_version": "0.1.0",
+  "environment_sha256": "c074fc526d09488513cc723d9cd9747b3bdc99308d53d7ff06ed57f78e98e129",
+  "task": {
+    "plugin": "delivery",
+    "version": "0.1.0"
+  },
+  "embodiment_profile": "abstract_courier_v1",
+  "courier_profile": {
+    "profile_id": "scooter_standard",
+    "version": "0.1.0",
+    "transport_modes": [
+      "walk",
+      "scooter"
+    ],
+    "carrying_capacity": 3,
+    "owns_scooter": true,
+    "battery_enabled": true,
+    "bus_access": false,
+    "car_rental_access": false,
+    "outcome_relevant_fields": [
+      "transport_modes",
+      "carrying_capacity",
+      "owns_scooter",
+      "battery_enabled"
+    ],
+    "extra": {}
+  },
+  "navigation_mode": "nav_waypoint",
+  "runtime_track": "text",
+  "seed": 42,
+  "spawn": {
+    "frame": "bundle_world",
+    "position": {
+      "x_cm": 7089.76,
+      "y_cm": 1700.0,
+      "z_cm": 0.0
+    },
+    "yaw_deg": 0.0
+  },
+  "order_schedule": [],
+  "observable_instruction": "Complete as many deliveries as you can before your budget runs out.",
+  "budgets": {
+    "steps": 200
+  },
+  "safety_timeout_s": 3600.0,
+  "evaluator_id": "delivery_score",
+  "evaluator_version": "0.1.0",
+  "private_state_ref": "private://small-city-11/42"
+}

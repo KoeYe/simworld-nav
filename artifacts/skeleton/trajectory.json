@@ -1,0 +1,3057 @@
+{
+  "schema": "embodiedbench/trajectory",
+  "schema_version": "0.1.0",
+  "episode_id": "small-city-11_delivery_000042",
+  "instance_id": "small-city-11_delivery_000042",
+  "benchmark_version": "",
+  "environment_id": "small-city-11-delivery",
+  "environment_version": "0.1.0",
+  "task_plugin": "delivery",
+  "task_plugin_version": "0.1.0",
+  "model_id": "scripted_courier",
+  "harness_version": "0.1.0",
+  "seed": 42,
+  "turns": [
+    {
+      "step_index": 0,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 0,
+        "text": "### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_5",
+            "bearing_deg": 0.0,
+            "distance_m": 39.5841
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_4",
+            "bearing_deg": 0.0,
+            "distance_m": 68.20400000000001
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": -1700.0,
+            "y_cm": 25658.41,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 0.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 200.0
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"VIEW_ORDERS\", \"arguments\": {}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 0,
+        "action": {
+          "type": "task",
+          "name": "VIEW_ORDERS",
+          "arguments": {}
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000001",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 0,
+          "kind": "step_completed",
+          "sim_time_s": 0.0,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 1,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 0,
+        "text": "### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[order_pool]\nOrders (1):\nThese are open orders available for you to accept:\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n------------------------------------------------------------",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_5",
+            "bearing_deg": 0.0,
+            "distance_m": 39.5841
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_4",
+            "bearing_deg": 0.0,
+            "distance_m": 68.20400000000001
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": -1700.0,
+            "y_cm": 25658.41,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 0.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 105.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[order_pool]\nOrders (1):\nThese are open orders available for you to accept:\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Food is still being prepared (~0 min)\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n------------------------------------------------------------",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"ACCEPT_ORDER\", \"arguments\": {\"_args\": [0]}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 1,
+        "action": {
+          "type": "task",
+          "name": "ACCEPT_ORDER",
+          "arguments": {
+            "_args": [
+              0
+            ]
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000002",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 1,
+          "kind": "step_completed",
+          "sim_time_s": 0.0,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 2,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 1,
+        "text": "### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_5",
+            "bearing_deg": 0.0,
+            "distance_m": 39.5841
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_4",
+            "bearing_deg": 0.0,
+            "distance_m": 68.20400000000001
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": -1700.0,
+            "y_cm": 25658.41,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 0.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 104.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"backward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 2,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "backward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000003",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 2,
+          "kind": "step_completed",
+          "sim_time_s": 6.59735,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 3,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 2,
+        "text": "### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:00:06. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_85",
+            "bearing_deg": 180.0,
+            "distance_m": 39.5841
+          },
+          {
+            "mark": 1,
+            "node_id": "int_4",
+            "bearing_deg": 180.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 2,
+            "node_id": "int_10",
+            "bearing_deg": 180.0,
+            "distance_m": 34.0
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": -1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 180.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 103.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:00:06. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"left\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 3,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "left"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000004",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 3,
+          "kind": "step_completed",
+          "sim_time_s": 12.264016666666667,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 4,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 3,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:00:12. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_5",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_86",
+            "bearing_deg": 90.0,
+            "distance_m": 41.093199999999996
+          },
+          {
+            "mark": 2,
+            "node_id": "dock_22",
+            "bearing_deg": 90.0,
+            "distance_m": 131.4756
+          },
+          {
+            "mark": 3,
+            "node_id": "int_9",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 102.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:00:12. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 7 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"right\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 4,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "right"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000005",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 4,
+          "kind": "step_completed",
+          "sim_time_s": 17.930683333333334,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 5,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 4,
+        "text": "### agent_state\nYou are Agent 1, you are facing South, you are at Cherry St & Church Ave. The current time is 00:00:17. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_10",
+            "bearing_deg": 180.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_82",
+            "bearing_deg": 180.0,
+            "distance_m": 13.570400999999983
+          },
+          {
+            "mark": 2,
+            "node_id": "dock_81",
+            "bearing_deg": 180.0,
+            "distance_m": 38.278
+          },
+          {
+            "mark": 3,
+            "node_id": "int_4",
+            "bearing_deg": 180.0,
+            "distance_m": 34.0
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 180.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 101.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing South, you are at Cherry St & Church Ave. The current time is 00:00:17. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"left\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 5,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "left"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000006",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 5,
+          "kind": "step_completed",
+          "sim_time_s": 24.31035,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 6,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 5,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 38 Cherry St. The current time is 00:00:24. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_9",
+            "bearing_deg": 90.0,
+            "distance_m": 38.278
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_94",
+            "bearing_deg": 90.0,
+            "distance_m": 39.7447
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 5527.8,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 100.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 38 Cherry St. The current time is 00:00:24. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 6,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000007",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 6,
+          "kind": "step_completed",
+          "sim_time_s": 30.934466666666665,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 7,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 6,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 78 Cherry St. The current time is 00:00:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_81",
+            "bearing_deg": 90.0,
+            "distance_m": 39.7447
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_0",
+            "bearing_deg": 90.0,
+            "distance_m": 22.3775
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 9502.27,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 99.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 78 Cherry St. The current time is 00:00:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 7,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000008",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 7,
+          "kind": "step_completed",
+          "sim_time_s": 34.664049999999996,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 8,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 7,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 100 Cherry St. The current time is 00:00:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_94",
+            "bearing_deg": 90.0,
+            "distance_m": 22.3775
+          },
+          {
+            "mark": 1,
+            "node_id": "int_15",
+            "bearing_deg": 90.0,
+            "distance_m": 65.5998
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 11740.02,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 98.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 100 Cherry St. The current time is 00:00:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 8,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000009",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 8,
+          "kind": "step_completed",
+          "sim_time_s": 45.59735,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 9,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 8,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Poplar Ave. The current time is 00:00:45. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_0",
+            "bearing_deg": 90.0,
+            "distance_m": 65.5998
+          },
+          {
+            "mark": 1,
+            "node_id": "int_20",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 2,
+            "node_id": "int_16",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 3,
+            "node_id": "dock_9",
+            "bearing_deg": 90.0,
+            "distance_m": 41.1683
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 97.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Poplar Ave. The current time is 00:00:45. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"right\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 9,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "right"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000010",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 9,
+          "kind": "step_completed",
+          "sim_time_s": 52.458733333333335,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 10,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 9,
+        "text": "### agent_state\nYou are Agent 1, you are facing South, you are at 126 Poplar Ave. The current time is 00:00:52. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_15",
+            "bearing_deg": 180.0,
+            "distance_m": 41.1683
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_98",
+            "bearing_deg": 180.0,
+            "distance_m": 43.37960000000001
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 14183.17,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 180.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 96.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing South, you are at 126 Poplar Ave. The current time is 00:00:52. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 10,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000011",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 10,
+          "kind": "step_completed",
+          "sim_time_s": 59.68866666666668,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 11,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 10,
+        "text": "### agent_state\nYou are Agent 1, you are facing South, you are at 82 Poplar Ave. The current time is 00:00:59. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_9",
+            "bearing_deg": 180.0,
+            "distance_m": 43.37960000000001
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_91",
+            "bearing_deg": 180.0,
+            "distance_m": 23.197599999999994
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 9845.21,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 180.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 95.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing South, you are at 82 Poplar Ave. The current time is 00:00:59. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 11,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000012",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 11,
+          "kind": "step_completed",
+          "sim_time_s": 63.55493333333333,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 12,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 11,
+        "text": "### agent_state\nYou are Agent 1, you are facing South, you are at 58 Poplar Ave. The current time is 00:01:03. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[pickup_hint]\nYou have arrived at the pickup location: Poplar Ave (left).\nOrders ready for pickup: #0\n\nYou can execute: PICKUP(orders=[0]) to collect the ready orders.",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_98",
+            "bearing_deg": 180.0,
+            "distance_m": 23.197599999999994
+          },
+          {
+            "mark": 1,
+            "node_id": "int_14",
+            "bearing_deg": 180.0,
+            "distance_m": 58.2545
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 7525.45,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 180.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 94.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing South, you are at 58 Poplar Ave. The current time is 00:01:03. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Ready for pickup\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[pickup_hint]\nYou have arrived at the pickup location: Poplar Ave (left).\nOrders ready for pickup: #0\n\nYou can execute: PICKUP(orders=[0]) to collect the ready orders.",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"PICKUP\", \"arguments\": {\"orders\": [0]}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 12,
+        "action": {
+          "type": "task",
+          "name": "PICKUP",
+          "arguments": {
+            "orders": [
+              0
+            ]
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000013",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 12,
+          "kind": "step_completed",
+          "sim_time_s": 63.55493333333333,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 13,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 12,
+        "text": "### agent_state\nYou are Agent 1, you are facing South, you are at 58 Poplar Ave. The current time is 00:01:03. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_98",
+            "bearing_deg": 180.0,
+            "distance_m": 23.197599999999994
+          },
+          {
+            "mark": 1,
+            "node_id": "int_14",
+            "bearing_deg": 180.0,
+            "distance_m": 58.2545
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 7525.45,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 180.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 93.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing South, you are at 58 Poplar Ave. The current time is 00:01:03. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"backward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 13,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "backward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000014",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 13,
+          "kind": "step_completed",
+          "sim_time_s": 67.4212,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 14,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 13,
+        "text": "### agent_state\nYou are Agent 1, you are facing North, you are at 82 Poplar Ave. The current time is 00:01:07. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_91",
+            "bearing_deg": 0.0,
+            "distance_m": 23.197599999999994
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_9",
+            "bearing_deg": 0.0,
+            "distance_m": 43.37960000000001
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 9845.21,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 0.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 92.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing North, you are at 82 Poplar Ave. The current time is 00:01:07. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 14,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000015",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 14,
+          "kind": "step_completed",
+          "sim_time_s": 74.65113333333333,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 15,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 14,
+        "text": "### agent_state\nYou are Agent 1, you are facing North, you are at 126 Poplar Ave. The current time is 00:01:14. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_98",
+            "bearing_deg": 0.0,
+            "distance_m": 43.37960000000001
+          },
+          {
+            "mark": 1,
+            "node_id": "int_15",
+            "bearing_deg": 0.0,
+            "distance_m": 41.1683
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 14183.17,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 0.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 91.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing North, you are at 126 Poplar Ave. The current time is 00:01:14. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 6 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 15,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000016",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 15,
+          "kind": "step_completed",
+          "sim_time_s": 81.51251666666667,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 16,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 15,
+        "text": "### agent_state\nYou are Agent 1, you are facing North, you are at Cherry St & Poplar Ave. The current time is 00:01:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_9",
+            "bearing_deg": 0.0,
+            "distance_m": 41.1683
+          },
+          {
+            "mark": 1,
+            "node_id": "int_16",
+            "bearing_deg": 0.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 2,
+            "node_id": "dock_0",
+            "bearing_deg": 0.0,
+            "distance_m": 65.5998
+          },
+          {
+            "mark": 3,
+            "node_id": "int_20",
+            "bearing_deg": 0.0,
+            "distance_m": 34.0
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 18300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 0.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 90.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing North, you are at Cherry St & Poplar Ave. The current time is 00:01:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"right\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 16,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "right"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000017",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 16,
+          "kind": "step_completed",
+          "sim_time_s": 87.17918333333334,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 17,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 16,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Poplar Ave. The current time is 00:01:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_15",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_64",
+            "bearing_deg": 90.0,
+            "distance_m": 44.676636
+          },
+          {
+            "mark": 2,
+            "node_id": "int_21",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 3,
+            "node_id": "dock_30",
+            "bearing_deg": 90.0,
+            "distance_m": 31.771200000000007
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 21700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 89.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Poplar Ave. The current time is 00:01:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 17,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000018",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 17,
+          "kind": "step_completed",
+          "sim_time_s": 94.62528933333334,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 18,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 17,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 192 Cherry St. The current time is 00:01:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_20",
+            "bearing_deg": 90.0,
+            "distance_m": 44.676636
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_68",
+            "bearing_deg": 90.0,
+            "distance_m": 20.862798
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 26167.6636,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 88.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 192 Cherry St. The current time is 00:01:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 18,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000019",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 18,
+          "kind": "step_completed",
+          "sim_time_s": 98.10242233333334,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 19,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 18,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 196 Cherry St. The current time is 00:01:38. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_64",
+            "bearing_deg": 90.0,
+            "distance_m": 20.862798
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_66",
+            "bearing_deg": 90.0,
+            "distance_m": 5.370832999999984
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 28253.9434,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 87.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 196 Cherry St. The current time is 00:01:38. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 19,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000020",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 19,
+          "kind": "step_completed",
+          "sim_time_s": 98.99756116666667,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 20,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 19,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 194 Cherry St. The current time is 00:01:38. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_68",
+            "bearing_deg": 90.0,
+            "distance_m": 5.370832999999984
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_21",
+            "bearing_deg": 90.0,
+            "distance_m": 18.83903300000002
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 28791.0267,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 86.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 194 Cherry St. The current time is 00:01:38. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 20,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000021",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 20,
+          "kind": "step_completed",
+          "sim_time_s": 102.13740000000001,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 21,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 20,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 166 Cherry St. The current time is 00:01:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_66",
+            "bearing_deg": 90.0,
+            "distance_m": 18.83903300000002
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_27",
+            "bearing_deg": 90.0,
+            "distance_m": 18.696699999999982
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 30674.93,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 85.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 166 Cherry St. The current time is 00:01:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 21,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000022",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 21,
+          "kind": "step_completed",
+          "sim_time_s": 105.25351666666668,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 22,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 21,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 168 Cherry St. The current time is 00:01:45. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_21",
+            "bearing_deg": 90.0,
+            "distance_m": 18.696699999999982
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_33",
+            "bearing_deg": 90.0,
+            "distance_m": 18.591600000000035
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 32544.6,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 84.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 168 Cherry St. The current time is 00:01:45. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 22,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000023",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 22,
+          "kind": "step_completed",
+          "sim_time_s": 108.35211666666669,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 23,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 22,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 170 Cherry St. The current time is 00:01:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_27",
+            "bearing_deg": 90.0,
+            "distance_m": 18.591600000000035
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_70",
+            "bearing_deg": 90.0,
+            "distance_m": 18.75470000000001
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 34403.76,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 83.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 170 Cherry St. The current time is 00:01:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 23,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000024",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 23,
+          "kind": "step_completed",
+          "sim_time_s": 111.47790000000002,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 24,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 23,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 198 Cherry St. The current time is 00:01:51. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_33",
+            "bearing_deg": 90.0,
+            "distance_m": 18.75470000000001
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_39",
+            "bearing_deg": 90.0,
+            "distance_m": 18.933199999999996
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 36279.23,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 82.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 198 Cherry St. The current time is 00:01:51. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 24,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000025",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 24,
+          "kind": "step_completed",
+          "sim_time_s": 114.63343333333336,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 25,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 24,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 172 Cherry St. The current time is 00:01:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_70",
+            "bearing_deg": 90.0,
+            "distance_m": 18.933199999999996
+          },
+          {
+            "mark": 1,
+            "node_id": "int_22",
+            "bearing_deg": 90.0,
+            "distance_m": 1.2744999999999709
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 38172.55,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 81.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 172 Cherry St. The current time is 00:01:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 25,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000026",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 25,
+          "kind": "step_completed",
+          "sim_time_s": 114.84585000000001,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 26,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 25,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 204 Cherry St. The current time is 00:01:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_39",
+            "bearing_deg": 90.0,
+            "distance_m": 1.2744999999999709
+          },
+          {
+            "mark": 1,
+            "node_id": "int_25",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 2,
+            "node_id": "int_23",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 38300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 80.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 204 Cherry St. The current time is 00:01:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"left\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 26,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "left"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000027",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 26,
+          "kind": "step_completed",
+          "sim_time_s": 120.51251666666668,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 27,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 26,
+        "text": "### agent_state\nYou are Agent 1, you are facing North, you are at Cherry St & Forest Ave. The current time is 00:02:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_22",
+            "bearing_deg": 0.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_89",
+            "bearing_deg": 0.0,
+            "distance_m": 50.61549999999999
+          },
+          {
+            "mark": 2,
+            "node_id": "dock_49",
+            "bearing_deg": 0.0,
+            "distance_m": 20.959100000000035
+          },
+          {
+            "mark": 3,
+            "node_id": "int_26",
+            "bearing_deg": 0.0,
+            "distance_m": 34.0
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 38300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 0.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 79.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing North, you are at Cherry St & Forest Ave. The current time is 00:02:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"right\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 27,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "right"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000028",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 27,
+          "kind": "step_completed",
+          "sim_time_s": 126.17918333333336,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 28,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 27,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Forest Ave. The current time is 00:02:06. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_23",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_51",
+            "bearing_deg": 90.0,
+            "distance_m": 39.14550000000003
+          },
+          {
+            "mark": 2,
+            "node_id": "dock_90",
+            "bearing_deg": 90.0,
+            "distance_m": 52.60560000000001
+          },
+          {
+            "mark": 3,
+            "node_id": "int_25",
+            "bearing_deg": 90.0,
+            "distance_m": 34.0
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 41700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 78.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Forest Ave. The current time is 00:02:06. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 28,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000029",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 28,
+          "kind": "step_completed",
+          "sim_time_s": 132.70343333333335,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 29,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 28,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 179 Cherry St. The current time is 00:02:12. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "int_26",
+            "bearing_deg": 90.0,
+            "distance_m": 39.14550000000003
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_53",
+            "bearing_deg": 90.0,
+            "distance_m": 39.83479999999996
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 45614.55,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 77.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 179 Cherry St. The current time is 00:02:12. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 5 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 29,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000030",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 29,
+          "kind": "step_completed",
+          "sim_time_s": 139.34256666666667,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 30,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 29,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 181 Cherry St. The current time is 00:02:19. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_51",
+            "bearing_deg": 90.0,
+            "distance_m": 39.83479999999996
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_55",
+            "bearing_deg": 90.0,
+            "distance_m": 28.12489999999998
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 49598.03,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 76.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 181 Cherry St. The current time is 00:02:19. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"MOVE\", \"arguments\": {\"direction\": \"forward\"}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 30,
+        "action": {
+          "type": "task",
+          "name": "MOVE",
+          "arguments": {
+            "direction": "forward"
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000031",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 30,
+          "kind": "step_completed",
+          "sim_time_s": 144.03005,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 0.0,
+      "reward_components": {
+        "vendor_total": 0.0
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    },
+    {
+      "step_index": 31,
+      "observation": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 30,
+        "text": "### agent_state\nYou are Agent 1, you are facing East, you are at 183 Cherry St. The current time is 00:02:24. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[dropoff_hint]\nYou are at the drop-off for order #0. Call DROP_OFF(oid=0) to complete the delivery.",
+        "media": [],
+        "marks": [
+          {
+            "mark": 0,
+            "node_id": "dock_53",
+            "bearing_deg": 90.0,
+            "distance_m": 28.12489999999998
+          },
+          {
+            "mark": 1,
+            "node_id": "dock_57",
+            "bearing_deg": 90.0,
+            "distance_m": 28.930600000000048
+          }
+        ],
+        "agent_pose": {
+          "frame": "bundle_world",
+          "position": {
+            "x_cm": 52410.52,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          "yaw_deg": 90.0
+        },
+        "available_actions": [
+          "task",
+          "nav_waypoint"
+        ],
+        "budgets_remaining": {
+          "steps": 75.0
+        },
+        "last_action_result": {
+          "status": "accepted",
+          "message": ""
+        }
+      },
+      "observation_text": "### agent_state\nYou are Agent 1, you are facing East, you are at 183 Cherry St. The current time is 00:02:24. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Active orders: #0. Carrying: #0. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou have accepted the following active orders:\n\n[Order #0]\n  Pickup : 58 Poplar Ave\n  Dropoff: 183 Cherry St\n  Time Left : 4 min\n  $$     : $4.83\n  Status : Picked up, waiting for delivery\n  Items  :\n    1. BlueCheese (serve=23\u00b0C) [STINKY]\n### ephemeral_context\n[dropoff_hint]\nYou are at the drop-off for order #0. Call DROP_OFF(oid=0) to complete the delivery.",
+      "model_input_refs": [],
+      "raw_model_output": "{\"action\": {\"name\": \"DROP_OFF\", \"arguments\": {\"oid\": 0}}}",
+      "action": {
+        "episode_id": "small-city-11_delivery_000042",
+        "step_index": 31,
+        "action": {
+          "type": "task",
+          "name": "DROP_OFF",
+          "arguments": {
+            "oid": 0
+          }
+        }
+      },
+      "action_result": {
+        "status": "accepted",
+        "message": ""
+      },
+      "events": [
+        {
+          "event_id": "small-city-11_delivery_000042_ev_000032",
+          "episode_id": "small-city-11_delivery_000042",
+          "step_index": 31,
+          "kind": "step_completed",
+          "sim_time_s": 144.03005,
+          "payload": {
+            "is_tool": false
+          },
+          "privileged": false
+        }
+      ],
+      "reward": 7.828507000000002,
+      "reward_components": {
+        "vendor_total": 7.828507000000002
+      },
+      "terminated": false,
+      "truncated": false,
+      "tokens": {
+        "prompt_tokens": 0,
+        "response_tokens": 0,
+        "response_loss_mask": [],
+        "observation_token_indices": [],
+        "image_token_indices": []
+      },
+      "cost": {
+        "model_latency_s": 0.0,
+        "environment_latency_s": 0.0
+      },
+      "compaction_boundary": false
+    }
+  ],
+  "total_reward": 7.828507000000002,
+  "terminated": false,
+  "truncated": false
+}

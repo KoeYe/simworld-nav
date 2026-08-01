@@ -1,0 +1,5958 @@
+{
+  "schema": "embodiedbench/world_bundle",
+  "schema_version": "0.1.0",
+  "world_id": "small-city-11",
+  "version": "0.1.0",
+  "frames": [
+    {
+      "name": "bundle_world",
+      "units": "cm",
+      "handedness": "left",
+      "up_axis": "z",
+      "description": "DeliveryBench procgen world frame; centimetres, z up"
+    }
+  ],
+  "transforms": [],
+  "nav_graph": {
+    "nodes": [
+      {
+        "node_id": "int_0",
+        "kind": "junction",
+        "position": {
+          "x_cm": -18300.0,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "10 Court St"
+      },
+      {
+        "node_id": "int_1",
+        "kind": "junction",
+        "position": {
+          "x_cm": -18300.0,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "12 Court St"
+      },
+      {
+        "node_id": "dock_92",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -17744.11,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "6 Court St"
+      },
+      {
+        "node_id": "dock_83",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -19956.28,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "4 Court St"
+      },
+      {
+        "node_id": "dock_95",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -17606.16,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "8 Court St"
+      },
+      {
+        "node_id": "dock_73",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -18969.02,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "2 Court St"
+      },
+      {
+        "node_id": "int_2",
+        "kind": "junction",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "178 Court St"
+      },
+      {
+        "node_id": "int_3",
+        "kind": "junction",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Church Ave & Court St"
+      },
+      {
+        "node_id": "int_7",
+        "kind": "junction",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "180 Court St"
+      },
+      {
+        "node_id": "dock_19",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -3412.49,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "150 Court St"
+      },
+      {
+        "node_id": "int_8",
+        "kind": "junction",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Church Ave & Court St"
+      },
+      {
+        "node_id": "dock_1",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 11718.14,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (right)",
+        "address": "100 Church Ave"
+      },
+      {
+        "node_id": "dock_3",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -8020.0,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "104 Court St"
+      },
+      {
+        "node_id": "int_4",
+        "kind": "junction",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "172 Church Ave"
+      },
+      {
+        "node_id": "int_9",
+        "kind": "junction",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Cherry St & Church Ave"
+      },
+      {
+        "node_id": "int_5",
+        "kind": "junction",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "6 Church Ave"
+      },
+      {
+        "node_id": "dock_16",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 16196.72,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (right)",
+        "address": "146 Church Ave"
+      },
+      {
+        "node_id": "int_10",
+        "kind": "junction",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Cherry St & Church Ave"
+      },
+      {
+        "node_id": "dock_85",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 25658.41,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (left)",
+        "address": "40 Church Ave"
+      },
+      {
+        "node_id": "int_6",
+        "kind": "junction",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 38300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "174 Church Ave"
+      },
+      {
+        "node_id": "int_11",
+        "kind": "junction",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 38300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "176 Church Ave"
+      },
+      {
+        "node_id": "dock_14",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 35109.85,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (left)",
+        "address": "134 Church Ave"
+      },
+      {
+        "node_id": "dock_28",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 38306.88,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (left)",
+        "address": "168 Church Ave"
+      },
+      {
+        "node_id": "dock_23",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 3332.51,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "166 Court St"
+      },
+      {
+        "node_id": "dock_72",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 8734.19,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (left)",
+        "address": "2 Church Ave"
+      },
+      {
+        "node_id": "dock_26",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 4572.62,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "167 Court St"
+      },
+      {
+        "node_id": "dock_81",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 5527.8,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "38 Cherry St"
+      },
+      {
+        "node_id": "dock_82",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 16942.9599,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (left)",
+        "address": "4 Church Ave"
+      },
+      {
+        "node_id": "dock_22",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 34847.56,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (right)",
+        "address": "166 Church Ave"
+      },
+      {
+        "node_id": "dock_86",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 5809.32,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "42 Cherry St"
+      },
+      {
+        "node_id": "dock_34",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 1700.0,
+          "y_cm": 37470.96,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (right)",
+        "address": "170 Church Ave"
+      },
+      {
+        "node_id": "int_12",
+        "kind": "junction",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": -18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "10 Poplar Ave"
+      },
+      {
+        "node_id": "int_17",
+        "kind": "junction",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": -18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "12 Poplar Ave"
+      },
+      {
+        "node_id": "dock_80",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": -15014.49,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (right)",
+        "address": "34 Poplar Ave"
+      },
+      {
+        "node_id": "int_13",
+        "kind": "junction",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Court St & Poplar Ave"
+      },
+      {
+        "node_id": "int_14",
+        "kind": "junction",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Court St & Poplar Ave"
+      },
+      {
+        "node_id": "int_18",
+        "kind": "junction",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "14 Poplar Ave"
+      },
+      {
+        "node_id": "dock_45",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 15228.71,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "174 Court St"
+      },
+      {
+        "node_id": "dock_13",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": -5373.07,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (right)",
+        "address": "130 Poplar Ave"
+      },
+      {
+        "node_id": "int_19",
+        "kind": "junction",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "174 Poplar Ave"
+      },
+      {
+        "node_id": "dock_91",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": 7525.45,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (left)",
+        "address": "58 Poplar Ave"
+      },
+      {
+        "node_id": "dock_43",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 15764.98,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "173 Court St"
+      },
+      {
+        "node_id": "int_15",
+        "kind": "junction",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Cherry St & Poplar Ave"
+      },
+      {
+        "node_id": "int_20",
+        "kind": "junction",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Cherry St & Poplar Ave"
+      },
+      {
+        "node_id": "int_16",
+        "kind": "junction",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "202 Cherry St"
+      },
+      {
+        "node_id": "dock_0",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 11740.02,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "100 Cherry St"
+      },
+      {
+        "node_id": "dock_9",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": 14183.17,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (left)",
+        "address": "126 Poplar Ave"
+      },
+      {
+        "node_id": "int_21",
+        "kind": "junction",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "205 Cherry St"
+      },
+      {
+        "node_id": "dock_17",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 16365.88,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "148 Cherry St"
+      },
+      {
+        "node_id": "dock_93",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": -15872.79,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (left)",
+        "address": "6 Poplar Ave"
+      },
+      {
+        "node_id": "dock_74",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": -1944.09,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (left)",
+        "address": "2 Poplar Ave"
+      },
+      {
+        "node_id": "dock_36",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": 5363.8748,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (right)",
+        "address": "170 Poplar Ave"
+      },
+      {
+        "node_id": "dock_30",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": 15122.88,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (right)",
+        "address": "168 Poplar Ave"
+      },
+      {
+        "node_id": "dock_64",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 26167.6636,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "192 Cherry St"
+      },
+      {
+        "node_id": "dock_25",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21956.54,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "167 Cherry St"
+      },
+      {
+        "node_id": "int_22",
+        "kind": "junction",
+        "position": {
+          "x_cm": 38300.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "204 Cherry St"
+      },
+      {
+        "node_id": "int_23",
+        "kind": "junction",
+        "position": {
+          "x_cm": 38300.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Cherry St & Forest Ave"
+      },
+      {
+        "node_id": "int_25",
+        "kind": "junction",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "206 Cherry St"
+      },
+      {
+        "node_id": "dock_39",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 38172.55,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "172 Cherry St"
+      },
+      {
+        "node_id": "int_26",
+        "kind": "junction",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "Cherry St & Forest Ave"
+      },
+      {
+        "node_id": "dock_89",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 38300.0,
+          "y_cm": 26761.55,
+          "z_cm": 0.0
+        },
+        "road_name": "Forest Ave (left)",
+        "address": "52 Forest Ave"
+      },
+      {
+        "node_id": "dock_49",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 36204.09,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "177 Cherry St"
+      },
+      {
+        "node_id": "int_24",
+        "kind": "junction",
+        "position": {
+          "x_cm": 38300.0,
+          "y_cm": 38300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "166 Forest Ave"
+      },
+      {
+        "node_id": "int_27",
+        "kind": "junction",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 38300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "168 Forest Ave"
+      },
+      {
+        "node_id": "dock_18",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 38300.0,
+          "y_cm": 36504.26,
+          "z_cm": 0.0
+        },
+        "road_name": "Forest Ave (left)",
+        "address": "148 Forest Ave"
+      },
+      {
+        "node_id": "dock_75",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 43621.65,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "200 Cherry St"
+      },
+      {
+        "node_id": "dock_51",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 45614.55,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "179 Cherry St"
+      },
+      {
+        "node_id": "dock_90",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 26960.56,
+          "z_cm": 0.0
+        },
+        "road_name": "Forest Ave (right)",
+        "address": "54 Forest Ave"
+      },
+      {
+        "node_id": "dock_20",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 37842.54,
+          "z_cm": 0.0
+        },
+        "road_name": "Forest Ave (right)",
+        "address": "162 Forest Ave"
+      },
+      {
+        "node_id": "int_28",
+        "kind": "junction",
+        "position": {
+          "x_cm": 58300.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "208 Cherry St"
+      },
+      {
+        "node_id": "int_29",
+        "kind": "junction",
+        "position": {
+          "x_cm": 58300.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "207 Cherry St"
+      },
+      {
+        "node_id": "dock_50",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 54284.37,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "178 Cherry St"
+      },
+      {
+        "node_id": "dock_52",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 59762.09,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "180 Cherry St"
+      },
+      {
+        "node_id": "dock_57",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 55303.58,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "185 Cherry St"
+      },
+      {
+        "node_id": "dock_59",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 58357.65,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "187 Cherry St"
+      },
+      {
+        "node_id": "int_30",
+        "kind": "junction",
+        "position": {
+          "x_cm": 61700.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "210 Cherry St"
+      },
+      {
+        "node_id": "int_31",
+        "kind": "junction",
+        "position": {
+          "x_cm": 61700.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "209 Cherry St"
+      },
+      {
+        "node_id": "dock_54",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 65391.24,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "182 Cherry St"
+      },
+      {
+        "node_id": "dock_61",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 63891.26,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "189 Cherry St"
+      },
+      {
+        "node_id": "int_32",
+        "kind": "junction",
+        "position": {
+          "x_cm": 78300.0,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "212 Cherry St"
+      },
+      {
+        "node_id": "int_33",
+        "kind": "junction",
+        "position": {
+          "x_cm": 78300.0,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "",
+        "address": "211 Cherry St"
+      },
+      {
+        "node_id": "dock_60",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 75982.97,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "188 Cherry St"
+      },
+      {
+        "node_id": "dock_77",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 75238.67,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "203 Cherry St"
+      },
+      {
+        "node_id": "dock_69",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 79859.52,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "197 Cherry St"
+      },
+      {
+        "node_id": "dock_94",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 9502.27,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "78 Cherry St"
+      },
+      {
+        "node_id": "dock_7",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 13946.33,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (right)",
+        "address": "122 Church Ave"
+      },
+      {
+        "node_id": "dock_2",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 11991.42,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "104 Cherry St"
+      },
+      {
+        "node_id": "dock_97",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 9944.42,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "82 Cherry St"
+      },
+      {
+        "node_id": "dock_10",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 14192.1047,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "128 Cherry St"
+      },
+      {
+        "node_id": "dock_87",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -13928.7195,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "44 Court St"
+      },
+      {
+        "node_id": "dock_4",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -1700.0,
+          "y_cm": 32478.81,
+          "z_cm": 0.0
+        },
+        "road_name": "Church Ave (left)",
+        "address": "108 Church Ave"
+      },
+      {
+        "node_id": "dock_5",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": -7477.52,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (right)",
+        "address": "108 Poplar Ave"
+      },
+      {
+        "node_id": "dock_6",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -6759.05,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "116 Court St"
+      },
+      {
+        "node_id": "dock_15",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -4855.29,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "134 Court St"
+      },
+      {
+        "node_id": "dock_99",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -9809.05,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "86 Court St"
+      },
+      {
+        "node_id": "dock_8",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 14240.51,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "126 Cherry St"
+      },
+      {
+        "node_id": "dock_11",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 14592.6563,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "130 Cherry St"
+      },
+      {
+        "node_id": "dock_98",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 18300.0,
+          "y_cm": 9845.21,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (left)",
+        "address": "82 Poplar Ave"
+      },
+      {
+        "node_id": "dock_12",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 34565.05,
+          "z_cm": 0.0
+        },
+        "road_name": "Forest Ave (right)",
+        "address": "130 Forest Ave"
+      },
+      {
+        "node_id": "dock_101",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 30644.91,
+          "z_cm": 0.0
+        },
+        "road_name": "Forest Ave (right)",
+        "address": "90 Forest Ave"
+      },
+      {
+        "node_id": "dock_21",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 30674.93,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "166 Cherry St"
+      },
+      {
+        "node_id": "dock_27",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 32544.6,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "168 Cherry St"
+      },
+      {
+        "node_id": "dock_66",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 28791.0267,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "194 Cherry St"
+      },
+      {
+        "node_id": "dock_48",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 4920.3457,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "176 Court St"
+      },
+      {
+        "node_id": "dock_24",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": 6401.44,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (right)",
+        "address": "166 Poplar Ave"
+      },
+      {
+        "node_id": "dock_41",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": 14370.1483,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (right)",
+        "address": "172 Poplar Ave"
+      },
+      {
+        "node_id": "dock_31",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 25066.33,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "169 Cherry St"
+      },
+      {
+        "node_id": "dock_32",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 7089.76,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "169 Court St"
+      },
+      {
+        "node_id": "dock_33",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 34403.76,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "170 Cherry St"
+      },
+      {
+        "node_id": "dock_29",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 7330.43,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "168 Court St"
+      },
+      {
+        "node_id": "dock_35",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 8638.45,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "170 Court St"
+      },
+      {
+        "node_id": "dock_71",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 26405.8303,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "199 Cherry St"
+      },
+      {
+        "node_id": "dock_38",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 11421.54,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "171 Court St"
+      },
+      {
+        "node_id": "dock_70",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 36279.23,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "198 Cherry St"
+      },
+      {
+        "node_id": "dock_40",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 11218.94,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "172 Court St"
+      },
+      {
+        "node_id": "dock_37",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 27189.45,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "171 Cherry St"
+      },
+      {
+        "node_id": "dock_42",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 29146.27,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "173 Cherry St"
+      },
+      {
+        "node_id": "dock_46",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 32688.98,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "175 Cherry St"
+      },
+      {
+        "node_id": "dock_44",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 48235.86,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "174 Cherry St"
+      },
+      {
+        "node_id": "dock_47",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 51239.15,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "176 Cherry St"
+      },
+      {
+        "node_id": "dock_62",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 47773.6891,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "190 Cherry St"
+      },
+      {
+        "node_id": "dock_53",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 49598.03,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "181 Cherry St"
+      },
+      {
+        "node_id": "dock_55",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 52410.52,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "183 Cherry St"
+      },
+      {
+        "node_id": "dock_56",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 69475.86,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "184 Cherry St"
+      },
+      {
+        "node_id": "dock_58",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 73584.73,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "186 Cherry St"
+      },
+      {
+        "node_id": "dock_76",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 64036.2651,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "201 Cherry St"
+      },
+      {
+        "node_id": "dock_63",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 66688.83,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "191 Cherry St"
+      },
+      {
+        "node_id": "dock_65",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 69671.5,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "193 Cherry St"
+      },
+      {
+        "node_id": "dock_68",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 28253.9434,
+          "y_cm": 18300.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (right)",
+        "address": "196 Cherry St"
+      },
+      {
+        "node_id": "dock_67",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 72399.21,
+          "y_cm": 21700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Cherry St (left)",
+        "address": "195 Cherry St"
+      },
+      {
+        "node_id": "dock_96",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": -6487.19,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (left)",
+        "address": "8 Poplar Ave"
+      },
+      {
+        "node_id": "dock_78",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -15553.81,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "28 Court St"
+      },
+      {
+        "node_id": "dock_88",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -13252.79,
+          "y_cm": -1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (left)",
+        "address": "50 Court St"
+      },
+      {
+        "node_id": "dock_79",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": -15129.79,
+          "y_cm": 1700.0,
+          "z_cm": 0.0
+        },
+        "road_name": "Court St (right)",
+        "address": "32 Court St"
+      },
+      {
+        "node_id": "dock_84",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 21700.0,
+          "y_cm": -10069.5,
+          "z_cm": 0.0
+        },
+        "road_name": "Poplar Ave (left)",
+        "address": "4 Poplar Ave"
+      },
+      {
+        "node_id": "dock_100",
+        "kind": "pass_through",
+        "position": {
+          "x_cm": 41700.0,
+          "y_cm": 30157.0583,
+          "z_cm": 0.0
+        },
+        "road_name": "Forest Ave (right)",
+        "address": "86 Forest Ave"
+      }
+    ],
+    "edges": [
+      {
+        "edge_id": "int_0__int_1",
+        "from_node": "int_0",
+        "to_node": "int_1",
+        "polyline": [
+          {
+            "x_cm": -18300.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -18300.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_0__dock_92",
+        "from_node": "int_0",
+        "to_node": "dock_92",
+        "polyline": [
+          {
+            "x_cm": -18300.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -17744.11,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 555.8899999999994,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_0__dock_83",
+        "from_node": "int_0",
+        "to_node": "dock_83",
+        "polyline": [
+          {
+            "x_cm": -18300.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -19956.28,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1656.2799999999988,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_1__dock_95",
+        "from_node": "int_1",
+        "to_node": "dock_95",
+        "polyline": [
+          {
+            "x_cm": -18300.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -17606.16,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 693.8400000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_1__dock_73",
+        "from_node": "int_1",
+        "to_node": "dock_73",
+        "polyline": [
+          {
+            "x_cm": -18300.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -18969.02,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 669.0200000000004,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_92__dock_78",
+        "from_node": "dock_92",
+        "to_node": "dock_78",
+        "polyline": [
+          {
+            "x_cm": -17744.11,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -15553.81,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2190.300000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_95__dock_79",
+        "from_node": "dock_95",
+        "to_node": "dock_79",
+        "polyline": [
+          {
+            "x_cm": -17606.16,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -15129.79,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2476.369999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_2__int_3",
+        "from_node": "int_2",
+        "to_node": "int_3",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_2__int_7",
+        "from_node": "int_2",
+        "to_node": "int_7",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_2__dock_19",
+        "from_node": "int_2",
+        "to_node": "dock_19",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -3412.49,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1712.4899999999998,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_3__int_8",
+        "from_node": "int_3",
+        "to_node": "int_8",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_3__dock_1",
+        "from_node": "int_3",
+        "to_node": "dock_1",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 11718.14,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 10018.14,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_3__dock_3",
+        "from_node": "int_3",
+        "to_node": "dock_3",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -8020.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 6320.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_7__int_8",
+        "from_node": "int_7",
+        "to_node": "int_8",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_7__dock_23",
+        "from_node": "int_7",
+        "to_node": "dock_23",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 3332.51,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1632.5100000000002,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_19__dock_15",
+        "from_node": "dock_19",
+        "to_node": "dock_15",
+        "polyline": [
+          {
+            "x_cm": -3412.49,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -4855.29,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1442.8000000000002,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_8__dock_72",
+        "from_node": "int_8",
+        "to_node": "dock_72",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 8734.19,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 7034.1900000000005,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_8__dock_26",
+        "from_node": "int_8",
+        "to_node": "dock_26",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 4572.62,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2872.62,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_1__dock_7",
+        "from_node": "dock_1",
+        "to_node": "dock_7",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 11718.14,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 13946.33,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2228.1900000000005,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_3__dock_87",
+        "from_node": "dock_3",
+        "to_node": "dock_87",
+        "polyline": [
+          {
+            "x_cm": -8020.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -13928.7195,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 5908.719499999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_4__int_9",
+        "from_node": "int_4",
+        "to_node": "int_9",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_4__int_5",
+        "from_node": "int_4",
+        "to_node": "int_5",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_4__dock_16",
+        "from_node": "int_4",
+        "to_node": "dock_16",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 16196.72,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2103.2800000000007,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_9__int_10",
+        "from_node": "int_9",
+        "to_node": "int_10",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_9__dock_81",
+        "from_node": "int_9",
+        "to_node": "dock_81",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 5527.8,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3827.8,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_9__dock_82",
+        "from_node": "int_9",
+        "to_node": "dock_82",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 16942.9599,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1357.0400999999983,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_5__int_10",
+        "from_node": "int_5",
+        "to_node": "int_10",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_5__dock_85",
+        "from_node": "int_5",
+        "to_node": "dock_85",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 25658.41,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3958.41,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_16__dock_7",
+        "from_node": "dock_16",
+        "to_node": "dock_7",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 16196.72,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 13946.33,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2250.3899999999994,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_10__dock_22",
+        "from_node": "int_10",
+        "to_node": "dock_22",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 34847.56,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 13147.559999999998,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_10__dock_86",
+        "from_node": "int_10",
+        "to_node": "dock_86",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 5809.32,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4109.32,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_85__dock_4",
+        "from_node": "dock_85",
+        "to_node": "dock_4",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 25658.41,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 32478.81,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 6820.4000000000015,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_6__int_11",
+        "from_node": "int_6",
+        "to_node": "int_11",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_6__dock_14",
+        "from_node": "int_6",
+        "to_node": "dock_14",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 35109.85,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3190.1500000000015,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_6__dock_28",
+        "from_node": "int_6",
+        "to_node": "dock_28",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 38306.88,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 6.879999999997381,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_11__dock_34",
+        "from_node": "int_11",
+        "to_node": "dock_34",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 37470.96,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 829.0400000000009,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_14__dock_4",
+        "from_node": "dock_14",
+        "to_node": "dock_4",
+        "polyline": [
+          {
+            "x_cm": -1700.0,
+            "y_cm": 35109.85,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -1700.0,
+            "y_cm": 32478.81,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2631.0399999999972,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_23__dock_48",
+        "from_node": "dock_23",
+        "to_node": "dock_48",
+        "polyline": [
+          {
+            "x_cm": 3332.51,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 4920.3457,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1587.8356999999996,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_72__dock_82",
+        "from_node": "dock_72",
+        "to_node": "dock_82",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 8734.19,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 16942.9599,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 8208.769900000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_26__dock_32",
+        "from_node": "dock_26",
+        "to_node": "dock_32",
+        "polyline": [
+          {
+            "x_cm": 4572.62,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 7089.76,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2517.1400000000003,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_81__dock_94",
+        "from_node": "dock_81",
+        "to_node": "dock_94",
+        "polyline": [
+          {
+            "x_cm": 5527.8,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 9502.27,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3974.4700000000003,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_22__dock_34",
+        "from_node": "dock_22",
+        "to_node": "dock_34",
+        "polyline": [
+          {
+            "x_cm": 1700.0,
+            "y_cm": 34847.56,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 1700.0,
+            "y_cm": 37470.96,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2623.4000000000015,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_86__dock_97",
+        "from_node": "dock_86",
+        "to_node": "dock_97",
+        "polyline": [
+          {
+            "x_cm": 5809.32,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 9944.42,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4135.1,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_12__int_17",
+        "from_node": "int_12",
+        "to_node": "int_17",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": -18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_12__dock_80",
+        "from_node": "int_12",
+        "to_node": "dock_80",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": -15014.49,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3285.51,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_17__dock_93",
+        "from_node": "int_17",
+        "to_node": "dock_93",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": -18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": -15872.79,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2427.209999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_80__dock_5",
+        "from_node": "dock_80",
+        "to_node": "dock_5",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -15014.49,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": -7477.52,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 7536.969999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_13__int_14",
+        "from_node": "int_13",
+        "to_node": "int_14",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_13__int_18",
+        "from_node": "int_13",
+        "to_node": "int_18",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_13__dock_45",
+        "from_node": "int_13",
+        "to_node": "dock_45",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 15228.71,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3071.290000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_13__dock_13",
+        "from_node": "int_13",
+        "to_node": "dock_13",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": -5373.07,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3673.0699999999997,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_14__int_19",
+        "from_node": "int_14",
+        "to_node": "int_19",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_14__dock_91",
+        "from_node": "int_14",
+        "to_node": "dock_91",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": 7525.45,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 5825.45,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_14__dock_43",
+        "from_node": "int_14",
+        "to_node": "dock_43",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 15764.98,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2535.0200000000004,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_18__int_19",
+        "from_node": "int_18",
+        "to_node": "int_19",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_18__dock_74",
+        "from_node": "int_18",
+        "to_node": "dock_74",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": -1944.09,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 244.08999999999992,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_45__dock_40",
+        "from_node": "dock_45",
+        "to_node": "dock_40",
+        "polyline": [
+          {
+            "x_cm": 15228.71,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 11218.94,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4009.7699999999986,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_13__dock_5",
+        "from_node": "dock_13",
+        "to_node": "dock_5",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": -5373.07,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": -7477.52,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2104.4500000000007,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_19__dock_36",
+        "from_node": "int_19",
+        "to_node": "dock_36",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 5363.8748,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3663.8747999999996,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_91__dock_98",
+        "from_node": "dock_91",
+        "to_node": "dock_98",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 7525.45,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": 9845.21,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2319.7599999999993,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_43__dock_38",
+        "from_node": "dock_43",
+        "to_node": "dock_38",
+        "polyline": [
+          {
+            "x_cm": 15764.98,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 11421.54,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4343.439999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_15__int_20",
+        "from_node": "int_15",
+        "to_node": "int_20",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_15__int_16",
+        "from_node": "int_15",
+        "to_node": "int_16",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_15__dock_0",
+        "from_node": "int_15",
+        "to_node": "dock_0",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 11740.02,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 6559.98,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_15__dock_9",
+        "from_node": "int_15",
+        "to_node": "dock_9",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": 14183.17,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4116.83,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_20__int_21",
+        "from_node": "int_20",
+        "to_node": "int_21",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_20__dock_30",
+        "from_node": "int_20",
+        "to_node": "dock_30",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 15122.88,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3177.120000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_20__dock_64",
+        "from_node": "int_20",
+        "to_node": "dock_64",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 26167.6636,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4467.6636,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_16__int_21",
+        "from_node": "int_16",
+        "to_node": "int_21",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_16__dock_17",
+        "from_node": "int_16",
+        "to_node": "dock_17",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 16365.88,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1934.1200000000008,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_0__dock_94",
+        "from_node": "dock_0",
+        "to_node": "dock_94",
+        "polyline": [
+          {
+            "x_cm": 11740.02,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 9502.27,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2237.75,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_9__dock_98",
+        "from_node": "dock_9",
+        "to_node": "dock_98",
+        "polyline": [
+          {
+            "x_cm": 18300.0,
+            "y_cm": 14183.17,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 18300.0,
+            "y_cm": 9845.21,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4337.960000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_21__dock_25",
+        "from_node": "int_21",
+        "to_node": "dock_25",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21956.54,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 256.5400000000009,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_17__dock_11",
+        "from_node": "dock_17",
+        "to_node": "dock_11",
+        "polyline": [
+          {
+            "x_cm": 16365.88,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 14592.6563,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1773.2236999999986,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_93__dock_84",
+        "from_node": "dock_93",
+        "to_node": "dock_84",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": -15872.79,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": -10069.5,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 5803.290000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_74__dock_96",
+        "from_node": "dock_74",
+        "to_node": "dock_96",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": -1944.09,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": -6487.19,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4543.099999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_36__dock_24",
+        "from_node": "dock_36",
+        "to_node": "dock_24",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 5363.8748,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 6401.44,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1037.5652,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_30__dock_41",
+        "from_node": "dock_30",
+        "to_node": "dock_41",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 15122.88,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 14370.1483,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 752.7316999999985,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_64__dock_68",
+        "from_node": "dock_64",
+        "to_node": "dock_68",
+        "polyline": [
+          {
+            "x_cm": 26167.6636,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 28253.9434,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2086.2798000000003,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_25__dock_31",
+        "from_node": "dock_25",
+        "to_node": "dock_31",
+        "polyline": [
+          {
+            "x_cm": 21956.54,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 25066.33,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3109.790000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_22__int_23",
+        "from_node": "int_22",
+        "to_node": "int_23",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 38300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_22__int_25",
+        "from_node": "int_22",
+        "to_node": "int_25",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_22__dock_39",
+        "from_node": "int_22",
+        "to_node": "dock_39",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 38172.55,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 127.44999999999709,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_23__int_26",
+        "from_node": "int_23",
+        "to_node": "int_26",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_23__dock_89",
+        "from_node": "int_23",
+        "to_node": "dock_89",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 38300.0,
+            "y_cm": 26761.55,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 5061.549999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_23__dock_49",
+        "from_node": "int_23",
+        "to_node": "dock_49",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 36204.09,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2095.9100000000035,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_25__int_26",
+        "from_node": "int_25",
+        "to_node": "int_26",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_25__dock_75",
+        "from_node": "int_25",
+        "to_node": "dock_75",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 43621.65,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1921.6500000000015,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_39__dock_70",
+        "from_node": "dock_39",
+        "to_node": "dock_70",
+        "polyline": [
+          {
+            "x_cm": 38172.55,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 36279.23,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1893.3199999999997,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_26__dock_51",
+        "from_node": "int_26",
+        "to_node": "dock_51",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 45614.55,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3914.550000000003,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_26__dock_90",
+        "from_node": "int_26",
+        "to_node": "dock_90",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 26960.56,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 5260.560000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_89__dock_18",
+        "from_node": "dock_89",
+        "to_node": "dock_18",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 26761.55,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 38300.0,
+            "y_cm": 36504.26,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 9742.710000000003,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_49__dock_46",
+        "from_node": "dock_49",
+        "to_node": "dock_46",
+        "polyline": [
+          {
+            "x_cm": 36204.09,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 32688.98,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3515.109999999997,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_24__int_27",
+        "from_node": "int_24",
+        "to_node": "int_27",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_24__dock_18",
+        "from_node": "int_24",
+        "to_node": "dock_18",
+        "polyline": [
+          {
+            "x_cm": 38300.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 38300.0,
+            "y_cm": 36504.26,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1795.739999999998,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_27__dock_20",
+        "from_node": "int_27",
+        "to_node": "dock_20",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 38300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 37842.54,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 457.4599999999991,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_75__dock_62",
+        "from_node": "dock_75",
+        "to_node": "dock_62",
+        "polyline": [
+          {
+            "x_cm": 43621.65,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 47773.6891,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4152.039100000002,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_51__dock_53",
+        "from_node": "dock_51",
+        "to_node": "dock_53",
+        "polyline": [
+          {
+            "x_cm": 45614.55,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 49598.03,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3983.479999999996,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_90__dock_100",
+        "from_node": "dock_90",
+        "to_node": "dock_100",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 26960.56,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 30157.0583,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3196.4982999999993,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_20__dock_12",
+        "from_node": "dock_20",
+        "to_node": "dock_12",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 37842.54,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 34565.05,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3277.489999999998,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_28__int_29",
+        "from_node": "int_28",
+        "to_node": "int_29",
+        "polyline": [
+          {
+            "x_cm": 58300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 58300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_28__dock_50",
+        "from_node": "int_28",
+        "to_node": "dock_50",
+        "polyline": [
+          {
+            "x_cm": 58300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 54284.37,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4015.6299999999974,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_28__dock_52",
+        "from_node": "int_28",
+        "to_node": "dock_52",
+        "polyline": [
+          {
+            "x_cm": 58300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 59762.09,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1462.0899999999965,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_29__dock_57",
+        "from_node": "int_29",
+        "to_node": "dock_57",
+        "polyline": [
+          {
+            "x_cm": 58300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 55303.58,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2996.4199999999983,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_29__dock_59",
+        "from_node": "int_29",
+        "to_node": "dock_59",
+        "polyline": [
+          {
+            "x_cm": 58300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 58357.65,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 57.650000000001455,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_50__dock_47",
+        "from_node": "dock_50",
+        "to_node": "dock_47",
+        "polyline": [
+          {
+            "x_cm": 54284.37,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 51239.15,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3045.220000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_52__int_30",
+        "from_node": "dock_52",
+        "to_node": "int_30",
+        "polyline": [
+          {
+            "x_cm": 59762.09,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 61700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1937.9100000000035,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_57__dock_55",
+        "from_node": "dock_57",
+        "to_node": "dock_55",
+        "polyline": [
+          {
+            "x_cm": 55303.58,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 52410.52,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2893.060000000005,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_59__int_31",
+        "from_node": "dock_59",
+        "to_node": "int_31",
+        "polyline": [
+          {
+            "x_cm": 58357.65,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 61700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3342.3499999999985,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_30__int_31",
+        "from_node": "int_30",
+        "to_node": "int_31",
+        "polyline": [
+          {
+            "x_cm": 61700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 61700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_30__dock_54",
+        "from_node": "int_30",
+        "to_node": "dock_54",
+        "polyline": [
+          {
+            "x_cm": 61700.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 65391.24,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3691.239999999998,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_31__dock_61",
+        "from_node": "int_31",
+        "to_node": "dock_61",
+        "polyline": [
+          {
+            "x_cm": 61700.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 63891.26,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2191.260000000002,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_54__dock_56",
+        "from_node": "dock_54",
+        "to_node": "dock_56",
+        "polyline": [
+          {
+            "x_cm": 65391.24,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 69475.86,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4084.6200000000026,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_61__dock_76",
+        "from_node": "dock_61",
+        "to_node": "dock_76",
+        "polyline": [
+          {
+            "x_cm": 63891.26,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 64036.2651,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 145.00509999999485,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_32__int_33",
+        "from_node": "int_32",
+        "to_node": "int_33",
+        "polyline": [
+          {
+            "x_cm": 78300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 78300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3400.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_32__dock_60",
+        "from_node": "int_32",
+        "to_node": "dock_60",
+        "polyline": [
+          {
+            "x_cm": 78300.0,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 75982.97,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2317.029999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_33__dock_77",
+        "from_node": "int_33",
+        "to_node": "dock_77",
+        "polyline": [
+          {
+            "x_cm": 78300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 75238.67,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3061.3300000000017,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "int_33__dock_69",
+        "from_node": "int_33",
+        "to_node": "dock_69",
+        "polyline": [
+          {
+            "x_cm": 78300.0,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 79859.52,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1559.520000000004,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_60__dock_58",
+        "from_node": "dock_60",
+        "to_node": "dock_58",
+        "polyline": [
+          {
+            "x_cm": 75982.97,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 73584.73,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2398.2400000000052,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_77__dock_67",
+        "from_node": "dock_77",
+        "to_node": "dock_67",
+        "polyline": [
+          {
+            "x_cm": 75238.67,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 72399.21,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2839.459999999992,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_2__dock_97",
+        "from_node": "dock_2",
+        "to_node": "dock_97",
+        "polyline": [
+          {
+            "x_cm": 11991.42,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 9944.42,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2047.0,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_2__dock_10",
+        "from_node": "dock_2",
+        "to_node": "dock_10",
+        "polyline": [
+          {
+            "x_cm": 11991.42,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 14192.1047,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2200.6847,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_10__dock_8",
+        "from_node": "dock_10",
+        "to_node": "dock_8",
+        "polyline": [
+          {
+            "x_cm": 14192.1047,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 14240.51,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 48.40530000000035,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_87__dock_79",
+        "from_node": "dock_87",
+        "to_node": "dock_79",
+        "polyline": [
+          {
+            "x_cm": -13928.7195,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -15129.79,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1201.0705000000016,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_6__dock_15",
+        "from_node": "dock_6",
+        "to_node": "dock_15",
+        "polyline": [
+          {
+            "x_cm": -6759.05,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -4855.29,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1903.7600000000002,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_6__dock_99",
+        "from_node": "dock_6",
+        "to_node": "dock_99",
+        "polyline": [
+          {
+            "x_cm": -6759.05,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -9809.05,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3049.999999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_99__dock_88",
+        "from_node": "dock_99",
+        "to_node": "dock_88",
+        "polyline": [
+          {
+            "x_cm": -9809.05,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -13252.79,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3443.7400000000016,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_8__dock_11",
+        "from_node": "dock_8",
+        "to_node": "dock_11",
+        "polyline": [
+          {
+            "x_cm": 14240.51,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 14592.6563,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 352.14630000000034,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_12__dock_101",
+        "from_node": "dock_12",
+        "to_node": "dock_101",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 34565.05,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 30644.91,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3920.140000000003,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_101__dock_100",
+        "from_node": "dock_101",
+        "to_node": "dock_100",
+        "polyline": [
+          {
+            "x_cm": 41700.0,
+            "y_cm": 30644.91,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 41700.0,
+            "y_cm": 30157.0583,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 487.85169999999925,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_21__dock_27",
+        "from_node": "dock_21",
+        "to_node": "dock_27",
+        "polyline": [
+          {
+            "x_cm": 30674.93,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 32544.6,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1869.6699999999983,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_21__dock_66",
+        "from_node": "dock_21",
+        "to_node": "dock_66",
+        "polyline": [
+          {
+            "x_cm": 30674.93,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 28791.0267,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1883.9033000000018,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_27__dock_33",
+        "from_node": "dock_27",
+        "to_node": "dock_33",
+        "polyline": [
+          {
+            "x_cm": 32544.6,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 34403.76,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1859.1600000000035,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_66__dock_68",
+        "from_node": "dock_66",
+        "to_node": "dock_68",
+        "polyline": [
+          {
+            "x_cm": 28791.0267,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 28253.9434,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 537.0832999999984,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_48__dock_29",
+        "from_node": "dock_48",
+        "to_node": "dock_29",
+        "polyline": [
+          {
+            "x_cm": 4920.3457,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 7330.43,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2410.0843000000004,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_24__dock_41",
+        "from_node": "dock_24",
+        "to_node": "dock_41",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": 6401.44,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": 14370.1483,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 7968.708300000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_31__dock_71",
+        "from_node": "dock_31",
+        "to_node": "dock_71",
+        "polyline": [
+          {
+            "x_cm": 25066.33,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 26405.8303,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1339.5002999999997,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_32__dock_38",
+        "from_node": "dock_32",
+        "to_node": "dock_38",
+        "polyline": [
+          {
+            "x_cm": 7089.76,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 11421.54,
+            "y_cm": 1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4331.780000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_33__dock_70",
+        "from_node": "dock_33",
+        "to_node": "dock_70",
+        "polyline": [
+          {
+            "x_cm": 34403.76,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 36279.23,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1875.4700000000012,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_29__dock_35",
+        "from_node": "dock_29",
+        "to_node": "dock_35",
+        "polyline": [
+          {
+            "x_cm": 7330.43,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 8638.45,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1308.0200000000004,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_35__dock_40",
+        "from_node": "dock_35",
+        "to_node": "dock_40",
+        "polyline": [
+          {
+            "x_cm": 8638.45,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 11218.94,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2580.49,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_71__dock_37",
+        "from_node": "dock_71",
+        "to_node": "dock_37",
+        "polyline": [
+          {
+            "x_cm": 26405.8303,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 27189.45,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 783.6196999999993,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_37__dock_42",
+        "from_node": "dock_37",
+        "to_node": "dock_42",
+        "polyline": [
+          {
+            "x_cm": 27189.45,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 29146.27,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 1956.8199999999997,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_42__dock_46",
+        "from_node": "dock_42",
+        "to_node": "dock_46",
+        "polyline": [
+          {
+            "x_cm": 29146.27,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 32688.98,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3542.709999999999,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_44__dock_47",
+        "from_node": "dock_44",
+        "to_node": "dock_47",
+        "polyline": [
+          {
+            "x_cm": 48235.86,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 51239.15,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3003.290000000001,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_44__dock_62",
+        "from_node": "dock_44",
+        "to_node": "dock_62",
+        "polyline": [
+          {
+            "x_cm": 48235.86,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 47773.6891,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 462.17089999999735,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_53__dock_55",
+        "from_node": "dock_53",
+        "to_node": "dock_55",
+        "polyline": [
+          {
+            "x_cm": 49598.03,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 52410.52,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2812.489999999998,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_56__dock_58",
+        "from_node": "dock_56",
+        "to_node": "dock_58",
+        "polyline": [
+          {
+            "x_cm": 69475.86,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 73584.73,
+            "y_cm": 18300.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 4108.869999999995,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_76__dock_63",
+        "from_node": "dock_76",
+        "to_node": "dock_63",
+        "polyline": [
+          {
+            "x_cm": 64036.2651,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 66688.83,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2652.564900000005,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_63__dock_65",
+        "from_node": "dock_63",
+        "to_node": "dock_65",
+        "polyline": [
+          {
+            "x_cm": 66688.83,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 69671.5,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2982.6699999999983,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_65__dock_67",
+        "from_node": "dock_65",
+        "to_node": "dock_67",
+        "polyline": [
+          {
+            "x_cm": 69671.5,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 72399.21,
+            "y_cm": 21700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2727.7100000000064,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_96__dock_84",
+        "from_node": "dock_96",
+        "to_node": "dock_84",
+        "polyline": [
+          {
+            "x_cm": 21700.0,
+            "y_cm": -6487.19,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": 21700.0,
+            "y_cm": -10069.5,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 3582.3100000000004,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      },
+      {
+        "edge_id": "dock_78__dock_88",
+        "from_node": "dock_78",
+        "to_node": "dock_88",
+        "polyline": [
+          {
+            "x_cm": -15553.81,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          },
+          {
+            "x_cm": -13252.79,
+            "y_cm": -1700.0,
+            "z_cm": 0.0
+          }
+        ],
+        "length_cm": 2301.0199999999986,
+        "provenance": "authored_centerline",
+        "status": "certified",
+        "bidirectional": true,
+        "slope_deg": 0.0,
+        "surface": "road",
+        "allowed_modes": [
+          "walk",
+          "scooter"
+        ],
+        "exclusion_reason": ""
+      }
+    ],
+    "components": [
+      [
+        "dock_0",
+        "dock_1",
+        "dock_10",
+        "dock_100",
+        "dock_101",
+        "dock_11",
+        "dock_12",
+        "dock_13",
+        "dock_14",
+        "dock_15",
+        "dock_16",
+        "dock_17",
+        "dock_18",
+        "dock_19",
+        "dock_2",
+        "dock_20",
+        "dock_21",
+        "dock_22",
+        "dock_23",
+        "dock_24",
+        "dock_25",
+        "dock_26",
+        "dock_27",
+        "dock_28",
+        "dock_29",
+        "dock_3",
+        "dock_30",
+        "dock_31",
+        "dock_32",
+        "dock_33",
+        "dock_34",
+        "dock_35",
+        "dock_36",
+        "dock_37",
+        "dock_38",
+        "dock_39",
+        "dock_4",
+        "dock_40",
+        "dock_41",
+        "dock_42",
+        "dock_43",
+        "dock_44",
+        "dock_45",
+        "dock_46",
+        "dock_47",
+        "dock_48",
+        "dock_49",
+        "dock_5",
+        "dock_50",
+        "dock_51",
+        "dock_52",
+        "dock_53",
+        "dock_54",
+        "dock_55",
+        "dock_56",
+        "dock_57",
+        "dock_58",
+        "dock_59",
+        "dock_6",
+        "dock_60",
+        "dock_61",
+        "dock_62",
+        "dock_63",
+        "dock_64",
+        "dock_65",
+        "dock_66",
+        "dock_67",
+        "dock_68",
+        "dock_69",
+        "dock_7",
+        "dock_70",
+        "dock_71",
+        "dock_72",
+        "dock_73",
+        "dock_74",
+        "dock_75",
+        "dock_76",
+        "dock_77",
+        "dock_78",
+        "dock_79",
+        "dock_8",
+        "dock_80",
+        "dock_81",
+        "dock_82",
+        "dock_83",
+        "dock_84",
+        "dock_85",
+        "dock_86",
+        "dock_87",
+        "dock_88",
+        "dock_89",
+        "dock_9",
+        "dock_90",
+        "dock_91",
+        "dock_92",
+        "dock_93",
+        "dock_94",
+        "dock_95",
+        "dock_96",
+        "dock_97",
+        "dock_98",
+        "dock_99",
+        "int_0",
+        "int_1",
+        "int_10",
+        "int_11",
+        "int_12",
+        "int_13",
+        "int_14",
+        "int_15",
+        "int_16",
+        "int_17",
+        "int_18",
+        "int_19",
+        "int_2",
+        "int_20",
+        "int_21",
+        "int_22",
+        "int_23",
+        "int_24",
+        "int_25",
+        "int_26",
+        "int_27",
+        "int_28",
+        "int_29",
+        "int_3",
+        "int_30",
+        "int_31",
+        "int_32",
+        "int_33",
+        "int_4",
+        "int_5",
+        "int_6",
+        "int_7",
+        "int_8",
+        "int_9"
+      ]
+    ]
+  },
+  "entities": [],
+  "interaction_sites": [],
+  "source": {
+    "ue_project": "",
+    "engine_version": "",
+    "level_package": "procgen/small-city-11",
+    "compiler_version": "0.1.0",
+    "rules_version": "",
+    "manual_override_count": 0,
+    "actor_count": 136
+  },
+  "previews": [],
+  "notes": [
+    "Compiled from the DeliveryBench engine's own waypoint graph, so the bundle describes the graph the runtime actually navigates.",
+    "No NavMesh evidence: procgen maps have no UE NavMesh to validate against (PLAN.md M2 applies to UE-sourced maps)."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema": "embodiedbench/score_report",
+  "schema_version": "0.1.0",
+  "instance_id": "small-city-11_delivery_000042",
+  "episode_id": "small-city-11_delivery_000042",
+  "evaluator_id": "delivery_score",
+  "evaluator_version": "0.1.0",
+  "success": true,
+  "upper_bound_undefined_reason": "no documented upper-bound policy exists before M7; PLAN.md 12.5 defines the primary metric relative to one, so it is reported as undefined rather than estimated",
+  "metrics": {
+    "deliveries": {
+      "value": 1.0
+    },
+    "net_earnings": {
+      "value": 107.828507
+    },
+    "steps_taken": {
+      "value": 32.0
+    },
+    "invalid_actions": {
+      "value": 0.0
+    },
+    "total_reward": {
+      "value": 7.828507000000002
+    }
+  },
+  "training_shaping": {},
+  "costs": {
+    "environment_steps": 32.0,
+    "output_tokens": 0.0
+  },
+  "trajectory_sha256": "4f5ee6339f38d12104ee8a441ef808de9d788e63429855cf36273b4928475a2a"
+}

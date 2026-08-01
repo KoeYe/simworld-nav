@@ -1,0 +1,22 @@
+{
+  "map": "small-city-11",
+  "seed": 42,
+  "steps": 32,
+  "terminated": false,
+  "truncated": false,
+  "termination_reason": null,
+  "success": true,
+  "deliveries": 1.0,
+  "certified_road_coverage": 1.0,
+  "nodes": 136,
+  "edges": 153,
+  "hashes": {
+    "world_bundle": "c074fc526d09488513cc723d9cd9747b3bdc99308d53d7ff06ed57f78e98e129",
+    "environment_bundle": "4eaa80bb4ce43fccff1dcf733dbdee54a65aa39f383fbd35ea2c79028210b1ba",
+    "episode_spec": "0ad214800b47b39565604c36927bb3198d97193c70891cc2fcd8ebb54edacfe6",
+    "trajectory": "4f5ee6339f38d12104ee8a441ef808de9d788e63429855cf36273b4928475a2a",
+    "transition": "256741ce263da1179fd89fa4698ec471a17b036ef920d4f3595a492fbe3ff70d",
+    "terminal_state": "84017c4203b35bd5ecd4468da63bf1b7039725af88d646347646edbe7c40f712",
+    "score_report": "e059bc52e84d78b4b1a11e9180f716ca1cbadbefbad28f46c89cb489fa4cf0f0"
+  }
+}

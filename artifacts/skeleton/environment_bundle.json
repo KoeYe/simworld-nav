@@ -1,0 +1,47 @@
+{
+  "schema": "embodiedbench/environment_bundle",
+  "schema_version": "0.1.0",
+  "environment_id": "small-city-11-delivery",
+  "version": "0.1.0",
+  "base_world_id": "small-city-11",
+  "base_world_version": "0.1.0",
+  "base_world_sha256": "c074fc526d09488513cc723d9cd9747b3bdc99308d53d7ff06ed57f78e98e129",
+  "supported_embodiment_profiles": [
+    "abstract_courier_v1"
+  ],
+  "supported_navigation_modes": [
+    "nav_waypoint"
+  ],
+  "supported_runtimes": [
+    "text"
+  ],
+  "sensors": {
+    "channels": [
+      "text"
+    ]
+  },
+  "certificates": [
+    {
+      "environment_id": "small-city-11-delivery",
+      "environment_version": "0.1.0",
+      "task_plugin": "delivery",
+      "task_plugin_version": "0.1.0",
+      "embodiment_profile": "abstract_courier_v1",
+      "navigation_mode": "nav_waypoint",
+      "runtime": "text",
+      "grade": "C",
+      "checks_passed": [
+        "schema",
+        "graph_referential_integrity"
+      ],
+      "checks_failed": [],
+      "limitations": [
+        "no NavMesh validation (procgen map, PLAN.md M2 not applicable)",
+        "no cached observation album bound to this environment",
+        "text runtime only"
+      ],
+      "certified_road_coverage": 1.0,
+      "issued_at": ""
+    }
+  ]
+}
