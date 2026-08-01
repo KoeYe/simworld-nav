@@ -1,0 +1,2851 @@
+{
+  "schema": "embodiedbench/vlm_baseline/v0.1",
+  "model": "/data/murray/models/Qwen3-VL-4B-Instruct",
+  "map": "small-city-11",
+  "preset": "standard",
+  "vision": true,
+  "episodes": 3,
+  "mean_task_score": 0.0,
+  "max_task_score": 0.0,
+  "mean_deliveries": 0,
+  "any_delivery": false,
+  "nonzero_reward": false,
+  "total_parse_failures": 0,
+  "records": [
+    {
+      "seed": 42,
+      "steps": 80,
+      "wall_clock_s": 1133.6,
+      "deliveries": 0,
+      "success": false,
+      "task_score": 0.0,
+      "reward_components": {
+        "delivery": 0.0,
+        "on_time_bonus": 0.0,
+        "late_penalty": -0.0,
+        "invalid_action_penalty": -0.0,
+        "step_cost": -0.0
+      },
+      "parse_failures": 0,
+      "invalid_actions": 0,
+      "system_prompt": "You are a delivery courier in small-city-11. Accept orders, collect them from restaurants, and deliver them to their destinations. Move with MOVE(direction=...) or MOVE_TO(k). Constraints: orders have deadlines; you can carry at most 3 order(s).\n\nEach turn you receive the current state and, when available, a first-person view and a map. Reply with EXACTLY ONE action and nothing else.\n\nAvailable actions:\n  VIEW_ORDERS()  - list orders you could accept\n  ACCEPT_ORDER(k)  - accept order number k\n  PICKUP(orders=[k])  - collect order k at a restaurant\n  DROP_OFF(oid=k)  - deliver order k at its destination\n  WAIT()  - do nothing this turn\n  MOVE_TO(k)  - step to numbered neighbouring waypoint k\n  MOVE(direction=\"forward\"|\"left\"|\"right\"|\"backward\")  - step in a direction\n  NAVIGATE(target=\"restaurant 1\")  - ask for a route (does not move you)\n\nReply with one action only, for example: MOVE_TO(1)",
+      "turns": [
+        {
+          "step": 0,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 1612,
+          "response_tokens": 5,
+          "latency_s": 1.33
+        },
+        {
+          "step": 1,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 108 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 2997,
+          "response_tokens": 5,
+          "latency_s": 0.493
+        },
+        {
+          "step": 2,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 134 Church Ave. The current time is 00:00:04. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 4382,
+          "response_tokens": 5,
+          "latency_s": 0.633
+        },
+        {
+          "step": 3,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 174 Church Ave. The current time is 00:00:09. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 5766,
+          "response_tokens": 4,
+          "latency_s": 0.793
+        },
+        {
+          "step": 4,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 176 Church Ave. The current time is 00:00:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 7150,
+          "response_tokens": 5,
+          "latency_s": 0.982
+        },
+        {
+          "step": 5,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 174 Church Ave. The current time is 00:00:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 8534,
+          "response_tokens": 4,
+          "latency_s": 1.152
+        },
+        {
+          "step": 6,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 134 Church Ave. The current time is 00:00:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 9918,
+          "response_tokens": 5,
+          "latency_s": 1.243
+        },
+        {
+          "step": 7,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Church Ave. The current time is 00:00:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 11303,
+          "response_tokens": 5,
+          "latency_s": 1.437
+        },
+        {
+          "step": 8,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 40 Church Ave. The current time is 00:00:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 12687,
+          "response_tokens": 5,
+          "latency_s": 1.635
+        },
+        {
+          "step": 9,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:00:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 14069,
+          "response_tokens": 4,
+          "latency_s": 1.811
+        },
+        {
+          "step": 10,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:00:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 15450,
+          "response_tokens": 5,
+          "latency_s": 2.049
+        },
+        {
+          "step": 11,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 42 Cherry St. The current time is 00:01:01. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 16834,
+          "response_tokens": 5,
+          "latency_s": 2.261
+        },
+        {
+          "step": 12,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 82 Cherry St. The current time is 00:01:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 18218,
+          "response_tokens": 5,
+          "latency_s": 2.502
+        },
+        {
+          "step": 13,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 104 Cherry St. The current time is 00:01:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 19603,
+          "response_tokens": 5,
+          "latency_s": 2.759
+        },
+        {
+          "step": 14,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 128 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 21014,
+          "response_tokens": 5,
+          "latency_s": 2.972
+        },
+        {
+          "step": 15,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 126 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 22425,
+          "response_tokens": 5,
+          "latency_s": 3.233
+        },
+        {
+          "step": 16,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 130 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 23836,
+          "response_tokens": 5,
+          "latency_s": 3.478
+        },
+        {
+          "step": 17,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 148 Cherry St. The current time is 00:01:18. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 25221,
+          "response_tokens": 5,
+          "latency_s": 3.758
+        },
+        {
+          "step": 18,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 26605,
+          "response_tokens": 4,
+          "latency_s": 3.995
+        },
+        {
+          "step": 19,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at Cherry St & Poplar Ave. The current time is 00:01:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 27987,
+          "response_tokens": 4,
+          "latency_s": 4.279
+        },
+        {
+          "step": 20,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Poplar Ave. The current time is 00:01:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 29369,
+          "response_tokens": 5,
+          "latency_s": 4.595
+        },
+        {
+          "step": 21,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 192 Cherry St. The current time is 00:01:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 30754,
+          "response_tokens": 5,
+          "latency_s": 4.856
+        },
+        {
+          "step": 22,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Cherry St & Poplar Ave. The current time is 00:01:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 32137,
+          "response_tokens": 4,
+          "latency_s": 5.138
+        },
+        {
+          "step": 23,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 168 Poplar Ave. The current time is 00:01:53. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 33522,
+          "response_tokens": 5,
+          "latency_s": 5.436
+        },
+        {
+          "step": 24,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 172 Poplar Ave. The current time is 00:01:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 34908,
+          "response_tokens": 5,
+          "latency_s": 5.778
+        },
+        {
+          "step": 25,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 166 Poplar Ave. The current time is 00:02:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 36294,
+          "response_tokens": 5,
+          "latency_s": 6.102
+        },
+        {
+          "step": 26,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 170 Poplar Ave. The current time is 00:02:09. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 37706,
+          "response_tokens": 5,
+          "latency_s": 6.437
+        },
+        {
+          "step": 27,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 174 Poplar Ave. The current time is 00:02:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 39091,
+          "response_tokens": 4,
+          "latency_s": 6.782
+        },
+        {
+          "step": 28,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Court St & Poplar Ave. The current time is 00:02:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 40473,
+          "response_tokens": 4,
+          "latency_s": 7.065
+        },
+        {
+          "step": 29,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at Court St & Poplar Ave. The current time is 00:02:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 41855,
+          "response_tokens": 5,
+          "latency_s": 7.434
+        },
+        {
+          "step": 30,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 130 Poplar Ave. The current time is 00:02:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 43241,
+          "response_tokens": 5,
+          "latency_s": 7.785
+        },
+        {
+          "step": 31,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Poplar Ave. The current time is 00:02:36. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 44627,
+          "response_tokens": 5,
+          "latency_s": 8.348
+        },
+        {
+          "step": 32,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 34 Poplar Ave. The current time is 00:02:49. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 46012,
+          "response_tokens": 5,
+          "latency_s": 8.556
+        },
+        {
+          "step": 33,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 10 Poplar Ave. The current time is 00:02:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 47397,
+          "response_tokens": 4,
+          "latency_s": 8.864
+        },
+        {
+          "step": 34,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 12 Poplar Ave. The current time is 00:03:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 48781,
+          "response_tokens": 4,
+          "latency_s": 9.256
+        },
+        {
+          "step": 35,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 6 Poplar Ave. The current time is 00:03:04. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 50164,
+          "response_tokens": 5,
+          "latency_s": 9.687
+        },
+        {
+          "step": 36,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 4 Poplar Ave. The current time is 00:03:14. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 51548,
+          "response_tokens": 5,
+          "latency_s": 10.073
+        },
+        {
+          "step": 37,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 8 Poplar Ave. The current time is 00:03:20. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 52932,
+          "response_tokens": 5,
+          "latency_s": 10.467
+        },
+        {
+          "step": 38,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 2 Poplar Ave. The current time is 00:03:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 54316,
+          "response_tokens": 5,
+          "latency_s": 10.79
+        },
+        {
+          "step": 39,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 14 Poplar Ave. The current time is 00:03:28. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 55700,
+          "response_tokens": 4,
+          "latency_s": 11.257
+        },
+        {
+          "step": 40,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Court St & Poplar Ave. The current time is 00:03:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 57082,
+          "response_tokens": 4,
+          "latency_s": 11.81
+        },
+        {
+          "step": 41,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 130 Poplar Ave. The current time is 00:03:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 58467,
+          "response_tokens": 5,
+          "latency_s": 12.118
+        },
+        {
+          "step": 42,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Poplar Ave. The current time is 00:03:43. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 59853,
+          "response_tokens": 5,
+          "latency_s": 12.573
+        },
+        {
+          "step": 43,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 34 Poplar Ave. The current time is 00:03:56. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 61238,
+          "response_tokens": 5,
+          "latency_s": 12.963
+        },
+        {
+          "step": 44,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 10 Poplar Ave. The current time is 00:04:01. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 62623,
+          "response_tokens": 4,
+          "latency_s": 13.385
+        },
+        {
+          "step": 45,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 12 Poplar Ave. The current time is 00:04:07. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 64007,
+          "response_tokens": 4,
+          "latency_s": 13.695
+        },
+        {
+          "step": 46,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 6 Poplar Ave. The current time is 00:04:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 65390,
+          "response_tokens": 5,
+          "latency_s": 14.578
+        },
+        {
+          "step": 47,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 4 Poplar Ave. The current time is 00:04:20. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 66774,
+          "response_tokens": 5,
+          "latency_s": 14.719
+        },
+        {
+          "step": 48,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 8 Poplar Ave. The current time is 00:04:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 68158,
+          "response_tokens": 5,
+          "latency_s": 15.248
+        },
+        {
+          "step": 49,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 2 Poplar Ave. The current time is 00:04:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 69542,
+          "response_tokens": 5,
+          "latency_s": 15.655
+        },
+        {
+          "step": 50,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 14 Poplar Ave. The current time is 00:04:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 70926,
+          "response_tokens": 4,
+          "latency_s": 16.521
+        },
+        {
+          "step": 51,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Court St & Poplar Ave. The current time is 00:04:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 72308,
+          "response_tokens": 4,
+          "latency_s": 16.654
+        },
+        {
+          "step": 52,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 130 Poplar Ave. The current time is 00:04:46. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 73693,
+          "response_tokens": 5,
+          "latency_s": 17.551
+        },
+        {
+          "step": 53,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Poplar Ave. The current time is 00:04:50. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 75079,
+          "response_tokens": 5,
+          "latency_s": 17.991
+        },
+        {
+          "step": 54,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 34 Poplar Ave. The current time is 00:05:02. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 76464,
+          "response_tokens": 5,
+          "latency_s": 18.392
+        },
+        {
+          "step": 55,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 10 Poplar Ave. The current time is 00:05:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 77849,
+          "response_tokens": 4,
+          "latency_s": 19.009
+        },
+        {
+          "step": 56,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 12 Poplar Ave. The current time is 00:05:13. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 79233,
+          "response_tokens": 4,
+          "latency_s": 19.536
+        },
+        {
+          "step": 57,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 6 Poplar Ave. The current time is 00:05:17. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 80616,
+          "response_tokens": 5,
+          "latency_s": 20.184
+        },
+        {
+          "step": 58,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 4 Poplar Ave. The current time is 00:05:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 82000,
+          "response_tokens": 5,
+          "latency_s": 20.615
+        },
+        {
+          "step": 59,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 8 Poplar Ave. The current time is 00:05:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 83384,
+          "response_tokens": 5,
+          "latency_s": 21.057
+        },
+        {
+          "step": 60,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 2 Poplar Ave. The current time is 00:05:41. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 84768,
+          "response_tokens": 5,
+          "latency_s": 22.281
+        },
+        {
+          "step": 61,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 14 Poplar Ave. The current time is 00:05:41. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 86152,
+          "response_tokens": 4,
+          "latency_s": 22.555
+        },
+        {
+          "step": 62,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Court St & Poplar Ave. The current time is 00:05:47. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 87534,
+          "response_tokens": 4,
+          "latency_s": 23.254
+        },
+        {
+          "step": 63,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 130 Poplar Ave. The current time is 00:05:53. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 88919,
+          "response_tokens": 5,
+          "latency_s": 24.19
+        },
+        {
+          "step": 64,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Poplar Ave. The current time is 00:05:56. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 90305,
+          "response_tokens": 5,
+          "latency_s": 25.035
+        },
+        {
+          "step": 65,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 34 Poplar Ave. The current time is 00:06:09. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 91690,
+          "response_tokens": 5,
+          "latency_s": 24.328
+        },
+        {
+          "step": 66,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 10 Poplar Ave. The current time is 00:06:14. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 93075,
+          "response_tokens": 4,
+          "latency_s": 24.707
+        },
+        {
+          "step": 67,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 12 Poplar Ave. The current time is 00:06:20. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 94459,
+          "response_tokens": 4,
+          "latency_s": 25.552
+        },
+        {
+          "step": 68,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 6 Poplar Ave. The current time is 00:06:24. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 95842,
+          "response_tokens": 5,
+          "latency_s": 26.185
+        },
+        {
+          "step": 69,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 4 Poplar Ave. The current time is 00:06:34. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 97226,
+          "response_tokens": 5,
+          "latency_s": 26.79
+        },
+        {
+          "step": 70,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 8 Poplar Ave. The current time is 00:06:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 98610,
+          "response_tokens": 5,
+          "latency_s": 27.4
+        },
+        {
+          "step": 71,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 2 Poplar Ave. The current time is 00:06:47. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 99994,
+          "response_tokens": 5,
+          "latency_s": 28.014
+        },
+        {
+          "step": 72,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 14 Poplar Ave. The current time is 00:06:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 101378,
+          "response_tokens": 4,
+          "latency_s": 28.563
+        },
+        {
+          "step": 73,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Court St & Poplar Ave. The current time is 00:06:53. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 102760,
+          "response_tokens": 4,
+          "latency_s": 29.144
+        },
+        {
+          "step": 74,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 130 Poplar Ave. The current time is 00:07:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 104145,
+          "response_tokens": 5,
+          "latency_s": 30.203
+        },
+        {
+          "step": 75,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Poplar Ave. The current time is 00:07:03. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 105531,
+          "response_tokens": 5,
+          "latency_s": 30.773
+        },
+        {
+          "step": 76,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 34 Poplar Ave. The current time is 00:07:16. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 106916,
+          "response_tokens": 5,
+          "latency_s": 31.51
+        },
+        {
+          "step": 77,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 10 Poplar Ave. The current time is 00:07:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 108301,
+          "response_tokens": 4,
+          "latency_s": 31.758
+        },
+        {
+          "step": 78,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 12 Poplar Ave. The current time is 00:07:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 109685,
+          "response_tokens": 4,
+          "latency_s": 32.037
+        },
+        {
+          "step": 79,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 6 Poplar Ave. The current time is 00:07:31. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 111068,
+          "response_tokens": 5,
+          "latency_s": 33.122
+        },
+        {
+          "step": 80,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 4 Poplar Ave. The current time is 00:07:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 112452,
+          "response_tokens": 5,
+          "latency_s": 33.338
+        }
+      ],
+      "token_summary": {
+        "total_tokens": 112457,
+        "assistant_tokens": 379,
+        "environment_tokens": 112078,
+        "image_tokens": 97848,
+        "turns": 163
+      },
+      "trajectory_sha256": "8558241befce17670f3e6dd112f9f8c962162a758c09ba7bf4e5da21d38283e6"
+    },
+    {
+      "seed": 43,
+      "steps": 25,
+      "wall_clock_s": 78.2,
+      "deliveries": 0,
+      "success": false,
+      "task_score": 0.0,
+      "reward_components": {
+        "delivery": 0.0,
+        "on_time_bonus": 0.0,
+        "late_penalty": -0.0,
+        "invalid_action_penalty": -0.0,
+        "step_cost": -0.0
+      },
+      "parse_failures": 0,
+      "invalid_actions": 0,
+      "system_prompt": "You are a delivery courier in small-city-11. Accept orders, collect them from restaurants, and deliver them to their destinations. Move with MOVE(direction=...) or MOVE_TO(k). Constraints: orders have deadlines; you can carry at most 3 order(s).\n\nEach turn you receive the current state and, when available, a first-person view and a map. Reply with EXACTLY ONE action and nothing else.\n\nAvailable actions:\n  VIEW_ORDERS()  - list orders you could accept\n  ACCEPT_ORDER(k)  - accept order number k\n  PICKUP(orders=[k])  - collect order k at a restaurant\n  DROP_OFF(oid=k)  - deliver order k at its destination\n  WAIT()  - do nothing this turn\n  MOVE_TO(k)  - step to numbered neighbouring waypoint k\n  MOVE(direction=\"forward\"|\"left\"|\"right\"|\"backward\")  - step in a direction\n  NAVIGATE(target=\"restaurant 1\")  - ask for a route (does not move you)\n\nReply with one action only, for example: MOVE_TO(1)",
+      "turns": [
+        {
+          "step": 0,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 1612,
+          "response_tokens": 5,
+          "latency_s": 0.227
+        },
+        {
+          "step": 1,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 108 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 2997,
+          "response_tokens": 5,
+          "latency_s": 0.366
+        },
+        {
+          "step": 2,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 134 Church Ave. The current time is 00:00:04. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 4382,
+          "response_tokens": 5,
+          "latency_s": 0.528
+        },
+        {
+          "step": 3,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 174 Church Ave. The current time is 00:00:09. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 5766,
+          "response_tokens": 4,
+          "latency_s": 0.687
+        },
+        {
+          "step": 4,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 176 Church Ave. The current time is 00:00:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 7150,
+          "response_tokens": 5,
+          "latency_s": 0.877
+        },
+        {
+          "step": 5,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 174 Church Ave. The current time is 00:00:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 8534,
+          "response_tokens": 4,
+          "latency_s": 1.052
+        },
+        {
+          "step": 6,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 134 Church Ave. The current time is 00:00:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 9918,
+          "response_tokens": 5,
+          "latency_s": 1.268
+        },
+        {
+          "step": 7,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Church Ave. The current time is 00:00:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 11303,
+          "response_tokens": 5,
+          "latency_s": 1.477
+        },
+        {
+          "step": 8,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 40 Church Ave. The current time is 00:00:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 12687,
+          "response_tokens": 5,
+          "latency_s": 1.737
+        },
+        {
+          "step": 9,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:00:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 14069,
+          "response_tokens": 4,
+          "latency_s": 1.861
+        },
+        {
+          "step": 10,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:00:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 15450,
+          "response_tokens": 5,
+          "latency_s": 2.1
+        },
+        {
+          "step": 11,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 42 Cherry St. The current time is 00:01:01. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 16834,
+          "response_tokens": 5,
+          "latency_s": 2.325
+        },
+        {
+          "step": 12,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 82 Cherry St. The current time is 00:01:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 18218,
+          "response_tokens": 5,
+          "latency_s": 2.563
+        },
+        {
+          "step": 13,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 104 Cherry St. The current time is 00:01:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 19603,
+          "response_tokens": 5,
+          "latency_s": 2.784
+        },
+        {
+          "step": 14,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 128 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 21014,
+          "response_tokens": 5,
+          "latency_s": 3.056
+        },
+        {
+          "step": 15,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 126 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 22425,
+          "response_tokens": 5,
+          "latency_s": 3.376
+        },
+        {
+          "step": 16,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 130 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 23836,
+          "response_tokens": 5,
+          "latency_s": 3.649
+        },
+        {
+          "step": 17,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 148 Cherry St. The current time is 00:01:18. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 25221,
+          "response_tokens": 5,
+          "latency_s": 3.915
+        },
+        {
+          "step": 18,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 26605,
+          "response_tokens": 4,
+          "latency_s": 4.055
+        },
+        {
+          "step": 19,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at Cherry St & Poplar Ave. The current time is 00:01:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 27987,
+          "response_tokens": 4,
+          "latency_s": 4.329
+        },
+        {
+          "step": 20,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Poplar Ave. The current time is 00:01:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 29369,
+          "response_tokens": 5,
+          "latency_s": 4.654
+        },
+        {
+          "step": 21,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 192 Cherry St. The current time is 00:01:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 30754,
+          "response_tokens": 5,
+          "latency_s": 4.967
+        },
+        {
+          "step": 22,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Cherry St & Poplar Ave. The current time is 00:01:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 32137,
+          "response_tokens": 4,
+          "latency_s": 5.175
+        },
+        {
+          "step": 23,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 168 Poplar Ave. The current time is 00:01:53. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 33522,
+          "response_tokens": 5,
+          "latency_s": 5.504
+        },
+        {
+          "step": 24,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 172 Poplar Ave. The current time is 00:01:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 34908,
+          "response_tokens": 5,
+          "latency_s": 5.877
+        }
+      ],
+      "token_summary": {
+        "total_tokens": 34913,
+        "assistant_tokens": 119,
+        "environment_tokens": 34794,
+        "image_tokens": 30200,
+        "turns": 51
+      },
+      "trajectory_sha256": "9ce326d59d1b11790c58330c80cea3457f136c7db650709dbb58025557fb5363"
+    },
+    {
+      "seed": 44,
+      "steps": 25,
+      "wall_clock_s": 76.4,
+      "deliveries": 0,
+      "success": false,
+      "task_score": 0.0,
+      "reward_components": {
+        "delivery": 0.0,
+        "on_time_bonus": 0.0,
+        "late_penalty": -0.0,
+        "invalid_action_penalty": -0.0,
+        "step_cost": -0.0
+      },
+      "parse_failures": 0,
+      "invalid_actions": 0,
+      "system_prompt": "You are a delivery courier in small-city-11. Accept orders, collect them from restaurants, and deliver them to their destinations. Move with MOVE(direction=...) or MOVE_TO(k). Constraints: orders have deadlines; you can carry at most 3 order(s).\n\nEach turn you receive the current state and, when available, a first-person view and a map. Reply with EXACTLY ONE action and nothing else.\n\nAvailable actions:\n  VIEW_ORDERS()  - list orders you could accept\n  ACCEPT_ORDER(k)  - accept order number k\n  PICKUP(orders=[k])  - collect order k at a restaurant\n  DROP_OFF(oid=k)  - deliver order k at its destination\n  WAIT()  - do nothing this turn\n  MOVE_TO(k)  - step to numbered neighbouring waypoint k\n  MOVE(direction=\"forward\"|\"left\"|\"right\"|\"backward\")  - step in a direction\n  NAVIGATE(target=\"restaurant 1\")  - ask for a route (does not move you)\n\nReply with one action only, for example: MOVE_TO(1)",
+      "turns": [
+        {
+          "step": 0,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 40 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 1612,
+          "response_tokens": 5,
+          "latency_s": 0.222
+        },
+        {
+          "step": 1,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 108 Church Ave. The current time is 00:00:00. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 2997,
+          "response_tokens": 5,
+          "latency_s": 0.362
+        },
+        {
+          "step": 2,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 134 Church Ave. The current time is 00:00:04. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 4382,
+          "response_tokens": 5,
+          "latency_s": 0.52
+        },
+        {
+          "step": 3,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing North, you are at 174 Church Ave. The current time is 00:00:09. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 5766,
+          "response_tokens": 4,
+          "latency_s": 0.682
+        },
+        {
+          "step": 4,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 176 Church Ave. The current time is 00:00:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 7150,
+          "response_tokens": 5,
+          "latency_s": 0.873
+        },
+        {
+          "step": 5,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at 174 Church Ave. The current time is 00:00:21. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : (blocked)\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 8534,
+          "response_tokens": 4,
+          "latency_s": 1.044
+        },
+        {
+          "step": 6,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 134 Church Ave. The current time is 00:00:26. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 9918,
+          "response_tokens": 5,
+          "latency_s": 1.262
+        },
+        {
+          "step": 7,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 108 Church Ave. The current time is 00:00:30. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 11303,
+          "response_tokens": 5,
+          "latency_s": 1.472
+        },
+        {
+          "step": 8,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 40 Church Ave. The current time is 00:00:42. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 12687,
+          "response_tokens": 5,
+          "latency_s": 1.682
+        },
+        {
+          "step": 9,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 6 Church Ave. The current time is 00:00:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 14069,
+          "response_tokens": 4,
+          "latency_s": 1.845
+        },
+        {
+          "step": 10,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Church Ave. The current time is 00:00:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 15450,
+          "response_tokens": 5,
+          "latency_s": 2.097
+        },
+        {
+          "step": 11,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 42 Cherry St. The current time is 00:01:01. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 16834,
+          "response_tokens": 5,
+          "latency_s": 2.311
+        },
+        {
+          "step": 12,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 82 Cherry St. The current time is 00:01:08. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 18218,
+          "response_tokens": 5,
+          "latency_s": 2.547
+        },
+        {
+          "step": 13,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 104 Cherry St. The current time is 00:01:11. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 19603,
+          "response_tokens": 5,
+          "latency_s": 2.765
+        },
+        {
+          "step": 14,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 128 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 21014,
+          "response_tokens": 5,
+          "latency_s": 3.033
+        },
+        {
+          "step": 15,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 126 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 22425,
+          "response_tokens": 5,
+          "latency_s": 3.289
+        },
+        {
+          "step": 16,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 130 Cherry St. The current time is 00:01:15. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.\n### ephemeral_context\n[bus_hint]\nYou are at a bus stop. When a bus arrives, you can board it.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 23836,
+          "response_tokens": 5,
+          "latency_s": 3.57
+        },
+        {
+          "step": 17,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 148 Cherry St. The current time is 00:01:18. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 25221,
+          "response_tokens": 5,
+          "latency_s": 3.84
+        },
+        {
+          "step": 18,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 202 Cherry St. The current time is 00:01:22. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(right)",
+          "parsed_action": "MOVE({'direction': 'right'})",
+          "parsed_ok": true,
+          "prompt_tokens": 26605,
+          "response_tokens": 4,
+          "latency_s": 4.061
+        },
+        {
+          "step": 19,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at Cherry St & Poplar Ave. The current time is 00:01:27. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 27987,
+          "response_tokens": 4,
+          "latency_s": 4.351
+        },
+        {
+          "step": 20,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at Cherry St & Poplar Ave. The current time is 00:01:33. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 29369,
+          "response_tokens": 5,
+          "latency_s": 4.681
+        },
+        {
+          "step": 21,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing East, you are at 192 Cherry St. The current time is 00:01:40. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(backward)",
+          "parsed_action": "MOVE({'direction': 'backward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 30754,
+          "response_tokens": 5,
+          "latency_s": 4.964
+        },
+        {
+          "step": 22,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing West, you are at Cherry St & Poplar Ave. The current time is 00:01:48. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : reachable\n  - right   : reachable\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(left)",
+          "parsed_action": "MOVE({'direction': 'left'})",
+          "parsed_ok": true,
+          "prompt_tokens": 32137,
+          "response_tokens": 4,
+          "latency_s": 5.16
+        },
+        {
+          "step": 23,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 168 Poplar Ave. The current time is 00:01:53. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 33522,
+          "response_tokens": 5,
+          "latency_s": 5.496
+        },
+        {
+          "step": 24,
+          "prompt_text": "<image><image>\n\n### agent_state\nYou are Agent 1, you are facing South, you are at 172 Poplar Ave. The current time is 00:01:54. Your current transport mode is e-scooter, your location is labeled in the 2D map. Your speed is ~6.0 m/s. Your current pace is normal (\u00d71.00). Earnings is $100.00. Inventory: empty.\n### reachable_waypoints\nFrom here, MOVE(direction=...) reaches (relative to your facing):\n  - forward : reachable\n  - left    : (blocked)\n  - right   : (blocked)\n  - backward: reachable\n### active_orders\nYou currently have no accepted orders.",
+          "image_count": 2,
+          "image_shapes": [
+            [
+              640,
+              360
+            ],
+            [
+              1200,
+              843
+            ]
+          ],
+          "raw_output": "MOVE(forward)",
+          "parsed_action": "MOVE({'direction': 'forward'})",
+          "parsed_ok": true,
+          "prompt_tokens": 34908,
+          "response_tokens": 5,
+          "latency_s": 5.794
+        }
+      ],
+      "token_summary": {
+        "total_tokens": 34913,
+        "assistant_tokens": 119,
+        "environment_tokens": 34794,
+        "image_tokens": 30200,
+        "turns": 51
+      },
+      "trajectory_sha256": "1388781dfe9b87d970ad1587ccd9ebcbe973fc2dc1f92a60d6696a34f553123f"
+    }
+  ]
+}
