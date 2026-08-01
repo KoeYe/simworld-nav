@@ -75,6 +75,11 @@ class Thresholds:
     long_edge_floor_m: float = 100.0
     # The certified region must be one dominant component, not a scatter.
     min_largest_component_fraction: float = 0.90
+    # Node the graph before analysing it. Measured on Paris, 37.2% of edges ran
+    # straight past a junction without stopping there, letting an agent skip
+    # intersections it never visited. Repair is on by default because an
+    # un-noded graph is not a description of the map.
+    repair_graph: bool = True
     # Scripted oracle deliveries that must succeed for the map to be usable.
     solvability_seeds: int = 5
     min_solvability_rate: float = 0.8
@@ -438,6 +443,11 @@ async def _scripted_delivery(
         await env.reset(seed=seed)
         agent = env._env.dms[0]
         city_map = agent.city_map
+        # The oracle must plan on the graph the analysis certified, not the raw
+        # one; otherwise solvability is measured against a different map.
+        from embodiedbench.compiler.graph_repair import repair_graph as _node_graph
+
+        _node_graph(city_map)
 
         async def act(action: str):
             return await env.step(json.dumps({"action": action}))
@@ -613,6 +623,11 @@ def compile_map(
 
     try:
         agent = env._env.dms[0]
+        repair = None
+        if thresholds.repair_graph:
+            from embodiedbench.compiler.graph_repair import repair_graph as _node_graph
+
+            repair = _node_graph(agent.city_map).to_dict()
         analysis = analyze_graph(agent.city_map, thresholds)
         world = compile_procgen_world(
             agent.city_map, map_name=map_name, order_manager=env._env.om
@@ -660,6 +675,7 @@ def compile_map(
         "map": map_name,
         "thresholds": dataclasses.asdict(thresholds),
         "analysis": analysis.to_dict(),
+        "graph_repair": repair,
         "source_geometry": source,
         "navigation": decision.to_dict(),
         "quality_findings": findings,

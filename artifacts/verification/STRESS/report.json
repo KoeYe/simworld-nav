@@ -8,7 +8,7 @@
       "case": "minimal_grid",
       "attacks": "baseline validity",
       "note": "",
-      "seconds": 0.5,
+      "seconds": 0.4,
       "status": "pass",
       "checks": [
         {
@@ -41,27 +41,27 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 33,
-          "edge_count": 45,
-          "mean_degree": 2.727,
+          "edge_count": 42,
+          "mean_degree": 2.545,
           "degree_histogram": {
-            "1": 2,
+            "1": 1,
             "2": 18,
-            "3": 8,
-            "4": 1,
-            "6": 4
+            "3": 9,
+            "4": 5
           },
           "over_connected_nodes": 0,
           "dock_nodes": 0,
           "junction_nodes": 20,
           "edge_length_m": {
             "min": 1.0,
-            "p50": 34.0,
-            "p90": 86.0,
+            "p50": 26.0,
+            "p90": 75.4,
             "p99": 86.0,
             "max": 86.0
           },
@@ -70,7 +70,25 @@
           "cardinal_fraction": 1.0,
           "largest_component_fraction": 1.0,
           "component_count": 1,
-          "long_edge_threshold_m": 204.0
+          "long_edge_threshold_m": 156.0
+        },
+        "graph_repair": {
+          "nodes": 33,
+          "edges_before": 45,
+          "edges_after": 42,
+          "edges_split": 9,
+          "edges_added": 6,
+          "edges_removed": 9,
+          "skipped_nodes_recovered": 14,
+          "mean_degree_before": 2.727,
+          "mean_degree_after": 2.545,
+          "max_degree_before": 6,
+          "max_degree_after": 4,
+          "longest_edge_before_m": 86.0,
+          "longest_edge_after_m": 86.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -103,14 +121,14 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.05,
               "failure": null
             },
@@ -124,14 +142,14 @@
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 46,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.2,
               "failure": null
             }
@@ -139,7 +157,7 @@
           "delivered_episodes": 5,
           "solvability_rate": 1.0,
           "passes": true,
-          "mean_steps": 8.8
+          "mean_steps": 9.2
         },
         "grade": "A",
         "env_config": {
@@ -157,16 +175,16 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "f08db3adbe8ecf0469b0705e7e24942812fd4ac3bfbbcc68c1cf71070689e82f",
+        "world_bundle_sha256": "753ff5d1edb0abc971c29ce7b809c972514ab88ca26cc076454f534451eab7fa",
         "world_nodes": 33,
-        "world_edges": 45
+        "world_edges": 42
       }
     },
     {
       "case": "single_segment",
       "attacks": "graphs smaller than any threshold",
       "note": "",
-      "seconds": 0.2,
+      "seconds": 0.1,
       "status": "pass",
       "checks": [
         {
@@ -187,6 +205,7 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
@@ -213,6 +232,24 @@
           "largest_component_fraction": 1.0,
           "component_count": 1,
           "long_edge_threshold_m": 100.0
+        },
+        "graph_repair": {
+          "nodes": 14,
+          "edges_before": 14,
+          "edges_after": 14,
+          "edges_split": 0,
+          "edges_added": 0,
+          "edges_removed": 0,
+          "skipped_nodes_recovered": 0,
+          "mean_degree_before": 2.0,
+          "mean_degree_after": 2.0,
+          "max_degree_before": 2,
+          "max_degree_after": 2,
+          "longest_edge_before_m": 86.0,
+          "longest_edge_after_m": 86.0,
+          "notes": [
+            "reached a fixpoint after 0 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -335,6 +372,7 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
@@ -412,19 +450,19 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 53,
-          "edge_count": 77,
-          "mean_degree": 2.906,
+          "edge_count": 70,
+          "mean_degree": 2.642,
           "degree_histogram": {
-            "1": 2,
+            "1": 1,
             "2": 26,
-            "3": 16,
-            "4": 1,
-            "6": 8
+            "3": 17,
+            "4": 9
           },
           "over_connected_nodes": 0,
           "dock_nodes": 0,
@@ -442,6 +480,24 @@
           "largest_component_fraction": 0.6226,
           "component_count": 2,
           "long_edge_threshold_m": 204.0
+        },
+        "graph_repair": {
+          "nodes": 53,
+          "edges_before": 77,
+          "edges_after": 70,
+          "edges_split": 13,
+          "edges_added": 6,
+          "edges_removed": 13,
+          "skipped_nodes_recovered": 22,
+          "mean_degree_before": 2.906,
+          "mean_degree_after": 2.642,
+          "max_degree_before": 6,
+          "max_degree_after": 4,
+          "longest_edge_before_m": 86.0,
+          "longest_edge_after_m": 86.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -480,14 +536,14 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.05,
               "failure": null
             },
@@ -501,14 +557,14 @@
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 46,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.2,
               "failure": null
             }
@@ -516,7 +572,7 @@
           "delivered_episodes": 5,
           "solvability_rate": 1.0,
           "passes": true,
-          "mean_steps": 8.8
+          "mean_steps": 9.2
         },
         "grade": "B",
         "env_config": {
@@ -534,9 +590,9 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "b0036872ee54ed6c0443df27a68c6be0f5c601a5a65b54e4d8dca225581f1a08",
+        "world_bundle_sha256": "d2e160fe905b5efa7507ad8c6bb4ccbaadc81b1ee40b1976fe1f075ffd5f3dcf",
         "world_nodes": 53,
-        "world_edges": 77
+        "world_edges": 70
       }
     },
     {
@@ -572,37 +628,55 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 39,
-          "edge_count": 62,
-          "mean_degree": 3.179,
+          "edge_count": 58,
+          "mean_degree": 2.974,
           "degree_histogram": {
-            "1": 2,
-            "2": 16,
-            "3": 4,
-            "4": 11,
-            "5": 2,
-            "6": 4
+            "1": 1,
+            "2": 18,
+            "3": 3,
+            "4": 15,
+            "5": 2
           },
           "over_connected_nodes": 0,
           "dock_nodes": 0,
           "junction_nodes": 26,
           "edge_length_m": {
             "min": 1.0,
-            "p50": 32.6,
-            "p90": 86.0,
+            "p50": 26.0,
+            "p90": 53.8,
             "p99": 86.0,
             "max": 86.0
           },
           "degenerate_edges": 0,
           "long_edges": 0,
-          "cardinal_fraction": 0.8065,
+          "cardinal_fraction": 0.7931,
           "largest_component_fraction": 1.0,
           "component_count": 1,
-          "long_edge_threshold_m": 195.6
+          "long_edge_threshold_m": 156.0
+        },
+        "graph_repair": {
+          "nodes": 39,
+          "edges_before": 62,
+          "edges_after": 58,
+          "edges_split": 10,
+          "edges_added": 6,
+          "edges_removed": 10,
+          "skipped_nodes_recovered": 16,
+          "mean_degree_before": 3.179,
+          "mean_degree_after": 2.974,
+          "max_degree_before": 6,
+          "max_degree_after": 5,
+          "longest_edge_before_m": 86.0,
+          "longest_edge_after_m": 86.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -626,8 +700,8 @@
             "NAVIGATE"
           ],
           "enable_waypoint_marks": true,
-          "rationale": "80.7% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
-          "cardinal_fraction": 0.8065
+          "rationale": "79.3% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 0.7931
         },
         "quality_findings": [
           {
@@ -642,14 +716,14 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 9,
+              "steps": 11,
               "earnings": 104.25,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.05,
               "failure": null
             },
@@ -663,14 +737,14 @@
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 9,
+              "steps": 11,
               "earnings": 104.25,
               "failure": null
             },
             {
               "seed": 46,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.2,
               "failure": null
             }
@@ -696,16 +770,16 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "bbc294c27c6c7c0d9bde856ea0d9d100e8fc3e03d3388bf1b2bccd96917ff20a",
+        "world_bundle_sha256": "cf380bcb08d75e42c91c10c4c860c5f172d88c0ab4d4dfcdbd04ac1af7d1c18e",
         "world_nodes": 39,
-        "world_edges": 62
+        "world_edges": 58
       }
     },
     {
       "case": "self_loop_segments",
       "attacks": "start == end",
       "note": "",
-      "seconds": 0.3,
+      "seconds": 0.2,
       "status": "pass",
       "checks": [
         {
@@ -726,27 +800,27 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 33,
-          "edge_count": 45,
-          "mean_degree": 2.727,
+          "edge_count": 42,
+          "mean_degree": 2.545,
           "degree_histogram": {
-            "1": 2,
+            "1": 1,
             "2": 18,
-            "3": 8,
-            "4": 1,
-            "6": 4
+            "3": 9,
+            "4": 5
           },
           "over_connected_nodes": 0,
           "dock_nodes": 0,
           "junction_nodes": 20,
           "edge_length_m": {
             "min": 1.0,
-            "p50": 34.0,
-            "p90": 86.0,
+            "p50": 26.0,
+            "p90": 75.4,
             "p99": 86.0,
             "max": 86.0
           },
@@ -755,7 +829,25 @@
           "cardinal_fraction": 1.0,
           "largest_component_fraction": 1.0,
           "component_count": 1,
-          "long_edge_threshold_m": 204.0
+          "long_edge_threshold_m": 156.0
+        },
+        "graph_repair": {
+          "nodes": 33,
+          "edges_before": 45,
+          "edges_after": 42,
+          "edges_split": 9,
+          "edges_added": 6,
+          "edges_removed": 9,
+          "skipped_nodes_recovered": 14,
+          "mean_degree_before": 2.727,
+          "mean_degree_after": 2.545,
+          "max_degree_before": 6,
+          "max_degree_after": 4,
+          "longest_edge_before_m": 86.0,
+          "longest_edge_after_m": 86.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -795,14 +887,14 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.05,
               "failure": null
             },
@@ -816,14 +908,14 @@
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 46,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.2,
               "failure": null
             }
@@ -831,7 +923,7 @@
           "delivered_episodes": 5,
           "solvability_rate": 1.0,
           "passes": true,
-          "mean_steps": 8.8
+          "mean_steps": 9.2
         },
         "grade": "B",
         "env_config": {
@@ -849,16 +941,16 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "813ebe6b46febee624aa0e4c70fcf68b0f8eab4c7b10d4812244de8f1903b09f",
+        "world_bundle_sha256": "c724647b03715a823106c50ccea94a0ab60e8c28a8c380d12dc3ac06c63c702c",
         "world_nodes": 33,
-        "world_edges": 45
+        "world_edges": 42
       }
     },
     {
       "case": "star_hub",
       "attacks": "degree far outside road norms",
       "note": "",
-      "seconds": 1.3,
+      "seconds": 1.2,
       "status": "pass",
       "checks": [
         {
@@ -871,8 +963,7 @@
           "name": "flag[over_connected_nodes]",
           "expected": "over_connected_nodes",
           "observed": [
-            "over_connected_nodes",
-            "long_unvalidated_edges"
+            "over_connected_nodes"
           ],
           "status": "pass"
         }
@@ -888,21 +979,23 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 85,
-          "edge_count": 253,
-          "mean_degree": 5.953,
+          "edge_count": 230,
+          "mean_degree": 5.412,
           "degree_histogram": {
-            "1": 13,
-            "3": 47,
-            "11": 1,
-            "14": 23,
-            "19": 1
+            "1": 1,
+            "2": 11,
+            "3": 48,
+            "4": 1,
+            "12": 23,
+            "13": 1
           },
-          "over_connected_nodes": 25,
+          "over_connected_nodes": 24,
           "dock_nodes": 0,
           "junction_nodes": 72,
           "edge_length_m": {
@@ -910,14 +1003,32 @@
             "p50": 29.27,
             "p90": 166.0,
             "p99": 166.0,
-            "max": 205.0
+            "max": 166.0
           },
           "degenerate_edges": 0,
-          "long_edges": 2,
-          "cardinal_fraction": 0.1462,
+          "long_edges": 0,
+          "cardinal_fraction": 0.1435,
           "largest_component_fraction": 1.0,
           "component_count": 1,
           "long_edge_threshold_m": 175.62
+        },
+        "graph_repair": {
+          "nodes": 85,
+          "edges_before": 253,
+          "edges_after": 230,
+          "edges_split": 36,
+          "edges_added": 13,
+          "edges_removed": 36,
+          "skipped_nodes_recovered": 63,
+          "mean_degree_before": 5.953,
+          "mean_degree_after": 5.412,
+          "max_degree_before": 19,
+          "max_degree_after": 13,
+          "longest_edge_before_m": 205.0,
+          "longest_edge_after_m": 166.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -940,20 +1051,14 @@
             "NAVIGATE"
           ],
           "enable_waypoint_marks": true,
-          "rationale": "only 14.6% of edges are near-cardinal (< 60%), so directional MOVE would leave most shortest-path steps unreachable. Graph navigation (MOVE_TO) is the primary action, per PLAN.md 3.3.4.",
-          "cardinal_fraction": 0.1462
+          "rationale": "only 14.3% of edges are near-cardinal (< 60%), so directional MOVE would leave most shortest-path steps unreachable. Graph navigation (MOVE_TO) is the primary action, per PLAN.md 3.3.4.",
+          "cardinal_fraction": 0.1435
         },
         "quality_findings": [
           {
             "code": "over_connected_nodes",
-            "count": 25,
+            "count": 24,
             "detail": "nodes with degree > 6; a road junction rarely exceeds this, so these are probably endpoints merged in error (false intersections, PLAN.md 3.2)"
-          },
-          {
-            "code": "long_unvalidated_edges",
-            "count": 2,
-            "detail": "edges longer than 175.62 m, this map's own outlier threshold (6.0x its median edge, floored at 100.0 m). Such edges may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)",
-            "stage": "graph"
           }
         ],
         "validation": {
@@ -961,35 +1066,35 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 8,
+              "steps": 13,
               "earnings": 106.75,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 8,
+              "steps": 17,
               "earnings": 107.23,
               "failure": null
             },
             {
               "seed": 44,
               "delivered": 1,
-              "steps": 8,
+              "steps": 16,
               "earnings": 107.23,
               "failure": null
             },
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 8,
+              "steps": 13,
               "earnings": 106.75,
               "failure": null
             },
             {
               "seed": 46,
               "delivered": 1,
-              "steps": 8,
+              "steps": 15,
               "earnings": 106.99,
               "failure": null
             }
@@ -997,7 +1102,7 @@
           "delivered_episodes": 5,
           "solvability_rate": 1.0,
           "passes": true,
-          "mean_steps": 8
+          "mean_steps": 14.8
         },
         "grade": "B",
         "env_config": {
@@ -1014,16 +1119,16 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "97aa8ecbf750fc7c54d10a539b12c9f990f6ddee7e1b176fed4d0daab942bcee",
+        "world_bundle_sha256": "414433d0c77cadeeff2fe6db2a594b94b2dc46fa68b4ce23b79a6304181a98da",
         "world_nodes": 85,
-        "world_edges": 253
+        "world_edges": 230
       }
     },
     {
       "case": "rotated_grid_37deg",
       "attacks": "cardinality is a property, not a given",
       "note": "the Paris lesson in miniature: a rotated grid must not get cardinal MOVE",
-      "seconds": 0.4,
+      "seconds": 0.3,
       "status": "pass",
       "checks": [
         {
@@ -1050,19 +1155,18 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 41,
-          "edge_count": 57,
-          "mean_degree": 2.78,
+          "edge_count": 53,
+          "mean_degree": 2.585,
           "degree_histogram": {
-            "1": 3,
-            "2": 16,
-            "3": 17,
-            "4": 1,
-            "6": 4
+            "2": 21,
+            "3": 16,
+            "4": 4
           },
           "over_connected_nodes": 0,
           "dock_nodes": 0,
@@ -1070,7 +1174,7 @@
           "edge_length_m": {
             "min": 6.751,
             "p50": 34.0,
-            "p90": 146.0,
+            "p90": 103.25,
             "p99": 146.0,
             "max": 146.0
           },
@@ -1080,6 +1184,24 @@
           "largest_component_fraction": 1.0,
           "component_count": 1,
           "long_edge_threshold_m": 203.99
+        },
+        "graph_repair": {
+          "nodes": 41,
+          "edges_before": 57,
+          "edges_after": 53,
+          "edges_split": 7,
+          "edges_added": 3,
+          "edges_removed": 7,
+          "skipped_nodes_recovered": 19,
+          "mean_degree_before": 2.78,
+          "mean_degree_after": 2.585,
+          "max_degree_before": 6,
+          "max_degree_after": 4,
+          "longest_edge_before_m": 146.0,
+          "longest_edge_after_m": 146.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -1111,28 +1233,28 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 15,
+              "steps": 14,
               "earnings": 105.83,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 13,
+              "steps": 14,
               "earnings": 105.54,
               "failure": null
             },
             {
               "seed": 44,
               "delivered": 1,
-              "steps": 12,
+              "steps": 13,
               "earnings": 104.95,
               "failure": null
             },
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 15,
+              "steps": 14,
               "earnings": 105.83,
               "failure": null
             },
@@ -1164,16 +1286,16 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "56a8764fc57204cf6c8c975017d2d1893c628f472ff50edf91f83a27a808f2ec",
+        "world_bundle_sha256": "81a4056cc548a4012b966444ae276f3a93713974a6bcd4d9e2ea9ec9ecee529d",
         "world_nodes": 41,
-        "world_edges": 57
+        "world_edges": 53
       }
     },
     {
       "case": "very_long_segments",
       "attacks": "map-spanning edges",
       "note": "",
-      "seconds": 0.5,
+      "seconds": 0.4,
       "status": "pass",
       "checks": [
         {
@@ -1186,7 +1308,6 @@
           "name": "flag[long_unvalidated_edges]",
           "expected": "long_unvalidated_edges",
           "observed": [
-            "over_connected_nodes",
             "long_unvalidated_edges"
           ],
           "status": "pass"
@@ -1203,30 +1324,29 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 38,
-          "edge_count": 53,
-          "mean_degree": 2.789,
+          "edge_count": 50,
+          "mean_degree": 2.632,
           "degree_histogram": {
-            "1": 2,
-            "2": 19,
-            "3": 11,
-            "4": 2,
-            "6": 3,
-            "7": 1
+            "1": 1,
+            "2": 18,
+            "3": 13,
+            "4": 6
           },
-          "over_connected_nodes": 1,
+          "over_connected_nodes": 0,
           "dock_nodes": 0,
           "junction_nodes": 25,
           "edge_length_m": {
             "min": 1.0,
             "p50": 34.0,
             "p90": 86.0,
-            "p99": 1966.0,
-            "max": 1966.0
+            "p99": 1880.0,
+            "max": 1880.0
           },
           "degenerate_edges": 0,
           "long_edges": 4,
@@ -1234,6 +1354,24 @@
           "largest_component_fraction": 1.0,
           "component_count": 1,
           "long_edge_threshold_m": 204.0
+        },
+        "graph_repair": {
+          "nodes": 38,
+          "edges_before": 53,
+          "edges_after": 50,
+          "edges_split": 12,
+          "edges_added": 9,
+          "edges_removed": 12,
+          "skipped_nodes_recovered": 20,
+          "mean_degree_before": 2.789,
+          "mean_degree_after": 2.632,
+          "max_degree_before": 7,
+          "max_degree_after": 4,
+          "longest_edge_before_m": 1966.0,
+          "longest_edge_after_m": 1880.0,
+          "notes": [
+            "reached a fixpoint after 2 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -1262,11 +1400,6 @@
         },
         "quality_findings": [
           {
-            "code": "over_connected_nodes",
-            "count": 1,
-            "detail": "nodes with degree > 6; a road junction rarely exceeds this, so these are probably endpoints merged in error (false intersections, PLAN.md 3.2)"
-          },
-          {
             "code": "long_unvalidated_edges",
             "count": 4,
             "detail": "edges longer than 204.0 m, this map's own outlier threshold (6.0x its median edge, floored at 100.0 m). Such edges may cross non-road space and need NavMesh confirmation before certification (PLAN.md 6.1 P2)",
@@ -1278,14 +1411,14 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 8,
+              "steps": 9,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 11,
+              "steps": 9,
               "earnings": 104.05,
               "failure": null
             },
@@ -1299,14 +1432,14 @@
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 8,
+              "steps": 9,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 46,
               "delivered": 1,
-              "steps": 11,
+              "steps": 9,
               "earnings": 104.2,
               "failure": null
             }
@@ -1314,7 +1447,7 @@
           "delivered_episodes": 5,
           "solvability_rate": 1.0,
           "passes": true,
-          "mean_steps": 9.8
+          "mean_steps": 9.4
         },
         "grade": "B",
         "env_config": {
@@ -1332,9 +1465,9 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "aeb69e9e9e9f6cc304ed9070d4ad1056878c53af87c886ab8e52bd30130fdbbd",
+        "world_bundle_sha256": "2df56722f2aff057b95a36f8a4b6c50414dc42cab9045b1b39a04ccd23036a24",
         "world_nodes": 38,
-        "world_edges": 53
+        "world_edges": 50
       }
     },
     {
@@ -1362,27 +1495,27 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 33,
-          "edge_count": 45,
-          "mean_degree": 2.727,
+          "edge_count": 42,
+          "mean_degree": 2.545,
           "degree_histogram": {
-            "1": 2,
+            "1": 1,
             "2": 18,
-            "3": 8,
-            "4": 1,
-            "6": 4
+            "3": 9,
+            "4": 5
           },
           "over_connected_nodes": 0,
           "dock_nodes": 0,
           "junction_nodes": 20,
           "edge_length_m": {
             "min": 1.0,
-            "p50": 34.0,
-            "p90": 86.0,
+            "p50": 26.0,
+            "p90": 75.4,
             "p99": 86.0,
             "max": 86.0
           },
@@ -1391,7 +1524,25 @@
           "cardinal_fraction": 1.0,
           "largest_component_fraction": 1.0,
           "component_count": 1,
-          "long_edge_threshold_m": 204.0
+          "long_edge_threshold_m": 156.0
+        },
+        "graph_repair": {
+          "nodes": 33,
+          "edges_before": 45,
+          "edges_after": 42,
+          "edges_split": 9,
+          "edges_added": 6,
+          "edges_removed": 9,
+          "skipped_nodes_recovered": 14,
+          "mean_degree_before": 2.727,
+          "mean_degree_after": 2.545,
+          "max_degree_before": 6,
+          "max_degree_after": 4,
+          "longest_edge_before_m": 86.0,
+          "longest_edge_after_m": 86.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -1424,14 +1575,14 @@
             {
               "seed": 42,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 43,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.05,
               "failure": null
             },
@@ -1445,14 +1596,14 @@
             {
               "seed": 45,
               "delivered": 1,
-              "steps": 7,
+              "steps": 10,
               "earnings": 104.34,
               "failure": null
             },
             {
               "seed": 46,
               "delivered": 1,
-              "steps": 10,
+              "steps": 8,
               "earnings": 104.2,
               "failure": null
             }
@@ -1460,7 +1611,7 @@
           "delivered_episodes": 5,
           "solvability_rate": 1.0,
           "passes": true,
-          "mean_steps": 8.8
+          "mean_steps": 9.2
         },
         "grade": "A",
         "env_config": {
@@ -1478,16 +1629,16 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "1c83c788b2543fa4ead98757a4ade0d96e1813f8723d95fe4e62b5883cd52a07",
+        "world_bundle_sha256": "e3441b5612ed6b06cb8dd2782c2a8806d13dbf7c4e2d25de37c2e9b0eaa3e363",
         "world_nodes": 33,
-        "world_edges": 45
+        "world_edges": 42
       }
     },
     {
       "case": "huge_grid",
       "attacks": "scale, not just termination",
       "note": "",
-      "seconds": 11.9,
+      "seconds": 12.4,
       "status": "pass",
       "checks": [
         {
@@ -1508,19 +1659,19 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
         "analysis": {
           "node_count": 249,
-          "edge_count": 385,
-          "mean_degree": 3.092,
+          "edge_count": 377,
+          "mean_degree": 3.028,
           "degree_histogram": {
             "2": 13,
-            "3": 216,
-            "4": 8,
-            "5": 8,
-            "6": 4
+            "3": 224,
+            "4": 4,
+            "5": 8
           },
           "over_connected_nodes": 0,
           "dock_nodes": 0,
@@ -1534,10 +1685,28 @@
           },
           "degenerate_edges": 0,
           "long_edges": 120,
-          "cardinal_fraction": 0.9688,
+          "cardinal_fraction": 0.9682,
           "largest_component_fraction": 1.0,
           "component_count": 1,
           "long_edge_threshold_m": 204.0
+        },
+        "graph_repair": {
+          "nodes": 249,
+          "edges_before": 399,
+          "edges_after": 386,
+          "edges_split": 13,
+          "edges_added": 0,
+          "edges_removed": 8,
+          "skipped_nodes_recovered": 99,
+          "mean_degree_before": 3.092,
+          "mean_degree_after": 3.028,
+          "max_degree_before": 6,
+          "max_degree_after": 5,
+          "longest_edge_before_m": 1126.0,
+          "longest_edge_after_m": 1126.0,
+          "notes": [
+            "reached a fixpoint after 1 pass(es)"
+          ]
         },
         "source_geometry": {
           "available": true,
@@ -1561,8 +1730,8 @@
             "NAVIGATE"
           ],
           "enable_waypoint_marks": true,
-          "rationale": "96.9% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
-          "cardinal_fraction": 0.9688
+          "rationale": "96.8% of edges lie within 6 degrees of a cardinal axis (>= 60%), so directional MOVE is a valid abstraction and is offered alongside graph navigation.",
+          "cardinal_fraction": 0.9682
         },
         "quality_findings": [
           {
@@ -1631,9 +1800,9 @@
           "enable_waypoint_marks": true,
           "render_mode": "text"
         },
-        "world_bundle_sha256": "f57205a17256319b23af37bbb6cf7934f0197d6046816e8324822ada65df308c",
+        "world_bundle_sha256": "733d93d102294e252a49ceaaedffe8170b597afc056ae786a36b7aa89c7ac0e2",
         "world_nodes": 249,
-        "world_edges": 385
+        "world_edges": 377
       }
     },
     {
@@ -1667,6 +1836,7 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
@@ -1736,6 +1906,7 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
@@ -1811,6 +1982,7 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },
@@ -1880,6 +2052,7 @@
           "long_edge_p50_factor": 6.0,
           "long_edge_floor_m": 100.0,
           "min_largest_component_fraction": 0.9,
+          "repair_graph": true,
           "solvability_seeds": 5,
           "min_solvability_rate": 0.8
         },

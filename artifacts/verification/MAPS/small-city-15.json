@@ -9,6 +9,7 @@
     "long_edge_p50_factor": 6.0,
     "long_edge_floor_m": 100.0,
     "min_largest_component_fraction": 0.9,
+    "repair_graph": true,
     "solvability_seeds": 5,
     "min_solvability_rate": 0.8
   },
@@ -17,10 +18,10 @@
     "edge_count": 207,
     "mean_degree": 2.238,
     "degree_histogram": {
-      "1": 5,
-      "2": 149,
-      "3": 13,
-      "4": 18
+      "1": 4,
+      "2": 150,
+      "3": 14,
+      "4": 17
     },
     "over_connected_nodes": 0,
     "dock_nodes": 0,
@@ -38,6 +39,24 @@
     "largest_component_fraction": 1.0,
     "component_count": 1,
     "long_edge_threshold_m": 167.57
+  },
+  "graph_repair": {
+    "nodes": 185,
+    "edges_before": 207,
+    "edges_after": 207,
+    "edges_split": 1,
+    "edges_added": 1,
+    "edges_removed": 1,
+    "skipped_nodes_recovered": 1,
+    "mean_degree_before": 2.238,
+    "mean_degree_after": 2.238,
+    "max_degree_before": 4,
+    "max_degree_after": 4,
+    "longest_edge_before_m": 128.3,
+    "longest_edge_after_m": 128.3,
+    "notes": [
+      "reached a fixpoint after 1 pass(es)"
+    ]
   },
   "source_geometry": {
     "available": true,
@@ -130,7 +149,7 @@
     "enable_waypoint_marks": true,
     "render_mode": "text"
   },
-  "world_bundle_sha256": "3e512c1a883f9839d3c55e487fdba48e07f88d0a4cb935b6a1650e4777b55d49",
+  "world_bundle_sha256": "5c509adbcc1de12919ca61c73380bb5df3ea5e0279e624ed7381920e25658102",
   "world_nodes": 185,
   "world_edges": 207
 }

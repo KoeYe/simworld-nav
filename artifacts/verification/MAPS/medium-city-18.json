@@ -9,6 +9,7 @@
     "long_edge_p50_factor": 6.0,
     "long_edge_floor_m": 100.0,
     "min_largest_component_fraction": 0.9,
+    "repair_graph": true,
     "solvability_seeds": 5,
     "min_solvability_rate": 0.8
   },
@@ -38,6 +39,24 @@
     "largest_component_fraction": 1.0,
     "component_count": 1,
     "long_edge_threshold_m": 195.39
+  },
+  "graph_repair": {
+    "nodes": 206,
+    "edges_before": 232,
+    "edges_after": 232,
+    "edges_split": 0,
+    "edges_added": 0,
+    "edges_removed": 0,
+    "skipped_nodes_recovered": 0,
+    "mean_degree_before": 2.252,
+    "mean_degree_after": 2.252,
+    "max_degree_before": 4,
+    "max_degree_after": 4,
+    "longest_edge_before_m": 128.11,
+    "longest_edge_after_m": 128.11,
+    "notes": [
+      "reached a fixpoint after 0 pass(es)"
+    ]
   },
   "source_geometry": {
     "available": true,

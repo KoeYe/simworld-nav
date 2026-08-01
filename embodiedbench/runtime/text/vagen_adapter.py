@@ -88,6 +88,7 @@ class VagenTextRuntime:
         preset: str = "nav",
         max_steps: int = 400,
         config_overrides: dict[str, Any] | None = None,
+        repair_graph: bool = True,
     ):
         apply_deterministic_patches()
         self._module = load_vendor_env_module()
@@ -95,6 +96,8 @@ class VagenTextRuntime:
         self._preset = preset
         self._max_steps = max_steps
         self._config_overrides = dict(config_overrides or {})
+        self._repair_graph = repair_graph
+        self.graph_repair_report: dict[str, Any] | None = None
         self._env: Any = None
         self._episode_id: str | None = None
         self._step_index = 0
@@ -134,6 +137,14 @@ class VagenTextRuntime:
         self._sim_time_s = 0.0
 
         raw_obs, _raw_info = asyncio.run(self._env.reset(seed=instance.seed))
+        if self._repair_graph:
+            # Node the graph before the first observation, so the candidate
+            # waypoints the agent is offered match the graph it will traverse.
+            from embodiedbench.compiler.graph_repair import repair_graph as _node_graph
+
+            agent = self._dm()
+            if agent is not None:
+                self.graph_repair_report = _node_graph(agent.city_map).to_dict()
         observation = self._observation(raw_obs, instance, action_result=None)
         info = ResetInfo(
             episode_id=instance.instance_id,
