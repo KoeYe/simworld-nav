@@ -358,3 +358,32 @@ def test_paris_refuses_multi_modal_for_the_right_reason():
     assert not compatibility.can_run
     # PLAN.md 3.3.7's missing Paris affordances, surfaced as a deficit.
     assert "bus_station" in compatibility.deficit
+
+
+def test_the_step_floor_matches_what_a_leg_actually_costs():
+    """A validator that passes an unfinishable configuration certifies it.
+
+    The old floor was 5 steps an order. A delivery leg on the compiled Paris
+    carriageway is a median 530 m over 18 m edges, so a shortest-path oracle
+    spends ~23 turns an order stepping junction by junction and ~11 using
+    ``follow_street``. At 5 the validator happily accepted the 120-step budget
+    the benchmark actually ran, under which the oracle could deliver 3.1 of 10.
+    """
+    from embodiedbench.tasks.profiles import (
+        MIN_STEPS_PER_ORDER,
+        BudgetProfile,
+        DeliveryTaskConfig,
+        OrderProfile,
+    )
+
+    assert MIN_STEPS_PER_ORDER >= 11
+    tight = DeliveryTaskConfig(
+        order=OrderProfile(order_count=10),
+        budget=BudgetProfile(steps=10 * MIN_STEPS_PER_ORDER - 1),
+    )
+    assert any("cannot plausibly cover" in p for p in tight.validate())
+    fine = DeliveryTaskConfig(
+        order=OrderProfile(order_count=10),
+        budget=BudgetProfile(steps=10 * MIN_STEPS_PER_ORDER),
+    )
+    assert not any("cannot plausibly cover" in p for p in fine.validate())

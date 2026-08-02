@@ -1,0 +1,419 @@
+"""The courier's tools: everything the agent can *do* or *ask*.
+
+mini-SWE-agent gives its agent exactly one tool -- bash -- because a shell is
+already a universal interface to a computer. An embodied courier has no such
+universal verb, so the tool set has to be designed, and the design question is
+what a real delivery rider actually has on the job.
+
+A rider has three distinct kinds of affordance, and conflating them is what made
+the first version of this environment unusable:
+
+**Act.** Things that change the world and consume time: walking to the next
+junction, picking up a bag, handing it over. These are irreversible, they cost
+the step budget, and they can fail for physical reasons.
+
+**Look.** Things that change only what the rider knows: turning to look down a
+street, reading the shopfront in front of them. A rider can look around for free
+before committing to a turn, and denying that is what forced the earlier policy
+to guess.
+
+**Consult.** Things that query knowledge the rider carries: the order slip in
+their pocket, the map app on their phone. A phone lookup is not perception --
+it works around a corner and in the dark -- but it is also not free, and a
+simulation that makes it free trains an agent that never looks up.
+
+Each tool declares which kind it is, what it costs, and what it can return,
+because the harness needs that to charge budgets correctly and the task layer
+needs it to decide which tools an episode allows. A ``consult`` tool is the one
+a benchmark may want to switch off to make a condition harder; an ``act`` tool
+never can be.
+
+Tools are *declared here and dispatched by name*, so the prompt the model sees
+and the code that executes are generated from one source. A tool the environment
+does not enable is not described in the prompt, which is what stopped the old
+observation telling the agent to use MOVE on a map where MOVE was disabled.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable
+
+
+class ToolKind(str, Enum):
+    """What a tool does to the world, the agent's knowledge, or neither."""
+
+    ACT = "act"          # changes the world, costs simulated time
+    LOOK = "look"        # changes what the agent knows, from where it stands
+    CONSULT = "consult"  # queries carried knowledge: the order slip, the phone
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# What the free observation already says
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# An audit of the 25 recorded trajectories found the reference courier using
+# four of eleven tools, and two of the seven it never touched turned out to be
+# unable to tell it anything:
+#
+#     observation   "You are on Quai Beaubourg, outside number 2."
+#     read_sign()   "The sign says Quai Beaubourg. The doors here are numbered 2."
+#
+# read_sign was a three-second, one-turn way to be told what the turn already
+# said. look(k) was three quarters of the same thing -- its street name, compass
+# and distance are the candidate line verbatim -- with one genuinely new fact
+# buried at the end.
+#
+# A menu entry that cannot change what the agent knows is worse than useless:
+# it costs prompt, it costs a turn when taken, and it teaches a policy that
+# actions need not pay. So the redundancy is made checkable rather than
+# remembered. Each knowledge tool declares the facts a call returns, the
+# observation declares the facts it states for free, and ``available_tools``
+# drops any tool that has nothing left. ``tests/test_courier_harness.py``
+# asserts the menu contains no such tool, so the next one cannot be added
+# quietly.
+#
+# Names are facts, not sentences: two tools that both return "how far the next
+# junction is" must use one name, or the check cannot see they overlap.
+FACT_STREET_HERE = "street_here"          # which street the courier stands on
+FACT_NUMBERS_HERE = "numbers_here"        # door numbers at this junction
+FACT_STREET_NAMES = "street_names"        # the names of the streets leaving it
+FACT_HEADINGS = "headings"                # compass and left/right for each
+FACT_DISTANCES = "distances"              # metres to each next junction
+FACT_NUMBERS_AHEAD = "numbers_ahead"      # door numbers down a street not taken
+FACT_ORDER_ADDRESSES = "order_addresses"  # both ends of every live job
+FACT_ORDER_FEE = "order_fee"
+FACT_DEADLINES = "deadlines"
+FACT_ROUTE_DISTANCE = "route_distance"    # how far, on foot, to a named address
+FACT_TARGET_BEARING = "target_bearing"    # which way it lies, as the crow flies
+FACT_TURN_BY_TURN = "turn_by_turn"        # street, turn and distance, leg by leg
+
+# Stated every turn, in every condition, without spending anything. Note what is
+# NOT here: nothing about a light, an obstacle, or a shopfront. Those are in the
+# photographs and in no tool at all, which is what makes looking load-bearing.
+OBSERVATION_PROVIDES: frozenset[str] = frozenset({
+    FACT_STREET_HERE, FACT_NUMBERS_HERE, FACT_STREET_NAMES,
+    FACT_HEADINGS, FACT_DISTANCES, FACT_DEADLINES,
+})
+
+
+@dataclass(frozen=True)
+class ToolParam:
+    name: str
+    type: str
+    description: str
+    required: bool = True
+
+
+@dataclass
+class Tool:
+    """One thing the courier can do, described once for both prompt and dispatch."""
+
+    name: str
+    kind: ToolKind
+    summary: str
+    params: tuple[ToolParam, ...] = ()
+    example: str = ""
+    # Simulated seconds a call costs. Looking is quick but not free -- a rider
+    # who spins on the spot every turn is not delivering.
+    time_cost_s: float = 0.0
+    # Whether a call counts against the step budget. Consulting the phone does
+    # not move the rider, but it must still cost something or the optimal policy
+    # is to query forever.
+    counts_as_step: bool = True
+    requires_env_action: str | None = None
+    # The facts a call returns, from the vocabulary above. Empty for a tool that
+    # acts rather than informs -- ``collect`` earns its place by what it does.
+    provides: frozenset[str] = frozenset()
+
+    def informative(self, already_known: frozenset[str] = OBSERVATION_PROVIDES) -> bool:
+        """Can this call tell the courier something the turn has not already?"""
+        return not self.provides or bool(self.provides - already_known)
+
+    def signature(self) -> str:
+        inner = ", ".join(
+            p.name if p.required else f"{p.name}=None" for p in self.params
+        )
+        return f"{self.name}({inner})"
+
+    def typed_signature(self) -> str:
+        """The signature with argument types, so the menu needs no second block.
+
+        The menu used to spend three lines on every tool -- signature, one line
+        per parameter, and an example -- which is 1179 tokens of system prompt
+        for ten tools whose names say most of it. Folding the type into the
+        signature says the same thing in one line, and the parameter's own
+        description is only worth its line when the name does not carry it.
+        """
+        inner = ", ".join(
+            f"{p.name}: {p.type}" + ("" if p.required else " = default")
+            for p in self.params
+        )
+        return f"{self.name}({inner})"
+
+    def describe(self) -> str:
+        lines = [f"{self.typed_signature()} — {self.summary}"]
+        # Only parameters the signature does not already explain. ``k: int`` next
+        # to "the number beside the street you want" is the same sentence twice.
+        for param in self.params:
+            if param.name in self.summary or param.type in ("int",):
+                continue
+            lines.append(f"    {param.name} — {param.description}")
+        if self.example and any(p.type == "str" for p in self.params):
+            lines.append(f"    e.g. {self.example}")
+        return "\n".join(lines)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The courier's tool set
+# ─────────────────────────────────────────────────────────────────────────────
+
+WALK_TO = Tool(
+    name="walk_to",
+    kind=ToolKind.ACT,
+    summary="Walk to a numbered waypoint on a street leaving this junction.",
+    params=(ToolParam("k", "int", "the number beside the street you want to take"),),
+    example="walk_to(3)",
+    time_cost_s=0.0,
+    requires_env_action="MOVE_TO",
+)
+
+FOLLOW_STREET = Tool(
+    name="follow_street",
+    kind=ToolKind.ACT,
+    summary=(
+        "Take street k and keep going along it for up to n junctions (6 at most). "
+        "Stops early at a fork, a dead end, a crossing with a light, anything "
+        "blocking the way, or your address."
+    ),
+    params=(
+        ToolParam("k", "int", "the number beside the street you want to take"),
+        ToolParam("n", "int", "how many junctions to walk, at most 6", required=False),
+    ),
+    example="follow_street(3, 6)",
+    time_cost_s=0.0,
+    requires_env_action="MOVE_TO",
+)
+
+LOOK = Tool(
+    name="look",
+    kind=ToolKind.LOOK,
+    # It used to answer with the street's name, compass and distance as well --
+    # the candidate line word for word, already on screen, for two seconds and a
+    # turn. What it alone can say is the numbers running away down a street the
+    # courier is not standing on, which is the gradient that finds a door when no
+    # phone will. So that is all it says now, and the summary promises only that.
+    summary=(
+        "Read the door numbers running away down street k, without walking it. "
+        "The numbers tell you which way they climb."
+    ),
+    params=(ToolParam("k", "int", "the number of the street to look down"),),
+    example="look(2)",
+    # A rider glances down a street in a couple of seconds. Charging something
+    # keeps looking honest without making it precious.
+    time_cost_s=2.0,
+    counts_as_step=True,
+    provides=frozenset({FACT_NUMBERS_AHEAD}),
+)
+
+# ``read_sign`` was here, and it is gone. It answered "The sign says Quai
+# Beaubourg. The doors here are numbered 2." to a turn that had already opened
+# with "You are on Quai Beaubourg, outside number 2." -- the same two facts, in
+# every condition, for three seconds and a turn. There is nothing to weaken or
+# reprice: a tool whose entire output is a restatement of the prompt is not a
+# cheap tool, it is not a tool. Anything that wants to re-anchor the courier on
+# which street it is on reads the observation.
+
+CHECK_ORDER = Tool(
+    name="check_order",
+    kind=ToolKind.CONSULT,
+    summary="Re-read the order slip: pickup address, dropoff address, deadline, fee.",
+    example="check_order()",
+    time_cost_s=2.0,
+    # The turn header names the end the courier is walking to and when it is due.
+    # The slip is where both ends and the money are.
+    provides=frozenset({FACT_ORDER_ADDRESSES, FACT_ORDER_FEE, FACT_DEADLINES}),
+)
+
+CHECK_MAP = Tool(
+    name="check_map",
+    kind=ToolKind.CONSULT,
+    summary="Look up one address on your phone: which street, how far, roughly which way.",
+    params=(ToolParam("address", "str", "the address to look up, as written on the slip"),),
+    example='check_map("42 Rue de Rivoli")',
+    time_cost_s=5.0,
+    # Search, not directions: where a place is and how far, for any address the
+    # courier can name -- including one no live job mentions. ``navigate`` routes
+    # only to a job in hand, and says how to get there rather than where it is.
+    provides=frozenset({FACT_ROUTE_DISTANCE, FACT_TARGET_BEARING}),
+)
+
+NAVIGATE = Tool(
+    name="navigate",
+    kind=ToolKind.CONSULT,
+    summary=(
+        "Ask your phone for directions to the address you are heading for: which street, "
+        "which turn, how far. The route and nothing else — it cannot see crossings, "
+        "traffic or doors. Name a job number to route to that one instead of the "
+        "job in hand."
+    ),
+    params=(ToolParam("job", "int", "which job to route to", required=False),),
+    example="navigate(1)",
+    # A phone lookup and reading the route off the screen, standing still. Dearer
+    # than check_map because it answers a bigger question: a policy that calls it
+    # every turn instead of walking should lose to one that calls it once a leg.
+    time_cost_s=15.0,
+    provides=frozenset({FACT_TURN_BY_TURN, FACT_ROUTE_DISTANCE}),
+)
+
+
+COLLECT = Tool(
+    name="collect",
+    kind=ToolKind.ACT,
+    summary="Collect the order. Only works standing at the pickup address.",
+    example="collect()",
+    time_cost_s=30.0,
+    requires_env_action="PICKUP",
+)
+
+HAND_OVER = Tool(
+    name="hand_over",
+    kind=ToolKind.ACT,
+    summary="Hand the order to the customer. Only works standing at the dropoff address.",
+    example="hand_over()",
+    time_cost_s=30.0,
+    requires_env_action="DROP_OFF",
+)
+
+ACCEPT_JOB = Tool(
+    name="accept_job",
+    kind=ToolKind.ACT,
+    summary="Accept an offered job.",
+    params=(ToolParam("k", "int", "the number of the job to accept"),),
+    example="accept_job(0)",
+    requires_env_action="ACCEPT_ORDER",
+)
+
+LIST_JOBS = Tool(
+    name="list_jobs",
+    kind=ToolKind.CONSULT,
+    summary="See the jobs currently on offer.",
+    example="list_jobs()",
+    requires_env_action="VIEW_ORDERS",
+)
+
+WAIT = Tool(
+    name="wait",
+    kind=ToolKind.ACT,
+    # "Wait where you are for a moment" described the only tool that answers the
+    # only mechanic the photographs exist for, and never mentioned either. At a
+    # crossing this waits out the phase, so one call always changes the light --
+    # which is the fact a policy needs in order to use it at all.
+    summary=(
+        "Wait where you are. At a crossing this waits for the light to change, "
+        "so one call is always enough."
+    ),
+    example="wait()",
+    time_cost_s=10.0,
+    requires_env_action="WAIT",
+)
+
+NOTE = Tool(
+    name="note",
+    kind=ToolKind.CONSULT,
+    summary=(
+        "Write a line in your notebook. It is shown back to you every turn, so use it "
+        "for things you must not forget — a street that was a dead end, where you have "
+        "already searched."
+    ),
+    params=(ToolParam("text", "str", "what to remember, in a few words"),),
+    example='note("Rue Monge north end is a dead end")',
+    time_cost_s=0.0,
+)
+
+# Only tools the runtime dispatches. `accept_job`, `list_jobs` and `note` are
+# defined above and have no executor anywhere, exactly like the macros that were
+# already removed -- the earlier fix was applied to the macros alone and missed
+# these three. A tool in the menu that raises FormatError costs a turn and, three
+# times running, the episode.
+#
+# ``follow_street`` was removed from the menu on that same rule, correctly, when
+# nothing could run it. ``CourierEnv.follow_street`` now can, and it belongs back
+# in: a leg is a median 530 m over 18 m edges, so a courier without it spends
+# about 35 turns per order pressing the same button.
+ALL_TOOLS: tuple[Tool, ...] = (
+    WALK_TO, FOLLOW_STREET, LOOK, CHECK_ORDER, CHECK_MAP, NAVIGATE,
+    COLLECT, HAND_OVER, WAIT,
+)
+UNIMPLEMENTED_TOOLS: tuple[Tool, ...] = (LIST_JOBS, ACCEPT_JOB, NOTE)
+TOOLS_BY_NAME: dict[str, Tool] = {t.name: t for t in ALL_TOOLS}
+# Tools that were in the menu and are not any more, with the reason, so a
+# reviewer can tell a deliberate retirement from an oversight.
+RETIRED_TOOLS: dict[str, str] = {
+    "report_blocked": (
+        "it let the courier tell its phone a street was shut, and the phone "
+        "would route round it. That is not a thing a rider does -- you see a "
+        "skip and you take the next street, you do not file a report with the "
+        "map app. With it gone the phone stays permanently blind, the route "
+        "keeps pointing through the barrier, and going round is something the "
+        "courier has to work out from what it can see"
+    ),
+    "read_sign": (
+        "every fact it returned -- the street here and the numbers here -- is "
+        "stated in the first two lines of every observation, in every condition"
+    ),
+}
+
+
+def available_tools(
+    enabled_env_actions: list[str],
+    *,
+    allow_consult: bool = True,
+    observation_provides: frozenset[str] = OBSERVATION_PROVIDES,
+) -> list[Tool]:
+    """The tools this environment can actually execute and that can say something.
+
+    Three filters, and they fail in different ways if omitted. A tool backed by
+    an environment action the map does not enable is dropped rather than
+    described and then refused. ``allow_consult`` exists because the phone is the
+    natural difficulty knob: switch it off and the courier has to navigate by
+    house numbers and memory alone. And a tool whose facts the observation
+    already states is dropped as well -- not because it would fail, but because
+    it would succeed at telling the courier what it was just told, and charge a
+    turn for it.
+
+    ``observation_provides`` is a parameter rather than a constant because it is
+    the same knob as ``allow_consult`` pointed at the other half: a condition
+    that stops stating house numbers in the header gives a tool that reports
+    house numbers something to do again.
+    """
+    enabled = set(enabled_env_actions)
+    out: list[Tool] = []
+    for tool in ALL_TOOLS:
+        if tool.requires_env_action and tool.requires_env_action not in enabled:
+            continue
+        if tool.kind is ToolKind.CONSULT and not allow_consult:
+            continue
+        if not tool.informative(observation_provides):
+            continue
+        out.append(tool)
+    return out
+
+
+def render_tool_menu(tools: list[Tool]) -> str:
+    """The tool section of the system prompt, grouped by what each kind does."""
+    groups = {
+        ToolKind.ACT: "Actions — these change the world and take time",
+        ToolKind.LOOK: "Looking — these tell you about where you are standing",
+        ToolKind.CONSULT: "Consulting — these query what you carry, not what you see",
+    }
+    lines: list[str] = []
+    for kind, heading in groups.items():
+        chosen = [t for t in tools if t.kind is kind]
+        if not chosen:
+            continue
+        lines.append(heading + ":")
+        lines.extend("  " + t.describe().replace("\n", "\n  ") for t in chosen)
+        lines.append("")
+    return "\n".join(lines).rstrip()

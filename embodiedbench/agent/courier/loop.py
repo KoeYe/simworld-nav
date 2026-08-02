@@ -1,0 +1,323 @@
+"""The courier loop: how a turn is assembled, parsed, executed and charged.
+
+Shape borrowed from mini-SWE-agent, because the shape is the good part: prompts
+are data rather than code, the model emits exactly one action per turn inside a
+fenced block, a malformed reply is re-prompted rather than fatal, and every limit
+is explicit and checked in one place. What changes is everything embodied --
+a courier has a tool set rather than a shell, carries memory between turns, and
+acts in a world where a wrong move costs simulated time it cannot get back.
+
+One turn, in order:
+
+    1. sense       the runtime's state becomes an observation: where am I, what
+                   streets leave this junction, what does the job slip say
+    2. remember    memory is updated with the arrival, then rendered into the
+                   prompt. Recording happens before rendering so the current
+                   junction is already in the trail the model reads.
+    3. compose     system prompt (once) + memory + observation + images +
+                   any feedback from the previous turn's failure
+    4. decide      the model returns THOUGHT then exactly one fenced action
+    5. parse       into (tool, arguments), against the tool set this environment
+                   actually enables. A parse failure is a FormatError.
+    6. execute     dispatch to the runtime; a macro expands to several tool calls
+                   and stops early if the situation changes
+    7. charge      steps, simulated seconds, tool calls, output tokens
+    8. record      the turn, its images, the raw reply, the typed result
+
+Two failure modes are deliberately non-terminating, because ending an episode on
+them would score the prompt rather than the policy:
+
+FormatError        the reply had no action, or a malformed one. Re-prompt with
+                   the format reminder. After ``max_format_errors`` in a row the
+                   episode truncates -- a model that cannot emit the grammar is
+                   not going to start.
+RejectedAction     the action parsed but the world refused it (walked into a
+                   wall, collected at the wrong address). The typed reason goes
+                   into the next prompt. This is information, not an error, and
+                   a courier gets it constantly.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from typing import Any
+
+from embodiedbench.agent.courier.memory import CourierMemory
+from embodiedbench.agent.courier.skills import MACROS_BY_NAME, Macro
+from embodiedbench.agent.courier.tools import Tool, ToolKind
+
+# The action grammar. One fenced block, one call. Fenced rather than bare so a
+# model that narrates around its action still parses, which mini-SWE-agent found
+# necessary and which held here too.
+ACTION_BLOCK = re.compile(r"```(?:action)?\s*\n?(.+?)\n?```", re.DOTALL)
+# Where a call starts. Finding its *end* needs a scan, not a pattern -- see
+# split_calls.
+CALL_START = re.compile(r"([a-z_][a-z_0-9]*)\s*\(", re.IGNORECASE)
+
+
+class FormatError(Exception):
+    """The reply did not contain exactly one well-formed action."""
+
+
+class RejectedAction(Exception):
+    """The action was understood but the world refused it."""
+
+    def __init__(self, message: str, code: str = "rejected"):
+        self.code = code
+        super().__init__(message)
+
+
+@dataclass
+class Budgets:
+    """Every limit in one place, so none is enforced twice or not at all."""
+
+    steps: int = 120
+    tool_calls: int | None = 160
+    sim_seconds: float | None = 3600.0
+    output_tokens: int | None = 60000
+    max_format_errors: int = 3
+    wall_seconds: float | None = 1800.0
+
+    def to_dict(self) -> dict[str, Any]:
+        return dict(self.__dict__)
+
+
+@dataclass
+class Spend:
+    steps: int = 0
+    tool_calls: int = 0
+    sim_seconds: float = 0.0
+    output_tokens: int = 0
+    format_errors: int = 0
+    consecutive_format_errors: int = 0
+
+    def to_dict(self) -> dict[str, Any]:
+        return dict(self.__dict__)
+
+
+@dataclass
+class ParsedAction:
+    """One decision, after parsing and before execution."""
+
+    tool: str
+    args: list[Any]
+    kwargs: dict[str, Any]
+    thought: str = ""
+    raw: str = ""
+
+    def render(self) -> str:
+        inner = ", ".join(
+            [repr(a) if isinstance(a, str) else str(a) for a in self.args]
+            + [f"{k}={v!r}" for k, v in self.kwargs.items()]
+        )
+        return f"{self.tool}({inner})"
+
+
+def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
+    """Pull exactly one tool call out of a model reply.
+
+    Raises ``FormatError`` rather than guessing. Guessing is how an agent ends up
+    executing something it did not choose: an earlier text policy fell back to
+    WAIT on any unparseable reply, which spent a turn and told the model nothing
+    about what went wrong.
+    """
+    text = reply or ""
+    blocks = ACTION_BLOCK.findall(text)
+    if not blocks:
+        raise FormatError(
+            "No action found. End your reply with a fenced block containing exactly "
+            "one call, for example:\n```\nwalk_to(3)\n```"
+        )
+    if len(blocks) > 1:
+        raise FormatError(
+            f"Found {len(blocks)} action blocks. Give exactly one action per turn."
+        )
+    calls = split_calls(blocks[0].strip())
+    if not calls:
+        raise FormatError(
+            f"Could not read an action from {blocks[0].strip()[:80]!r}. "
+            "Use the form tool_name(arguments)."
+        )
+    if len(calls) > 1:
+        raise FormatError(
+            f"Found {len(calls)} calls in one block: "
+            f"{', '.join(c[0] for c in calls)}. Give exactly one."
+        )
+    name, raw_args = calls[0]
+    name = name.lower()
+    if name not in allowed:
+        raise FormatError(
+            f"{name!r} is not something you can do here. Available: "
+            f"{', '.join(sorted(allowed))}."
+        )
+
+    args: list[Any] = []
+    kwargs: dict[str, Any] = {}
+    for piece in _split_args(raw_args):
+        if not piece:
+            continue
+        if "=" in piece and not piece.lstrip().startswith(('"', "'")):
+            key, _, value = piece.partition("=")
+            kwargs[key.strip()] = _coerce(value.strip())
+        else:
+            args.append(_coerce(piece.strip()))
+
+    thought = ""
+    head = text.split("```")[0].strip()
+    if head:
+        thought = head[-600:]
+    return ParsedAction(tool=name, args=args, kwargs=kwargs, thought=thought, raw=blocks[0].strip())
+
+
+def split_calls(text: str) -> list[tuple[str, str]]:
+    """Every ``name(args)`` in a block, as ``(name, raw_args)``.
+
+    A regex cannot do this correctly. ``[^)]*`` stops at the first bracket and
+    silently truncated ``check_map("12 Avenue de Rivoli (2)")`` into a corrupt
+    address -- 27 of 86 street names carry a "(2)" suffix, so that was routine,
+    not an edge case. Making it greedy to the last bracket fixed the quoting and
+    broke the opposite check: ``walk_to(3)`` followed by ``look(2)`` then matched
+    as a single call, so a reply containing two actions was accepted as one.
+
+    Scanning is the only thing that satisfies both. Track quote state and bracket
+    depth, and a close bracket only ends the call when it is unquoted and at
+    depth zero.
+    """
+    calls: list[tuple[str, str]] = []
+    position = 0
+    while True:
+        match = CALL_START.search(text, position)
+        if match is None:
+            return calls
+        depth, quote, index = 1, "", match.end()
+        while index < len(text) and depth:
+            char = text[index]
+            if quote:
+                if char == quote:
+                    quote = ""
+            elif char in "\"'":
+                quote = char
+            elif char in "([{":
+                depth += 1
+            elif char in ")]}":
+                depth -= 1
+            index += 1
+        if depth:
+            # Unbalanced: report the fragment so the error names what was seen.
+            calls.append((match.group(1), text[match.end():]))
+            return calls
+        calls.append((match.group(1), text[match.end():index - 1]))
+        position = index
+
+
+def _split_args(raw: str) -> list[str]:
+    out, depth, current, quote = [], 0, [], ""
+    for ch in raw:
+        if quote:
+            current.append(ch)
+            if ch == quote:
+                quote = ""
+            continue
+        if ch in "\"'":
+            quote = ch
+            current.append(ch)
+        elif ch in "[({":
+            depth += 1
+            current.append(ch)
+        elif ch in "])}":
+            depth -= 1
+            current.append(ch)
+        elif ch == "," and depth == 0:
+            out.append("".join(current))
+            current = []
+        else:
+            current.append(ch)
+    out.append("".join(current))
+    return [piece.strip() for piece in out]
+
+
+def _coerce(value: str) -> Any:
+    text = value.strip()
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in "\"'":
+        return text[1:-1]
+    try:
+        return int(text)
+    except ValueError:
+        pass
+    try:
+        return float(text)
+    except ValueError:
+        pass
+    return text
+
+
+@dataclass
+class TurnLog:
+    """Everything about one turn, for replay and for the trajectory."""
+
+    step: int
+    prompt: str
+    image_paths: list[str] = field(default_factory=list)
+    reply: str = ""
+    thought: str = ""
+    action: str = ""
+    tool_kind: str = ""
+    expanded: list[str] = field(default_factory=list)
+    status: str = "accepted"
+    error: str = ""
+    sim_seconds: float = 0.0
+    reward: float = 0.0
+    memory: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return dict(self.__dict__)
+
+
+@dataclass
+class CourierRun:
+    """The result of one shift."""
+
+    turns: list[TurnLog] = field(default_factory=list)
+    spend: Spend = field(default_factory=Spend)
+    budgets: Budgets = field(default_factory=Budgets)
+    memory: CourierMemory = field(default_factory=CourierMemory)
+    finished: bool = False
+    termination_reason: str = ""
+    total_reward: float = 0.0
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "turns": [t.to_dict() for t in self.turns],
+            "spend": self.spend.to_dict(),
+            "budgets": self.budgets.to_dict(),
+            "memory": self.memory.to_dict(),
+            "finished": self.finished,
+            "termination_reason": self.termination_reason,
+            "total_reward": round(self.total_reward, 4),
+            "turn_count": len(self.turns),
+        }
+
+
+def budget_exceeded(spend: Spend, budgets: Budgets) -> str | None:
+    """Which limit stopped the episode, checked in one place.
+
+    Checked *before* an action executes, so an exhausted budget never leaves a
+    half-applied transition the trajectory then has to explain.
+    """
+    if spend.steps >= budgets.steps:
+        return "step_budget_exhausted"
+    if budgets.tool_calls is not None and spend.tool_calls >= budgets.tool_calls:
+        return "tool_call_budget_exhausted"
+    if budgets.sim_seconds is not None and spend.sim_seconds >= budgets.sim_seconds:
+        return "sim_time_budget_exhausted"
+    if budgets.output_tokens is not None and spend.output_tokens >= budgets.output_tokens:
+        return "output_token_budget_exhausted"
+    if spend.consecutive_format_errors >= budgets.max_format_errors:
+        return "repeated_format_errors"
+    return None
+
+
+def expansion_limit(macro: Macro, requested: int) -> int:
+    """Clamp a macro to its declared maximum, reporting rather than truncating silently."""
+    return max(1, min(int(requested), macro.max_expansion))

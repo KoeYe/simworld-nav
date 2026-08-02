@@ -37,6 +37,11 @@ DELIVERYBENCH = REPO_ROOT / "vendor" / "vagen" / "vagen" / "envs" / "deliveryben
 
 # A frame whose grey histogram is this concentrated carries no scene.
 BLANK_DOMINANCE = 0.99
+# Mean luminance below this is too dark to navigate from, whatever it contains.
+MIN_MEAN_LUMINANCE = 12.0
+# Standard deviation below this means a near-flat frame: a wall, the sky, or the
+# inside of a building the camera was placed within.
+MIN_LUMINANCE_STDDEV = 6.0
 # Position match tolerance against a graph node, in centimetres.
 POSITION_TOLERANCE_CM = 1.0
 EXPECTED_YAWS = (0.0, 90.0, 180.0, 270.0)
@@ -70,6 +75,8 @@ class AlbumReport:
     by_kind: Counter = field(default_factory=Counter)
     sizes_by_kind: dict[str, Counter] = field(default_factory=lambda: defaultdict(Counter))
     duplicate_keys: int = 0
+    identical_images: int = 0
+    waypoints_with_identical_yaws: list[str] = field(default_factory=list)
     positions: int = 0
     complete_waypoints: int = 0
     incomplete_waypoints: list[str] = field(default_factory=list)
@@ -91,6 +98,8 @@ class AlbumReport:
             "by_kind": dict(self.by_kind),
             "sizes_by_kind": {k: dict(v) for k, v in self.sizes_by_kind.items()},
             "duplicate_keys": self.duplicate_keys,
+            "identical_images": self.identical_images,
+            "waypoints_with_identical_yaws": self.waypoints_with_identical_yaws[:20],
             "positions": self.positions,
             "complete_waypoints": self.complete_waypoints,
             "incomplete_waypoints": self.incomplete_waypoints[:20],
@@ -162,8 +171,14 @@ def verify_image(path: Path) -> tuple[bool, list[str], dict[str, Any]]:
     total = sum(histogram) or 1
     dominant = max(histogram) / total
     distinct = sum(1 for count in histogram if count > 0)
+    mean = sum(i * c for i, c in enumerate(histogram)) / total
+    variance = sum(((i - mean) ** 2) * c for i, c in enumerate(histogram)) / total
+    stddev = variance ** 0.5
     stats["distinct_grey"] = distinct
     stats["dominant_fraction"] = round(dominant, 4)
+    stats["mean_luminance"] = round(mean, 2)
+    stats["luminance_stddev"] = round(stddev, 2)
+    stats["sha256"] = _content_hash(path)
 
     if stats["width"] <= 0 or stats["height"] <= 0:
         problems.append("zero_dimension")
@@ -171,7 +186,20 @@ def verify_image(path: Path) -> tuple[bool, list[str], dict[str, Any]]:
         problems.append("blank_frame")
     if distinct <= 2:
         problems.append("flat_image")
+    # A frame can decode perfectly and still be useless to a policy. These two
+    # catch the render failures that look fine in a file listing: a camera
+    # placed inside a wall, and a night-dark or unlit capture.
+    if mean < MIN_MEAN_LUMINANCE:
+        problems.append("too_dark")
+    if stddev < MIN_LUMINANCE_STDDEV:
+        problems.append("near_flat_view")
     return not problems, problems, stats
+
+
+def _content_hash(path: Path) -> str:
+    from embodiedbench.artifacts.hashing import sha256_file
+
+    return sha256_file(path)
 
 
 def graph_positions(map_name: str) -> set[tuple[float, float]]:
@@ -218,12 +246,20 @@ def verify_album(
         report.status = "absent"
         return report
 
-    root = (album_root or (DELIVERYBENCH / "deliverybench_fpv" / map_name))
+    # Take the root find_album actually resolved rather than recomputing the
+    # vendored default. They diverge whenever EB_ALBUM_ROOT points at a freshly
+    # baked album -- which is the normal case for any album we render, since
+    # vendor/ is an input and is kept byte-identical.
+    root = Path(album["root"]) if album.get("root") else (
+        album_root or (DELIVERYBENCH / "deliverybench_fpv" / map_name)
+    )
     manifest_path = root.parent / album["manifest"]
     report.manifest = album["manifest"]
 
     seen_keys: set[tuple[float, float, float, str, str]] = set()
     yaws_by_waypoint: dict[str, set[float]] = defaultdict(set)
+    hashes_by_waypoint: dict[str, set[str]] = defaultdict(set)
+    hash_counts: Counter = Counter()
     album_points: set[tuple[float, float]] = set()
 
     rows = [line for line in manifest_path.read_text(encoding="utf-8").splitlines() if line.strip()]
@@ -273,6 +309,11 @@ def verify_album(
 
         report.images_checked += 1
         ok, problems, stats = verify_image(resolved)
+        digest = stats.get("sha256")
+        if digest:
+            hash_counts[digest] += 1
+            if kind == "plain":
+                hashes_by_waypoint[str(entry.get("waypoint_id") or "")].add(digest)
         report.sizes_by_kind[kind][f"{stats.get('width')}x{stats.get('height')}"] += 1
         if ok:
             report.images_valid += 1
@@ -282,6 +323,20 @@ def verify_album(
             report.failures.append(
                 {"key": str(key), "kind": kind, "path": str(resolved), "problems": problems}
             )
+
+    # An identical image at two different keys means the camera did not move
+    # between captures -- the single most likely render bug, and invisible
+    # unless the bytes are compared.
+    report.identical_images = sum(count - 1 for count in hash_counts.values() if count > 1)
+    if report.identical_images:
+        report.problems["identical_images"] += report.identical_images
+    for waypoint, digests in hashes_by_waypoint.items():
+        if len(digests) < len(EXPECTED_YAWS):
+            report.waypoints_with_identical_yaws.append(
+                f"{waypoint}: {len(digests)} distinct of {len(EXPECTED_YAWS)} yaws"
+            )
+    if report.waypoints_with_identical_yaws:
+        report.problems["waypoint_yaws_not_distinct"] = len(report.waypoints_with_identical_yaws)
 
     report.positions = len(album_points)
     for waypoint, yaws in yaws_by_waypoint.items():
@@ -322,6 +377,8 @@ def verify_album(
         and report.images_valid == report.images_checked
         and report.problems.get("image_missing", 0) == 0
         and report.duplicate_keys == 0
+        and report.identical_images == 0
+        and not report.waypoints_with_identical_yaws
         else "fail"
     )
     return report

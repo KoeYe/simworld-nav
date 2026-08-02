@@ -73,11 +73,15 @@ class VagenCachedRuntime(VagenTextRuntime):
         # no first-person frame at all.
         album = find_album(map_name)
         if album.get("found"):
-            album_dir = Path("deliverybench_fpv") / map_name
+            # An absolute directory works wherever the album lives; the engine
+            # only joins relative paths against its own base_dir, which cannot
+            # reach an album baked outside the vendored checkout.
+            root = Path(album["root"]).parent if album.get("root") else None
             manifest = album.get("manifest", "")
-            # find_album reports the manifest relative to the album's parent.
-            parent = Path(manifest).parent if manifest else Path(map_name)
-            merged["fpv_dir"] = str(Path("deliverybench_fpv") / parent)
+            if root is not None and manifest:
+                merged["fpv_dir"] = str((root / manifest).parent)
+            else:
+                merged["fpv_dir"] = str(Path("deliverybench_fpv") / Path(manifest).parent)
             self.album = album
         else:
             self.album = {"found": False}

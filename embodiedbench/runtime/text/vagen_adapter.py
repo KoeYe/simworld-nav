@@ -23,6 +23,7 @@ import json
 from typing import Any
 
 from embodiedbench.artifacts.state_digest import digest_of, extract_state, state_digest
+from embodiedbench.baseline.compat import apply_map_compatibility_patches
 from embodiedbench.baseline.determinism import apply_deterministic_patches
 from embodiedbench.baseline.replay import STATE_POLICY, load_vendor_env_module
 from embodiedbench.runtime.core import EpisodeNotStarted, RuntimeError_, StepIndexMismatch
@@ -91,6 +92,12 @@ class VagenTextRuntime:
         repair_graph: bool = True,
     ):
         apply_deterministic_patches()
+        # Without this the runtime cannot load Paris at all: the vendored bus
+        # manager indexes route[0] unconditionally and Paris ships an empty
+        # bus_routes list (PARIS-F1). Every compiler entry point already applied
+        # it, so the gap only showed up in the runtime -- the one component that
+        # actually has to run for a policy to be trained.
+        apply_map_compatibility_patches()
         self._module = load_vendor_env_module()
         self._map_name = map_name
         self._preset = preset
@@ -231,7 +238,17 @@ class VagenTextRuntime:
             if node is None:
                 raise RuntimeError_(f"could not resolve mark {action.target_mark} to a node")
             return render_vendor_action("MOVE_TO", {"target": node})
-        raise RuntimeError_(f"text runtime cannot execute action type {action.type!r}")
+        # Unreachable in practice: capabilities.require_action screens point
+        # modes out first, because this runtime advertises nav_waypoint only.
+        # The reason is worth stating where someone hits it rather than leaving
+        # a bare type name -- the vendored engine's action space is
+        # node-to-node, so there is no primitive that can end at the arbitrary
+        # lattice pose a point action resolves to (PLAN.md 9.5).
+        raise RuntimeError_(
+            f"the text runtime cannot execute {action.type!r}: its action space is "
+            "graph-neighbour moves, which cannot terminate at an off-node pose. "
+            "Point modes need the live UE runtime or a pose-lattice album."
+        )
 
     def _resolved_target(self, envelope: ActionEnvelope) -> str | None:
         action = envelope.action
@@ -297,10 +314,19 @@ class VagenTextRuntime:
         dm = self._dm()
         if dm is None:
             return None
+        # The engine's facing_deg is a *compass* bearing: map.py's _bearing_deg
+        # is atan2(dx, dy), so 0 means north (+Y) and it increases clockwise.
+        # Pose.yaw_deg is the mathematical convention used by the camera
+        # intrinsics, the point-navigation chain and the UE renderer alike --
+        # atan2(dy, dx), 0 means +X, increasing anticlockwise. Copying one into
+        # the other without converting rotates every pose by 90 degrees and then
+        # mirrors it, which is why an observation could say "you are facing
+        # South" while the same axis was described as "east".
+        compass = float(getattr(dm, "facing_deg", 0.0) or 0.0)
         return Pose(
             frame=FrameName.BUNDLE_WORLD,
             position=Vec3(x_cm=float(dm.x), y_cm=float(dm.y)),
-            yaw_deg=float(getattr(dm, "facing_deg", 0.0) or 0.0),
+            yaw_deg=(90.0 - compass) % 360.0,
         )
 
     def _current_sim_time(self) -> float:

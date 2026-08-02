@@ -1,0 +1,947 @@
+"""The courier harness: tools, parsing, memory, skills, budgets, prompts.
+
+The tests that matter most here are the ones that defend the *boundary* — that
+the harness records what happened without deciding what to do next. A harness
+that plans the route measures itself instead of the policy, and that failure is
+invisible from the scores.
+"""
+
+from __future__ import annotations
+
+import pytest
+
+from embodiedbench.agent.courier import (
+    MACROS,
+    PROCEDURES,
+    Budgets,
+    CourierMemory,
+    FormatError,
+    Spend,
+    ToolKind,
+    available_tools,
+    budget_exceeded,
+    parse_reply,
+    render_macros,
+    render_procedures,
+    render_tool_menu,
+)
+from embodiedbench.agent.courier.loop import expansion_limit
+from embodiedbench.agent.courier.prompts import (
+    REQUIRED_FIELDS,
+    build_observation,
+    build_system_prompt,
+    render_candidates,
+)
+from embodiedbench.agent.courier.skills import FOLLOW_STREET, RETRACE
+from embodiedbench.agent.courier.tools import (
+    ALL_TOOLS,
+    FACT_NUMBERS_HERE,
+    FACT_STREET_HERE,
+    OBSERVATION_PROVIDES,
+    RETIRED_TOOLS,
+    Tool,
+)
+
+PARIS_ACTIONS = ["VIEW_ORDERS", "ACCEPT_ORDER", "PICKUP", "DROP_OFF", "WAIT", "MOVE_TO", "NAVIGATE"]
+
+
+def fence(action: str, thought: str = "") -> str:
+    head = f"THOUGHT: {thought}\n" if thought else ""
+    return f"{head}```\n{action}\n```"
+
+
+class TestToolSet:
+    def test_tools_are_split_by_what_they_change(self):
+        """Act, look and consult are charged differently and can be enabled
+        separately; collapsing them is what let an earlier design treat a free
+        map lookup as equivalent to walking."""
+        kinds = {t.kind for t in ALL_TOOLS}
+        assert kinds == {ToolKind.ACT, ToolKind.LOOK, ToolKind.CONSULT}
+
+    def test_a_tool_the_map_cannot_execute_is_not_offered(self):
+        """The Paris defect in miniature: the observation advertised MOVE on a
+        map that disabled it, so every obedient turn was rejected."""
+        without_pickup = [a for a in PARIS_ACTIONS if a != "PICKUP"]
+        names = {t.name for t in available_tools(without_pickup)}
+        assert "collect" not in names
+        assert "walk_to" in names
+
+    def test_consult_tools_can_be_switched_off_as_a_difficulty_knob(self):
+        """Taking the phone away is the natural way to make an episode harder;
+        taking walking away is not a difficulty setting, it is a broken map."""
+        hard = available_tools(PARIS_ACTIONS, allow_consult=False)
+        names = {t.name for t in hard}
+        assert "check_map" not in names and "check_order" not in names
+        assert "walk_to" in names and "look" in names
+
+    def test_every_tool_documents_itself(self):
+        for tool in ALL_TOOLS:
+            described = tool.describe()
+            assert tool.name in described
+            assert tool.summary in described
+            for param in tool.params:
+                assert param.name in described
+
+    def test_looking_is_cheap_but_not_free(self):
+        """A rider who spins on the spot every turn is not delivering."""
+        look = next(t for t in ALL_TOOLS if t.name == "look")
+        walk = next(t for t in ALL_TOOLS if t.name == "walk_to")
+        assert 0 < look.time_cost_s < 30
+        assert look.counts_as_step
+
+    def test_the_menu_groups_tools_by_kind(self):
+        menu = render_tool_menu(available_tools(PARIS_ACTIONS))
+        assert "Actions" in menu and "Looking" in menu and "Consulting" in menu
+
+
+class TestNoToolRepeatsTheObservation:
+    """The audit that retired ``read_sign``, kept as a standing check.
+
+    The reference courier used four of eleven tools across 25 recorded runs, and
+    two of the seven it ignored could not have helped it: they answered with the
+    first two lines of the observation they were answering. A menu entry like
+    that costs prompt, costs a turn when taken, and teaches a policy that an
+    action need not pay for itself.
+    """
+
+    def test_no_offered_tool_only_restates_what_the_turn_says(self):
+        for tool in available_tools(PARIS_ACTIONS):
+            assert tool.informative(), (
+                f"{tool.name} returns {sorted(tool.provides)}, all of which the "
+                "observation already states for free"
+            )
+
+    def test_a_tool_that_would_only_restate_it_is_dropped_from_the_menu(self):
+        """The check has teeth: give it such a tool and it disappears."""
+        echo = Tool(name="echo", kind=ToolKind.LOOK, summary="says it again",
+                    provides=frozenset({FACT_STREET_HERE, FACT_NUMBERS_HERE}))
+        assert not echo.informative()
+        assert echo.informative(frozenset({FACT_STREET_HERE})), (
+            "one fact the turn does not carry is enough to earn a place"
+        )
+
+    def test_acting_tools_earn_their_place_by_acting(self):
+        """``collect`` returns no facts at all and is not therefore redundant."""
+        collect = next(t for t in ALL_TOOLS if t.name == "collect")
+        assert collect.provides == frozenset()
+        assert collect.informative()
+
+    def test_the_retirement_is_recorded_with_its_reason(self):
+        assert "read_sign" in RETIRED_TOOLS
+        assert "read_sign" not in {t.name for t in ALL_TOOLS}
+        assert len(RETIRED_TOOLS["read_sign"]) > 40, "a reason, not a tombstone"
+
+    def test_a_condition_that_stops_stating_a_fact_gives_the_tool_work_again(self):
+        """The knob is symmetric, which is why it is a parameter and not a rule.
+
+        Under a condition whose header stopped naming the doors underfoot, a tool
+        reporting door numbers would be informative again -- so the filter must
+        read the observation rather than a hard-coded list of survivors.
+        """
+        silent = OBSERVATION_PROVIDES - {FACT_NUMBERS_HERE}
+        echo = Tool(name="echo", kind=ToolKind.LOOK, summary="the doors here",
+                    provides=frozenset({FACT_NUMBERS_HERE}))
+        assert not echo.informative(OBSERVATION_PROVIDES)
+        assert echo.informative(silent)
+
+    def test_two_tools_that_route_do_not_route_identically(self):
+        """``check_map`` and ``navigate`` both touch the phone and must differ.
+
+        They were nearly merged during the audit. They stay separate because a
+        map app really does have both: search tells you where a place is, for any
+        address you can name; directions tell you how to get to one you are
+        going to. The check is that each carries a fact the other does not.
+        """
+        by_name = {t.name: t for t in ALL_TOOLS}
+        search, route = by_name["check_map"], by_name["navigate"]
+        assert search.provides - route.provides, "search says something routing does not"
+        assert route.provides - search.provides, "routing says something search does not"
+        assert route.time_cost_s > search.time_cost_s, "the bigger answer costs more"
+
+
+class TestActionParsing:
+    def allowed(self) -> set[str]:
+        return {t.name for t in available_tools(PARIS_ACTIONS)}
+
+    def test_a_well_formed_reply_parses(self):
+        action = parse_reply(fence("walk_to(3)", "street 3 heads west"), self.allowed())
+        assert action.tool == "walk_to"
+        assert action.args == [3]
+        assert "west" in action.thought
+
+    def test_a_string_argument_survives(self):
+        action = parse_reply(fence('check_map("42 Rue de Rivoli")'), self.allowed())
+        assert action.args == ["42 Rue de Rivoli"]
+
+    def test_keyword_arguments_parse(self):
+        action = parse_reply(fence("follow_street(k=3, n=4)"), self.allowed() | {"follow_street"})
+        assert action.kwargs == {"k": 3, "n": 4}
+
+    def test_no_fenced_block_is_a_format_error(self):
+        with pytest.raises(FormatError, match="No action found"):
+            parse_reply("I think I should walk_to(3).", self.allowed())
+
+    def test_two_actions_is_a_format_error(self):
+        """One action per turn, so a turn maps to exactly one transition and the
+        trajectory stays replayable."""
+        with pytest.raises(FormatError, match="exactly one"):
+            parse_reply("```\nwalk_to(3)\nlook(2)\n```", self.allowed())
+
+    def test_two_blocks_is_a_format_error(self):
+        with pytest.raises(FormatError, match="action blocks"):
+            parse_reply("```\nwalk_to(3)\n```\ntext\n```\nlook(1)\n```", self.allowed())
+
+    def test_an_unavailable_tool_is_refused_by_name(self):
+        """Refused at parse time, with the list, rather than passed to the world
+        and rejected there — the model needs to know what it may say."""
+        with pytest.raises(FormatError, match="not something you can do"):
+            parse_reply(fence("fly_to(3)"), self.allowed())
+
+    def test_the_error_message_shows_the_grammar(self):
+        """A format error that does not show the format teaches nothing."""
+        with pytest.raises(FormatError) as caught:
+            parse_reply("no action here", self.allowed())
+        assert "```" in str(caught.value)
+
+    def test_parsing_never_guesses(self):
+        """Falling back to a default action spends a turn on something the model
+        did not choose and hides the format problem."""
+        for reply in ("", "walk_to 3", "```\n\n```", "```\nnonsense\n```"):
+            with pytest.raises(FormatError):
+                parse_reply(reply, self.allowed())
+
+
+class TestMemory:
+    def test_it_records_where_the_agent_has_been(self):
+        memory = CourierMemory()
+        memory.arrive(step=0, node_id="s001_n000", street="Rue Monge")
+        memory.arrive(step=1, node_id="s001_n001", street="Rue Monge")
+        assert memory.current_node == "s001_n001"
+        assert memory.previous_node == "s001_n000"
+
+    def test_it_notices_a_loop(self):
+        """The concrete failure: the oracle circled three nodes 21 m from its
+        destination for the rest of the episode, because each looked best from
+        the last and it could not tell it had been there."""
+        memory = CourierMemory()
+        # A real loop revisits nodes by *travelling* between them. Repeating the
+        # same node id is standing still, which arrive() now ignores -- calling
+        # it every turn, including on looking and consulting, was firing the
+        # warning at an agent that had gone nowhere.
+        for step in range(6):
+            memory.arrive(step=step, node_id=f"s001_n{step % 2:03d}", street="Rue Monge")
+        assert memory.is_looping()
+        assert "circles" in memory.render()
+
+    def test_a_short_trail_is_not_a_loop(self):
+        memory = CourierMemory()
+        memory.arrive(step=0, node_id="a", street="Rue A")
+        memory.arrive(step=1, node_id="b", street="Rue B")
+        assert not memory.is_looping()
+
+    def test_notes_are_the_model_s_own_words_kept_verbatim(self):
+        memory = CourierMemory()
+        memory.write("Rue Monge north end is a dead end")
+        assert "Rue Monge north end is a dead end" in memory.render()
+
+    def test_duplicate_notes_are_not_repeated(self):
+        memory = CourierMemory()
+        for _ in range(3):
+            memory.write("same thing")
+        assert memory.notebook.count("same thing") == 1
+
+    def test_first_impression_of_a_street_is_kept(self):
+        """A later glance from another angle must not silently overwrite what
+        the agent already committed to memory."""
+        memory = CourierMemory()
+        memory.saw_street("Rue Monge", "wide, shops")
+        memory.saw_street("Rue Monge", "narrow")
+        assert memory.streets_seen["Rue Monge"] == "wide, shops"
+
+    def test_a_goal_change_is_shown_but_not_written_in_the_notebook(self):
+        """It used to be recorded as a note, and that was the wrong store.
+
+        The notebook shows six lines and a shift changes goal twenty times, so
+        by mid-episode the notebook was six copies of the ``Job:`` line directly
+        above it and every note the model had written for itself had been
+        evicted. The current goal belongs in the goal line; the notebook is the
+        one store the model controls.
+        """
+        memory = CourierMemory()
+        memory.write("Quai Montorgueil south past no. 37 is a dead end")
+        memory.set_goal("collect", "131 Union Ave")
+        memory.set_goal("deliver", "46 Hill St")
+        assert memory.goal_kind == "deliver" and memory.goal == "46 Hill St"
+        assert "deliver 46 Hill St" in memory.render()
+        assert memory.notebook == ["Quai Montorgueil south past no. 37 is a dead end"]
+
+    def test_memory_states_facts_and_never_a_recommendation(self):
+        """The boundary this harness is built around. Memory may say where the
+        agent has been; the moment it says where to go, the benchmark is
+        measuring the harness."""
+        memory = CourierMemory()
+        memory.arrive(step=0, node_id="a", street="Rue A")
+        memory.set_goal("collect", "12 Rue B")
+        memory.mark_dead_end("a")
+        rendered = memory.render().lower()
+        for verb in ("you should", "go to", "take street", "best", "recommend", "next move"):
+            assert verb not in rendered, f"memory told the agent what to do: {verb!r}"
+
+    def test_memory_is_serialisable_for_replay(self):
+        memory = CourierMemory()
+        memory.arrive(step=0, node_id="a", street="Rue A")
+        memory.write("note")
+        payload = memory.to_dict()
+        assert payload["trail"] and payload["notebook"] == ["note"]
+
+
+class TestSkills:
+    def test_procedures_are_guidance_not_code(self):
+        """Everything about *navigating* is written guidance, because navigation
+        is the capability under test."""
+        for procedure in PROCEDURES:
+            assert procedure.steps
+            assert procedure.when
+        # The route tool replaced check_map as the anchor of the address
+        # runbook; what the assertion is really about is that the runbook names
+        # tools rather than executing anything.
+        assert "navigate()" in render_procedures()
+
+    def test_every_macro_declares_the_tools_it_expands_into(self):
+        """The safety argument: a macro may only be built from tools the agent
+        could have called itself. One that decided anything would have to name a
+        tool that decides, and there is none."""
+        tool_names = {t.name for t in ALL_TOOLS}
+        for macro in MACROS:
+            assert macro.expands_to
+            for name in macro.expands_to:
+                assert name in tool_names, f"{macro.tool.name} expands into unknown {name}"
+
+    def test_no_macro_expands_into_a_consult_tool(self):
+        """A macro that could look things up could plan; these may only move."""
+        by_name = {t.name: t for t in ALL_TOOLS}
+        for macro in MACROS:
+            for name in macro.expands_to:
+                assert by_name[name].kind is not ToolKind.CONSULT
+
+    def test_macros_are_bounded(self):
+        assert expansion_limit(FOLLOW_STREET, 99) == FOLLOW_STREET.max_expansion
+        assert expansion_limit(RETRACE, 99) == RETRACE.max_expansion
+        assert expansion_limit(FOLLOW_STREET, 2) == 2
+        assert expansion_limit(FOLLOW_STREET, 0) == 1
+
+    def test_follow_street_does_not_choose_the_street(self):
+        """It walks the street the model named. If it picked one, it would be
+        doing the navigation."""
+        assert any(p.name == "k" for p in FOLLOW_STREET.tool.params)
+        assert "never chooses" in FOLLOW_STREET.rationale
+
+
+class TestBudgets:
+    def test_each_limit_is_reported_by_name(self):
+        budgets = Budgets(steps=5, tool_calls=10, sim_seconds=100.0, output_tokens=50)
+        assert budget_exceeded(Spend(steps=5), budgets) == "step_budget_exhausted"
+        assert budget_exceeded(Spend(tool_calls=10), budgets) == "tool_call_budget_exhausted"
+        assert budget_exceeded(Spend(sim_seconds=100.0), budgets) == "sim_time_budget_exhausted"
+        assert budget_exceeded(Spend(output_tokens=50), budgets) == "output_token_budget_exhausted"
+
+    def test_an_unspent_budget_does_not_stop_the_episode(self):
+        assert budget_exceeded(Spend(steps=1), Budgets(steps=5)) is None
+
+    def test_repeated_format_errors_end_the_episode(self):
+        """A model that cannot emit the grammar will not start; but one bad turn
+        must not end a run, so the limit is on consecutive failures."""
+        budgets = Budgets(max_format_errors=3)
+        assert budget_exceeded(Spend(consecutive_format_errors=2), budgets) is None
+        assert budget_exceeded(Spend(consecutive_format_errors=3), budgets) == "repeated_format_errors"
+
+    def test_optional_budgets_can_be_disabled(self):
+        loose = Budgets(steps=100, tool_calls=None, sim_seconds=None, output_tokens=None)
+        assert budget_exceeded(Spend(tool_calls=10_000, sim_seconds=1e9), loose) is None
+
+
+class TestPrompts:
+    def test_the_system_prompt_only_describes_executable_tools(self):
+        tools = available_tools([a for a in PARIS_ACTIONS if a != "PICKUP"])
+        prompt = build_system_prompt(city="Paris", tools=tools)
+        assert "collect()" not in prompt
+        assert "walk_to(k)" in prompt
+
+    def test_the_system_prompt_shows_the_action_grammar(self):
+        prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
+        assert "```" in prompt and "THOUGHT" in prompt
+
+    def test_templates_interpolate_every_declared_field(self):
+        """A renamed field must fail loudly rather than render '{street}' into
+        the model's context."""
+        prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
+        for field in REQUIRED_FIELDS["system"]:
+            assert "{" + field + "}" not in prompt
+        observation = build_observation(
+            memory="### your notes\n(nothing yet)", location="You are on Rue Monge.",
+            clock="12 min left.", candidates=render_candidates([
+                {"k": 1, "street": "Rue Monge", "heading": "north", "distance_m": 18.0,
+                 "numbers": "12-30"},
+            ]),
+        )
+        for field in REQUIRED_FIELDS["observation"]:
+            assert "{" + field + "}" not in observation
+
+    def test_candidates_carry_what_a_rider_reads_off_a_corner(self):
+        rendered = render_candidates([
+            {"k": 2, "street": "Rue de Rivoli", "heading": "west", "distance_m": 24.0,
+             "numbers": "40-58", "seen": True},
+        ])
+        assert "Rue de Rivoli" in rendered
+        assert "west" in rendered
+        assert "24 m" in rendered
+        assert "40-58" in rendered
+        assert "walked this before" in rendered
+
+    def test_candidates_never_name_the_correct_choice(self):
+        """Printing the answer would make the benchmark measure token-copying."""
+        rendered = render_candidates([
+            {"k": 1, "street": "A", "heading": "north", "distance_m": 10.0},
+            {"k": 2, "street": "B", "heading": "west", "distance_m": 12.0},
+        ]).lower()
+        for giveaway in ("recommended", "shortest", "best", "take this", "correct"):
+            assert giveaway not in rendered
+
+    def test_a_dead_end_is_stated_rather_than_left_blank(self):
+        assert "no way on" in render_candidates([]).lower()
+        assert "no way on" in build_observation(
+            memory="m", location="l", candidates=render_candidates([])
+        ).lower()
+
+
+class TestPoseConvention:
+    """The frame bug the independent evaluation surfaced.
+
+    Three angle conventions meet in this system: the engine's compass bearing
+    (atan2(dx,dy), 0 = north), the mathematical convention the camera intrinsics
+    and point-navigation chain use (atan2(dy,dx), 0 = +X), and the UE renderer's
+    yaw -- which a 1550-frame correlation against building footprints showed
+    matches the mathematical one (corr +0.60, against +0.48 for the negation and
+    ~+0.24 for the quarter-turns). Copying the engine's number into Pose.yaw_deg
+    without converting rotates and mirrors every heading.
+    """
+
+    @pytest.mark.parametrize(
+        "compass,expected_math",
+        [(0.0, 90.0), (90.0, 0.0), (180.0, 270.0), (270.0, 180.0), (45.0, 45.0)],
+    )
+    def test_compass_converts_to_the_mathematical_convention(self, compass, expected_math):
+        assert (90.0 - compass) % 360.0 == pytest.approx(expected_math)
+
+    def test_the_adapter_applies_the_conversion(self):
+        """A structural guard: if the raw copy comes back, this fails."""
+        import inspect
+
+        from embodiedbench.runtime.text.vagen_adapter import VagenTextRuntime
+
+        source = inspect.getsource(VagenTextRuntime._agent_pose)
+        assert "90.0 - compass" in source or "90 - compass" in source
+        assert "yaw_deg=float(getattr(dm" not in source
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The navigation tool and the session that carries it
+#
+# Everything below tests the input/output contract end to end -- the runtime, the
+# observation built from it, the reply parsed against it, and the tool dispatched
+# from it. None of that had a test before, because none of it had an
+# implementation: prompts.py could render strings, loop.py could parse a reply
+# and CourierEnv could execute a call, and nothing joined the three. A contract
+# with no implementation cannot regress, but it also cannot be relied on, and
+# every claim about "what the agent sees" was a claim about code nobody ran.
+# ─────────────────────────────────────────────────────────────────────────────
+
+import json
+import math
+import re
+import tempfile
+from pathlib import Path
+
+from embodiedbench.agent.courier.prompts import render_photographs
+from embodiedbench.agent.courier.session import CourierSession
+from embodiedbench.compiler.road_network import build_road_network
+from embodiedbench.runtime.city.courier_env import (
+    Condition,
+    CourierEnv,
+    relative_of,
+    turn_word,
+)
+
+PARIS_MAP = (Path(__file__).resolve().parents[1] / "vendor" / "vagen" / "vagen"
+             / "envs" / "deliverybench" / "maps" / "citycore-paris")
+
+
+@pytest.fixture(scope="module")
+def paris():
+    return build_road_network(PARIS_MAP, map_name="citycore-paris")
+
+
+def courier(paris, **kwargs):
+    kwargs.setdefault("seed", 0)
+    kwargs.setdefault("order_count", 1)
+    env = CourierEnv(paris, **kwargs)
+    env.reset()
+    return env
+
+
+class TestNavigationTool:
+    """A route, and nothing but a route.
+
+    The environment has exactly one mechanic that cannot be solved from text --
+    the pedestrian light -- so the single thing a navigation tool must never do
+    is mention it. Everything else it says is a direction a phone would speak.
+    """
+
+    # Anything a courier is supposed to use its eyes for. Word-bounded, because
+    # "Boulevard de Buci" contains "uci" and street names are not evidence.
+    FORBIDDEN = re.compile(
+        r"\b(red|green|amber|light|lights|lamp|signal|signalised|traffic|crossing|"
+        r"pedestrian|wait|obstacle|blocked|hazard|roadworks|closed|danger)\b",
+        re.IGNORECASE,
+    )
+
+    def routes(self, paris, seeds=range(6)):
+        """A route from many places, so the check is not one lucky sentence."""
+        out = []
+        for seed in seeds:
+            env = courier(paris, seed=seed, order_count=3)
+            for _ in range(12):
+                rows = env.candidates()
+                outcome = env.navigate()
+                if outcome.message:
+                    # Snapshot the corner the route was asked from: the env is
+                    # walked on below and the assertions are about *this* corner.
+                    out.append(({r["street"] for r in rows}, outcome))
+                if not rows:
+                    break
+                env.walk_to(rows[len(out) % len(rows)]["k"])
+        return out
+
+    def test_a_route_never_mentions_a_light_or_a_hazard(self, paris):
+        """The whole argument for the tool. If the phone says "wait at the
+        crossing", the photographs stop being load-bearing and the benchmark
+        stops measuring perception."""
+        checked = 0
+        for _, outcome in self.routes(paris):
+            found = self.FORBIDDEN.findall(outcome.message)
+            assert not found, f"navigate() leaked {found} in: {outcome.message!r}"
+            checked += 1
+        assert checked >= 40, "not enough routes to make the claim"
+
+    def test_a_route_never_names_the_numbered_street_to_take(self, paris):
+        """Naming ``k`` would make navigate() the policy: the agent would copy a
+        number instead of matching a street name to the corner it is standing on."""
+        for _, outcome in self.routes(paris, seeds=range(3)):
+            for line in outcome.message.splitlines():
+                assert not re.search(r"\bwalk_to\b|\bfollow_street\b|\bstreet \d\b", line)
+
+    def test_every_leg_is_written_in_one_shape(self, paris):
+        """One shape, so the street name is always in the same place.
+
+        The first draft gave the opening leg one grammar and later legs another,
+        and an agent that parses the route to match a corner had to handle both.
+        """
+        shape = re.compile(
+            r"^  \d+\. (?:Take|Turn left onto|Turn right onto|Bear left onto|"
+            r"Bear right onto|Continue onto|Turn back onto) .+ — .+ — \d+ junctions?, \d+ m\.$"
+        )
+        seen = 0
+        for _, outcome in self.routes(paris, seeds=range(3)):
+            for line in outcome.message.splitlines():
+                if re.match(r"^  \d+\. ", line):
+                    assert shape.match(line), line
+                    seen += 1
+        assert seen >= 40
+
+    def test_the_first_instruction_names_a_street_that_leaves_this_junction(self, paris):
+        """A route the courier cannot start is not a route."""
+        for streets, outcome in self.routes(paris, seeds=range(4)):
+            first = next((l for l in outcome.message.splitlines()
+                          if l.startswith("  1. ")), None)
+            if first is None:
+                continue
+            street = first.split(" — ")[0].split(". ", 1)[1]
+            for verb in ("Take ", "Turn left onto ", "Turn right onto ",
+                         "Bear left onto ", "Bear right onto ", "Continue onto ",
+                         "Turn back onto "):
+                if street.startswith(verb):
+                    street = street[len(verb):]
+                    break
+            assert street in streets, first
+
+    def test_following_the_route_gets_closer(self, paris):
+        """The route is correct, not merely well-formed."""
+        for seed in range(5):
+            env = courier(paris, seed=seed)
+            target = env.target_address()
+            before = env.route_length_cm(env.node_id, target.kerb_node)
+            legs = env.route_legs(env.node_id, target.kerb_node)
+            assert legs
+            path = env.route_nodes(env.node_id, target.kerb_node)
+            row = next(r for r in env.candidates() if r["node"] == path[1])
+            env.walk_to(row["k"])
+            after = env.route_length_cm(env.node_id, target.kerb_node)
+            assert after < before
+
+    def test_the_shortest_route_is_the_route_that_is_quoted(self, paris):
+        """The predecessor map has to be updated on every relaxation. Keeping the
+        first node that pushed a neighbour rebuilds a path out of edges the
+        search never chose, and the metres beside it then describe a different
+        walk from the one the instructions describe."""
+        env = courier(paris)
+        for goal in sorted(env.network.nodes)[:25]:
+            path = env.route_nodes(env.node_id, goal)
+            quoted = env.route_length_cm(env.node_id, goal)
+            if path is None or quoted is None:
+                continue
+            walked = sum(math.dist(env.position(a), env.position(b))
+                         for a, b in zip(path, path[1:]))
+            assert walked == pytest.approx(quoted, rel=1e-6, abs=1.0)
+
+    def test_the_phone_is_gone_when_the_phone_is_gone(self, paris):
+        env = courier(paris, condition=Condition.NO_PHONE)
+        outcome = env.navigate()
+        assert not outcome.ok and outcome.code == "no_phone"
+        assert "navigate" not in env.allowed_tool_names()
+
+    def test_asking_for_the_route_costs_the_clock(self, paris):
+        """A free lookup makes the optimal policy ask every turn forever."""
+        env = courier(paris)
+        before = env.sim_seconds
+        env.navigate()
+        assert env.sim_seconds - before == pytest.approx(env.NAVIGATE_SECONDS)
+        assert env.NAVIGATE_SECONDS > 0
+
+    def test_the_courier_chooses_which_job_to_route_to(self, paris):
+        """With several live orders the sequencing is the task; a tool that only
+        ever routes to the oldest would make that decision for the agent."""
+        env = courier(paris, order_count=3, difficulty=None)
+        live = env.live_orders()
+        if len(live) < 2:
+            pytest.skip("this seed issues one job at a time")
+        first = env.navigate(live[0].index).message
+        second = env.navigate(live[1].index).message
+        assert live[0].target.text in first
+        assert live[1].target.text in second
+        refused = env.navigate(99)
+        assert not refused.ok and refused.code == "no_such_job"
+
+    def test_arrival_is_reported_rather_than_routed(self, paris):
+        env = courier(paris)
+        target = env.target_address()
+        env.node_id = target.kerb_node
+        assert "arrived" in env.navigate().message
+
+
+class TestRelativeDirections:
+    def test_the_way_you_came_is_behind_you(self, paris):
+        env = courier(paris)
+        rows = env.candidates()
+        env.walk_to(rows[0]["k"])
+        back = [r for r in env.candidates() if r["back"]]
+        assert back and back[0]["relative"] == "behind you"
+
+    def test_there_is_no_relative_direction_before_the_first_step(self, paris):
+        """A courier who has not moved has no back to its head, and inventing one
+        would put a left and a right on a heading the agent cannot verify."""
+        env = courier(paris)
+        assert env.facing() is None
+        assert all(row["relative"] == "" for row in env.candidates())
+
+    @pytest.mark.parametrize("facing,bearing,expected", [
+        (0.0, 0.0, "straight ahead"),
+        (0.0, 90.0, "on your right"),
+        (0.0, 270.0, "on your left"),
+        (0.0, 180.0, "behind you"),
+        (90.0, 0.0, "on your left"),
+    ])
+    def test_relative_directions_are_taken_from_the_way_you_face(
+            self, facing, bearing, expected):
+        assert relative_of(bearing, facing) == expected
+
+    @pytest.mark.parametrize("a,b,expected", [
+        (0.0, 5.0, "continue"), (0.0, 90.0, "turn right"), (0.0, 270.0, "turn left"),
+        (0.0, 180.0, "turn back"), (0.0, 40.0, "bear right"), (0.0, 320.0, "bear left"),
+    ])
+    def test_a_turn_is_named_the_way_a_person_would_name_it(self, a, b, expected):
+        assert turn_word(a, b) == expected
+
+
+class TestFramesAreForwardViews:
+    """The photograph beside street k is the view down street k.
+
+    It was not: at the 105 signalised junctions the runtime served the *signal*
+    bake instead, and that bake aims the camera at the lamp rather than along the
+    street -- on 88 of those nodes every approach shares one yaw, so a junction's
+    four candidate photographs were four copies of one picture of somewhere the
+    courier was not going.
+    """
+
+    def album(self, tmp, env, signalised_node):
+        street = Path(tmp) / "street"
+        signal = Path(tmp) / "signal"
+        for node, node_data in env.network.nodes.items():
+            for neighbour in node_data.neighbours:
+                path = street / "images" / node / f"toward_{neighbour}.png"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"street")
+        for neighbour in env.network.nodes[signalised_node].neighbours:
+            for state in ("red", "green"):
+                path = (signal / "images" / signalised_node
+                        / f"toward_{neighbour}_{state}.png")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"signal")
+        return street, signal
+
+    def test_a_signalised_junction_still_shows_the_street_you_would_walk(self, paris):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = courier(paris)
+            node = sorted(env.signalised)[0]
+            street, signal = self.album(tmp, env, node)
+            visible = {f"{node}|{n}" for n in env.network.nodes[node].neighbours}
+            (signal / "signal_visibility.json").write_text(
+                json.dumps({"legible": sorted(visible)}))
+            env = CourierEnv(paris, seed=0, order_count=1,
+                             album_root=street, signal_album_root=signal)
+            env.reset()
+            env.node_id = node
+            rows = env.candidates()
+            images = [r["image"] for r in rows]
+            assert all(i is not None for i in images)
+            assert len(set(images)) == len(images), "one picture served for every street"
+            for row in rows:
+                assert row["image"].endswith(f"toward_{row['node']}.png")
+
+    def test_the_lamp_is_a_second_photograph_beside_the_street_one(self, paris):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = courier(paris)
+            node = sorted(env.signalised)[0]
+            street, signal = self.album(tmp, env, node)
+            neighbour = sorted(env.network.nodes[node].neighbours)[0]
+            (signal / "signal_visibility.json").write_text(
+                json.dumps({"legible": [f"{node}|{neighbour}"]}))
+            env = CourierEnv(paris, seed=0, order_count=1,
+                             album_root=street, signal_album_root=signal)
+            env.reset()
+            env.node_id = node
+            rows = {r["node"]: r for r in env.candidates()}
+            assert rows[neighbour]["signal_image"] is not None
+            assert "_red.png" in rows[neighbour]["signal_image"] or \
+                   "_green.png" in rows[neighbour]["signal_image"]
+            # And nothing for the approaches the album cannot show.
+            for node_id, row in rows.items():
+                if node_id != neighbour:
+                    assert row["signal_image"] is None
+
+    def test_no_lamp_is_shown_where_the_album_declares_none(self, paris):
+        """A picture of a light the courier cannot see, followed by a penalty for
+        the light it could not see, is the defect the visibility gate exists for."""
+        with tempfile.TemporaryDirectory() as tmp:
+            env = courier(paris)
+            node = sorted(env.signalised)[0]
+            street, signal = self.album(tmp, env, node)
+            (signal / "signal_visibility.json").write_text(json.dumps({"legible": []}))
+            env = CourierEnv(paris, seed=0, order_count=1,
+                             album_root=street, signal_album_root=signal)
+            env.reset()
+            env.node_id = node
+            assert all(r["signal_image"] is None for r in env.candidates())
+
+    def test_the_served_lamp_matches_the_phase_that_is_running(self, paris):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = courier(paris)
+            node = sorted(env.signalised)[0]
+            street, signal = self.album(tmp, env, node)
+            visible = {f"{node}|{n}" for n in env.network.nodes[node].neighbours}
+            (signal / "signal_visibility.json").write_text(
+                json.dumps({"legible": sorted(visible)}))
+            env = CourierEnv(paris, seed=0, order_count=1,
+                             album_root=street, signal_album_root=signal)
+            env.reset()
+            env.node_id = node
+            for row in env.candidates():
+                assert row["signal_image"].endswith(
+                    f"_{env.light_here(row['k'])}.png")
+
+
+class TestPhotographCaptions:
+    def test_every_frame_has_a_caption_and_they_are_in_the_same_order(self):
+        rows = [
+            {"k": 1, "street": "Rue Monge", "relative": "on your left",
+             "heading": "north", "image": "/a.png", "signal_image": "/a_red.png"},
+            {"k": 2, "street": "Rue Cujas", "relative": "behind you",
+             "heading": "south", "image": "/b.png", "signal_image": None},
+        ]
+        captions = render_photographs(rows)
+        assert "[1] looking down Rue Monge, on your left" in captions
+        assert "[2] looking down Rue Cujas, behind you" in captions
+        assert "[light 1]" in captions
+        assert "[light 2]" not in captions
+        # Street views first, then lamps -- the order the frames are attached in.
+        assert captions.index("[2]") < captions.index("[light 1]")
+
+    def test_a_junction_with_no_pictures_says_so(self):
+        assert "no photographs" in render_photographs([])
+
+
+class TestSession:
+    """The turn, end to end."""
+
+    def test_every_advertised_tool_can_be_dispatched(self, paris):
+        """A tool in the menu that the runtime cannot run costs the agent a turn,
+        and three of them cost the episode."""
+        for condition in (Condition.FULL, Condition.NO_PHONE):
+            env = courier(paris, condition=condition)
+            session = CourierSession(env)
+            assert set(session.dispatch) == set(session.allowed)
+            for name in session.allowed:
+                assert name in session.system_prompt()
+
+    def test_a_tool_that_is_not_advertised_is_refused_not_executed(self, paris):
+        env = courier(paris, condition=Condition.NO_PHONE)
+        session = CourierSession(env)
+        turn = session.step("THOUGHT: t\n```\nnavigate()\n```")
+        assert turn.status == "format_error"
+
+    def test_the_job_is_known_before_the_first_action(self, paris):
+        """A rider is handed the job with the bag. Learning it cost a turn."""
+        env = courier(paris)
+        session = CourierSession(env)
+        assert env.target_address().text in session.observe().text
+
+    def test_the_observation_lists_exactly_the_frames_it_attaches(self, paris):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = courier(paris)
+            street = Path(tmp) / "street"
+            for node, data in env.network.nodes.items():
+                for neighbour in data.neighbours:
+                    path = street / "images" / node / f"toward_{neighbour}.png"
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(b"x")
+            env = CourierEnv(paris, seed=0, order_count=1, album_root=street)
+            env.reset()
+            session = CourierSession(env)
+            observation = session.observe()
+            assert observation.frames
+            for frame in observation.frames:
+                assert frame.label.split("]")[0] + "]" in observation.text
+            assert len(observation.frames) == observation.text.count("] looking down") + \
+                observation.text.count("] the pedestrian light")
+
+    def test_a_malformed_reply_is_re_prompted_rather_than_fatal(self, paris):
+        session = CourierSession(courier(paris))
+        turn = session.step("I will walk north.")
+        assert turn.status == "format_error"
+        assert not session.finished
+        assert "fenced block" in session.feedback
+
+    def test_three_malformed_replies_in_a_row_end_the_episode(self, paris):
+        session = CourierSession(courier(paris))
+        for _ in range(3):
+            session.step("no action here")
+        assert session.finished
+        assert session.run.termination_reason == "repeated_format_errors"
+
+    def test_a_refusal_is_information_and_the_episode_continues(self, paris):
+        session = CourierSession(courier(paris))
+        turn = session.step("THOUGHT: t\n```\nwalk_to(99)\n```")
+        assert turn.status == "rejected"
+        assert not session.finished
+        assert "no street 99" in session.feedback
+
+    def test_the_wrong_arity_is_reported_rather_than_crashing(self, paris):
+        session = CourierSession(courier(paris))
+        turn = session.step('THOUGHT: t\n```\ncheck_order("Rue Monge")\n```')
+        assert turn.status == "rejected"
+        assert turn.error == "bad_arguments"
+
+    def test_the_clock_the_turn_reports_is_the_clock_the_world_moved(self, paris):
+        session = CourierSession(courier(paris))
+        before = session.env.sim_seconds
+        turn = session.step("THOUGHT: t\n```\nnavigate()\n```")
+        assert turn.sim_seconds == pytest.approx(session.env.sim_seconds - before)
+        assert turn.sim_seconds > 0
+
+    def test_handling_time_is_charged_like_walking_time(self, paris):
+        """Both tools declared 30 s and neither advanced the clock, so a minute a
+        delivery was free -- and the deadlines had already been sized as if it
+        were not."""
+        env = courier(paris)
+        order = env.active_order()
+        env.node_id = order.pickup.kerb_node
+        before = env.sim_seconds
+        assert env.collect().ok
+        assert env.sim_seconds - before >= 30.0
+        env.node_id = order.dropoff.kerb_node
+        before = env.sim_seconds
+        assert env.hand_over().ok
+        assert env.sim_seconds - before >= 30.0
+
+    def test_a_refusal_names_the_job_the_courier_is_actually_near(self, paris):
+        """"You are not at 19 Boulevard du Temple" while standing beside job 1's
+        door named a place the courier was not going and said nothing about the
+        one it was."""
+        env = courier(paris, order_count=3, difficulty=None)
+        live = env.live_orders()
+        if len(live) < 2:
+            pytest.skip("this seed issues one job at a time")
+        far, near = live[0], live[-1]
+        if far is near:
+            pytest.skip("only one live pickup")
+        env.node_id = near.pickup.kerb_node
+        # Standing on the door, collect succeeds; one junction off, the refusal
+        # must still be about *this* job.
+        message = env.collect().message
+        assert near.pickup.text in message
+
+
+class TestPromptDoesNotLeak:
+    def test_the_prompt_tells_the_agent_the_pictures_are_load_bearing(self):
+        prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
+        assert "LOOK AT THE PHOTOGRAPHS" in prompt
+        low = prompt.lower()
+        assert "colour" in low and "pedestrian light" in low
+
+    def test_the_prompt_says_which_photograph_governs_the_crossing(self):
+        """36% of the street frames have a traffic lamp baked into them in one
+        fixed phase, so a street view can show red while the crossing is green.
+        Only the [light k] frame tracks the phase, and the courier has to be told
+        which of the two pictures it is being scored against."""
+        prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
+        assert "[light k]" in prompt
+        assert "not any light in the street views" in prompt
+
+    def test_the_prompt_states_the_reply_format_unambiguously(self):
+        prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
+        for rule in ("Exactly one fenced block", "one call", "THOUGHT"):
+            assert rule in prompt
+
+    def test_the_prompt_never_says_which_way_to_go(self):
+        prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
+        low = prompt.lower()
+        for leak in ("the light is red", "the light is green", "walk_to(1) is correct",
+                     "the answer is", "the shortest"):
+            assert leak not in low
+
+    def test_the_prompt_fits_a_sensible_budget(self):
+        """Context spent on the runbook is context not spent on the pictures."""
+        prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
+        # ~4 characters a token for English prose; the exact tokeniser does not
+        # matter for a ceiling this loose.
+        assert len(prompt) / 4 < 1600, "system prompt has grown past its budget"
+
+    def test_taking_the_phone_away_takes_its_runbook_away_too(self):
+        """Guidance that names a tool the environment will refuse is the same
+        defect as a menu that does."""
+        hard = build_system_prompt(
+            city="Paris", tools=available_tools(PARIS_ACTIONS, allow_consult=False))
+        assert "navigate()" not in hard
+        assert "check_map" not in hard
+        # What is left is the runbook that does not need a phone: read the doors
+        # and follow the numbers.
+        assert "look(k)" in hard

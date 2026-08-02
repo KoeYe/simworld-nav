@@ -157,6 +157,18 @@ class ObservationProfile:
         return problems
 
 
+# The measured floor for one order on the compiled Paris carriageway, not a
+# guess. A delivery leg is a median 530 m over 18 m edges, so a shortest-path
+# oracle spends about 23 turns an order stepping junction by junction and about
+# 11 using ``follow_street`` -- 109 turns for a ten-order shift. The old floor
+# was 5, which would have validated a configuration in which a perfect courier
+# could not finish a quarter of the work, and did: the 120-step budget the
+# benchmark actually ran capped the oracle at 3.1 of 10 deliveries. A validator
+# that passes an unfinishable configuration is worse than no validator, because
+# it certifies it.
+MIN_STEPS_PER_ORDER = 12
+
+
 @dataclass(frozen=True)
 class BudgetProfile:
     """Hardware-independent budgets (PLAN.md 12.2)."""
@@ -204,10 +216,11 @@ class DeliveryTaskConfig:
             problems.append("constraint: battery requires a scooter in transport.modes")
         if self.constraint.carrying_capacity < 1:
             problems.append("constraint: carrying_capacity must allow at least one order")
-        if self.budget.steps < self.order.order_count * 5:
+        if self.budget.steps < self.order.order_count * MIN_STEPS_PER_ORDER:
             problems.append(
                 f"budget: {self.budget.steps} steps cannot plausibly cover "
-                f"{self.order.order_count} orders"
+                f"{self.order.order_count} orders "
+                f"({MIN_STEPS_PER_ORDER} each is the measured floor)"
             )
         return problems
 

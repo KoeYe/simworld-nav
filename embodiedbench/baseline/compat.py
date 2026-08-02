@@ -184,3 +184,82 @@ def apply_map_compatibility_patches() -> PatchSet:
     bus_module._embodiedbench_compat_applied = True
     bus_module._embodiedbench_compat_patchset = patches
     return patches
+
+
+MISSING_MOVEMENT_HELPERS_REASON = (
+    "vlm_delivery/utils/traffic_lights.py calls movement_direction() and "
+    "movement_axis() from _select_edge_light and edge_signal_check, and defines "
+    "neither -- the module imports only `typing`. Every call raises NameError, so "
+    "the whole runtime half of the signal system is dead code in this checkout. "
+    "The functions are reconstructed here from two things the file itself fixes: "
+    "its own _DIR_DEG table {north:0, east:90, south:180, west:270}, and "
+    "signal_state_for_axis, whose axis spellings ('south-north', 'north-south', "
+    "'vertical', 'sn', 'ns') say exactly what movement_axis must return. Tracked "
+    "as ROSE-F1; if the upstream implementations arrive, "
+    "test_movement_helpers_match_the_axis_convention catches any disagreement."
+)
+
+
+def _compass_bearing(from_node, to_node) -> float:
+    """Compass bearing a->b: 0 = north (+Y), increasing clockwise.
+
+    Matches map.py's _bearing_deg, which is atan2(dx, dy) rather than the
+    mathematical atan2(dy, dx). The two differ by a reflection *and* a quarter
+    turn, so mixing them silently mirrors every heading.
+    """
+    import math
+
+    dx = float(to_node.position.x) - float(from_node.position.x)
+    dy = float(to_node.position.y) - float(from_node.position.y)
+    return math.degrees(math.atan2(dx, dy)) % 360.0
+
+
+def movement_direction(from_node, to_node) -> str:
+    """Cardinal direction of travel, in the vendored compass convention."""
+    bearing = _compass_bearing(from_node, to_node)
+    return ("north", "east", "south", "west")[int((bearing + 45.0) % 360.0 // 90.0)]
+
+
+def movement_axis(from_node, to_node) -> str:
+    """Crossing axis of travel: what signal_state_for_axis expects."""
+    return "north-south" if movement_direction(from_node, to_node) in ("north", "south") else "east-west"
+
+
+def apply_traffic_light_patches() -> PatchSet:
+    """Install the two helpers rose's traffic_lights.py calls but never defines."""
+    from vagen.envs.deliverybench.vlm_delivery.utils import traffic_lights as module
+
+    patches = PatchSet()
+    if not hasattr(module, "math"):
+        # The module's only import is `typing`, yet _dist_point_to_segment calls
+        # math.hypot. Three symbols the file uses and never defines -- math,
+        # movement_direction, movement_axis -- says this copy was truncated
+        # rather than merely buggy, so it is repaired here and the repair is
+        # recorded instead of vendor being edited.
+        import math as _math
+
+        module.math = _math
+        patches.records.append(PatchRecord(
+            target="vlm_delivery.utils.traffic_lights.math",
+            reason=(
+                "traffic_lights.py calls math.hypot in _dist_point_to_segment but "
+                "imports only `typing`, so every edge_signal_check raised NameError. "
+                "Tracked as ROSE-F1."
+            ),
+            original_source_sha256=sha256_bytes(
+                inspect.getsource(module._dist_point_to_segment).encode()
+            ),
+            applied=True,
+        ))
+    if not hasattr(module, "movement_direction"):
+        module.movement_direction = movement_direction
+        module.movement_axis = movement_axis
+        patches.records.append(PatchRecord(
+            target="vlm_delivery.utils.traffic_lights.movement_direction",
+            reason=MISSING_MOVEMENT_HELPERS_REASON,
+            original_source_sha256=sha256_bytes(
+                inspect.getsource(module.edge_signal_check).encode()
+            ),
+            applied=True,
+        ))
+    return patches

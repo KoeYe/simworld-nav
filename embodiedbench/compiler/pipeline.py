@@ -75,6 +75,14 @@ class Thresholds:
     long_edge_floor_m: float = 100.0
     # The certified region must be one dominant component, not a scatter.
     min_largest_component_fraction: float = 0.90
+    # A point action's reach, as a multiple of the map's own median edge, so one
+    # point step and one waypoint step cover comparable ground on any map. An
+    # absolute cap cannot do that: 18 m is about one Paris edge but several
+    # blocks on a dense procgen map. The band stops a pathological median from
+    # producing a reach of centimetres or of kilometres.
+    point_range_p50_factor: float = 1.0
+    point_range_min_m: float = 5.0
+    point_range_max_m: float = 40.0
     # Node the graph before analysing it. Measured on Paris, 37.2% of edges ran
     # straight past a junction without stopping there, letting an agent skip
     # intersections it never visited. Repair is on by default because an
@@ -232,6 +240,103 @@ class NavigationDecision:
 
     def to_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
+
+
+@dataclass
+class PointNavDecision:
+    """Whether this map can host the two point-navigation modes, and how far.
+
+    PLAN.md 9 wants all three modes, with ``nav_waypoint`` first. The other two
+    are not a property of the *map* so much as of the runtime serving it, and
+    the honest decomposition is worth stating rather than collapsing:
+
+    definable   both point modes need only camera intrinsics, a traversable
+                surface to project onto, and a pose lattice. Any map with a
+                usable graph has all three, so both modes are definable
+                wherever ``nav_waypoint`` is.
+    servable    a point action ends at a lattice pose, and PLAN.md 9.5 forbids
+                snapping in cached mode only, because that would make the two
+                runtimes different transition systems. A node-keyed album has no
+                image at an arbitrary lattice pose, so a cached runtime cannot
+                serve the point modes even though the map defines them. That is
+                a runtime limit, recorded here so nobody reads "definable" as
+                "available in every runtime".
+
+    ``depth_provider_is_geometric`` carries PLAN.md 9.3's warning forward: where
+    the range comes from a ground-plane raycast, ``nav_point_2d_depth`` is point
+    selection plus known geometry rather than metric-depth reasoning, and
+    results must be reported that way.
+    """
+
+    definable: bool
+    servable_runtimes: list[str]
+    max_range_m: float
+    lattice_spacing_cm: float
+    lattice_headings: int
+    depth_provider: str
+    depth_provider_is_geometric: bool
+    rationale: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return dataclasses.asdict(self)
+
+
+def decide_point_navigation(
+    analysis: GraphAnalysis,
+    *,
+    thresholds: Thresholds = THRESHOLDS,
+    album_is_lattice_baked: bool = False,
+) -> PointNavDecision:
+    """Scale point-action reach to the map, and say which runtimes can serve it."""
+    from embodiedbench.embodiment.point_nav import (
+        DEFAULT_LATTICE_HEADINGS,
+        DEFAULT_LATTICE_SPACING_CM,
+    )
+
+    median_edge_m = float((analysis.edge_length_m or {}).get("p50") or 0.0)
+    definable = analysis.node_count > 0 and analysis.edge_count > 0
+
+    if median_edge_m <= 0:
+        reach = thresholds.point_range_min_m
+        reach_reason = (
+            f"no measurable median edge, so the reach falls back to the "
+            f"{thresholds.point_range_min_m:g} m floor"
+        )
+    else:
+        raw = median_edge_m * thresholds.point_range_p50_factor
+        reach = min(max(raw, thresholds.point_range_min_m), thresholds.point_range_max_m)
+        clamped = "" if raw == reach else f" (clamped from {raw:.1f} m)"
+        reach_reason = (
+            f"reach {reach:.1f} m = {thresholds.point_range_p50_factor:g}x the map's own "
+            f"median edge of {median_edge_m:.1f} m{clamped}"
+        )
+
+    servable = ["live"]
+    if album_is_lattice_baked:
+        servable.append("cached")
+        serve_reason = "the album is baked on the pose lattice, so cached can serve point modes"
+    else:
+        serve_reason = (
+            "the album is keyed on graph nodes, which have no image at an arbitrary "
+            "lattice pose, so point modes are live-runtime only (PLAN.md 9.5)"
+        )
+
+    return PointNavDecision(
+        definable=definable,
+        servable_runtimes=servable if definable else [],
+        max_range_m=round(reach, 2),
+        lattice_spacing_cm=DEFAULT_LATTICE_SPACING_CM,
+        lattice_headings=DEFAULT_LATTICE_HEADINGS,
+        depth_provider="ground_plane_raycast",
+        # PLAN.md 9.3: say so plainly rather than letting a reader assume the
+        # mode measures depth.
+        depth_provider_is_geometric=True,
+        rationale=(
+            f"{reach_reason}; {serve_reason}"
+            if definable
+            else "map has no usable graph, so no navigation mode is definable"
+        ),
+    )
 
 
 def decide_navigation(

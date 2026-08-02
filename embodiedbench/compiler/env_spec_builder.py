@@ -28,10 +28,29 @@ from embodiedbench.schemas.env_spec import (
     QualityFlag,
     SolvabilityEvidence,
 )
+from embodiedbench.compiler.pipeline import GraphAnalysis, decide_point_navigation
 from embodiedbench.schemas.environment import CertificationGrade, NavigationMode
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DELIVERYBENCH = REPO_ROOT / "vendor" / "vagen" / "vagen" / "envs" / "deliverybench"
+
+
+def album_search_roots(map_name: str) -> list[Path]:
+    """Where an album for this map might live, in priority order.
+
+    Albums we bake cannot go inside vendor/ -- that checkout is an input and is
+    kept byte-identical -- so a freshly rendered album lives outside it. EB_ALBUM_ROOT
+    points at that location and is searched first, falling back to the albums
+    that shipped with the vendored maps.
+    """
+    import os
+
+    roots: list[Path] = []
+    external = os.environ.get("EB_ALBUM_ROOT")
+    if external:
+        roots.append(Path(external) / map_name)
+    roots.append(DELIVERYBENCH / "deliverybench_fpv" / map_name)
+    return roots
 
 
 def find_album(map_name: str, album_root: Path | None = None) -> dict[str, Any]:
@@ -43,9 +62,16 @@ def find_album(map_name: str, album_root: Path | None = None) -> dict[str, Any]:
     ``main_base_floor_road_full_1280x960/``. The largest manifest wins, since a
     stub is never the intended album.
     """
-    root = album_root or (DELIVERYBENCH / "deliverybench_fpv" / map_name)
-    if not root.exists():
-        return {"found": False, "reason": f"no album directory for {map_name!r}"}
+    if album_root is not None:
+        roots = [Path(album_root)]
+    else:
+        roots = album_search_roots(map_name)
+    root = next((r for r in roots if r.exists()), None)
+    if root is None:
+        return {
+            "found": False,
+            "reason": f"no album directory for {map_name!r} under {[str(r) for r in roots]}",
+        }
 
     candidates = [root / "manifest.jsonl"]
     for child in sorted(root.iterdir()):
@@ -123,6 +149,7 @@ def find_album(map_name: str, album_root: Path | None = None) -> dict[str, Any]:
 
         best = {
             "found": True,
+            "root": str(root),
             "manifest": str(manifest.relative_to(root.parent)),
             "rows": rows,
             "waypoints": len(positions),
@@ -235,7 +262,14 @@ def build_env_spec(
         if navigation["mode"] == "graph"
         else NavigationStyle.CARDINAL_AND_GRAPH
     )
+    # nav_waypoint is unconditional -- a one-hop step to a named neighbour needs
+    # no geometry, which is why PLAN.md 9 makes it the production path. The two
+    # point modes are added when the map's geometry defines them; which runtimes
+    # can actually *serve* them is a separate fact, recorded alongside.
+    point_nav = decide_point_navigation(_graph_analysis_from_dict(analysis))
     modes = [NavigationMode.NAV_WAYPOINT]
+    if point_nav.definable:
+        modes += [NavigationMode.NAV_POINT_3D, NavigationMode.NAV_POINT_2D_DEPTH]
 
     edge_lengths = analysis.get("edge_length_m") or {}
     graph = GraphSummary(
@@ -272,5 +306,26 @@ def build_env_spec(
         usable=True,
         world_bundle_sha256=result.get("world_bundle_sha256"),
         thresholds=result.get("thresholds", {}),
-        runtime_config=result.get("env_config") or {},
+        # EnvSpec 0.1.0 has no dedicated field for point-mode reach and lattice,
+        # and runtime_config is the schema's declared free-form channel. Putting
+        # it here keeps a runtime able to read the reach it must enforce without
+        # a version bump that would invalidate every spec already written.
+        runtime_config={
+            **(result.get("env_config") or {}),
+            "point_navigation": point_nav.to_dict(),
+        },
+    )
+
+
+def _graph_analysis_from_dict(analysis: dict[str, Any]) -> GraphAnalysis:
+    """Rebuild the analysis dataclass from its serialized form.
+
+    ``compile_map`` publishes its analysis as a dict, but the point-mode rule is
+    written against the dataclass so it can also be called directly on a fresh
+    analysis. Reconstructing is cheaper than duplicating the rule.
+    """
+    return GraphAnalysis(
+        node_count=int(analysis.get("node_count", 0)),
+        edge_count=int(analysis.get("edge_count", 0)),
+        edge_length_m=dict(analysis.get("edge_length_m") or {}),
     )

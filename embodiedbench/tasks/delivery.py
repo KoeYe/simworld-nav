@@ -43,7 +43,11 @@ from embodiedbench.schemas.geometry import FrameName, Pose, Vec3
 from embodiedbench.schemas.runtime import RuntimeMode
 from embodiedbench.schemas.trajectory import MetricValue, ScoreReport, Trajectory
 from embodiedbench.tasks.core import SolvabilityVerdict, TaskRequirements
-from embodiedbench.tasks.profiles import PRESETS, DeliveryTaskConfig
+from embodiedbench.tasks.profiles import (
+    MIN_STEPS_PER_ORDER,
+    PRESETS,
+    DeliveryTaskConfig,
+)
 
 # The M0-frozen v1 courier profile set (ADR-0004). scooter_veteran is
 # deliberately absent: PLAN.md 8.2 conditions it on a scientific justification
@@ -217,7 +221,7 @@ class DeliveryTask:
     def check_solvable(self, spec: EpisodeSpec, env: EnvSpec) -> SolvabilityVerdict:
         """PLAN.md 8.3's rejection rules, as far as a spec can answer them."""
         reasons: list[str] = []
-        if spec.budgets.steps < self.config.order.order_count * 5:
+        if spec.budgets.steps < self.config.order.order_count * MIN_STEPS_PER_ORDER:
             reasons.append("step budget cannot plausibly cover the order count")
         if not env.usable:
             reasons.append("environment is unusable")
