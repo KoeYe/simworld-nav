@@ -1,0 +1,20 @@
+stride=waypoint  TIME_BUDGET_MULTIPLE=3.5  6 seeds a tier, hazards on
+
+  solo    ceiling  6/6
+  solo    blind    4/6
+  solo    sighted  4/6
+  pair    ceiling  12/12
+  pair    blind    7/12
+  pair    sighted  7/12
+  triple  ceiling  18/18
+  triple  blind    7/18
+  triple  sighted  9/18
+  shift   ceiling  54/60
+  shift   blind    11/60
+  shift   sighted  12/60
+
+| | solo | pair | triple | shift |
+|---|---|---|---|---|
+| ceiling (map + memory) | 6/6 | 12/12 | 18/18 | 54/60 |
+| floor, blind | 4/6 | 7/12 | 7/18 | 11/60 |
+| floor, reads the frames | 4/6 | 7/12 | 9/18 | 12/60 |

@@ -1,0 +1,8 @@
+[grid] ok in 2s
+[invalid] ok in 0s
+[accounting] ok in 0s
+[economy] ok in 0s
+[determinism] ok in 0s
+[gating] ok in 0s
+[exploits] ok in 6s
+written /home/murray/simworld_nav/docs/review/sweep.json

@@ -1,0 +1,26 @@
+  x2.0   solo   waypoint  blind   8.3%  sighted  25.0%  gain +16.7
+  x2.0   solo   block     blind  16.7%  sighted  25.0%  gain +8.3
+  x2.0   pair   waypoint  blind  42.1%  sighted  47.6%  gain +5.5
+  x2.0   pair   block     blind  42.1%  sighted  50.0%  gain +7.9
+  x2.6   solo   waypoint  blind  25.0%  sighted  33.3%  gain +8.3
+  x2.6   solo   block     blind  25.0%  sighted  50.0%  gain +25.0
+  x2.6   pair   waypoint  blind  52.4%  sighted  57.1%  gain +4.7
+  x2.6   pair   block     blind  55.0%  sighted  60.0%  gain +5.0
+  x3.5   solo   waypoint  blind  50.0%  sighted  66.7%  gain +16.7
+  x3.5   solo   block     blind  50.0%  sighted  66.7%  gain +16.7
+  x3.5   pair   waypoint  blind  56.5%  sighted  59.1%  gain +2.6
+  x3.5   pair   block     blind  52.2%  sighted  60.9%  gain +8.7
+  x4.5   solo   waypoint  blind  66.7%  sighted  75.0%  gain +8.3
+  x4.5   solo   block     blind  66.7%  sighted  66.7%  gain +0.0
+  x4.5   pair   waypoint  blind  69.6%  sighted  69.6%  gain +0.0
+  x4.5   pair   block     blind  60.9%  sighted  65.2%  gain +4.3
+  x6.75  solo   waypoint  blind  83.3%  sighted  83.3%  gain +0.0
+  x6.75  solo   block     blind  66.7%  sighted  75.0%  gain +8.3
+  x6.75  pair   waypoint  blind  70.8%  sighted  66.7%  gain -4.1
+  x6.75  pair   block     blind  58.3%  sighted  66.7%  gain +8.4
+  x9.0   solo   waypoint  blind  83.3%  sighted  83.3%  gain +0.0
+  x9.0   solo   block     blind  66.7%  sighted  75.0%  gain +8.3
+  x9.0   pair   waypoint  blind  70.8%  sighted  66.7%  gain -4.1
+  x9.0   pair   block     blind  58.3%  sighted  66.7%  gain +8.4
+
+written docs/review/clock_sweep.json

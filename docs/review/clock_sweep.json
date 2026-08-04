@@ -1,0 +1,242 @@
+[
+  {
+    "multiple": 2.0,
+    "tier": "solo",
+    "stride": "waypoint",
+    "blind": 8.3,
+    "blind_on_time": 8.3,
+    "sighted": 25.0,
+    "sighted_on_time": 25.0,
+    "gain": 16.7
+  },
+  {
+    "multiple": 2.0,
+    "tier": "solo",
+    "stride": "block",
+    "blind": 16.7,
+    "blind_on_time": 8.3,
+    "sighted": 25.0,
+    "sighted_on_time": 25.0,
+    "gain": 8.3
+  },
+  {
+    "multiple": 2.0,
+    "tier": "pair",
+    "stride": "waypoint",
+    "blind": 42.1,
+    "blind_on_time": 10.5,
+    "sighted": 47.6,
+    "sighted_on_time": 23.8,
+    "gain": 5.5
+  },
+  {
+    "multiple": 2.0,
+    "tier": "pair",
+    "stride": "block",
+    "blind": 42.1,
+    "blind_on_time": 10.5,
+    "sighted": 50.0,
+    "sighted_on_time": 25.0,
+    "gain": 7.9
+  },
+  {
+    "multiple": 2.6,
+    "tier": "solo",
+    "stride": "waypoint",
+    "blind": 25.0,
+    "blind_on_time": 8.3,
+    "sighted": 33.3,
+    "sighted_on_time": 33.3,
+    "gain": 8.3
+  },
+  {
+    "multiple": 2.6,
+    "tier": "solo",
+    "stride": "block",
+    "blind": 25.0,
+    "blind_on_time": 8.3,
+    "sighted": 50.0,
+    "sighted_on_time": 33.3,
+    "gain": 25.0
+  },
+  {
+    "multiple": 2.6,
+    "tier": "pair",
+    "stride": "waypoint",
+    "blind": 52.4,
+    "blind_on_time": 9.5,
+    "sighted": 57.1,
+    "sighted_on_time": 28.6,
+    "gain": 4.7
+  },
+  {
+    "multiple": 2.6,
+    "tier": "pair",
+    "stride": "block",
+    "blind": 55.0,
+    "blind_on_time": 15.0,
+    "sighted": 60.0,
+    "sighted_on_time": 35.0,
+    "gain": 5.0
+  },
+  {
+    "multiple": 3.5,
+    "tier": "solo",
+    "stride": "waypoint",
+    "blind": 50.0,
+    "blind_on_time": 8.3,
+    "sighted": 66.7,
+    "sighted_on_time": 33.3,
+    "gain": 16.7
+  },
+  {
+    "multiple": 3.5,
+    "tier": "solo",
+    "stride": "block",
+    "blind": 50.0,
+    "blind_on_time": 8.3,
+    "sighted": 66.7,
+    "sighted_on_time": 33.3,
+    "gain": 16.7
+  },
+  {
+    "multiple": 3.5,
+    "tier": "pair",
+    "stride": "waypoint",
+    "blind": 56.5,
+    "blind_on_time": 13.0,
+    "sighted": 59.1,
+    "sighted_on_time": 27.3,
+    "gain": 2.6
+  },
+  {
+    "multiple": 3.5,
+    "tier": "pair",
+    "stride": "block",
+    "blind": 52.2,
+    "blind_on_time": 17.4,
+    "sighted": 60.9,
+    "sighted_on_time": 30.4,
+    "gain": 8.7
+  },
+  {
+    "multiple": 4.5,
+    "tier": "solo",
+    "stride": "waypoint",
+    "blind": 66.7,
+    "blind_on_time": 8.3,
+    "sighted": 75.0,
+    "sighted_on_time": 33.3,
+    "gain": 8.3
+  },
+  {
+    "multiple": 4.5,
+    "tier": "solo",
+    "stride": "block",
+    "blind": 66.7,
+    "blind_on_time": 8.3,
+    "sighted": 66.7,
+    "sighted_on_time": 33.3,
+    "gain": 0.0
+  },
+  {
+    "multiple": 4.5,
+    "tier": "pair",
+    "stride": "waypoint",
+    "blind": 69.6,
+    "blind_on_time": 17.4,
+    "sighted": 69.6,
+    "sighted_on_time": 30.4,
+    "gain": 0.0
+  },
+  {
+    "multiple": 4.5,
+    "tier": "pair",
+    "stride": "block",
+    "blind": 60.9,
+    "blind_on_time": 17.4,
+    "sighted": 65.2,
+    "sighted_on_time": 34.8,
+    "gain": 4.3
+  },
+  {
+    "multiple": 6.75,
+    "tier": "solo",
+    "stride": "waypoint",
+    "blind": 83.3,
+    "blind_on_time": 8.3,
+    "sighted": 83.3,
+    "sighted_on_time": 33.3,
+    "gain": 0.0
+  },
+  {
+    "multiple": 6.75,
+    "tier": "solo",
+    "stride": "block",
+    "blind": 66.7,
+    "blind_on_time": 8.3,
+    "sighted": 75.0,
+    "sighted_on_time": 33.3,
+    "gain": 8.3
+  },
+  {
+    "multiple": 6.75,
+    "tier": "pair",
+    "stride": "waypoint",
+    "blind": 70.8,
+    "blind_on_time": 16.7,
+    "sighted": 66.7,
+    "sighted_on_time": 29.2,
+    "gain": -4.1
+  },
+  {
+    "multiple": 6.75,
+    "tier": "pair",
+    "stride": "block",
+    "blind": 58.3,
+    "blind_on_time": 16.7,
+    "sighted": 66.7,
+    "sighted_on_time": 33.3,
+    "gain": 8.4
+  },
+  {
+    "multiple": 9.0,
+    "tier": "solo",
+    "stride": "waypoint",
+    "blind": 83.3,
+    "blind_on_time": 8.3,
+    "sighted": 83.3,
+    "sighted_on_time": 33.3,
+    "gain": 0.0
+  },
+  {
+    "multiple": 9.0,
+    "tier": "solo",
+    "stride": "block",
+    "blind": 66.7,
+    "blind_on_time": 8.3,
+    "sighted": 75.0,
+    "sighted_on_time": 33.3,
+    "gain": 8.3
+  },
+  {
+    "multiple": 9.0,
+    "tier": "pair",
+    "stride": "waypoint",
+    "blind": 70.8,
+    "blind_on_time": 16.7,
+    "sighted": 66.7,
+    "sighted_on_time": 29.2,
+    "gain": -4.1
+  },
+  {
+    "multiple": 9.0,
+    "tier": "pair",
+    "stride": "block",
+    "blind": 58.3,
+    "blind_on_time": 16.7,
+    "sighted": 66.7,
+    "sighted_on_time": 33.3,
+    "gain": 8.4
+  }
+]

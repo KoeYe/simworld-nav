@@ -1,0 +1,105 @@
+{
+  "model": "/data/shared/huggingface/hub/models--Qwen--Qwen2-VL-2B-Instruct/snapshots/aca78372505e6cb469c4fa6a35c60265b00ff5a4",
+  "tier": "solo",
+  "no_hazards": true,
+  "iterations": 6,
+  "batch": 4,
+  "learning_rate": 0.0001,
+  "format_weight": 1.0,
+  "train_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "eval_seeds": [
+    1000,
+    1001,
+    1002,
+    1003
+  ],
+  "seconds": 220.1,
+  "history": [
+    {
+      "iteration": 0,
+      "eval_format_score": 0.3125,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.5
+    },
+    {
+      "iteration": 1,
+      "train_reward": 0.4375,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.24065,
+      "grad_norm": 88.0,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 2,
+      "train_reward": 0.6875,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.18653,
+      "grad_norm": 31.875,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 3,
+      "train_reward": 0.6875,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.43214,
+      "grad_norm": 19.375,
+      "parameters_changed": true,
+      "eval_format_score": 0.4375,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 4.0
+    },
+    {
+      "iteration": 4,
+      "train_reward": 0.3125,
+      "advantage_spread": 0.75,
+      "step": "taken",
+      "loss": -0.05051,
+      "grad_norm": 19.25,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 5,
+      "train_reward": 0.375,
+      "advantage_spread": 0.75,
+      "step": "taken",
+      "loss": -0.12565,
+      "grad_norm": 23.375,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 6,
+      "train_reward": 0.5,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.14397,
+      "grad_norm": 66.5,
+      "parameters_changed": true,
+      "eval_format_score": 0.25,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.5
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "episode": "P",
+  "tier": "solo",
+  "stride": "block",
+  "seed": 0,
+  "condition": "full",
+  "embodiment": "human_on_foot",
+  "albums": true,
+  "replies": [
+    "THOUGHT: Both candidates are Quai Beaubourg in opposite directions and both pavement views are clear, so the pictures cannot separate them; only a route can, and buying it once keeps the map on screen.\n```\nnavigate()\n```",
+    "THOUGHT: The route says take Quai Beaubourg south-west, which is candidate 2, and its pavement view is clear with no barrier and no pedestrian light.\n```\nwalk_to(2)\n```",
+    "THOUGHT: The route wants Rue Saint-Antoine north-west and candidate 2 now reads north-west for 61 m over 4 junctions, which matches; its photograph is a shopfront wall because the first junction is metres away, so it tells me nothing about the street but does not contradict the route either.\n```\nwalk_to(2)\n```",
+    "THOUGHT: Candidate 3 continues Rue Saint-Antoine north-west and the pavement view down it is clear of barriers with no pedestrian light shown.\n```\nwalk_to(3)\n```"
+  ]
+}

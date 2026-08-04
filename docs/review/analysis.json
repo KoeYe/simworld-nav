@@ -1,0 +1,283 @@
+{
+  "prompt_promises": [
+    {
+      "stride": "waypoint",
+      "allowed": [
+        "check_map",
+        "check_order",
+        "collect",
+        "follow_street",
+        "hand_over",
+        "look",
+        "navigate",
+        "wait",
+        "walk_to"
+      ],
+      "mentioned_in_prompt": [
+        "check_map",
+        "check_order",
+        "collect",
+        "follow_street",
+        "hand_over",
+        "look",
+        "navigate",
+        "wait",
+        "walk_to"
+      ],
+      "mentioned_but_not_callable": [],
+      "callable_but_unmentioned": [],
+      "prompt_claims_red_costs": true
+    },
+    {
+      "stride": "block",
+      "allowed": [
+        "check_map",
+        "check_order",
+        "collect",
+        "hand_over",
+        "look",
+        "navigate",
+        "wait",
+        "walk_to"
+      ],
+      "mentioned_in_prompt": [
+        "check_map",
+        "check_order",
+        "collect",
+        "hand_over",
+        "look",
+        "navigate",
+        "wait",
+        "walk_to"
+      ],
+      "mentioned_but_not_callable": [],
+      "callable_but_unmentioned": [],
+      "prompt_claims_red_costs": true
+    }
+  ],
+  "red_penalty": {
+    "runs": [
+      {
+        "signals": true,
+        "red": 23,
+        "sim": 12547.6,
+        "delivered": 3,
+        "walked": 7325.5
+      },
+      {
+        "signals": false,
+        "red": 0,
+        "sim": 11514.0,
+        "delivered": 3,
+        "walked": 7901.5
+      }
+    ],
+    "extra_sim_seconds_with_signals": 1033.6,
+    "red_crossings_with_signals": 23,
+    "implied_charge_per_crossing": 44.9,
+    "note": "if the implied charge is ~0 the mechanic is counted but not paid for"
+  },
+  "wait_cost": {
+    "documented_s": 10,
+    "charged_s": 15.0
+  },
+  "house_numbers": {
+    "streets_checked": 28,
+    "monotone": 3,
+    "not_monotone": 25,
+    "share_not_monotone": 0.893,
+    "examples": [
+      {
+        "street": "Rue de Rivoli",
+        "numbers_in_node_order": [
+          " ",
+          "5",
+          " ",
+          " ",
+          " ",
+          "1",
+          "1",
+          "1",
+          " "
+        ]
+      },
+      {
+        "street": "Rue Saint-Honor\u00e9",
+        "numbers_in_node_order": [
+          " ",
+          "4",
+          " ",
+          "1",
+          " ",
+          " ",
+          " ",
+          "1"
+        ]
+      },
+      {
+        "street": "Rue de la Paix",
+        "numbers_in_node_order": [
+          "3",
+          "2",
+          "4"
+        ]
+      },
+      {
+        "street": "Avenue des \u00c9coles",
+        "numbers_in_node_order": [
+          "2",
+          "5",
+          " ",
+          " ",
+          "0",
+          "1"
+        ]
+      },
+      {
+        "street": "Boulevard du Temple",
+        "numbers_in_node_order": [
+          " ",
+          " ",
+          " ",
+          " ",
+          " ",
+          " ",
+          " ",
+          " ",
+          " ",
+          "2",
+          " ",
+          "2"
+        ]
+      },
+      {
+        "street": "Rue de S\u00e9vign\u00e9",
+        "numbers_in_node_order": [
+          "1",
+          " ",
+          " ",
+          "6",
+          "9",
+          " ",
+          " ",
+          " ",
+          "1",
+          "1",
+          "2",
+          " "
+        ]
+      },
+      {
+        "street": "Quai Montorgueil",
+        "numbers_in_node_order": [
+          " ",
+          " ",
+          " ",
+          "1",
+          "1",
+          "1",
+          "1",
+          " ",
+          " ",
+          " ",
+          "2",
+          "2"
+        ]
+      },
+      {
+        "street": "Rue Saint-Antoine",
+        "numbers_in_node_order": [
+          "2",
+          "4",
+          " ",
+          "6",
+          " "
+        ]
+      }
+    ]
+  },
+  "candidate_edges": {
+    "candidate_rows_seen": 992,
+    "under_5m": 0.1028,
+    "under_10m": 0.2339,
+    "under_20m": 0.9607,
+    "median_m": 17.873239422803913,
+    "identical_image_served_twice": 0,
+    "same_street_name_twice_in_one_list": 235,
+    "identical_compass_heading_twice": 134
+  },
+  "path_leak": {
+    "frames_seen": 539,
+    "frames_whose_filename_states_the_hazard": 0,
+    "share": 0.0,
+    "examples": [],
+    "note": "RUNNING.md hands the model images=[f.path ...]; a policy that reads the path never needs the pixels"
+  },
+  "clock_multiple": [
+    {
+      "tier": "solo",
+      "multiples": [
+        7.0,
+        7.0,
+        7.0,
+        7.0,
+        6.999,
+        6.999
+      ],
+      "spread": 0.001
+    },
+    {
+      "tier": "pair",
+      "multiples": [
+        7.0,
+        7.0,
+        7.0,
+        7.0,
+        6.999,
+        7.0
+      ],
+      "spread": 0.001
+    },
+    {
+      "tier": "triple",
+      "multiples": [
+        7.0,
+        7.0,
+        7.0,
+        7.0,
+        7.0,
+        7.0
+      ],
+      "spread": 0.0
+    },
+    {
+      "tier": "shift",
+      "multiples": [
+        7.0,
+        7.0,
+        7.0,
+        7.0,
+        7.0,
+        7.0
+      ],
+      "spread": 0.0
+    }
+  ],
+  "turns_per_delivery": {
+    "claim": "block stride is about 12 to 25 turns per delivery instead of 90",
+    "measured": [
+      {
+        "stride": "waypoint",
+        "turns": 928,
+        "delivered": 5,
+        "turns_per_delivery": 185.6
+      },
+      {
+        "stride": "block",
+        "turns": 436,
+        "delivered": 3,
+        "turns_per_delivery": 145.3
+      }
+    ]
+  }
+}

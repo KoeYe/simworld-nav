@@ -1,0 +1,94 @@
+{
+  "turn": 35,
+  "config": {
+    "tier": "solo",
+    "stride": "block",
+    "seed": 0
+  },
+  "text": "### your notes\nCame from: Rue Oberkampf no. 15 <- Rue Oberkampf no. 18 <- Rue Oberkampf no. 7 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 17.\n\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Oberkampf, behind you\n  [2] looking down Rue Oberkampf, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou hand the order to the customer at 17 Rue Oberkampf. You are paid 5.43.\n",
+  "frames": [
+    {
+      "label": "[1] Rue Oberkampf, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s009_n010/toward_s009_n009.png"
+    },
+    {
+      "label": "[2] Rue Oberkampf, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s009_n010/toward_s009_n011.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/A/turn_035_map.png",
+      "svg_bytes": 21149
+    }
+  ],
+  "finished": true,
+  "sim_seconds": 906.8683040916046,
+  "summary": {
+    "node": "s009_n010",
+    "street": "Rue Oberkampf",
+    "sim_seconds": 906.9,
+    "earnings": 5.43,
+    "profit": 5.43,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "5 Rue Saint-Antoine",
+        "dropoff": "17 Rue Oberkampf",
+        "fee": 5.43,
+        "deadline_s": 985.4,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 5.43,
+        "issued_at_s": 0.0
+      }
+    ],
+    "difficulty": "solo",
+    "turns": 34,
+    "queue_depth": 1,
+    "minutes_per_delivery": 15.11,
+    "turns_per_delivery": 34.0,
+    "delivered": 1,
+    "on_time": 1,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 1,
+    "rejected_actions": 5,
+    "walked_m": 767.0,
+    "optimal_walk_m": 562.7,
+    "walk_ratio": 1.36,
+    "optimal_seconds": 541.9,
+    "time_ratio": 1.67,
+    "shift_optimal_seconds": 430.2,
+    "deliveries_per_hour": 3.97,
+    "earnings_per_hour": 21.56,
+    "shift_seconds": 3011.2452100661644,
+    "shift_over": false,
+    "red_crossings": 1,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 1,
+    "slow_passages": 3,
+    "obstacles": {
+      "placed": 35,
+      "in_effect": 35,
+      "slow_pedestrian": 22,
+      "slow_pedestrian_in_effect": 22,
+      "road_block": 13,
+      "road_block_in_effect": 13
+    },
+    "finished": true
+  },
+  "previous": {
+    "reply": "THOUGHT: This should be the door; handing the parcel over.\n```\nhand_over()\n```",
+    "action": "hand_over()",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 30.0,
+    "reward": 1.5
+  }
+}

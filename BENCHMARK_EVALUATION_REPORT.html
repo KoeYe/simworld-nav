@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paris Delivery Benchmark — Visual Evaluation</title>
+<style>
+:root{--ink:#18212b;--muted:#68727d;--paper:#f7f4ee;--card:#fff;--red:#b63b3b;--amber:#c47b18;--green:#277a59;--blue:#315f91;--line:#d9d2c7}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}main{max-width:1180px;margin:auto;padding:48px 26px 80px}h1{font:700 clamp(2.3rem,6vw,5rem)/.95 Georgia,serif;margin:.2em 0}h2{font:700 2rem/1.1 Georgia,serif;margin:2.2em 0 .7em}h3{margin:0 0 .35em}p{max-width:78ch}.eyebrow{text-transform:uppercase;letter-spacing:.14em;color:var(--blue);font-weight:750}.verdict{font-size:1.25rem;border-left:6px solid var(--red);padding:16px 22px;background:#fff4f1;max-width:900px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.metric,.finding,.gate{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 4px 18px #352d2210}.metric b{display:block;font-size:2rem}.metric span{color:var(--muted)}.pass{color:var(--green)}.fail{color:var(--red)}.warn{color:var(--amber)}.trajectory{position:relative;margin:28px 0 20px;padding-left:34px}.trajectory:before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:4px;background:linear-gradient(var(--blue),var(--red),var(--green));border-radius:3px}.stop{position:relative;background:white;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:0 0 12px}.stop:before{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:var(--blue);left:-31px;top:19px;border:3px solid var(--paper)}.stop.hazard:before{background:var(--red)}.stop.signal:before{background:var(--amber)}.stop.success:before{background:var(--green)}.stop small{color:var(--muted)}.flow{width:100%;height:auto;background:#eef3f5;border-radius:18px;border:1px solid #ccd7dc}.sev{display:inline-block;color:white;background:var(--red);border-radius:20px;padding:3px 9px;font-size:.75rem;font-weight:800;text-transform:uppercase}.sev.med{background:var(--amber)}table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#ece8df}code{background:#eee9df;padding:2px 5px;border-radius:4px}.note{color:var(--muted);font-size:.92rem}.bar{height:10px;background:#e3ded4;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green)}footer{margin-top:60px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted)}@media(max-width:600px){main{padding:30px 16px}th,td{padding:8px;font-size:.85rem}}
+</style>
+</head>
+<body><main>
+<p class="eyebrow">Embodied audit · 2 August 2026 · revision 5130047</p>
+<h1>Paris delivery,<br>under the microscope.</h1>
+<p class="verdict"><strong>Promising research prototype; not benchmark-release ready and not evidence for real-Paris deployment.</strong> The engineering skeleton is strong, but the only validated task condition is intentionally text-solvable, release gates disagree, and no real-world embodiment evidence exists.</p>
+
+<h2>The blind run</h2>
+<div class="grid">
+ <div class="metric"><b>1 / 1</b><span>delivered, on time</span></div>
+ <div class="metric"><b>34</b><span>agent turns</span></div>
+ <div class="metric"><b>10.59</b><span>simulated minutes</span></div>
+ <div class="metric"><b>537.9 m</b><span>walked</span></div>
+ <div class="metric"><b>0 / 0</b><span>barrier hits / red crossings</span></div>
+ <div class="metric"><b>2</b><span>correct waits at red</span></div>
+</div>
+
+<svg class="flow" viewBox="0 0 1000 240" role="img" aria-label="Observation and action flow">
+ <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#315f91"/></marker></defs>
+ <g font-family="system-ui" text-anchor="middle"><rect x="40" y="70" width="190" height="100" rx="18" fill="white"/><text x="135" y="110" font-size="20" font-weight="700">World</text><text x="135" y="138" fill="#68727d">state + clock</text>
+ <rect x="300" y="30" width="190" height="80" rx="18" fill="white"/><text x="395" y="65" font-size="19" font-weight="700">Text</text><text x="395" y="91" fill="#68727d">streets, notes, tools</text>
+ <rect x="300" y="135" width="190" height="80" rx="18" fill="white"/><text x="395" y="170" font-size="19" font-weight="700">Frames</text><text x="395" y="196" fill="#68727d">street · signal · map</text>
+ <rect x="570" y="70" width="190" height="100" rx="18" fill="white"/><text x="665" y="110" font-size="20" font-weight="700">Courier policy</text><text x="665" y="138" fill="#68727d">one fenced call</text>
+ <rect x="830" y="70" width="130" height="100" rx="18" fill="white"/><text x="895" y="110" font-size="20" font-weight="700">Tool</text><text x="895" y="138" fill="#68727d">charged</text>
+ </g><g stroke="#315f91" stroke-width="4" fill="none" marker-end="url(#a)"><path d="M230 100L295 70"/><path d="M230 140L295 175"/><path d="M490 70L565 105"/><path d="M490 175L565 135"/><path d="M760 120L825 120"/><path d="M895 175C895 225 135 225 135 175"/></g>
+</svg>
+
+<div class="trajectory">
+ <div class="stop"><h3>Start · Quai Beaubourg</h3><small>Two opposite photographs; phone required to establish direction.</small></div>
+ <div class="stop"><h3>Pickup · 5 Rue Saint-Antoine</h3><small>Door search exposed block/waypoint unit confusion and an exact-distance refusal leak.</small></div>
+ <div class="stop hazard"><h3>Blocked · Boulevard du Temple</h3><small>The road closure was visually clear. I did not collide.</small></div>
+ <div class="stop"><h3>Failed detour · Quai Ménilmontant</h3><small>The apparent bypass was a short dead end; the phone could not learn the closure.</small></div>
+ <div class="stop signal"><h3>Recovery · Rue de Sévigné</h3><small>Separate lamp images were red; one wait changed them to green.</small></div>
+ <div class="stop"><h3>Wide loop</h3><small>Rue de la Roquette → Avenue de Crimée → Rue Oberkampf.</small></div>
+ <div class="stop success"><h3>Delivered · 17 Rue Oberkampf</h3><small>On time after 34 turns; two rejected door interactions.</small></div>
+</div>
+
+<h2>Configuration reality</h2>
+<table><thead><tr><th>Axis</th><th>Implemented</th><th>What can be claimed</th></tr></thead><tbody>
+<tr><td>Difficulty</td><td>solo · pair · triple · shift · endless</td><td>All have code/tests; limited audit sample is not a score estimate.</td></tr>
+<tr><td>Stride</td><td>waypoint · block</td><td>Both tested; human audit used block.</td></tr>
+<tr><td>Condition</td><td>full · no_phone · visual</td><td><strong>Only full is validated.</strong> Visual is known information-incomplete.</td></tr>
+<tr><td>Runtime</td><td>text · cached · live contract</td><td>Text/cached exercised. Live UE unavailable in this audit.</td></tr>
+<tr><td>Embodiment</td><td>abstract profiles</td><td>Walking graph actions, not a physical courier or robot.</td></tr>
+</tbody></table>
+
+<h2>Release gates</h2>
+<div class="grid">
+ <div class="gate"><h3 class="pass">PASS · Migration</h3><p>366 nodes, 428 edges, 856/856 walkable directions photographed; scripted 2/2 delivery.</p></div>
+ <div class="gate"><h3 class="pass">PASS · Stress</h3><p>15/15 generated edge cases behaved as expected.</p></div>
+ <div class="gate"><h3 class="fail">FAIL · Readiness</h3><p>Expected image count per turn did not hold.</p></div>
+ <div class="gate"><h3 class="fail">FAIL · Provenance</h3><p>43/49 assertions: source path, plugin tree, and Python identity drift.</p></div>
+ <div class="gate"><h3 class="warn">BLOCKED · Training</h3><p>R1 and Qwen CLIs import undeclared, unavailable <code>torch</code>.</p></div>
+ <div class="gate"><h3 class="pass">PASS · Full suite</h3><p>950 passed, 4 skipped in 379.81 seconds.</p></div>
+ <div class="gate"><h3 class="pass">PASS · Replay</h3><p>28/28 text, visual, repeated, and clean-process replay assertions.</p></div>
+</div>
+
+<h2>Highest-impact findings</h2>
+<div class="grid">
+ <article class="finding"><span class="sev">Critical</span><h3>No real-Paris evidence</h3><p>Synthetic topology, cached views, no physical embodiment, field trial, safety case, or current geographic certificate.</p></article>
+ <article class="finding"><span class="sev">High</span><h3>Pixels are not yet the benchmark</h3><p>The only validated condition is designed as a text planning floor. Perception-oriented rungs are unvalidated.</p></article>
+ <article class="finding"><span class="sev">High</span><h3>Privileged rangefinder leak</h3><p>Rejected door tools reveal exact metric distance, contrary to the evaluation brief.</p></article>
+ <article class="finding"><span class="sev">High</span><h3>Public runner is not literal</h3><p>The documented reference call yields “no order was generated” without a missing reset.</p></article>
+ <article class="finding"><span class="sev med">Medium</span><h3>Units conflict</h3><p>“Next junction,” route junction counts, block calls, waypoints, and metres do not align for the agent.</p></article>
+ <article class="finding"><span class="sev med">Medium</span><h3>Context is expensive</h3><p>~1,479 rough system-prompt tokens plus repeated notes, photographs, captions, trail, and map each turn.</p></article>
+</div>
+
+<h2>What is already good</h2>
+<p>Typed tools drive both prompt and dispatch; photographs and SVG maps remain distinct; full prompts and ordered media are recorded; every tool costs simulated time; cached/text transitions receive conformance checks; deterministic replay and stress testing are first-class; and the code is unusually candid about unvalidated conditions. These are excellent foundations.</p>
+
+<h2>Path to a defensible paper</h2>
+<ol><li>Remove the exact-distance leak and run adversarial harness tests.</li><li>Make one clean-container release command pass tests, readiness, provenance, replay, and dependency preflight.</li><li>Validate a perception-essential condition with image removal/shuffle and human/VLM baselines.</li><li>Generate hashed result cards with seed lists and confidence intervals.</li><li>Publish a compatibility matrix across maps, profiles, conditions, hazards, and runtimes.</li><li>Keep real-world Paris deployment as a separate safety-governed program.</li></ol>
+
+<footer>Detailed evidence and recommendations: <a href="BENCHMARK_EVALUATION_REPORT.md">BENCHMARK_EVALUATION_REPORT.md</a> · Execution plan: <a href="BENCHMARK_TEST_PLAN.md">BENCHMARK_TEST_PLAN.md</a></footer>
+</main></body></html>

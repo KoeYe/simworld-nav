@@ -1,0 +1,128 @@
+{
+  "turn": 35,
+  "config": {
+    "tier": "triple",
+    "stride": "block",
+    "seed": 4
+  },
+  "text": "### your notes\nCame from: Rue Oberkampf no. 23 <- Rue Oberkampf no. 30, 31 <- Avenue L\u00e9on Frot <- Boulevard de Buci <- Boulevard de Buci no. 7, 10, 12, 14\nYou have passed Rue Oberkampf, Rue Oberkampf no. 30, 31 more than twice \u2014 you are going in circles.\nStreets you have seen: Rue Saint-Antoine (seen from Boulevard de Buci no. 1, 2); Rue Caulaincourt (seen from Rue Ordener); Boulevard du Temple (seen from Rue Ordener); Rue Saint-Blaise (seen from Rue Ordener)\n\n### where you are\nYou are on Rue Ordener.\nYou are carrying 2 jobs. Their deadlines run at the same time:\n  job 0: deliver to 4 Boulevard du Temple \u2014 0 min overdue\n  job 2: collect from 9 Boulevard du Temple \u2014 9 min left\n\n### streets leaving this junction\n  1. Rue Caulaincourt \u2014 half left (east) \u2014 next junction 10 m\n  2. Boulevard du Temple \u2014 straight ahead (south-east) \u2014 next junction 8 m\n  3. Rue Saint-Blaise \u2014 half right (south) \u2014 next junction 11 m\n  4. Rue Oberkampf \u2014 behind you (north-west) \u2014 next junction 6 m\n\n### photographs\n  [1] looking down Rue Caulaincourt, half left\n  [2] looking down Boulevard du Temple, straight ahead\n  [3] looking down Rue Saint-Blaise, half right\n  [4] looking down Rue Oberkampf, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 6 m along Rue Ordener, through 1 junction. Rue Ordener does not go on from here.\n",
+  "frames": [
+    {
+      "label": "[1] Rue Caulaincourt, half left",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s040_n001/toward_s039_n000.png"
+    },
+    {
+      "label": "[2] Boulevard du Temple, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s040_n001/toward_s004_n004.png"
+    },
+    {
+      "label": "[3] Rue Saint-Blaise, half right",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s040_n001/toward_s048_n001.png"
+    },
+    {
+      "label": "[4] Rue Oberkampf, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s040_n001/toward_s009_n014.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/B/turn_035_map.png",
+      "svg_bytes": 15499
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 862.6583071945987,
+  "summary": {
+    "node": "s040_n001",
+    "street": "Rue Ordener",
+    "sim_seconds": 862.7,
+    "earnings": 2.12,
+    "profit": 2.12,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "4 Boulevard de Buci",
+        "dropoff": "4 Boulevard du Temple",
+        "fee": 5.02,
+        "deadline_s": 847.6,
+        "picked_up": true,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 1,
+        "pickup": "25 Rue Oberkampf",
+        "dropoff": "14 Boulevard de Buci",
+        "fee": 4.23,
+        "deadline_s": 389.0,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 2.12,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 2,
+        "pickup": "9 Boulevard du Temple",
+        "dropoff": "13 Boulevard de Buci",
+        "fee": 4.37,
+        "deadline_s": 646.2,
+        "picked_up": false,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 737.6
+      }
+    ],
+    "difficulty": "triple",
+    "turns": 34,
+    "queue_depth": 2,
+    "minutes_per_delivery": 14.38,
+    "turns_per_delivery": 34.0,
+    "delivered": 1,
+    "on_time": 0,
+    "late": 1,
+    "expired": 0,
+    "orders_issued": 3,
+    "rejected_actions": 3,
+    "walked_m": 664.5,
+    "optimal_walk_m": 147.1,
+    "walk_ratio": 4.52,
+    "optimal_seconds": 165.1,
+    "time_ratio": 5.23,
+    "shift_optimal_seconds": 861.1,
+    "deliveries_per_hour": 4.17,
+    "earnings_per_hour": 8.85,
+    "shift_seconds": 6027.907640817939,
+    "shift_over": false,
+    "red_crossings": 3,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 0,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 25,
+      "in_effect": 25,
+      "slow_pedestrian": 16,
+      "slow_pedestrian_in_effect": 16,
+      "road_block": 9,
+      "road_block_in_effect": 9
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: The route continues onto Rue Ordener, which is candidate 2 south-east.\n```\nwalk_to(2)\n```",
+    "action": "walk_to(2)",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 4.4614841783718475,
+    "reward": -0.0
+  }
+}

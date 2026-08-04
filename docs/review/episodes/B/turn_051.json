@@ -1,0 +1,118 @@
+{
+  "turn": 51,
+  "config": {
+    "tier": "triple",
+    "stride": "block",
+    "seed": 4
+  },
+  "text": "### your notes\nJob: collect from 9 Boulevard du Temple\nCame from: Boulevard du Temple <- Boulevard du Temple no. 5, 6 <- Rue Cr\u00e9mieux <- Boulevard du Temple no. 3, 4 <- Rue Ordener\nYou have passed Rue Oberkampf, Rue Oberkampf no. 30, 31 more than twice \u2014 you are going in circles.\nStreets you have seen: Boulevard du Temple (seen from Rue Ordener); Rue Saint-Blaise (seen from Rue Ordener); Rue Cr\u00e9mieux (seen from Boulevard du Temple); Rue des Martyrs (seen from Boulevard du Temple)\n\n### where you are\nYou are on Boulevard du Temple, outside numbers 9, 10.\n5 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 behind you (north-east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 straight ahead (south-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Boulevard du Temple, behind you\n  [2] looking down Boulevard du Temple, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Boulevard du Temple, through 2 junctions. You are at the address you were looking for.\n",
+  "frames": [
+    {
+      "label": "[1] Boulevard du Temple, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s004_n006/toward_s004_n005.png"
+    },
+    {
+      "label": "[2] Boulevard du Temple, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_obstacles/citycore-paris/images/s004_n008/toward_s004_n009_slow_pedestrian.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/B/turn_051_map.png",
+      "svg_bytes": 15663
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 1063.0499529360434,
+  "summary": {
+    "node": "s004_n006",
+    "street": "Boulevard du Temple",
+    "sim_seconds": 1063.0,
+    "earnings": 4.63,
+    "profit": 4.63,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "4 Boulevard de Buci",
+        "dropoff": "4 Boulevard du Temple",
+        "fee": 5.02,
+        "deadline_s": 847.6,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 2.51,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 1,
+        "pickup": "25 Rue Oberkampf",
+        "dropoff": "14 Boulevard de Buci",
+        "fee": 4.23,
+        "deadline_s": 389.0,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 2.12,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 2,
+        "pickup": "9 Boulevard du Temple",
+        "dropoff": "13 Boulevard de Buci",
+        "fee": 4.37,
+        "deadline_s": 646.2,
+        "picked_up": false,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 737.6
+      }
+    ],
+    "difficulty": "triple",
+    "turns": 50,
+    "queue_depth": 2,
+    "minutes_per_delivery": 8.86,
+    "turns_per_delivery": 25.0,
+    "delivered": 2,
+    "on_time": 0,
+    "late": 2,
+    "expired": 0,
+    "orders_issued": 3,
+    "rejected_actions": 9,
+    "walked_m": 861.1,
+    "optimal_walk_m": 411.4,
+    "walk_ratio": 2.09,
+    "optimal_seconds": 413.8,
+    "time_ratio": 2.57,
+    "shift_optimal_seconds": 861.1,
+    "deliveries_per_hour": 6.77,
+    "earnings_per_hour": 15.68,
+    "shift_seconds": 6027.907640817939,
+    "shift_over": false,
+    "red_crossings": 3,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 0,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 25,
+      "in_effect": 25,
+      "slow_pedestrian": 16,
+      "slow_pedestrian_in_effect": 16,
+      "road_block": 9,
+      "road_block_in_effect": 9
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: Number 9 is 36 m south-west and candidate 4 stays on Boulevard du Temple that way.\n```\nwalk_to(4)\n```",
+    "action": "walk_to(4)",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 25.714285155681182,
+    "reward": -0.0
+  }
+}

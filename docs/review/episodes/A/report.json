@@ -1,0 +1,4652 @@
+{
+  "turns": [
+    {
+      "step": 1,
+      "prompt": "### your notes\nJob: collect from 5 Rue Saint-Antoine\n\n### where you are\nYou are on Quai Beaubourg, outside number 2.\n16 min left before the deadline.\n\n### streets leaving this junction\n  1. Quai Beaubourg \u2014 heading north-east \u2014 next junction 18 m\n  2. Quai Beaubourg \u2014 heading south-west \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Quai Beaubourg, heading north-east\n  [2] looking down Quai Beaubourg, heading south-west\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n001/toward_s014_n000.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n001/toward_s014_n002.png"
+      ],
+      "reply": "THOUGHT: Both candidates are Quai Beaubourg in opposite directions and both photographs are clear, so the pictures cannot separate them; only a route can. I have no facing yet either, so I buy directions once and keep the map on screen.\n```\nnavigate()\n```",
+      "thought": "THOUGHT: Both candidates are Quai Beaubourg in opposite directions and both photographs are clear, so the pictures cannot separate them; only a route can. I have no facing yet either, so I buy directions once and keep the map on screen.",
+      "action": "navigate()",
+      "tool_kind": "consult",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 15.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "5 Rue Saint-Antoine",
+        "goal_kind": "collect from",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1
+        },
+        "streets_seen": {},
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 2,
+      "prompt": "### your notes\nJob: collect from 5 Rue Saint-Antoine\n\n### where you are\nYou are on Quai Beaubourg, outside number 2.\n16 min left before the deadline.\n\n### streets leaving this junction\n  1. Quai Beaubourg \u2014 heading north-east \u2014 next junction 18 m\n  2. Quai Beaubourg \u2014 heading south-west \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Quai Beaubourg, heading north-east\n  [2] looking down Quai Beaubourg, heading south-west\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nRoute to 5 Rue Saint-Antoine \u2014 181 m, about 2 min on foot.\n  1. Take Quai Beaubourg \u2014 south-west \u2014 1 junction, 29 m.\n  2. Turn left onto Rue Saint-Antoine \u2014 north-west overall \u2014 3 junctions, 151 m.\n  Then 5 Rue Saint-Antoine is on Rue Saint-Antoine.\n  The map on your screen shows the route.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n001/toward_s014_n000.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n001/toward_s014_n002.png"
+      ],
+      "reply": "THOUGHT: The route says take Quai Beaubourg south-west for one junction; candidate 2 is that street and its photograph is clear of barriers with no pedestrian light shown.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: The route says take Quai Beaubourg south-west for one junction; candidate 2 is that street and its photograph is clear of barriers with no pedestrian light shown.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 21.023479381492663,
+      "reward": -0.0,
+      "memory": {
+        "goal": "5 Rue Saint-Antoine",
+        "goal_kind": "collect from",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 3,
+      "prompt": "### your notes\nJob: collect from 5 Rue Saint-Antoine\nCame from: Quai Beaubourg no. 2\nStreets you have seen: Quai Beaubourg (seen from Quai Beaubourg); Rue Saint-Antoine (seen from Quai Beaubourg)\n\n### where you are\nYou are on Quai Beaubourg.\n16 min left before the deadline.\n\n### streets leaving this junction\n  1. Quai Beaubourg \u2014 behind you (north-east) \u2014 next junction 11 m\n  2. Rue Saint-Antoine \u2014 on your left (south-east) \u2014 next junction 7 m\n\n### photographs\n  [1] looking down Quai Beaubourg, behind you\n  [2] looking down Rue Saint-Antoine, on your left\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 29 m along Quai Beaubourg, through 2 junctions. Quai Beaubourg does not go on from here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n003/toward_s014_n002.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n003/toward_s007_n000.png"
+      ],
+      "reply": "THOUGHT: The route wants Rue Saint-Antoine north-west but the only Rue Saint-Antoine offered here is south-east, and its photograph shows a shopfront wall rather than a view down the street, so I cannot tell direction from the picture. Reading the door numbers is 2 s and tells me which way they climb toward number 5.\n```\nlook(2)\n```",
+      "thought": "THOUGHT: The route wants Rue Saint-Antoine north-west but the only Rue Saint-Antoine offered here is south-east, and its photograph shows a shopfront wall rather than a view down the street, so I cannot tell direction from the picture. Reading the door numbers is 2 s and tells me which way they climb toward number 5.",
+      "action": "look(2)",
+      "tool_kind": "look",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 2.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "5 Rue Saint-Antoine",
+        "goal_kind": "collect from",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 4,
+      "prompt": "### your notes\nJob: collect from 5 Rue Saint-Antoine\nCame from: Quai Beaubourg no. 2\nStreets you have seen: Quai Beaubourg (seen from Quai Beaubourg); Rue Saint-Antoine (seen from Quai Beaubourg)\n\n### where you are\nYou are on Quai Beaubourg.\n16 min left before the deadline.\n\n### streets leaving this junction\n  1. Quai Beaubourg \u2014 behind you (north-east) \u2014 next junction 11 m\n  2. Rue Saint-Antoine \u2014 on your left (south-east) \u2014 next junction 7 m\n\n### photographs\n  [1] looking down Quai Beaubourg, behind you\n  [2] looking down Rue Saint-Antoine, on your left\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nNo door numbers are visible down Rue Saint-Antoine.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n003/toward_s014_n002.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s014_n003/toward_s007_n000.png"
+      ],
+      "reply": "THOUGHT: look() reports no visible door numbers and the photograph shows only a facade, so neither picture nor text separates the directions. The route said turn left onto Rue Saint-Antoine and candidate 2 is the only Rue Saint-Antoine here, on my left, so I take it and expect the street to bend north-west.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: look() reports no visible door numbers and the photograph shows only a facade, so neither picture nor text separates the directions. The route said turn left onto Rue Saint-Antoine and candidate 2 is the only Rue Saint-Antoine here, on my left, so I take it and expect the street to bend north-west.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 43.91884794950194,
+      "reward": -0.0,
+      "memory": {
+        "goal": "5 Rue Saint-Antoine",
+        "goal_kind": "collect from",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 5,
+      "prompt": "### your notes\nJob: collect from 5 Rue Saint-Antoine\nCame from: Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Quai Beaubourg (seen from Quai Beaubourg); Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine.\n15 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue de S\u00e9vign\u00e9 \u2014 sharp left (south) \u2014 next junction 8 m\n  3. Rue Saint-Antoine \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, behind you\n  [2] looking down Rue de S\u00e9vign\u00e9, sharp left\n  [3] looking down Rue Saint-Antoine, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 61 m along Rue Saint-Antoine, through 4 junctions. A street leaves Rue Saint-Antoine here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n003/toward_s007_n002.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n003/toward_s005_n015.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n003/toward_s007_n004.png"
+      ],
+      "reply": "THOUGHT: The map shows me on the route heading north-west and photograph 3 is a clear straight run down Rue Saint-Antoine with no barrier and no pedestrian light, so I stay on the street.\n```\nwalk_to(3)\n```",
+      "thought": "THOUGHT: The map shows me on the route heading north-west and photograph 3 is a clear straight run down Rue Saint-Antoine with no barrier and no pedestrian light, so I stay on the street.",
+      "action": "walk_to(3)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 38.571428571428584,
+      "reward": -0.0,
+      "memory": {
+        "goal": "5 Rue Saint-Antoine",
+        "goal_kind": "collect from",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 6,
+      "prompt": "### your notes\nJob: collect from 5 Rue Saint-Antoine\nCame from: Rue Saint-Antoine <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine.\n14 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Quai M\u00e9nilmontant \u2014 half left (west) \u2014 next junction 6 m\n  3. Boulevard du Temple \u2014 half left (west) \u2014 next junction 5 m\n  4. Rue Saint-Antoine \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, behind you\n  [2] looking down Quai M\u00e9nilmontant, half left\n  [3] looking down Boulevard du Temple, half left\n  [4] looking down Rue Saint-Antoine, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 54 m along Rue Saint-Antoine, through 3 junctions. A street leaves Rue Saint-Antoine here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s007_n005.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s046_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s004_n012.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s007_n010/toward_s007_n011_slow_pedestrian.png"
+      ],
+      "reply": "THOUGHT: Photograph 4 shows a Morris column, a bin, an A-board and a planter crowding the pavement but the carriageway itself is open, so this is furniture that slows rather than a barrier that shuts. Detouring costs more than the delay, so I stay on Rue Saint-Antoine.\n```\nwalk_to(4)\n```",
+      "thought": "THOUGHT: Photograph 4 shows a Morris column, a bin, an A-board and a planter crowding the pavement but the carriageway itself is open, so this is furniture that slows rather than a barrier that shuts. Detouring costs more than the delay, so I stay on Rue Saint-Antoine.",
+      "action": "walk_to(4)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 25.714285714285694,
+      "reward": -0.0,
+      "memory": {
+        "goal": "5 Rue Saint-Antoine",
+        "goal_kind": "collect from",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 1,
+          "s007_n008": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 7,
+      "prompt": "### your notes\nJob: collect from 5 Rue Saint-Antoine\nCame from: Rue Saint-Antoine <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine, outside numbers 5, 7.\n14 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Saint-Antoine \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, behind you\n  [2] looking down Rue Saint-Antoine, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Rue Saint-Antoine, through 2 junctions. You are at the address you were looking for.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n008/toward_s007_n007.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s007_n010/toward_s007_n011_slow_pedestrian.png"
+      ],
+      "reply": "THOUGHT: The header says I am on Rue Saint-Antoine outside numbers 5 and 7 and the world confirms I am at the address I was sent to, which matches the pickup on the slip exactly.\n```\ncollect()\n```",
+      "thought": "THOUGHT: The header says I am on Rue Saint-Antoine outside numbers 5 and 7 and the world confirms I am at the address I was sent to, which matches the pickup on the slip exactly.",
+      "action": "collect()",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 30.0,
+      "reward": 0.1,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 1,
+          "s007_n008": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 8,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Saint-Antoine <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine, outside numbers 5, 7.\n13 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Saint-Antoine \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, behind you\n  [2] looking down Rue Saint-Antoine, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou collect the order from 5 Rue Saint-Antoine.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n008/toward_s007_n007.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s007_n010/toward_s007_n011_slow_pedestrian.png"
+      ],
+      "reply": "THOUGHT: The parcel is collected and the job is now 17 Rue Oberkampf, but the map on screen is still drawn to the pickup, so the route I am carrying is stale and I need directions to the new address.\n```\nnavigate()\n```",
+      "thought": "THOUGHT: The parcel is collected and the job is now 17 Rue Oberkampf, but the map on screen is still drawn to the pickup, so the route I am carrying is stale and I need directions to the new address.",
+      "action": "navigate()",
+      "tool_kind": "consult",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 15.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 1,
+          "s007_n008": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 9,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Saint-Antoine <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine, outside numbers 5, 7.\n13 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Saint-Antoine \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, behind you\n  [2] looking down Rue Saint-Antoine, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nRoute to 17 Rue Oberkampf \u2014 243 m, about 3 min on foot.\n  1. Take Rue Saint-Antoine \u2014 south-east, behind you \u2014 2 junctions, 36 m.\n  2. Turn right onto Boulevard du Temple \u2014 north-east overall \u2014 3 junctions, 149 m.\n  3. Bear right onto Rue Oberkampf \u2014 south-east overall \u2014 1 junction, 59 m.\n  Then 17 Rue Oberkampf is on Rue Oberkampf.\n  The map on your screen shows the route.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n008/toward_s007_n007.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s007_n010/toward_s007_n011_slow_pedestrian.png"
+      ],
+      "reply": "THOUGHT: The new route starts by retracing Rue Saint-Antoine south-east for two junctions, which is the stretch I have just walked and found clear, so I take candidate 1 without paying for another look.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: The new route starts by retracing Rue Saint-Antoine south-east for two junctions, which is the stretch I have just walked and found clear, so I take candidate 1 without paying for another look.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 25.714285714285694,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 2,
+          "s007_n008": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 10,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Saint-Antoine no. 5, 7 <- Rue Saint-Antoine <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine.\n13 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 straight ahead (south-east) \u2014 next junction 18 m\n  2. Quai M\u00e9nilmontant \u2014 sharp right (west) \u2014 next junction 6 m\n  3. Boulevard du Temple \u2014 sharp right (west) \u2014 next junction 5 m\n  4. Rue Saint-Antoine \u2014 behind you (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, straight ahead\n  [2] looking down Quai M\u00e9nilmontant, sharp right\n  [3] looking down Boulevard du Temple, sharp right\n  [4] looking down Rue Saint-Antoine, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Rue Saint-Antoine, through 2 junctions. A street leaves Rue Saint-Antoine here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s007_n005.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s046_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s004_n012.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s007_n010/toward_s007_n011_slow_pedestrian.png"
+      ],
+      "reply": "THOUGHT: Photographs 2 and 3 show the same corner from almost the same bearing and neither carries a street-name plate, so only the text separates them; the route names Boulevard du Temple, which is candidate 3, and its view is clear.\n```\nwalk_to(3)\n```",
+      "thought": "THOUGHT: Photographs 2 and 3 show the same corner from almost the same bearing and neither carries a street-name plate, so only the text separates them; the route names Boulevard du Temple, which is candidate 3, and its view is clear.",
+      "action": "walk_to(3)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 3.4299929352903575,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 2,
+          "s007_n008": 1,
+          "s004_n012": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 11,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7 <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside numbers 21, 24.\n13 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 on your right (north-east) \u2014 next junction 18 m\n  2. Rue Saint-Antoine \u2014 behind you (east) \u2014 next junction 5 m\n  3. Quai M\u00e9nilmontant \u2014 on your left (south-west) \u2014 next junction 2 m\n  4. Boulevard du Temple \u2014 half left (south-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Boulevard du Temple, on your right\n  [2] looking down Rue Saint-Antoine, behind you\n  [3] looking down Quai M\u00e9nilmontant, on your left\n  [4] looking down Boulevard du Temple, half left\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 5 m along Boulevard du Temple, through 1 junction. Boulevard du Temple forks here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n012/toward_s004_n011.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n012/toward_s007_n006.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n012/toward_s046_n001.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s004_n012/toward_s004_n013_road_block.png"
+      ],
+      "reply": "THOUGHT: The fork offers two Boulevard du Temple branches; photograph 4 shows metal barriers and bins right across the carriageway so that branch is shut, and photograph 1 is clear with a zebra crossing and matches the route north-east.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: The fork offers two Boulevard du Temple branches; photograph 4 shows metal barriers and bins right across the carriageway so that branch is shut, and photograph 1 is clear with a zebra crossing and matches the route north-east.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 12.856384287168964,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 2,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 12,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7 <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside number 22.\n13 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 straight ahead (north-east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 behind you (south-west) \u2014 next junction 18 m\n  3. Quai M\u00e9nilmontant \u2014 behind you (south-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Boulevard du Temple, straight ahead\n  [2] looking down Boulevard du Temple, behind you\n  [3] looking down Quai M\u00e9nilmontant, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 18 m along Boulevard du Temple, through 1 junction. A street leaves Boulevard du Temple here.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s004_n009/toward_s004_n008_road_block.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s004_n012.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s046_n000.png"
+      ],
+      "reply": "THOUGHT: Photograph 1 shows railings and bins closing Boulevard du Temple completely, but the barrier is some way down the street and the only other candidates here go back south-west, so I advance expecting to be stopped at a junction short of it where a side street may let me round.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: Photograph 1 shows railings and bins closing Boulevard du Temple completely, but the barrier is some way down the street and the only other candidates here go back south-west, so I advance expecting to be stopped at a junction short of it where a side street may let me round.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 70.71428571428572,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 2,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 1,
+          "s004_n009": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 13,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Boulevard du Temple no. 22 <- Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7 <- Quai Beaubourg\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside numbers 15, 16, 17, 18.\n11 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 straight ahead (north-east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 behind you (south-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Boulevard du Temple, straight ahead\n  [2] looking down Boulevard du Temple, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Boulevard du Temple, through 2 junctions. Boulevard du Temple is blocked and you cannot get past. You walk back to the junction. You will have to go round.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s004_n009/toward_s004_n008_road_block.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n009/toward_s004_n010.png"
+      ],
+      "reply": "THOUGHT: The barrier shuts Boulevard du Temple and the map shows no side street along this leg, so the only way round starts back at the fork; I retrace south-west.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: The barrier shuts Boulevard du Temple and the map shows no side street along this leg, so the only way round starts back at the fork; I retrace south-west.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 25.714285714285722,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 2,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 14,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Boulevard du Temple no. 15, 16, 17, 18 <- Boulevard du Temple no. 22 <- Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside number 22.\n11 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 behind you (north-east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 straight ahead (south-west) \u2014 next junction 18 m\n  3. Quai M\u00e9nilmontant \u2014 straight ahead (south-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Boulevard du Temple, behind you\n  [2] looking down Boulevard du Temple, straight ahead\n  [3] looking down Quai M\u00e9nilmontant, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Boulevard du Temple, through 2 junctions. A street leaves Boulevard du Temple here.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s004_n009/toward_s004_n008_road_block.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s004_n012.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s046_n000.png"
+      ],
+      "reply": "THOUGHT: Both ways out of here run south-west while the dropoff is north-east beyond the barrier, so before committing to a long detour I pay 5 s to fix where 17 Rue Oberkampf actually lies from here.\n```\ncheck_map(\"17 Rue Oberkampf\")\n```",
+      "thought": "THOUGHT: Both ways out of here run south-west while the dropoff is north-east beyond the barrier, so before committing to a long detour I pay 5 s to fix where 17 Rue Oberkampf actually lies from here.",
+      "action": "check_map('17 Rue Oberkampf')",
+      "tool_kind": "consult",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 5.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 2,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 15,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Boulevard du Temple no. 15, 16, 17, 18 <- Boulevard du Temple no. 22 <- Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside number 22.\n11 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 behind you (north-east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 straight ahead (south-west) \u2014 next junction 18 m\n  3. Quai M\u00e9nilmontant \u2014 straight ahead (south-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Boulevard du Temple, behind you\n  [2] looking down Boulevard du Temple, straight ahead\n  [3] looking down Quai M\u00e9nilmontant, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\n17 Rue Oberkampf is on Rue Oberkampf, about 185 m away on foot. It lies to the north-east of you as the crow flies; the streets may not go that way.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s004_n009/toward_s004_n008_road_block.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s004_n012.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s046_n000.png"
+      ],
+      "reply": "THOUGHT: The dropoff is 185 m north-east but the direct street is shut, so I take Quai M\u00e9nilmontant, which I have not walked and whose photograph is clear, hoping it runs parallel and lets me rejoin beyond the barrier.\n```\nwalk_to(3)\n```",
+      "thought": "THOUGHT: The dropoff is 185 m north-east but the direct street is shut, so I take Quai M\u00e9nilmontant, which I have not walked and whose photograph is clear, hoping it runs parallel and lets me rejoin beyond the barrier.",
+      "action": "walk_to(3)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 14.540987703338487,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 2,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": false
+      }
+    },
+    {
+      "step": 16,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Boulevard du Temple no. 22 <- Boulevard du Temple no. 15, 16, 17, 18 <- Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Quai M\u00e9nilmontant.\n11 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 behind you (north-east) \u2014 next junction 2 m\n  2. Quai M\u00e9nilmontant \u2014 behind you (north-east) \u2014 next junction 15 m\n  3. Rue Saint-Antoine \u2014 sharp left (east) \u2014 next junction 6 m\n\n### photographs\n  [1] looking down Boulevard du Temple, behind you\n  [2] looking down Quai M\u00e9nilmontant, behind you\n  [3] looking down Rue Saint-Antoine, sharp left\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 20 m along Quai M\u00e9nilmontant, through 2 junctions. Quai M\u00e9nilmontant does not go on from here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s046_n001/toward_s004_n012.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s046_n001/toward_s046_n000.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s046_n001/toward_s007_n006.png"
+      ],
+      "reply": "THOUGHT: The map shows the only unblocked way to Rue Oberkampf runs back down Rue Saint-Antoine and then north-east along Rue de S\u00e9vign\u00e9, so I start the detour by taking Rue Saint-Antoine east.\n```\nwalk_to(3)\n```",
+      "thought": "THOUGHT: The map shows the only unblocked way to Rue Oberkampf runs back down Rue Saint-Antoine and then north-east along Rue de S\u00e9vign\u00e9, so I start the detour by taking Rue Saint-Antoine east.",
+      "action": "walk_to(3)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 4.251296015395212,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 1,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 17,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Quai M\u00e9nilmontant <- Boulevard du Temple no. 22 <- Boulevard du Temple no. 15, 16, 17, 18 <- Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine.\n11 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 half right (south-east) \u2014 next junction 18 m\n  2. Quai M\u00e9nilmontant \u2014 behind you (west) \u2014 next junction 6 m\n  3. Boulevard du Temple \u2014 behind you (west) \u2014 next junction 5 m\n  4. Rue Saint-Antoine \u2014 sharp left (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, half right\n  [2] looking down Quai M\u00e9nilmontant, behind you\n  [3] looking down Boulevard du Temple, behind you\n  [4] looking down Rue Saint-Antoine, sharp left\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 6 m along Rue Saint-Antoine, through 1 junction. Rue Saint-Antoine forks here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s007_n005.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s046_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n006/toward_s004_n012.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s007_n010/toward_s007_n011_slow_pedestrian.png"
+      ],
+      "reply": "THOUGHT: Candidate 1 is Rue Saint-Antoine running back south-east toward the junction where Rue de Sevigne leaves, which is the start of my detour, and its photograph is a clear street.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: Candidate 1 is Rue Saint-Antoine running back south-east toward the junction where Rue de Sevigne leaves, which is the start of my detour, and its photograph is a clear street.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 38.57142857142861,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 18,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Saint-Antoine <- Quai M\u00e9nilmontant <- Boulevard du Temple no. 22 <- Boulevard du Temple no. 15, 16, 17, 18 <- Boulevard du Temple no. 21, 24\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Rue Saint-Antoine.\n10 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 straight ahead (south-east) \u2014 next junction 18 m\n  2. Rue de S\u00e9vign\u00e9 \u2014 half right (south) \u2014 next junction 8 m\n  3. Rue Saint-Antoine \u2014 behind you (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Saint-Antoine, straight ahead\n  [2] looking down Rue de S\u00e9vign\u00e9, half right\n  [3] looking down Rue Saint-Antoine, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 54 m along Rue Saint-Antoine, through 3 junctions. A street leaves Rue Saint-Antoine here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n003/toward_s007_n002.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n003/toward_s005_n015.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s007_n003/toward_s007_n004.png"
+      ],
+      "reply": "THOUGHT: Photograph 2 shows the corner into Rue de Sevigne clear of barriers, and that street is the detour the map says reaches Rue Oberkampf without crossing the closure.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: Photograph 2 shows the corner into Rue de Sevigne clear of barriers, and that street is the detour the map says reaches Rue Oberkampf without crossing the closure.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 5.893094953772902,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 19,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Saint-Antoine <- Quai M\u00e9nilmontant <- Boulevard du Temple no. 22 <- Boulevard du Temple no. 15, 16, 17, 18 <- Boulevard du Temple no. 21, 24\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine); Boulevard Saint-Honor\u00e9 (2) (seen from Rue de S\u00e9vign\u00e9 no. 23)\n\n### where you are\nYou are on Rue de S\u00e9vign\u00e9, outside number 23.\n10 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard Saint-Honor\u00e9 (2) \u2014 sharp left (north-east) \u2014 next junction 22 m\n  2. Rue de S\u00e9vign\u00e9 \u2014 sharp left (north-east) \u2014 next junction 18 m\n  3. Rue de S\u00e9vign\u00e9 \u2014 half right (south-west) \u2014 next junction 18 m\n  4. Rue Saint-Antoine \u2014 behind you (north) \u2014 next junction 8 m\n\n### photographs\n  [1] looking down Boulevard Saint-Honor\u00e9 (2), sharp left\n  [2] looking down Rue de S\u00e9vign\u00e9, sharp left\n  [3] looking down Rue de S\u00e9vign\u00e9, half right\n  [4] looking down Rue Saint-Antoine, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 8 m along Rue de S\u00e9vign\u00e9, through 1 junction. Rue de S\u00e9vign\u00e9 forks here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n015/toward_s060_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n015/toward_s005_n014.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n015/toward_s005_n016.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n015/toward_s007_n003.png"
+      ],
+      "reply": "THOUGHT: Candidate 2 is Rue de Sevigne running north-east, the direction of the dropoff, and its photograph shows a clear street with no barrier and no pedestrian light.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: Candidate 2 is Rue de Sevigne running north-east, the direction of the dropoff, and its photograph shows a clear street with no barrier and no pedestrian light.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 12.76659958771711,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 20,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue de S\u00e9vign\u00e9 no. 23 <- Rue Saint-Antoine <- Quai M\u00e9nilmontant <- Boulevard du Temple no. 22 <- Boulevard du Temple no. 15, 16, 17, 18\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine); Boulevard Saint-Honor\u00e9 (2) (seen from Rue de S\u00e9vign\u00e9 no. 23)\n\n### where you are\nYou are on Rue de S\u00e9vign\u00e9.\n10 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 straight ahead (north-east) \u2014 next junction 18 m\n  2. Boulevard Saint-Honor\u00e9 (2) \u2014 straight ahead (north-east) \u2014 next junction 4 m\n  3. Rue de S\u00e9vign\u00e9 \u2014 behind you (south-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, straight ahead\n  [2] looking down Boulevard Saint-Honor\u00e9 (2), straight ahead\n  [3] looking down Rue de S\u00e9vign\u00e9, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 18 m along Rue de S\u00e9vign\u00e9, through 1 junction. A street leaves Rue de S\u00e9vign\u00e9 here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n014/toward_s005_n013.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n014/toward_s060_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n014/toward_s005_n015.png"
+      ],
+      "reply": "THOUGHT: Rue de Sevigne runs on north-east straight ahead toward the dropoff and the photograph down it is clear, so I keep going rather than spend a turn consulting.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: Rue de Sevigne runs on north-east straight ahead toward the dropoff and the photograph down it is clear, so I keep going rather than spend a turn consulting.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 25.714285714260996,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 21,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 23 <- Rue Saint-Antoine <- Quai M\u00e9nilmontant <- Boulevard du Temple no. 22\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine); Boulevard Saint-Honor\u00e9 (2) (seen from Rue de S\u00e9vign\u00e9 no. 23); Boulevard Lafayette (seen from Rue de S\u00e9vign\u00e9 no. 19)\n\n### where you are\nYou are on Rue de S\u00e9vign\u00e9, outside number 19.\n9 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 straight ahead (north-east) \u2014 next junction 18 m\n  2. Rue de S\u00e9vign\u00e9 \u2014 behind you (south-west) \u2014 next junction 18 m\n  3. Boulevard Lafayette \u2014 behind you (south-west) \u2014 next junction 4 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, straight ahead\n  [2] looking down Rue de S\u00e9vign\u00e9, behind you\n  [3] looking down Boulevard Lafayette, behind you\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Rue de S\u00e9vign\u00e9, through 2 junctions. There is a pedestrian light at this crossing.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s005_n009/toward_s005_n008_slow_pedestrian.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n012/toward_s005_n013.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n012/toward_s012_n006.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n012/toward_s005_n011_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n012/toward_s005_n013_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n012/toward_s012_n006_green.png"
+      ],
+      "reply": "THOUGHT: Rue de Sevigne runs on north-east straight ahead toward the dropoff and the photograph down it is clear, so I keep going rather than spend a turn consulting.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: Rue de Sevigne runs on north-east straight ahead toward the dropoff and the photograph down it is clear, so I keep going rather than spend a turn consulting.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 104.28571428571433,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 22,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue de S\u00e9vign\u00e9 no. 19 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 23 <- Rue Saint-Antoine <- Quai M\u00e9nilmontant\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Boulevard du Temple (seen from Rue Saint-Antoine); Boulevard Saint-Honor\u00e9 (2) (seen from Rue de S\u00e9vign\u00e9 no. 23); Boulevard Lafayette (seen from Rue de S\u00e9vign\u00e9 no. 19); Rue de la Roquette (seen from Rue de S\u00e9vign\u00e9 no. 9)\n\n### where you are\nYou are on Rue de S\u00e9vign\u00e9, outside number 9.\n7 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 straight ahead (north-east) \u2014 next junction 18 m\n  2. Rue de la Roquette \u2014 straight ahead (north-east) \u2014 next junction 3 m\n  3. Rue de S\u00e9vign\u00e9 \u2014 behind you (south-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, straight ahead\n  [2] looking down Rue de la Roquette, straight ahead\n  [3] looking down Rue de S\u00e9vign\u00e9, behind you\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 90 m along Rue de S\u00e9vign\u00e9, through 5 junctions. There is a pedestrian light at this crossing.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n007/toward_s005_n006.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n007/toward_s049_n001.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s005_n008/toward_s005_n009_slow_pedestrian.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n007/toward_s005_n006_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n007/toward_s049_n001_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n007/toward_s005_n008_green.png"
+      ],
+      "reply": "THOUGHT: Rue de Sevigne runs on north-east straight ahead toward the dropoff and the photograph down it is clear, so I keep going rather than spend a turn consulting.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: Rue de Sevigne runs on north-east straight ahead toward the dropoff and the photograph down it is clear, so I keep going rather than spend a turn consulting.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 12.854124250973769,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 23,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue de S\u00e9vign\u00e9 no. 9 <- Rue de S\u00e9vign\u00e9 no. 19 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 23 <- Rue Saint-Antoine\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Boulevard Lafayette (seen from Rue de S\u00e9vign\u00e9 no. 19); Rue de la Roquette (seen from Rue de S\u00e9vign\u00e9 no. 9); Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9)\n\n### where you are\nYou are on Rue de S\u00e9vign\u00e9.\n7 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 straight ahead (north-east) \u2014 next junction 18 m\n  2. Rue de Flandre \u2014 straight ahead (north-east) \u2014 next junction 4 m\n  3. Rue de S\u00e9vign\u00e9 \u2014 behind you (south-west) \u2014 next junction 18 m\n  4. Rue Oberkampf \u2014 sharp left (south-west) \u2014 next junction 7 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, straight ahead\n  [2] looking down Rue de Flandre, straight ahead\n  [3] looking down Rue de S\u00e9vign\u00e9, behind you\n  [4] looking down Rue Oberkampf, sharp left\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [light 4] the pedestrian light for street 4\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 18 m along Rue de S\u00e9vign\u00e9, through 1 junction. There is a pedestrian light at this crossing.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s005_n002/toward_s005_n001_road_block.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n006/toward_s042_n000.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n006/toward_s005_n007.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s005_n006/toward_s009_n009.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n006/toward_s005_n005_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n006/toward_s042_n000_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n006/toward_s005_n007_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s005_n006/toward_s009_n009_green.png"
+      ],
+      "reply": "THOUGHT: Rue Oberkampf is candidate 4 and that is the street the parcel goes to, so I leave Rue de Sevigne here and start looking for number 17.\n```\nwalk_to(4)\n```",
+      "thought": "THOUGHT: Rue Oberkampf is candidate 4 and that is the street the parcel goes to, so I leave Rue de Sevigne here and start looking for number 17.",
+      "action": "walk_to(4)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 4.905125042967597,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 24,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9 <- Rue de S\u00e9vign\u00e9 no. 19 <- Rue de S\u00e9vign\u00e9 no. 23 <- Rue Saint-Antoine\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Boulevard Lafayette (seen from Rue de S\u00e9vign\u00e9 no. 19); Rue de la Roquette (seen from Rue de S\u00e9vign\u00e9 no. 9); Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9)\n\n### where you are\nYou are on Rue Oberkampf, outside number 15.\n7 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 behind you (north-east) \u2014 next junction 7 m\n  2. Rue Oberkampf \u2014 sharp left (south-east) \u2014 next junction 18 m\n  3. Rue de Flandre \u2014 half right (north-west) \u2014 next junction 6 m\n  4. Rue Oberkampf \u2014 half right (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, behind you\n  [2] looking down Rue Oberkampf, sharp left\n  [3] looking down Rue de Flandre, half right\n  [4] looking down Rue Oberkampf, half right\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 7 m along Rue Oberkampf, through 1 junction. Rue Oberkampf forks here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s005_n006.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n008.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s042_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n010.png"
+      ],
+      "reply": "THOUGHT: I am outside number 15 and need 17, and both Rue Oberkampf branches are open to me, so 2 s to read which way the door numbers climb is cheaper than walking the wrong one.\n```\nlook(2)\n```",
+      "thought": "THOUGHT: I am outside number 15 and need 17, and both Rue Oberkampf branches are open to me, so 2 s to read which way the door numbers climb is cheaper than walking the wrong one.",
+      "action": "look(2)",
+      "tool_kind": "look",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 2.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 25,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9 <- Rue de S\u00e9vign\u00e9 no. 19 <- Rue de S\u00e9vign\u00e9 no. 23 <- Rue Saint-Antoine\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Boulevard Lafayette (seen from Rue de S\u00e9vign\u00e9 no. 19); Rue de la Roquette (seen from Rue de S\u00e9vign\u00e9 no. 9); Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9)\n\n### where you are\nYou are on Rue Oberkampf, outside number 15.\n7 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 behind you (north-east) \u2014 next junction 7 m\n  2. Rue Oberkampf \u2014 sharp left (south-east) \u2014 next junction 18 m\n  3. Rue de Flandre \u2014 half right (north-west) \u2014 next junction 6 m\n  4. Rue Oberkampf \u2014 half right (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, behind you\n  [2] looking down Rue Oberkampf, sharp left\n  [3] looking down Rue de Flandre, half right\n  [4] looking down Rue Oberkampf, half right\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nDown Rue Oberkampf the doors read 18 climbing.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s005_n006.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n008.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s042_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n010.png"
+      ],
+      "reply": "THOUGHT: The doors down candidate 2 read 18 and climbing while I stand at 15, so 17 lies that way; I take it.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: The doors down candidate 2 read 18 and climbing while I stand at 15, so 17 lies that way; I take it.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 12.857083388690057,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1,
+          "s009_n008": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 26,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9 <- Rue de S\u00e9vign\u00e9 no. 19 <- Rue de S\u00e9vign\u00e9 no. 23\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de la Roquette (seen from Rue de S\u00e9vign\u00e9 no. 9); Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18)\n\n### where you are\nYou are on Rue Oberkampf, outside number 18.\n7 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 straight ahead (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 behind you (north-west) \u2014 next junction 18 m\n  3. Avenue de Crim\u00e9e \u2014 behind you (north-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Rue Oberkampf, straight ahead\n  [2] looking down Rue Oberkampf, behind you\n  [3] looking down Avenue de Crim\u00e9e, behind you\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 18 m along Rue Oberkampf, through 1 junction. There is a pedestrian light at this crossing.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s009_n005/toward_s009_n004_slow_pedestrian.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s009_n009.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s043_n001.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n007_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n009_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s043_n001_green.png"
+      ],
+      "reply": "THOUGHT: I am outside number 18 with the numbers climbing, and 17 is the odd side of the same stretch, so I try the handover here.\n```\nhand_over()\n```",
+      "thought": "THOUGHT: I am outside number 18 with the numbers climbing, and 17 is the odd side of the same stretch, so I try the handover here.",
+      "action": "hand_over()",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "rejected",
+      "error": "not_at_dropoff",
+      "sim_seconds": 5.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1,
+          "s009_n008": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 27,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9 <- Rue de S\u00e9vign\u00e9 no. 19 <- Rue de S\u00e9vign\u00e9 no. 23\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de la Roquette (seen from Rue de S\u00e9vign\u00e9 no. 9); Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18)\n\n### where you are\nYou are on Rue Oberkampf, outside number 18.\n7 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 straight ahead (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 behind you (north-west) \u2014 next junction 18 m\n  3. Avenue de Crim\u00e9e \u2014 behind you (north-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Rue Oberkampf, straight ahead\n  [2] looking down Rue Oberkampf, behind you\n  [3] looking down Avenue de Crim\u00e9e, behind you\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou are not at 17 Rue Oberkampf. It is 36 m away; you need to be within 8 m.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s009_n005/toward_s009_n004_slow_pedestrian.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s009_n009.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s043_n001.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n007_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n009_green.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s043_n001_green.png"
+      ],
+      "reply": "THOUGHT: The refusal puts number 17 thirty-six metres off and the numbers climb south-east, so I walk one more block that way.\n```\nwalk_to(1)\n```",
+      "thought": "THOUGHT: The refusal puts number 17 thirty-six metres off and the numbers climb south-east, so I walk one more block that way.",
+      "action": "walk_to(1)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 91.42856487891618,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1,
+          "s009_n008": 1,
+          "s009_n004": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 28,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 18 <- Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9 <- Rue de S\u00e9vign\u00e9 no. 19\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 7.\n5 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 straight ahead (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 behind you (north-west) \u2014 next junction 18 m\n  3. Rue Nationale \u2014 behind you (north-west) \u2014 next junction 2 m\n\n### photographs\n  [1] looking down Rue Oberkampf, straight ahead\n  [2] looking down Rue Oberkampf, behind you\n  [3] looking down Rue Nationale, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 72 m along Rue Oberkampf, through 4 junctions. A street leaves Rue Oberkampf here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n004/toward_s009_n003.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s009_n004/toward_s009_n005_slow_pedestrian.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n004/toward_s055_n001.png"
+      ],
+      "reply": "THOUGHT: I have moved a block south-east; a 5 s refusal tells me exactly how far number 17 now is, which is cheaper than a look or a route.\n```\nhand_over()\n```",
+      "thought": "THOUGHT: I have moved a block south-east; a 5 s refusal tells me exactly how far number 17 now is, which is cheaper than a look or a route.",
+      "action": "hand_over()",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "rejected",
+      "error": "not_at_dropoff",
+      "sim_seconds": 5.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1,
+          "s009_n008": 1,
+          "s009_n004": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 29,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 18 <- Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9 <- Rue de S\u00e9vign\u00e9 no. 19\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 7.\n5 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 straight ahead (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 behind you (north-west) \u2014 next junction 18 m\n  3. Rue Nationale \u2014 behind you (north-west) \u2014 next junction 2 m\n\n### photographs\n  [1] looking down Rue Oberkampf, straight ahead\n  [2] looking down Rue Oberkampf, behind you\n  [3] looking down Rue Nationale, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou are not at 17 Rue Oberkampf. It is 108 m away; you need to be within 8 m.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n004/toward_s009_n003.png",
+        "/data/murray/paris_obstacles/citycore-paris/images/s009_n004/toward_s009_n005_slow_pedestrian.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n004/toward_s055_n001.png"
+      ],
+      "reply": "THOUGHT: Walking south-east took me from 15 to 18 to 7 and pushed number 17 from 36 m to 108 m, so the numbers do not run in order here and I must go back north-west.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: Walking south-east took me from 15 to 18 to 7 and pushed number 17 from 36 m to 108 m, so the numbers do not run in order here and I must go back north-west.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 91.42856487891618,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          },
+          {
+            "step": 29,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1,
+          "s009_n008": 2,
+          "s009_n004": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 30,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 7 <- Rue Oberkampf no. 18 <- Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 18.\n4 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n  3. Avenue de Crim\u00e9e \u2014 straight ahead (north-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Rue Oberkampf, behind you\n  [2] looking down Rue Oberkampf, straight ahead\n  [3] looking down Avenue de Crim\u00e9e, straight ahead\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 72 m along Rue Oberkampf, through 4 junctions. There is a pedestrian light at this crossing.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s009_n005/toward_s009_n004_slow_pedestrian.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s009_n009.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s043_n001.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n007_red.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n009_red.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s043_n001_red.png"
+      ],
+      "reply": "THOUGHT: I am heading back north-west toward where 17 should be; a 5 s refusal is the cheapest way to see whether the distance is falling.\n```\nhand_over()\n```",
+      "thought": "THOUGHT: I am heading back north-west toward where 17 should be; a 5 s refusal is the cheapest way to see whether the distance is falling.",
+      "action": "hand_over()",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "rejected",
+      "error": "not_at_dropoff",
+      "sim_seconds": 5.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          },
+          {
+            "step": 29,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 1,
+          "s009_n008": 2,
+          "s009_n004": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 31,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 7 <- Rue Oberkampf no. 18 <- Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 18.\n4 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n  3. Avenue de Crim\u00e9e \u2014 straight ahead (north-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Rue Oberkampf, behind you\n  [2] looking down Rue Oberkampf, straight ahead\n  [3] looking down Avenue de Crim\u00e9e, straight ahead\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou are not at 17 Rue Oberkampf. It is 36 m away; you need to be within 8 m.\n",
+      "image_paths": [
+        "/data/murray/paris_obstacles/citycore-paris/images/s009_n005/toward_s009_n004_slow_pedestrian.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s009_n009.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s043_n001.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n007_red.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n009_red.png",
+        "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s043_n001_red.png"
+      ],
+      "reply": "THOUGHT: Number 17 is 36 m off and south-east only made it worse, so it lies north-west; candidate 2 keeps me on Rue Oberkampf that way.\n```\nwalk_to(2)\n```",
+      "thought": "THOUGHT: Number 17 is 36 m off and south-east only made it worse, so it lies north-west; candidate 2 keeps me on Rue Oberkampf that way.",
+      "action": "walk_to(2)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 87.85708338869006,
+      "reward": -1.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          },
+          {
+            "step": 29,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 31,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 2,
+          "s009_n008": 2,
+          "s009_n004": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 32,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 18 <- Rue Oberkampf no. 7 <- Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 15.\n2 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 sharp right (north-east) \u2014 next junction 7 m\n  2. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  3. Rue de Flandre \u2014 straight ahead (north-west) \u2014 next junction 6 m\n  4. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, sharp right\n  [2] looking down Rue Oberkampf, behind you\n  [3] looking down Rue de Flandre, straight ahead\n  [4] looking down Rue Oberkampf, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 18 m along Rue Oberkampf, through 1 junction. A street leaves Rue Oberkampf here.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s005_n006.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n008.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s042_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n010.png"
+      ],
+      "reply": "THOUGHT: Checking the range again before I walk past it a second time.\n```\nhand_over()\n```",
+      "thought": "THOUGHT: Checking the range again before I walk past it a second time.",
+      "action": "hand_over()",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "rejected",
+      "error": "not_at_dropoff",
+      "sim_seconds": 5.0,
+      "reward": 0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          },
+          {
+            "step": 29,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 31,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 2,
+          "s009_n008": 2,
+          "s009_n004": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 33,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 18 <- Rue Oberkampf no. 7 <- Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 15.\n2 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue de S\u00e9vign\u00e9 \u2014 sharp right (north-east) \u2014 next junction 7 m\n  2. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  3. Rue de Flandre \u2014 straight ahead (north-west) \u2014 next junction 6 m\n  4. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue de S\u00e9vign\u00e9, sharp right\n  [2] looking down Rue Oberkampf, behind you\n  [3] looking down Rue de Flandre, straight ahead\n  [4] looking down Rue Oberkampf, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou are not at 17 Rue Oberkampf. It is 18 m away; you need to be within 8 m.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s005_n006.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n008.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s042_n001.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n009/toward_s009_n010.png"
+      ],
+      "reply": "THOUGHT: Number 17 is 18 m north-west and candidate 4 is Rue Oberkampf running exactly that way, which is one block.\n```\nwalk_to(4)\n```",
+      "thought": "THOUGHT: Number 17 is 18 m north-west and candidate 4 is Rue Oberkampf running exactly that way, which is one block.",
+      "action": "walk_to(4)",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 12.857075448797787,
+      "reward": -0.0,
+      "memory": {
+        "goal": "17 Rue Oberkampf",
+        "goal_kind": "deliver to",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          },
+          {
+            "step": 29,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 31,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 33,
+            "node": "s009_n010",
+            "street": "Rue Oberkampf",
+            "address": "17"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 2,
+          "s009_n008": 2,
+          "s009_n004": 1,
+          "s009_n010": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    },
+    {
+      "step": 34,
+      "prompt": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 15 <- Rue Oberkampf no. 18 <- Rue Oberkampf no. 7 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 17.\n2 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Oberkampf, behind you\n  [2] looking down Rue Oberkampf, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 18 m along Rue Oberkampf, through 1 junction. You are at the address you were looking for.\n",
+      "image_paths": [
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n010/toward_s009_n009.png",
+        "/data/murray/paris_streets_v2/citycore-paris/images/s009_n010/toward_s009_n011.png"
+      ],
+      "reply": "THOUGHT: This should be the door; handing the parcel over.\n```\nhand_over()\n```",
+      "thought": "THOUGHT: This should be the door; handing the parcel over.",
+      "action": "hand_over()",
+      "tool_kind": "act",
+      "expanded": [],
+      "status": "accepted",
+      "error": "",
+      "sim_seconds": 30.0,
+      "reward": 1.5,
+      "memory": {
+        "goal": "",
+        "goal_kind": "",
+        "trail": [
+          {
+            "step": 1,
+            "node": "s014_n001",
+            "street": "Quai Beaubourg",
+            "address": "2"
+          },
+          {
+            "step": 2,
+            "node": "s014_n003",
+            "street": "Quai Beaubourg",
+            "address": ""
+          },
+          {
+            "step": 4,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 5,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 6,
+            "node": "s007_n008",
+            "street": "Rue Saint-Antoine",
+            "address": "5, 7"
+          },
+          {
+            "step": 9,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 10,
+            "node": "s004_n012",
+            "street": "Boulevard du Temple",
+            "address": "21, 24"
+          },
+          {
+            "step": 11,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 12,
+            "node": "s004_n009",
+            "street": "Boulevard du Temple",
+            "address": "15, 16, 17, 18"
+          },
+          {
+            "step": 13,
+            "node": "s004_n011",
+            "street": "Boulevard du Temple",
+            "address": "22"
+          },
+          {
+            "step": 15,
+            "node": "s046_n001",
+            "street": "Quai M\u00e9nilmontant",
+            "address": ""
+          },
+          {
+            "step": 16,
+            "node": "s007_n006",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 17,
+            "node": "s007_n003",
+            "street": "Rue Saint-Antoine",
+            "address": ""
+          },
+          {
+            "step": 18,
+            "node": "s005_n015",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "23"
+          },
+          {
+            "step": 19,
+            "node": "s005_n014",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 20,
+            "node": "s005_n012",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "19"
+          },
+          {
+            "step": 21,
+            "node": "s005_n007",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": "9"
+          },
+          {
+            "step": 22,
+            "node": "s005_n006",
+            "street": "Rue de S\u00e9vign\u00e9",
+            "address": ""
+          },
+          {
+            "step": 23,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 25,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 27,
+            "node": "s009_n004",
+            "street": "Rue Oberkampf",
+            "address": "7"
+          },
+          {
+            "step": 29,
+            "node": "s009_n008",
+            "street": "Rue Oberkampf",
+            "address": "18"
+          },
+          {
+            "step": 31,
+            "node": "s009_n009",
+            "street": "Rue Oberkampf",
+            "address": "15"
+          },
+          {
+            "step": 33,
+            "node": "s009_n010",
+            "street": "Rue Oberkampf",
+            "address": "17"
+          }
+        ],
+        "visit_counts": {
+          "s014_n001": 1,
+          "s014_n003": 1,
+          "s007_n003": 2,
+          "s007_n006": 3,
+          "s007_n008": 1,
+          "s004_n012": 1,
+          "s004_n011": 2,
+          "s004_n009": 1,
+          "s046_n001": 1,
+          "s005_n015": 1,
+          "s005_n014": 1,
+          "s005_n012": 1,
+          "s005_n007": 1,
+          "s005_n006": 1,
+          "s009_n009": 2,
+          "s009_n008": 2,
+          "s009_n004": 1,
+          "s009_n010": 1
+        },
+        "streets_seen": {
+          "Quai Beaubourg": "seen from Quai Beaubourg",
+          "Rue Saint-Antoine": "seen from Quai Beaubourg",
+          "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+          "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+          "Boulevard du Temple": "seen from Rue Saint-Antoine",
+          "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+          "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+          "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+          "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+          "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+          "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+          "Rue Nationale": "seen from Rue Oberkampf no. 7"
+        },
+        "dead_ends": [],
+        "notebook": [],
+        "looping": true
+      }
+    }
+  ],
+  "spend": {
+    "steps": 34,
+    "tool_calls": 34,
+    "sim_seconds": 906.8683040916046,
+    "output_tokens": 0,
+    "format_errors": 0,
+    "consecutive_format_errors": 0
+  },
+  "budgets": {
+    "steps": 120,
+    "tool_calls": 160,
+    "sim_seconds": 3600.0,
+    "output_tokens": 60000,
+    "max_format_errors": 3,
+    "wall_seconds": 1800.0
+  },
+  "memory": {
+    "goal": "",
+    "goal_kind": "",
+    "trail": [
+      {
+        "step": 1,
+        "node": "s014_n001",
+        "street": "Quai Beaubourg",
+        "address": "2"
+      },
+      {
+        "step": 2,
+        "node": "s014_n003",
+        "street": "Quai Beaubourg",
+        "address": ""
+      },
+      {
+        "step": 4,
+        "node": "s007_n003",
+        "street": "Rue Saint-Antoine",
+        "address": ""
+      },
+      {
+        "step": 5,
+        "node": "s007_n006",
+        "street": "Rue Saint-Antoine",
+        "address": ""
+      },
+      {
+        "step": 6,
+        "node": "s007_n008",
+        "street": "Rue Saint-Antoine",
+        "address": "5, 7"
+      },
+      {
+        "step": 9,
+        "node": "s007_n006",
+        "street": "Rue Saint-Antoine",
+        "address": ""
+      },
+      {
+        "step": 10,
+        "node": "s004_n012",
+        "street": "Boulevard du Temple",
+        "address": "21, 24"
+      },
+      {
+        "step": 11,
+        "node": "s004_n011",
+        "street": "Boulevard du Temple",
+        "address": "22"
+      },
+      {
+        "step": 12,
+        "node": "s004_n009",
+        "street": "Boulevard du Temple",
+        "address": "15, 16, 17, 18"
+      },
+      {
+        "step": 13,
+        "node": "s004_n011",
+        "street": "Boulevard du Temple",
+        "address": "22"
+      },
+      {
+        "step": 15,
+        "node": "s046_n001",
+        "street": "Quai M\u00e9nilmontant",
+        "address": ""
+      },
+      {
+        "step": 16,
+        "node": "s007_n006",
+        "street": "Rue Saint-Antoine",
+        "address": ""
+      },
+      {
+        "step": 17,
+        "node": "s007_n003",
+        "street": "Rue Saint-Antoine",
+        "address": ""
+      },
+      {
+        "step": 18,
+        "node": "s005_n015",
+        "street": "Rue de S\u00e9vign\u00e9",
+        "address": "23"
+      },
+      {
+        "step": 19,
+        "node": "s005_n014",
+        "street": "Rue de S\u00e9vign\u00e9",
+        "address": ""
+      },
+      {
+        "step": 20,
+        "node": "s005_n012",
+        "street": "Rue de S\u00e9vign\u00e9",
+        "address": "19"
+      },
+      {
+        "step": 21,
+        "node": "s005_n007",
+        "street": "Rue de S\u00e9vign\u00e9",
+        "address": "9"
+      },
+      {
+        "step": 22,
+        "node": "s005_n006",
+        "street": "Rue de S\u00e9vign\u00e9",
+        "address": ""
+      },
+      {
+        "step": 23,
+        "node": "s009_n009",
+        "street": "Rue Oberkampf",
+        "address": "15"
+      },
+      {
+        "step": 25,
+        "node": "s009_n008",
+        "street": "Rue Oberkampf",
+        "address": "18"
+      },
+      {
+        "step": 27,
+        "node": "s009_n004",
+        "street": "Rue Oberkampf",
+        "address": "7"
+      },
+      {
+        "step": 29,
+        "node": "s009_n008",
+        "street": "Rue Oberkampf",
+        "address": "18"
+      },
+      {
+        "step": 31,
+        "node": "s009_n009",
+        "street": "Rue Oberkampf",
+        "address": "15"
+      },
+      {
+        "step": 33,
+        "node": "s009_n010",
+        "street": "Rue Oberkampf",
+        "address": "17"
+      }
+    ],
+    "visit_counts": {
+      "s014_n001": 1,
+      "s014_n003": 1,
+      "s007_n003": 2,
+      "s007_n006": 3,
+      "s007_n008": 1,
+      "s004_n012": 1,
+      "s004_n011": 2,
+      "s004_n009": 1,
+      "s046_n001": 1,
+      "s005_n015": 1,
+      "s005_n014": 1,
+      "s005_n012": 1,
+      "s005_n007": 1,
+      "s005_n006": 1,
+      "s009_n009": 2,
+      "s009_n008": 2,
+      "s009_n004": 1,
+      "s009_n010": 1
+    },
+    "streets_seen": {
+      "Quai Beaubourg": "seen from Quai Beaubourg",
+      "Rue Saint-Antoine": "seen from Quai Beaubourg",
+      "Rue de S\u00e9vign\u00e9": "seen from Rue Saint-Antoine",
+      "Quai M\u00e9nilmontant": "seen from Rue Saint-Antoine",
+      "Boulevard du Temple": "seen from Rue Saint-Antoine",
+      "Boulevard Saint-Honor\u00e9 (2)": "seen from Rue de S\u00e9vign\u00e9 no. 23",
+      "Boulevard Lafayette": "seen from Rue de S\u00e9vign\u00e9 no. 19",
+      "Rue de la Roquette": "seen from Rue de S\u00e9vign\u00e9 no. 9",
+      "Rue de Flandre": "seen from Rue de S\u00e9vign\u00e9",
+      "Rue Oberkampf": "seen from Rue de S\u00e9vign\u00e9",
+      "Avenue de Crim\u00e9e": "seen from Rue Oberkampf no. 18",
+      "Rue Nationale": "seen from Rue Oberkampf no. 7"
+    },
+    "dead_ends": [],
+    "notebook": [],
+    "looping": true
+  },
+  "finished": true,
+  "termination_reason": "delivered",
+  "total_reward": 0.6,
+  "turn_count": 34,
+  "env": {
+    "node": "s009_n010",
+    "street": "Rue Oberkampf",
+    "sim_seconds": 906.9,
+    "earnings": 5.43,
+    "profit": 5.43,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "5 Rue Saint-Antoine",
+        "dropoff": "17 Rue Oberkampf",
+        "fee": 5.43,
+        "deadline_s": 985.4,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 5.43,
+        "issued_at_s": 0.0
+      }
+    ],
+    "difficulty": "solo",
+    "turns": 34,
+    "queue_depth": 1,
+    "minutes_per_delivery": 15.11,
+    "turns_per_delivery": 34.0,
+    "delivered": 1,
+    "on_time": 1,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 1,
+    "rejected_actions": 5,
+    "walked_m": 767.0,
+    "optimal_walk_m": 562.7,
+    "walk_ratio": 1.36,
+    "optimal_seconds": 541.9,
+    "time_ratio": 1.67,
+    "shift_optimal_seconds": 430.2,
+    "deliveries_per_hour": 3.97,
+    "earnings_per_hour": 21.56,
+    "shift_seconds": 3011.2452100661644,
+    "shift_over": false,
+    "red_crossings": 1,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 1,
+    "slow_passages": 3,
+    "obstacles": {
+      "placed": 35,
+      "in_effect": 35,
+      "slow_pedestrian": 22,
+      "slow_pedestrian_in_effect": 22,
+      "road_block": 13,
+      "road_block_in_effect": 13
+    },
+    "finished": true
+  }
+}

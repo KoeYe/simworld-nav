@@ -1,0 +1,118 @@
+{
+  "turn": 15,
+  "config": {
+    "tier": "triple",
+    "stride": "block",
+    "seed": 4
+  },
+  "text": "### your notes\nCame from: Rue Oberkampf no. 23 <- Rue Oberkampf no. 25, 26 <- Rue Oberkampf no. 30, 31 <- Rue Oberkampf <- Rue Oberkampf no. 32, 34\nStreets you have seen: Rue Oberkampf (seen from Rue Mazarine); Boulevard de Buci (seen from Rue Oberkampf); Avenue L\u00e9on Frot (seen from Rue Oberkampf no. 30, 31); Rue Ordener (seen from Rue Oberkampf no. 23)\n\n### where you are\nYou are on Rue Oberkampf, outside numbers 25, 26.\nYou are carrying 2 jobs. Their deadlines run at the same time:\n  job 0: collect from 4 Boulevard de Buci \u2014 7 min left\n  job 1: deliver to 14 Boulevard de Buci \u2014 0 min overdue\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Oberkampf, behind you\n  [2] looking down Rue Oberkampf, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou collect the order from 25 Rue Oberkampf.\n",
+  "frames": [
+    {
+      "label": "[1] Rue Oberkampf, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s009_n015/toward_s009_n014.png"
+    },
+    {
+      "label": "[2] Rue Oberkampf, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s009_n015/toward_s009_n016.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/B/turn_015_map.png",
+      "svg_bytes": 24608
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 403.9042067028629,
+  "summary": {
+    "node": "s009_n015",
+    "street": "Rue Oberkampf",
+    "sim_seconds": 403.9,
+    "earnings": 0.0,
+    "profit": 0.0,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "4 Boulevard de Buci",
+        "dropoff": "4 Boulevard du Temple",
+        "fee": 5.02,
+        "deadline_s": 847.6,
+        "picked_up": false,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 1,
+        "pickup": "25 Rue Oberkampf",
+        "dropoff": "14 Boulevard de Buci",
+        "fee": 4.23,
+        "deadline_s": 389.0,
+        "picked_up": true,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 2,
+        "pickup": "9 Boulevard du Temple",
+        "dropoff": "13 Boulevard de Buci",
+        "fee": 4.37,
+        "deadline_s": 646.2,
+        "picked_up": false,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": null
+      }
+    ],
+    "difficulty": "triple",
+    "turns": 14,
+    "queue_depth": 2,
+    "minutes_per_delivery": null,
+    "turns_per_delivery": null,
+    "delivered": 0,
+    "on_time": 0,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 2,
+    "rejected_actions": 1,
+    "walked_m": 274.3,
+    "optimal_walk_m": 0.0,
+    "walk_ratio": null,
+    "optimal_seconds": 0.0,
+    "time_ratio": null,
+    "shift_optimal_seconds": 861.1,
+    "deliveries_per_hour": 0.0,
+    "earnings_per_hour": 0.0,
+    "shift_seconds": 6027.907640817939,
+    "shift_over": false,
+    "red_crossings": 2,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 0,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 25,
+      "in_effect": 25,
+      "slow_pedestrian": 16,
+      "slow_pedestrian_in_effect": 16,
+      "road_block": 9,
+      "road_block_in_effect": 9
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: Back outside number 25, which is job 1 pickup; collecting even though the window has just closed, since a late delivery still pays something.\n```\ncollect()\n```",
+    "action": "collect()",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 30.0,
+    "reward": 0.1
+  }
+}

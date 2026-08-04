@@ -1,0 +1,99 @@
+{
+  "turn": 14,
+  "config": {
+    "tier": "solo",
+    "stride": "block",
+    "seed": 0
+  },
+  "text": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Boulevard du Temple no. 15, 16, 17, 18 <- Boulevard du Temple no. 22 <- Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside number 22.\n11 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 behind you (north-east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 straight ahead (south-west) \u2014 next junction 18 m\n  3. Quai M\u00e9nilmontant \u2014 straight ahead (south-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Boulevard du Temple, behind you\n  [2] looking down Boulevard du Temple, straight ahead\n  [3] looking down Quai M\u00e9nilmontant, straight ahead\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Boulevard du Temple, through 2 junctions. A street leaves Boulevard du Temple here.\n",
+  "frames": [
+    {
+      "label": "[1] Boulevard du Temple, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_obstacles/citycore-paris/images/s004_n009/toward_s004_n008_road_block.png"
+    },
+    {
+      "label": "[2] Boulevard du Temple, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s004_n012.png"
+    },
+    {
+      "label": "[3] Quai M\u00e9nilmontant, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s004_n011/toward_s046_n000.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/A/turn_014_map.png",
+      "svg_bytes": 21149
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 329.65727598202534,
+  "summary": {
+    "node": "s004_n011",
+    "street": "Boulevard du Temple",
+    "sim_seconds": 329.7,
+    "earnings": 0.0,
+    "profit": 0.0,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "5 Rue Saint-Antoine",
+        "dropoff": "17 Rue Oberkampf",
+        "fee": 5.43,
+        "deadline_s": 985.4,
+        "picked_up": true,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      }
+    ],
+    "difficulty": "solo",
+    "turns": 13,
+    "queue_depth": 1,
+    "minutes_per_delivery": null,
+    "turns_per_delivery": null,
+    "delivered": 0,
+    "on_time": 0,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 1,
+    "rejected_actions": 1,
+    "walked_m": 311.7,
+    "optimal_walk_m": 0.0,
+    "walk_ratio": null,
+    "optimal_seconds": 0.0,
+    "time_ratio": null,
+    "shift_optimal_seconds": 430.2,
+    "deliveries_per_hour": 0.0,
+    "earnings_per_hour": 0.0,
+    "shift_seconds": 3011.2452100661644,
+    "shift_over": false,
+    "red_crossings": 0,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 1,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 35,
+      "in_effect": 35,
+      "slow_pedestrian": 22,
+      "slow_pedestrian_in_effect": 22,
+      "road_block": 13,
+      "road_block_in_effect": 13
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: The barrier shuts Boulevard du Temple and the map shows no side street along this leg, so the only way round starts back at the fork; I retrace south-west.\n```\nwalk_to(2)\n```",
+    "action": "walk_to(2)",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 25.714285714285722,
+    "reward": -0.0
+  }
+}

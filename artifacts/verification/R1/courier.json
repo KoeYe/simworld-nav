@@ -1,0 +1,64 @@
+{
+  "gate": "courier_r1",
+  "model": "/data/shared/huggingface/hub/models--Qwen--Qwen2-VL-2B-Instruct/snapshots/aca78372505e6cb469c4fa6a35c60265b00ff5a4",
+  "real_model": true,
+  "tier": "solo",
+  "embodiment": "human_on_foot",
+  "seeds": 2,
+  "status": "pass",
+  "seconds": 18.8,
+  "checks": [
+    {
+      "check": "episodes_run_through_the_shipped_harness",
+      "status": "pass",
+      "episodes": 2,
+      "turns": [
+        1,
+        1
+      ],
+      "rewards": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "check": "images_reach_more_than_one_turn",
+      "status": "pass",
+      "images_shown": 2,
+      "episodes_with_images": 2,
+      "images_dropped": 2
+    },
+    {
+      "check": "policy_loss_covers_only_sampled_tokens",
+      "status": "pass",
+      "sampled_tokens": 170,
+      "total_tokens": 4167,
+      "logprobs_aligned": true
+    },
+    {
+      "check": "fanout_preserves_the_episode_return",
+      "status": "pass",
+      "shards": 4,
+      "episodes": 2
+    },
+    {
+      "check": "one_update_changes_the_policy",
+      "status": "pass",
+      "loss": -0.05524927377700806,
+      "masked_token_count": 170,
+      "grad_norm": 31.5,
+      "parameter_delta_l2": 0.0003808024565910251,
+      "parameters_changed": true,
+      "logits_changed": true,
+      "logits_max_abs_delta": 0.28125,
+      "param_digest_before": "830a4345c56ce8761aaaef2b907c9f0d4ddc8cb6f6239521136e33a0c0b4b58a",
+      "param_digest_after": "fb60da727d82201d15084e602006c3f0e91097b44cf5ef50b4abfb3942381e60",
+      "notes": [],
+      "synthetic_advantage": true,
+      "episode_rewards": [
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+{
+  "model": "/data/shared/huggingface/hub/models--Qwen--Qwen2-VL-2B-Instruct/snapshots/aca78372505e6cb469c4fa6a35c60265b00ff5a4",
+  "tier": "solo",
+  "no_hazards": true,
+  "iterations": 20,
+  "batch": 8,
+  "learning_rate": 0.0001,
+  "format_weight": 1.0,
+  "train_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "eval_seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007
+  ],
+  "seconds": 1081.1,
+  "history": [
+    {
+      "iteration": 0,
+      "eval_format_score": 0.2812,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.5
+    },
+    {
+      "iteration": 1,
+      "train_reward": 0.375,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.31597,
+      "grad_norm": 50.5,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 2,
+      "train_reward": 0.4375,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.34159,
+      "grad_norm": 31.875,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 3,
+      "train_reward": 0.375,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.0818,
+      "grad_norm": 25.75,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 4,
+      "train_reward": 0.125,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.15084,
+      "grad_norm": 29.25,
+      "parameters_changed": true,
+      "eval_format_score": 0.1875,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.5
+    },
+    {
+      "iteration": 5,
+      "train_reward": 0.5,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.18698,
+      "grad_norm": 49.75,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 6,
+      "train_reward": 0.2188,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.0716,
+      "grad_norm": 34.75,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 7,
+      "train_reward": 0.375,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.37395,
+      "grad_norm": 36.0,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 8,
+      "train_reward": 0.4062,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.26821,
+      "grad_norm": 197.0,
+      "parameters_changed": true,
+      "eval_format_score": 0.3125,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.75
+    },
+    {
+      "iteration": 9,
+      "train_reward": 0.2188,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.21656,
+      "grad_norm": 17.25,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 10,
+      "train_reward": 0.5938,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.13829,
+      "grad_norm": 40.5,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 11,
+      "train_reward": 0.4688,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.29089,
+      "grad_norm": 162.0,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 12,
+      "train_reward": 0.5,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.33951,
+      "grad_norm": 37.5,
+      "parameters_changed": true,
+      "eval_format_score": 0.0938,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.38
+    },
+    {
+      "iteration": 13,
+      "train_reward": 0.2812,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.11161,
+      "grad_norm": 190.0,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 14,
+      "train_reward": 0.4688,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.30876,
+      "grad_norm": 76.5,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 15,
+      "train_reward": 0.1562,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.14492,
+      "grad_norm": 15.875,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 16,
+      "train_reward": 0.4062,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.13836,
+      "grad_norm": 37.5,
+      "parameters_changed": true,
+      "eval_format_score": 0.2188,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.5
+    },
+    {
+      "iteration": 17,
+      "train_reward": 0.3125,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.27961,
+      "grad_norm": 12.375,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 18,
+      "train_reward": 0.2812,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.18656,
+      "grad_norm": 24.75,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 19,
+      "train_reward": 0.4688,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.15056,
+      "grad_norm": 70.5,
+      "parameters_changed": true
+    },
+    {
+      "iteration": 20,
+      "train_reward": 0.25,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.0795,
+      "grad_norm": 33.5,
+      "parameters_changed": true,
+      "eval_format_score": 0.375,
+      "eval_env_return": 0.0,
+      "eval_delivered": 0,
+      "eval_turns": 3.75
+    }
+  ]
+}

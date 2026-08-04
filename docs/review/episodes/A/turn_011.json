@@ -1,0 +1,104 @@
+{
+  "turn": 11,
+  "config": {
+    "tier": "solo",
+    "stride": "block",
+    "seed": 0
+  },
+  "text": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7 <- Quai Beaubourg <- Quai Beaubourg no. 2\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside numbers 21, 24.\n13 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 on your right (north-east) \u2014 next junction 18 m\n  2. Rue Saint-Antoine \u2014 behind you (east) \u2014 next junction 5 m\n  3. Quai M\u00e9nilmontant \u2014 on your left (south-west) \u2014 next junction 2 m\n  4. Boulevard du Temple \u2014 half left (south-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Boulevard du Temple, on your right\n  [2] looking down Rue Saint-Antoine, behind you\n  [3] looking down Quai M\u00e9nilmontant, on your left\n  [4] looking down Boulevard du Temple, half left\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 5 m along Boulevard du Temple, through 1 junction. Boulevard du Temple forks here.\n",
+  "frames": [
+    {
+      "label": "[1] Boulevard du Temple, on your right",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s004_n012/toward_s004_n011.png"
+    },
+    {
+      "label": "[2] Rue Saint-Antoine, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s004_n012/toward_s007_n006.png"
+    },
+    {
+      "label": "[3] Quai M\u00e9nilmontant, on your left",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s004_n012/toward_s046_n001.png"
+    },
+    {
+      "label": "[4] Boulevard du Temple, half left",
+      "kind": "photograph",
+      "path": "/data/murray/paris_obstacles/citycore-paris/images/s004_n012/toward_s004_n013_road_block.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/A/turn_011_map.png",
+      "svg_bytes": 21149
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 220.37232026628493,
+  "summary": {
+    "node": "s004_n012",
+    "street": "Boulevard du Temple",
+    "sim_seconds": 220.4,
+    "earnings": 0.0,
+    "profit": 0.0,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "5 Rue Saint-Antoine",
+        "dropoff": "17 Rue Oberkampf",
+        "fee": 5.43,
+        "deadline_s": 985.4,
+        "picked_up": true,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      }
+    ],
+    "difficulty": "solo",
+    "turns": 10,
+    "queue_depth": 1,
+    "minutes_per_delivery": null,
+    "turns_per_delivery": null,
+    "delivered": 0,
+    "on_time": 0,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 1,
+    "rejected_actions": 0,
+    "walked_m": 221.7,
+    "optimal_walk_m": 0.0,
+    "walk_ratio": null,
+    "optimal_seconds": 0.0,
+    "time_ratio": null,
+    "shift_optimal_seconds": 430.2,
+    "deliveries_per_hour": 0.0,
+    "earnings_per_hour": 0.0,
+    "shift_seconds": 3011.2452100661644,
+    "shift_over": false,
+    "red_crossings": 0,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 0,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 35,
+      "in_effect": 35,
+      "slow_pedestrian": 22,
+      "slow_pedestrian_in_effect": 22,
+      "road_block": 13,
+      "road_block_in_effect": 13
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: Photographs 2 and 3 show the same corner from almost the same bearing and neither carries a street-name plate, so only the text separates them; the route names Boulevard du Temple, which is candidate 3, and its view is clear.\n```\nwalk_to(3)\n```",
+    "action": "walk_to(3)",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 3.4299929352903575,
+    "reward": -0.0
+  }
+}

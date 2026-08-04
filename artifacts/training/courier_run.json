@@ -1,0 +1,68 @@
+{
+  "model": "/data/shared/huggingface/hub/models--Qwen--Qwen2-VL-2B-Instruct/snapshots/aca78372505e6cb469c4fa6a35c60265b00ff5a4",
+  "tier": "solo",
+  "embodiment": "human_on_foot",
+  "iterations": 4,
+  "batch": 2,
+  "format_weight": 1.0,
+  "learning_rate": 2e-05,
+  "seconds": 43.9,
+  "history": [
+    {
+      "iteration": 1,
+      "env_return_mean": 0.0,
+      "reward_mean": 0.25,
+      "format_score_mean": 0.25,
+      "turns_mean": 2.0,
+      "delivered": 0,
+      "advantage_spread": 0.5,
+      "step": "taken",
+      "loss": 0.07693,
+      "grad_norm": 13.938,
+      "parameter_delta_l2": 1.619891388642722e-06,
+      "parameters_changed": true,
+      "masked_tokens": 169
+    },
+    {
+      "iteration": 2,
+      "env_return_mean": 0.0,
+      "reward_mean": 0.0,
+      "format_score_mean": 0.0,
+      "turns_mean": 2.0,
+      "delivered": 0,
+      "advantage_spread": 0.0,
+      "step": "skipped",
+      "reason": "zero advantage spread; every episode in the batch earned the same reward"
+    },
+    {
+      "iteration": 3,
+      "env_return_mean": 0.0,
+      "reward_mean": 0.25,
+      "format_score_mean": 0.25,
+      "turns_mean": 2.0,
+      "delivered": 0,
+      "advantage_spread": 0.5,
+      "step": "taken",
+      "loss": -0.05448,
+      "grad_norm": 8.875,
+      "parameter_delta_l2": 1.7555297490974217e-06,
+      "parameters_changed": true,
+      "masked_tokens": 166
+    },
+    {
+      "iteration": 4,
+      "env_return_mean": 0.0,
+      "reward_mean": 0.5,
+      "format_score_mean": 0.5,
+      "turns_mean": 2.0,
+      "delivered": 0,
+      "advantage_spread": 1.0,
+      "step": "taken",
+      "loss": -0.29547,
+      "grad_norm": 52.75,
+      "parameter_delta_l2": 1.5094256187403344e-06,
+      "parameters_changed": true,
+      "masked_tokens": 99
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "turn": 4,
+  "config": {
+    "tier": "solo",
+    "stride": "block",
+    "seed": 0
+  },
+  "text": "### your notes\nJob: collect from 9 Rue Saint-Antoine\nCame from: Quai Beaubourg <- Quai Beaubourg no. 2\n\n### where you are\nYou are on Rue Saint-Antoine.\n15 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Saint-Antoine \u2014 behind you (south-east) \u2014 54 m on, 3 junctions, to the next choice\n  2. Rue de S\u00e9vign\u00e9 \u2014 sharp left (south) \u2014 8 m on, 1 junction, to the next choice\n  3. Rue Saint-Antoine \u2014 straight ahead (north-west) \u2014 54 m on, 3 junctions, to the next choice\n\n### photographs\n  [1], [2], [3] \u2014 the view down each of those streets, in that order\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 61 m along Rue Saint-Antoine, through 4 junctions. A street leaves Rue Saint-Antoine here.\n",
+  "frames": [
+    {
+      "label": "[1] Rue Saint-Antoine, behind you",
+      "kind": "photograph",
+      "path": "/tmp/embodiedbench_frames/fa933f40aefdd5c1.png"
+    },
+    {
+      "label": "[2] Rue de S\u00e9vign\u00e9, sharp left",
+      "kind": "photograph",
+      "path": "/tmp/embodiedbench_frames/0b57cb96d96efe6a.png"
+    },
+    {
+      "label": "[3] Rue Saint-Antoine, straight ahead",
+      "kind": "photograph",
+      "path": "/tmp/embodiedbench_frames/edb8184c6b9bfb14.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/P/turn_004_map.png",
+      "svg_bytes": 11219
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 79.9423273309946,
+  "summary": {
+    "node": "s007_n003",
+    "street": "Rue Saint-Antoine",
+    "sim_seconds": 79.9,
+    "earnings": 0.0,
+    "profit": 0.0,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "9 Rue Saint-Antoine",
+        "dropoff": "25 Rue Oberkampf",
+        "fee": 5.43,
+        "deadline_s": 985.4,
+        "picked_up": false,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      }
+    ],
+    "embodiment": "human_on_foot",
+    "viewpoint_expected": "pavement",
+    "viewpoint_served": "pavement",
+    "viewpoint_matches_embodiment": true,
+    "rests": 0,
+    "stamina_left": 98.18,
+    "stamina_spent": 1.82,
+    "tired": false,
+    "difficulty": "solo",
+    "turns": 3,
+    "queue_depth": 1,
+    "minutes_per_delivery": null,
+    "turns_per_delivery": null,
+    "delivered": 0,
+    "on_time": 0,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 1,
+    "rejected_actions": 0,
+    "walked_m": 90.9,
+    "optimal_walk_m": null,
+    "walk_ratio": null,
+    "optimal_seconds": 0.0,
+    "time_ratio": null,
+    "shift_optimal_seconds": 430.2,
+    "deliveries_per_hour": 0.0,
+    "earnings_per_hour": 0.0,
+    "shift_seconds": 1505.6226050330822,
+    "shift_over": false,
+    "red_crossings": 0,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 0,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 35,
+      "in_effect": 35,
+      "slow_pedestrian": 22,
+      "slow_pedestrian_in_effect": 22,
+      "road_block": 13,
+      "road_block_in_effect": 13
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: The route wants Rue Saint-Antoine north-west and candidate 2 now reads north-west for 61 m over 4 junctions, which matches; its photograph is a shopfront wall because the first junction is metres away, so it tells me nothing about the street but does not contradict the route either.\n```\nwalk_to(2)\n```",
+    "action": "walk_to(2)",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 43.91884794950194,
+    "reward": -0.0
+  }
+}

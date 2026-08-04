@@ -1,0 +1,114 @@
+{
+  "turn": 30,
+  "config": {
+    "tier": "solo",
+    "stride": "block",
+    "seed": 0
+  },
+  "text": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Rue Oberkampf no. 7 <- Rue Oberkampf no. 18 <- Rue Oberkampf no. 15 <- Rue de S\u00e9vign\u00e9 <- Rue de S\u00e9vign\u00e9 no. 9\nYou have passed Rue Saint-Antoine more than twice \u2014 you are going in circles.\nStreets you have seen: Rue de Flandre (seen from Rue de S\u00e9vign\u00e9); Rue Oberkampf (seen from Rue de S\u00e9vign\u00e9); Avenue de Crim\u00e9e (seen from Rue Oberkampf no. 18); Rue Nationale (seen from Rue Oberkampf no. 7)\n\n### where you are\nYou are on Rue Oberkampf, outside number 18.\n4 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Oberkampf \u2014 behind you (south-east) \u2014 next junction 18 m\n  2. Rue Oberkampf \u2014 straight ahead (north-west) \u2014 next junction 18 m\n  3. Avenue de Crim\u00e9e \u2014 straight ahead (north-west) \u2014 next junction 5 m\n\n### photographs\n  [1] looking down Rue Oberkampf, behind you\n  [2] looking down Rue Oberkampf, straight ahead\n  [3] looking down Avenue de Crim\u00e9e, straight ahead\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 72 m along Rue Oberkampf, through 4 junctions. There is a pedestrian light at this crossing.\n",
+  "frames": [
+    {
+      "label": "[1] Rue Oberkampf, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_obstacles/citycore-paris/images/s009_n005/toward_s009_n004_slow_pedestrian.png"
+    },
+    {
+      "label": "[2] Rue Oberkampf, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s009_n009.png"
+    },
+    {
+      "label": "[3] Avenue de Crim\u00e9e, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s009_n008/toward_s043_n001.png"
+    },
+    {
+      "label": "[light 1] pedestrian light for street 1",
+      "kind": "photograph",
+      "path": "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n007_red.png"
+    },
+    {
+      "label": "[light 2] pedestrian light for street 2",
+      "kind": "photograph",
+      "path": "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s009_n009_red.png"
+    },
+    {
+      "label": "[light 3] pedestrian light for street 3",
+      "kind": "photograph",
+      "path": "/data/murray/paris_signals_kerb/citycore-paris/images/s009_n008/toward_s043_n001_red.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/A/turn_030_map.png",
+      "svg_bytes": 23517
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 766.1541452541168,
+  "summary": {
+    "node": "s009_n008",
+    "street": "Rue Oberkampf",
+    "sim_seconds": 766.2,
+    "earnings": 0.0,
+    "profit": 0.0,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "5 Rue Saint-Antoine",
+        "dropoff": "17 Rue Oberkampf",
+        "fee": 5.43,
+        "deadline_s": 985.4,
+        "picked_up": true,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      }
+    ],
+    "difficulty": "solo",
+    "turns": 29,
+    "queue_depth": 1,
+    "minutes_per_delivery": null,
+    "turns_per_delivery": null,
+    "delivered": 0,
+    "on_time": 0,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 1,
+    "rejected_actions": 3,
+    "walked_m": 731.0,
+    "optimal_walk_m": 0.0,
+    "walk_ratio": null,
+    "optimal_seconds": 0.0,
+    "time_ratio": null,
+    "shift_optimal_seconds": 430.2,
+    "deliveries_per_hour": 0.0,
+    "earnings_per_hour": 0.0,
+    "shift_seconds": 3011.2452100661644,
+    "shift_over": false,
+    "red_crossings": 0,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 1,
+    "slow_passages": 3,
+    "obstacles": {
+      "placed": 35,
+      "in_effect": 35,
+      "slow_pedestrian": 22,
+      "slow_pedestrian_in_effect": 22,
+      "road_block": 13,
+      "road_block_in_effect": 13
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: Walking south-east took me from 15 to 18 to 7 and pushed number 17 from 36 m to 108 m, so the numbers do not run in order here and I must go back north-west.\n```\nwalk_to(2)\n```",
+    "action": "walk_to(2)",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 91.42856487891618,
+    "reward": -0.0
+  }
+}

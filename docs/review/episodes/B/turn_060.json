@@ -1,0 +1,138 @@
+{
+  "turn": 60,
+  "config": {
+    "tier": "triple",
+    "stride": "block",
+    "seed": 4
+  },
+  "text": "### your notes\nJob: deliver to 13 Boulevard de Buci\nCame from: Avenue L\u00e9on Frot <- Rue Oberkampf no. 30, 31 <- Rue Oberkampf no. 23 <- Rue Ordener <- Boulevard du Temple\nYou have passed Rue Oberkampf no. 30, 31, Rue Oberkampf, Rue Oberkampf no. 23 more than twice \u2014 you are going in circles.\nStreets you have seen: Boulevard du Temple (seen from Rue Ordener); Rue Saint-Blaise (seen from Rue Ordener); Rue Cr\u00e9mieux (seen from Boulevard du Temple); Rue des Martyrs (seen from Boulevard du Temple)\n\n### where you are\nYou are on Boulevard de Buci.\n3 min left before the deadline.\n\n### streets leaving this junction\n  1. Avenue L\u00e9on Frot \u2014 behind you (north-east) \u2014 next junction 12 m\n  2. Boulevard de Buci \u2014 half left (south-west) \u2014 next junction 17 m\n  3. Rue Oberkampf \u2014 on your right (north) \u2014 next junction 10 m\n\n### photographs\n  [1] looking down Avenue L\u00e9on Frot, behind you\n  [2] looking down Boulevard de Buci, half left\n  [3] looking down Rue Oberkampf, on your right\n  [light 1] the pedestrian light for street 1\n  [light 2] the pedestrian light for street 2\n  [light 3] the pedestrian light for street 3\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou are not at 13 Boulevard de Buci. It is 17 m away; you need to be within 8 m.\n",
+  "frames": [
+    {
+      "label": "[1] Avenue L\u00e9on Frot, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s028_n008/toward_s051_n000.png"
+    },
+    {
+      "label": "[2] Boulevard de Buci, half left",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s028_n008/toward_s028_n007.png"
+    },
+    {
+      "label": "[3] Rue Oberkampf, on your right",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s028_n008/toward_s009_n018.png"
+    },
+    {
+      "label": "[light 1] pedestrian light for street 1",
+      "kind": "photograph",
+      "path": "/data/murray/paris_signals_kerb/citycore-paris/images/s028_n008/toward_s051_n000_green.png"
+    },
+    {
+      "label": "[light 2] pedestrian light for street 2",
+      "kind": "photograph",
+      "path": "/data/murray/paris_signals_kerb/citycore-paris/images/s028_n008/toward_s028_n007_green.png"
+    },
+    {
+      "label": "[light 3] pedestrian light for street 3",
+      "kind": "photograph",
+      "path": "/data/murray/paris_signals_kerb/citycore-paris/images/s028_n008/toward_s009_n018_red.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/B/turn_060_map.png",
+      "svg_bytes": 11344
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 1199.0177674843217,
+  "summary": {
+    "node": "s028_n008",
+    "street": "Boulevard de Buci",
+    "sim_seconds": 1199.0,
+    "earnings": 4.63,
+    "profit": 4.63,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "4 Boulevard de Buci",
+        "dropoff": "4 Boulevard du Temple",
+        "fee": 5.02,
+        "deadline_s": 847.6,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 2.51,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 1,
+        "pickup": "25 Rue Oberkampf",
+        "dropoff": "14 Boulevard de Buci",
+        "fee": 4.23,
+        "deadline_s": 389.0,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 2.12,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 2,
+        "pickup": "9 Boulevard du Temple",
+        "dropoff": "13 Boulevard de Buci",
+        "fee": 4.37,
+        "deadline_s": 646.2,
+        "picked_up": true,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 737.6
+      }
+    ],
+    "difficulty": "triple",
+    "turns": 59,
+    "queue_depth": 2,
+    "minutes_per_delivery": 9.99,
+    "turns_per_delivery": 29.5,
+    "delivered": 2,
+    "on_time": 0,
+    "late": 2,
+    "expired": 0,
+    "orders_issued": 3,
+    "rejected_actions": 10,
+    "walked_m": 981.4,
+    "optimal_walk_m": 395.2,
+    "walk_ratio": 2.48,
+    "optimal_seconds": 402.3,
+    "time_ratio": 2.98,
+    "shift_optimal_seconds": 861.1,
+    "deliveries_per_hour": 6.0,
+    "earnings_per_hour": 13.9,
+    "shift_seconds": 6027.907640817939,
+    "shift_over": false,
+    "red_crossings": 3,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 0,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 25,
+      "in_effect": 25,
+      "slow_pedestrian": 16,
+      "slow_pedestrian_in_effect": 16,
+      "road_block": 9,
+      "road_block_in_effect": 9
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: On Boulevard de Buci with three minutes left; a 5 s range check stops me walking past number 13 the way I did earlier.\n```\nhand_over()\n```",
+    "action": "hand_over()",
+    "status": "rejected",
+    "error": "not_at_dropoff",
+    "sim_seconds": 5.0,
+    "reward": 0.0
+  }
+}

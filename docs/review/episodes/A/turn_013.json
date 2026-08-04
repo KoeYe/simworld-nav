@@ -1,0 +1,94 @@
+{
+  "turn": 13,
+  "config": {
+    "tier": "solo",
+    "stride": "block",
+    "seed": 0
+  },
+  "text": "### your notes\nJob: deliver to 17 Rue Oberkampf\nCame from: Boulevard du Temple no. 22 <- Boulevard du Temple no. 21, 24 <- Rue Saint-Antoine <- Rue Saint-Antoine no. 5, 7 <- Quai Beaubourg\nStreets you have seen: Rue Saint-Antoine (seen from Quai Beaubourg); Rue de S\u00e9vign\u00e9 (seen from Rue Saint-Antoine); Quai M\u00e9nilmontant (seen from Rue Saint-Antoine); Boulevard du Temple (seen from Rue Saint-Antoine)\n\n### where you are\nYou are on Boulevard du Temple, outside numbers 15, 16, 17, 18.\n11 min left before the deadline.\n\n### streets leaving this junction\n  1. Boulevard du Temple \u2014 straight ahead (north-east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 behind you (south-west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Boulevard du Temple, straight ahead\n  [2] looking down Boulevard du Temple, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou walk 36 m along Boulevard du Temple, through 2 junctions. Boulevard du Temple is blocked and you cannot get past. You walk back to the junction. You will have to go round.\n",
+  "frames": [
+    {
+      "label": "[1] Boulevard du Temple, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_obstacles/citycore-paris/images/s004_n009/toward_s004_n008_road_block.png"
+    },
+    {
+      "label": "[2] Boulevard du Temple, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s004_n009/toward_s004_n010.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/A/turn_013_map.png",
+      "svg_bytes": 21149
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 303.9429902677396,
+  "summary": {
+    "node": "s004_n009",
+    "street": "Boulevard du Temple",
+    "sim_seconds": 303.9,
+    "earnings": 0.0,
+    "profit": 0.0,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "5 Rue Saint-Antoine",
+        "dropoff": "17 Rue Oberkampf",
+        "fee": 5.43,
+        "deadline_s": 985.4,
+        "picked_up": true,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 0.0
+      }
+    ],
+    "difficulty": "solo",
+    "turns": 12,
+    "queue_depth": 1,
+    "minutes_per_delivery": null,
+    "turns_per_delivery": null,
+    "delivered": 0,
+    "on_time": 0,
+    "late": 0,
+    "expired": 0,
+    "orders_issued": 1,
+    "rejected_actions": 1,
+    "walked_m": 275.7,
+    "optimal_walk_m": 0.0,
+    "walk_ratio": null,
+    "optimal_seconds": 0.0,
+    "time_ratio": null,
+    "shift_optimal_seconds": 430.2,
+    "deliveries_per_hour": 0.0,
+    "earnings_per_hour": 0.0,
+    "shift_seconds": 3011.2452100661644,
+    "shift_over": false,
+    "red_crossings": 0,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 1,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 35,
+      "in_effect": 35,
+      "slow_pedestrian": 22,
+      "slow_pedestrian_in_effect": 22,
+      "road_block": 13,
+      "road_block_in_effect": 13
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: Photograph 1 shows railings and bins closing Boulevard du Temple completely, but the barrier is some way down the street and the only other candidates here go back south-west, so I advance expecting to be stopped at a junction short of it where a side street may let me round.\n```\nwalk_to(1)\n```",
+    "action": "walk_to(1)",
+    "status": "accepted",
+    "error": "",
+    "sim_seconds": 70.71428571428572,
+    "reward": -0.0
+  }
+}

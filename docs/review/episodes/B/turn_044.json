@@ -1,0 +1,123 @@
+{
+  "turn": 44,
+  "config": {
+    "tier": "triple",
+    "stride": "block",
+    "seed": 4
+  },
+  "text": "### your notes\nJob: collect from 9 Boulevard du Temple\nCame from: Boulevard du Temple <- Boulevard du Temple no. 3, 4 <- Boulevard du Temple no. 5, 6 <- Rue Ordener <- Rue Oberkampf no. 23\nYou have passed Rue Oberkampf, Rue Oberkampf no. 30, 31 more than twice \u2014 you are going in circles.\nStreets you have seen: Boulevard du Temple (seen from Rue Ordener); Rue Saint-Blaise (seen from Rue Ordener); Rue Cr\u00e9mieux (seen from Boulevard du Temple); Rue des Martyrs (seen from Boulevard du Temple)\n\n### where you are\nYou are on Rue Cr\u00e9mieux.\n7 min left before the deadline.\n\n### streets leaving this junction\n  1. Rue Cr\u00e9mieux \u2014 straight ahead (east) \u2014 next junction 18 m\n  2. Boulevard du Temple \u2014 behind you (west) \u2014 next junction 5 m\n  3. Rue Cr\u00e9mieux \u2014 behind you (west) \u2014 next junction 18 m\n\n### photographs\n  [1] looking down Rue Cr\u00e9mieux, straight ahead\n  [2] looking down Boulevard du Temple, behind you\n  [3] looking down Rue Cr\u00e9mieux, behind you\n  [map] your phone's map \u2014 a drawing, not a photograph: it has the streets and your route on it and cannot see anything in them\n\n### what just happened\nYou are not at 9 Boulevard du Temple. It is 109 m away; you need to be within 8 m.\n",
+  "frames": [
+    {
+      "label": "[1] Rue Cr\u00e9mieux, straight ahead",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s021_n004/toward_s021_n005.png"
+    },
+    {
+      "label": "[2] Boulevard du Temple, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_streets_v2/citycore-paris/images/s021_n004/toward_s004_n000.png"
+    },
+    {
+      "label": "[3] Rue Cr\u00e9mieux, behind you",
+      "kind": "photograph",
+      "path": "/data/murray/paris_obstacles/citycore-paris/images/s021_n003/toward_s021_n002_slow_pedestrian.png"
+    },
+    {
+      "label": "[map] the map on your phone",
+      "kind": "map",
+      "path": "",
+      "png": "/home/murray/simworld_nav/docs/review/episodes/B/turn_044_map.png",
+      "svg_bytes": 19268
+    }
+  ],
+  "finished": false,
+  "sim_seconds": 967.8663607716389,
+  "summary": {
+    "node": "s021_n004",
+    "street": "Rue Cr\u00e9mieux",
+    "sim_seconds": 967.9,
+    "earnings": 4.63,
+    "profit": 4.63,
+    "orders": [
+      {
+        "index": 0,
+        "pickup": "4 Boulevard de Buci",
+        "dropoff": "4 Boulevard du Temple",
+        "fee": 5.02,
+        "deadline_s": 847.6,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 2.51,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 1,
+        "pickup": "25 Rue Oberkampf",
+        "dropoff": "14 Boulevard de Buci",
+        "fee": 4.23,
+        "deadline_s": 389.0,
+        "picked_up": true,
+        "delivered": true,
+        "expired": false,
+        "paid": 2.12,
+        "issued_at_s": 0.0
+      },
+      {
+        "index": 2,
+        "pickup": "9 Boulevard du Temple",
+        "dropoff": "13 Boulevard de Buci",
+        "fee": 4.37,
+        "deadline_s": 646.2,
+        "picked_up": false,
+        "delivered": false,
+        "expired": false,
+        "paid": 0.0,
+        "issued_at_s": 737.6
+      }
+    ],
+    "difficulty": "triple",
+    "turns": 43,
+    "queue_depth": 2,
+    "minutes_per_delivery": 8.07,
+    "turns_per_delivery": 21.5,
+    "delivered": 2,
+    "on_time": 0,
+    "late": 2,
+    "expired": 0,
+    "orders_issued": 3,
+    "rejected_actions": 6,
+    "walked_m": 748.8,
+    "optimal_walk_m": 444.7,
+    "walk_ratio": 1.68,
+    "optimal_seconds": 437.7,
+    "time_ratio": 2.21,
+    "shift_optimal_seconds": 861.1,
+    "deliveries_per_hour": 7.44,
+    "earnings_per_hour": 17.22,
+    "shift_seconds": 6027.907640817939,
+    "shift_over": false,
+    "red_crossings": 3,
+    "waits_at_red": 0,
+    "signalised_junctions": 105,
+    "blocked_attempts": 0,
+    "slow_passages": 0,
+    "obstacles": {
+      "placed": 25,
+      "in_effect": 25,
+      "slow_pedestrian": 16,
+      "slow_pedestrian_in_effect": 16,
+      "road_block": 9,
+      "road_block_in_effect": 9
+    },
+    "finished": false
+  },
+  "previous": {
+    "reply": "THOUGHT: I have run off the end of Boulevard du Temple onto Rue Cremieux without passing number 9, so I read the range before walking any further.\n```\ncollect()\n```",
+    "action": "collect()",
+    "status": "rejected",
+    "error": "not_at_pickup",
+    "sim_seconds": 5.0,
+    "reward": 0.0
+  }
+}
