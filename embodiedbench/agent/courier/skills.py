@@ -39,12 +39,28 @@ from embodiedbench.agent.courier.tools import Tool, ToolParam
 
 
 @dataclass(frozen=True)
+class Step:
+    """One line of a runbook, optionally gated on a tool being callable.
+
+    Gating whole procedures was not enough. ``Finding an address`` requires
+    ``navigate`` and ``walk_to``, both of which exist at every stride, but one of
+    its *steps* named ``follow_street``, which exists only at waypoint stride --
+    so the block-stride prompt advertised a tool the runtime would refuse, and a
+    policy that followed its own instructions lost a turn to a format error.
+    A step names a tool, so a step is what has to be gated.
+    """
+
+    text: str
+    requires: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class Procedure:
     """A named runbook the courier is expected to know."""
 
     name: str
     when: str
-    steps: tuple[str, ...]
+    steps: tuple[str | Step, ...]
     # Tools this runbook tells the courier to use. A procedure whose tools are
     # not available is not shown: guidance that names an action the environment
     # will refuse is the same defect as a tool menu that does, and it slipped
@@ -55,8 +71,15 @@ class Procedure:
     # pays for both.
     excluded_by: tuple[str, ...] = ()
 
-    def render(self) -> str:
-        body = "\n".join(f"    {i}. {s}" for i, s in enumerate(self.steps, 1))
+    def render(self, available: set[str] | None = None) -> str:
+        lines = [
+            step.text if isinstance(step, Step) else step
+            for step in self.steps
+            if available is None
+            or not isinstance(step, Step)
+            or all(tool in available for tool in step.requires)
+        ]
+        body = "\n".join(f"    {i}. {s}" for i, s in enumerate(lines, 1))
         return f"  {self.name} — {self.when}\n{body}"
 
 
@@ -65,8 +88,10 @@ FIND_ADDRESS = Procedure(
     when="you know the address but not where it is",
     steps=(
         "navigate() for the route: which street, which turn, how far.",
-        "Match the first instruction to the numbered streets here and take that one, "
-        "with follow_street(k, n) if the route says to stay on it for several junctions.",
+        "Match the first instruction to the numbered streets here and take that one.",
+        Step("If the route says to stay on that street for several junctions, "
+             "follow_street(k, n) does them in one turn.",
+             requires=("follow_street",)),
         "navigate() again when you have made the turn, or when what you see stops "
         "matching what it said.",
     ),
@@ -143,8 +168,8 @@ ARRIVAL = Procedure(
     steps=(
         "Compare the street and door numbers at the top of the turn to the slip, "
         "exactly.",
-        "Only collect() at the pickup and hand_over() at the dropoff; both refuse "
-        "anywhere else and tell you how far off you are.",
+        "Only collect() at the pickup and hand_over() at the dropoff; a refusal "
+        "only says you are not there, and costs time, so it is not a search tool.",
         "If the number is close but wrong, walk one more junction the way the numbers "
         "are going.",
     ),
@@ -187,7 +212,7 @@ def render_procedures(
             and not any(tool in available for tool in p.excluded_by)
         )
     ]
-    return "\n".join(p.render() for p in chosen)
+    return "\n".join(p.render(available) for p in chosen)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

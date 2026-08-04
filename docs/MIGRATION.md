@@ -59,16 +59,30 @@ The three albums are:
 
 | album | frames | what it is |
 |---|---|---|
-| `paris_streets_v2` | 856 | one view per walkable direction, from each junction |
+| `paris_streets_v2` | 856 | one view per walkable direction, from the carriageway centreline |
+| `paris_streets_pavement` | 856 | the same 856 approaches from the **footway** |
 | `paris_signals_kerb` | 694 | every signalised approach, baked red and baked green |
 | `paris_obstacles` | 240 | approaches with a barrier or street furniture in them |
+
+`paris_streets_pavement` is what a courier **on foot** is shown; the other three
+are shot from the middle of the road, which is where a scooter or a car is. The
+camera is offset perpendicular to the direction of travel toward the right-hand
+kerb by half the street's own width plus 60 cm — France drives on the right, so
+a pedestrian keeps to the right pavement. On 13 of the 856 the building line is
+closer than the street's nominal width, so the full offset put the camera inside
+a wall; those were re-shot at 0.6× and the manifest records the offset actually
+used. Same eye height, resolution, yaw and map as the carriageway album, so the
+two differ by camera position and nothing else.
+
+Which album a run is served is decided by its embodiment, and
+`env.summary()["viewpoint_matches_embodiment"]` says whether it got its own.
 
 `paris_signals_kerb/signal_visibility.json` is the measurement that decides
 where the runtime is allowed to charge for crossing on red. It is derived from
 the frames and can be regenerated on the new machine without the engine:
 
 ```bash
-python -m embodiedbench.compiler.signal_legibility \
+python3 -m embodiedbench.compiler.signal_legibility \
   /data/murray/paris_signals_kerb/citycore-paris \
   --map-name citycore-paris --write-sidecar
 ```
@@ -78,8 +92,8 @@ python -m embodiedbench.compiler.signal_legibility \
 Run this on the new machine. It is the whole acceptance test.
 
 ```bash
-python -m pytest tests/ -q          # expect: 950 passed, 4 skipped
-python -m embodiedbench.tools.migration_check   # album coverage + a live episode
+python3 -m pytest tests/ -q          # expect: 950 passed, 4 skipped
+python3 -m embodiedbench.tools.migration_check   # album coverage + a live episode
 ```
 
 `migration_check` is deliberately not a unit test: it fails loudly if an album

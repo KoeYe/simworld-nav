@@ -40,6 +40,7 @@ from embodiedbench.agent.courier.loop import (
     budget_exceeded,
     parse_reply,
 )
+from embodiedbench.agent.courier.frame_alias import FrameAliases
 from embodiedbench.agent.courier.memory import CourierMemory
 from embodiedbench.agent.courier.prompts import (
     FORMAT_ERROR_TEMPLATE,
@@ -101,11 +102,13 @@ class CourierSession:
         city: str = "Paris",
         budgets: Budgets | None = None,
         with_images: bool = True,
+        frame_aliases: FrameAliases | None = None,
     ):
         self.env = env
         self.city = city
         self.budgets = budgets or Budgets()
         self.with_images = with_images
+        self.frames_seen = frame_aliases or FrameAliases()
         self.memory = CourierMemory()
         self.spend = Spend()
         self.run = CourierRun(spend=self.spend, budgets=self.budgets, memory=self.memory)
@@ -125,12 +128,37 @@ class CourierSession:
                     "cannot execute it"
                 )
             self.dispatch[name] = call
+        self._assert_prompt_only_names_callable_tools()
         self._record_arrival()
         # The slip is in the courier's pocket before the shift starts. Setting
         # the goal only after the first action meant turn 1 was always spent on
         # check_order() to learn what the job was -- a turn, 2 s, and a wholly
         # avoidable one, since a rider is handed the job with the bag.
         self._set_goal()
+
+    def _assert_prompt_only_names_callable_tools(self) -> None:
+        """The symmetry check, applied to the prose as well as the menu.
+
+        The tool *table* was built from ``allowed`` and so could not disagree
+        with the dispatch table. The paragraphs around it were free text, and
+        they named ``follow_street(k, n)`` at block stride where it is not
+        dispatchable -- so a policy following the instructions it had been given
+        lost a turn to a format error. Anything shaped like a call in the
+        rendered prompt has to be callable.
+        """
+        import re
+
+        prompt = self.system_prompt()
+        advertised = {
+            name for name in TOOLS_BY_NAME
+            if re.search(rf"\b{re.escape(name)}\s*\(", prompt)
+        }
+        unavailable = sorted(advertised - set(self.allowed))
+        if unavailable:
+            raise ValueError(
+                f"the prompt advertises {unavailable}, which this environment "
+                f"cannot execute (allowed: {sorted(self.allowed)})"
+            )
 
     # ── what the courier is shown ────────────────────────────────────────────
 
@@ -159,14 +187,17 @@ class CourierSession:
         """
         if not self.with_images:
             return []
+        # Renamed on the way out. The album names its files after what is in
+        # them, which would let a policy read ``road_block`` off the path instead
+        # of the picture. See ``frame_alias``.
         frames = [
             Frame(f"[{row['k']}] {row['street']}, {row.get('relative') or row['heading']}",
-                  row["image"])
+                  self.frames_seen.alias(row["image"]))
             for row in rows if row.get("image")
         ]
         frames += [
             Frame(f"[light {row['k']}] pedestrian light for street {row['k']}",
-                  row["signal_image"])
+                  self.frames_seen.alias(row["signal_image"]))
             for row in rows if row.get("signal_image")
         ]
         if self.phone_map_on():
@@ -220,6 +251,8 @@ class CourierSession:
             return turn
 
         self.spend.consecutive_format_errors = 0
+        if action.unfenced:
+            self.spend.unfenced_actions += 1
         turn.thought, turn.action = action.thought, action.render()
         turn.tool_kind = TOOLS_BY_NAME[action.tool].kind.value
 

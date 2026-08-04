@@ -91,6 +91,10 @@ class Spend:
     output_tokens: int = 0
     format_errors: int = 0
     consecutive_format_errors: int = 0
+    # Replies that carried a correct call with no code fence. Accepted,
+    # and counted, so format-following stays a reportable number rather
+    # than a silent leniency.
+    unfenced_actions: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return dict(self.__dict__)
@@ -105,6 +109,7 @@ class ParsedAction:
     kwargs: dict[str, Any]
     thought: str = ""
     raw: str = ""
+    unfenced: bool = False
 
     def render(self) -> str:
         inner = ", ".join(
@@ -112,6 +117,28 @@ class ParsedAction:
             + [f"{k}={v!r}" for k, v in self.kwargs.items()]
         )
         return f"{self.tool}({inner})"
+
+
+def _bare_call(text: str, allowed: set[str]) -> str | None:
+    """The last line that is nothing but one call to a tool this env allows.
+
+    Deliberately strict about *where*: the call has to be the whole line. A
+    tool name mentioned inside a sentence -- "I will walk_to(2) once I am
+    past the barrier" -- is the model narrating, not acting, and executing its
+    narration is the guessing this parser exists to avoid.
+    """
+    for line in reversed([ln.strip() for ln in text.splitlines() if ln.strip()]):
+        line = line.rstrip(".")
+        calls = split_calls(line)
+        if len(calls) != 1:
+            continue
+        name, _ = calls[0]
+        if name.lower() not in allowed:
+            continue
+        # the call must be the entire line, not a fragment of prose
+        if line.endswith(")") and line.lower().startswith(name.lower()):
+            return line
+    return None
 
 
 def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
@@ -124,11 +151,28 @@ def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
     """
     text = reply or ""
     blocks = ACTION_BLOCK.findall(text)
+    unfenced = False
     if not blocks:
-        raise FormatError(
-            "No action found. End your reply with a fenced block containing exactly "
-            "one call, for example:\n```\nwalk_to(3)\n```"
-        )
+        # A bare call on its own line counts. The fence exists to make the
+        # action unambiguous, and `walk_to(2)` alone on the last line is not
+        # ambiguous -- so rejecting it measures markdown, not navigation.
+        #
+        # This is not a hypothetical kindness. Qwen2-VL-2B ends every reply with
+        # exactly the right call and no fence, so all three of its opening turns
+        # were format errors and the three-strikes rule ended the episode before
+        # it had acted once. Every seed scored 0.0 for a reason that had nothing
+        # to do with the city. A benchmark that discards a correct action
+        # conflates instruction-following with the thing it means to measure.
+        #
+        # It is counted, not forgiven: ``Spend.unfenced_actions`` tracks it, so
+        # "how well does this model follow the reply format" stays answerable.
+        bare = _bare_call(text, allowed)
+        if bare is None:
+            raise FormatError(
+                "No action found. End your reply with a fenced block containing exactly "
+                "one call, for example:\n```\nwalk_to(3)\n```"
+            )
+        blocks, unfenced = [bare], True
     if len(blocks) > 1:
         raise FormatError(
             f"Found {len(blocks)} action blocks. Give exactly one action per turn."
@@ -163,11 +207,44 @@ def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
         else:
             args.append(_coerce(piece.strip()))
 
+    _check_argument_types(name, args, kwargs)
+
     thought = ""
     head = text.split("```")[0].strip()
     if head:
         thought = head[-600:]
-    return ParsedAction(tool=name, args=args, kwargs=kwargs, thought=thought, raw=blocks[0].strip())
+    return ParsedAction(tool=name, args=args, kwargs=kwargs, thought=thought,
+                        raw=blocks[0].strip(), unfenced=unfenced)
+
+
+def _check_argument_types(name: str, args: list[Any], kwargs: dict[str, Any]) -> None:
+    """Hold the caller to the types the prompt states.
+
+    The prompt says "any text argument goes in double quotes", and
+    ``check_map(42)`` was dispatched anyway: the address lookup then searched for
+    the *integer* 42, failed, and charged 5 s for a refusal caused by a rule the
+    runtime had declined to enforce. A rule stated to the agent and not enforced
+    is worse than no rule -- it teaches that the prompt is approximate.
+    """
+    from embodiedbench.agent.courier.tools import TOOLS_BY_NAME
+
+    tool = TOOLS_BY_NAME.get(name)
+    if tool is None:
+        return
+    supplied = list(zip(tool.params, args)) + [
+        (param, kwargs[param.name]) for param in tool.params if param.name in kwargs
+    ]
+    for param, value in supplied:
+        if param.type == "str" and not isinstance(value, str):
+            raise FormatError(
+                f"{name}({param.name}=…) takes text, so it goes in double quotes: "
+                f'{name}("{value}") rather than {name}({value}).'
+            )
+        if param.type == "int" and not isinstance(value, int):
+            raise FormatError(
+                f"{name}({param.name}=…) takes a whole number without quotes, "
+                f"like {tool.example or name + '(2)'}."
+            )
 
 
 def split_calls(text: str) -> list[tuple[str, str]]:

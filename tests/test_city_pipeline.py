@@ -245,12 +245,19 @@ class TestRuntimeSelfConsistency:
         scored = math.dist(env.position(), order.pickup.kerb)
         assert quoted == pytest.approx(scored)
 
-    def test_a_refusal_states_the_distance_and_the_tolerance(self):
+    def test_a_refusal_states_arrival_and_nothing_measurable(self):
+        """A refusal is a yes/no the courier could get by standing there.
+
+        Quoting the distance turned it into a rangefinder that beat walking on
+        price; quoting the tolerance is harmless on its own but there is nothing
+        left for it to qualify.
+        """
         env = self.env()
         outcome = env.collect()
         assert not outcome.ok
-        assert "m away" in outcome.message
-        assert f"{ARRIVAL_TOLERANCE_CM/100:.0f} m" in outcome.message
+        assert "m away" not in outcome.message
+        assert f"{ARRIVAL_TOLERANCE_CM/100:.0f} m" not in outcome.message
+        assert outcome.message.startswith("You are not standing at")
 
     def test_candidate_numbering_is_stable_regardless_of_approach(self):
         """Numbering by distance renumbered the same corner depending on where

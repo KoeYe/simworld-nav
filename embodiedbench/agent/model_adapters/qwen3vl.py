@@ -33,6 +33,11 @@ import torch
 
 # Qwen chat-template fragments, tokenized once and spliced. Splicing pre-tokenized
 # fragments is what lets the response ids survive untouched.
+# How many elements of a parameter to reduce at once when digesting.
+# 2**22 float32 values is 16 MB of temporary, which is nothing next to
+# a 7B model and bounded no matter how large a single weight is.
+_DIGEST_CHUNK = 1 << 22
+
 IM_END = "<|im_end|>\n"
 USER_OPEN = "<|im_start|>user\n"
 ASSISTANT_OPEN = "<|im_start|>assistant\n"
@@ -101,8 +106,11 @@ class Qwen3VLAdapter:
         device: str = "cuda:0",
         dtype: Any = None,
         attn_implementation: str | None = None,
+        lora: bool = False,
+        lora_rank: int = 16,
+        lora_alpha: int = 32,
     ):
-        from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
+        from transformers import AutoProcessor
 
         self.model_path = model_path
         self.device = device
@@ -112,8 +120,42 @@ class Qwen3VLAdapter:
         kwargs: dict[str, Any] = {"dtype": self.dtype, "device_map": device}
         if attn_implementation:
             kwargs["attn_implementation"] = attn_implementation
-        self.model = Qwen3VLForConditionalGeneration.from_pretrained(model_path, **kwargs)
+        # Loaded by class *capability* rather than by name. This was pinned to
+        # ``Qwen3VLForConditionalGeneration``, which meant the whole training
+        # path could only ever run against one checkpoint -- and the one it
+        # named is not on every host. Every Qwen-family VLM shares the
+        # ``<|image_pad|>`` placeholder convention this adapter is written
+        # around, so the smaller ones are usable as gate models: a correctness
+        # gate wants the cheapest checkpoint that exercises the path, not the
+        # best one.
+        try:
+            from transformers import AutoModelForImageTextToText as _AutoVLM
+        except ImportError:  # older transformers
+            from transformers import AutoModelForVision2Seq as _AutoVLM
+        self.model = _AutoVLM.from_pretrained(model_path, **kwargs)
         self.model.eval()
+
+        # LoRA, when asked for. What it buys here is not speed but *size*:
+        # a full fine-tune keeps parameters, gradients and two Adam moments
+        # for every weight, so a 7B model needs about 84 GB and does not fit
+        # a 24 GB card at any batch. With adapters only the adapters carry
+        # gradients and optimizer state, which is a few tens of MB, and the
+        # frozen base costs its weights and nothing else.
+        #
+        # Nothing downstream needs to know. ``run_policy_update`` already
+        # trains ``[p for p in model.parameters() if p.requires_grad]``, and
+        # PEFT freezes the base, so the same code trains adapters instead.
+        self.lora = lora
+        if lora:
+            from peft import LoraConfig, get_peft_model
+
+            config = LoraConfig(
+                r=lora_rank, lora_alpha=lora_alpha, lora_dropout=0.0,
+                bias="none", task_type="CAUSAL_LM",
+                target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+            )
+            self.model = get_peft_model(self.model, config)
+            self.model.eval()
 
         # The id whose occurrences mark where visual embeddings are spliced in.
         config = self.model.config
@@ -314,8 +356,17 @@ class Qwen3VLAdapter:
         for name, parameter in sorted(self.model.named_parameters()):
             if parameter.numel() == 0:
                 continue
-            values = parameter.detach().double()
-            total = float(values.sum().item())
-            energy = float(values.pow(2).sum().item())
+            # Reduced in bounded chunks. ``parameter.detach().double()``
+            # allocates a copy at twice the weight's size -- 4 GB for a 7B
+            # model's embedding matrix, which OOMs a 24 GB card before the first
+            # training step -- and ``sum(dtype=float64)`` upcasts internally and
+            # costs the same. Chunking keeps the temporary bounded regardless of
+            # how large the parameter is, and the arithmetic is identical.
+            flat = parameter.detach().reshape(-1)
+            total = energy = 0.0
+            for start in range(0, flat.numel(), _DIGEST_CHUNK):
+                piece = flat[start:start + _DIGEST_CHUNK].float()
+                total += float(piece.sum().item())
+                energy += float(piece.pow(2).sum().item())
             chunks.append(f"{name}:{total!r}:{energy!r}".encode())
         return sha256_bytes(b"|".join(chunks))

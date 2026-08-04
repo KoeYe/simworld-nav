@@ -22,8 +22,10 @@ SYSTEM_TEMPLATE = """You are a delivery courier working on foot in {city}. You c
 hand them to customers at street addresses, against a clock.
 
 Each turn you are shown your notes, where you are standing, the streets leaving
-this junction numbered 1..n, and one photograph per numbered street: the view
-down that street from where you stand, facing the way it goes.
+this junction numbered 1..n, and one photograph per numbered street: what you
+see looking that way. Where the next junction is metres off, or the street
+turns, that is mostly the building opposite — a view that does not reach, not an
+empty street.
 
 LOOK AT THE PHOTOGRAPHS BEFORE YOU ACT. The text will never tell you the colour
 of a pedestrian light, what is standing in your way, or what a shopfront says.
@@ -63,9 +65,9 @@ walk_to(2)
 
   - Exactly one fenced block, containing exactly one call, and nothing after it.
   - The name must be one of the tools listed above.
-  - Whole numbers go bare: walk_to(2), follow_street(2, 4).
+  - Whole numbers go bare: {number_example}.
   - Any text argument goes in double quotes.
-  - A tool with no arguments still needs its brackets: check_order()"""
+  - A tool with no arguments still needs its brackets: {no_arg_example}"""
 
 OBSERVATION_TEMPLATE = """{memory}
 
@@ -95,10 +97,18 @@ def render_photographs(rows: list[dict], *, phone_map: bool = False) -> str:
     harness telling the courier its phone can see the street.
     """
     lines: list[str] = []
-    for row in rows:
-        if row.get("image"):
-            where = row.get("relative") or f"heading {row.get('heading', '')}"
-            lines.append(f"  [{row['k']}] looking down {row['street']}, {where}")
+    # One line for all the street views instead of one line each. The per-street
+    # caption repeated the candidate line above it almost word for word -- same
+    # index, same street, same relative bearing -- so a four-way junction spent
+    # eight lines saying what four could. What the caption block has to preserve
+    # is the *ordering contract*: which attached image is which street. That is
+    # an index list, not a sentence per image.
+    views = [row["k"] for row in rows if row.get("image")]
+    if views:
+        numbers = ", ".join(f"[{k}]" for k in views)
+        lines.append(
+            f"  {numbers} — the view down each of those streets, in that order"
+        )
     for row in rows:
         if row.get("signal_image"):
             lines.append(
@@ -155,11 +165,23 @@ def build_system_prompt(*, city: str, tools: list[Tool]) -> str:
         if "navigate" in names else
         " If a street is shut, remember it and go round; nothing will remind you."
     )
+    # Even the formatting examples have to come from the live tool set. This line
+    # read "walk_to(2), follow_street(2, 4)" at every stride, so the block-stride
+    # prompt demonstrated the syntax of a tool the runtime would refuse.
+    number_example = "walk_to(2)"
+    if "follow_street" in names:
+        number_example += ", follow_street(2, 4)"
+    # Likewise the no-argument example: it named check_order(), which no_phone
+    # takes away, so that condition's prompt demonstrated a tool it had removed.
+    no_arg = next((t.name for t in tools if not t.params), "")
+    no_arg_example = f"{no_arg}()" if no_arg else "a call with empty brackets"
     return SYSTEM_TEMPLATE.format(
         city=city,
         tool_menu=render_tool_menu(tools),
         procedures=render_procedures(available=names),
         blocked_advice=blocked_advice,
+        number_example=number_example,
+        no_arg_example=no_arg_example,
     )
 
 
@@ -197,11 +219,23 @@ def render_candidates(rows: list[dict]) -> str:
         # Relative first, compass second. A courier on a corner decides in left
         # and right; the compass is what the phone speaks, and both are needed to
         # act on a route instruction, but only one of them is what the body does.
+        # Where the block stride knows how far one call carries, the line says
+        # that, and the compass is the direction the *block* runs rather than its
+        # first few metres. Quoting the next waypoint at block stride described a
+        # different action from the one the number was attached to: a 7 m stub
+        # labelled south-east carried a reviewer 61 m north-west.
+        heading = row.get("reach_heading") or row.get("heading", "")
         if row.get("relative"):
-            parts.append(f"{row['relative']} ({row.get('heading', '')})")
-        elif row.get("heading"):
-            parts.append(f"heading {row['heading']}")
-        if row.get("distance_m") is not None:
+            parts.append(f"{row['relative']} ({heading})")
+        elif heading:
+            parts.append(f"heading {heading}")
+        if row.get("reach_m") is not None:
+            junctions = row.get("reach_junctions", 1)
+            parts.append(
+                f"{row['reach_m']:.0f} m on, {junctions} junction"
+                f"{'' if junctions == 1 else 's'}, to the next choice"
+            )
+        elif row.get("distance_m") is not None:
             parts.append(f"next junction {row['distance_m']:.0f} m")
         if row.get("numbers"):
             parts.append(f"numbers {row['numbers']}")

@@ -636,6 +636,14 @@ class ObservationOnlyCourier:
                 break
             before = env.node_id
             before_distance = self.target_distance_m
+            # Spent, and there is a rest available: take it. A minute buys the
+            # tank back and the courier walks the rest of the shift at full
+            # speed, so on anything longer than a short tier this is strictly
+            # cheaper than dragging along at the tired fraction. A floor policy
+            # that ignored a tool it has been given would understate the floor.
+            if getattr(env, "tired", False) and "rest" in env.allowed_tool_names():
+                env.rest()
+                continue
             toward = next((r["node"] for r in env.candidates() if r["k"] == choice), None)
             if self.sighted and toward is not None and self.red_light(choice, toward):
                 # Read the lamp, see out the phase. One wait always changes the

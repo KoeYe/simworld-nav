@@ -778,11 +778,15 @@ class TestPhotographCaptions:
              "heading": "south", "image": "/b.png", "signal_image": None},
         ]
         captions = render_photographs(rows)
-        assert "[1] looking down Rue Monge, on your left" in captions
-        assert "[2] looking down Rue Cujas, behind you" in captions
+        # The contract is the ordering, not the prose: every attached frame is
+        # identified, and in the order the frames are attached. The per-street
+        # sentence was dropped because it restated the candidate line above it
+        # word for word; the index list carries the mapping on one line.
+        assert "[1]" in captions
+        assert "[2]" in captions
         assert "[light 1]" in captions
         assert "[light 2]" not in captions
-        # Street views first, then lamps -- the order the frames are attached in.
+        # Street views first, then lamps.
         assert captions.index("[2]") < captions.index("[light 1]")
 
     def test_a_junction_with_no_pictures_says_so(self):
@@ -828,10 +832,15 @@ class TestSession:
             session = CourierSession(env)
             observation = session.observe()
             assert observation.frames
+            # Every attached frame is named somewhere in the text, and nothing
+            # is named that is not attached.
+            captions = observation.text.split("### photographs")[1]
             for frame in observation.frames:
-                assert frame.label.split("]")[0] + "]" in observation.text
-            assert len(observation.frames) == observation.text.count("] looking down") + \
-                observation.text.count("] the pedestrian light")
+                marker = frame.label.split("]")[0] + "]"
+                assert marker in captions
+            attached = {frame.label.split("]")[0] + "]" for frame in observation.frames}
+            mentioned = set(re.findall(r"\[[^\]]+\]", captions))
+            assert mentioned == attached
 
     def test_a_malformed_reply_is_re_prompted_rather_than_fatal(self, paris):
         session = CourierSession(courier(paris))

@@ -860,10 +860,27 @@ def build_road_network(
         street = network.streets[street_index]
         # Numbers ascend with arc length, the way a real street is numbered.
         items.sort(key=lambda t: t[0])
-        counters = {1.0: 1, -1.0: 2}          # odd on the left, even on the right
+        # One cursor for the whole street, not one per side. Two independent
+        # counters each stepping by 2 keep each side monotone -- which they did,
+        # 42 of 46 sides -- but they desynchronise, because the two sides carry
+        # different numbers of buildings at different arc positions. The courier
+        # is shown every door readable from a junction, both sides at once, so
+        # what it read was the interleaving: on Rue Oberkampf
+        # ``2 | 4,6 | 1,8 | 3,5,10 | 7 | 9,12`` and on Rue du Bac the entire even
+        # side was a single No. 2 sitting past No. 13. 22 of 23 streets showed an
+        # inversion, No. N and No. N+1 could be 12 junctions apart, and the
+        # prompt's rule -- "if they are falling and you want a higher one, turn
+        # around" -- walked a reviewer away from the door it was standing near.
+        #
+        # A shared cursor with the parity forced by the side is what a real
+        # street does: numbers follow position along the street, so N and N+1 are
+        # across the road from each other. A side with no building at that
+        # position simply skips its number, which is also what a real street does.
+        cursor = 1
         for arc, side, building, offset, _ in items:
-            number = counters[side]
-            counters[side] += 2
+            wants_odd = side == 1.0            # odd on the left, even on the right
+            number = cursor if (cursor % 2 == 1) == wants_odd else cursor + 1
+            cursor = number + 1
             door = building.entrance_point()
             nearest, nearest_d = None, float("inf")
             kerb_node, kerb_d = None, float("inf")

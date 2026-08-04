@@ -69,7 +69,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
 
     for assertion in result.assertions:
         if not assertion.passed:
-            print(f"FAIL {assertion.name}")
+            print(f"FAIL [{assertion.kind}] {assertion.name}")
             print(f"     expected: {assertion.expected}")
             print(f"     observed: {assertion.observed}")
     for error in result.errors:
@@ -81,6 +81,22 @@ def cmd_verify(args: argparse.Namespace) -> int:
         f"/{summary['assertion_count']} assertions passed"
         + (" (content digests skipped)" if args.skip_content else "")
     )
+    # The ratio on its own put "this laptop has no content mount" and "a pinned
+    # digest changed" into the same number, and only the second is a reason to
+    # stop. Say which is which, and say plainly when nothing was actually
+    # corrupted.
+    by_kind = summary["failures_by_kind"]
+    if by_kind:
+        labels = {"integrity": "pinned artefacts that changed",
+                  "unavailable": "resources not present on this host",
+                  "environment": "tool environment differs from the baseline"}
+        for kind, names in sorted(by_kind.items()):
+            print(f"  {len(names)} {labels.get(kind, kind)}:")
+            for name in names:
+                print(f"    - {name}")
+        if not summary["integrity_failures"]:
+            print("  no integrity failure: nothing pinned has changed, this host "
+                  "is not set up to check all of it")
     if args.report:
         Path(args.report).parent.mkdir(parents=True, exist_ok=True)
         Path(args.report).write_text(json.dumps(summary, indent=2) + "\n")

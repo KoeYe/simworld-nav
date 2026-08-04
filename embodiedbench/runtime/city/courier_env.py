@@ -43,6 +43,8 @@ from embodiedbench.compiler.road_network import (
     bearing_deg,
     build_road_network,
 )
+from embodiedbench.runtime.city.embodiment import Embodiment, Viewpoint
+from embodiedbench.runtime.city.embodiment import get as embodiment_for
 from embodiedbench.runtime.city.map_image import MapDrawing, render_map
 from embodiedbench.runtime.city.obstacles import (
     BLOCKED_SECONDS,
@@ -389,7 +391,45 @@ HANDLING_SECONDS = 30.0
 # not one delivery, because what binds then is whether the courier can find the
 # door, which is the demand the ladder is supposed to measure. 7.0 sits inside
 # that flat region rather than on its edge.
-TIME_BUDGET_MULTIPLE = 7.0
+#
+# ---------------------------------------------------------------------------
+# THAT TABLE DOES NOT REPRODUCE, and the half of it that fails is the half the
+# choice of 7.0 rests on. Re-measured with this code -- same policy, same
+# albums, 12 seeds, both strides, mean over solo and pair:
+#
+#     multiple   blind    sighted   gain   cells where sight wins
+#       2.0      27.3%     36.9%    +9.6           4/4
+#       2.6      39.4%     50.1%   +10.8           4/4
+#       3.5      52.2%     63.4%   +11.2           4/4
+#       4.5      66.0%     69.1%    +3.2           2/4
+#       6.75     69.8%     72.9%    +3.1           2/4
+#       9.0      69.8%     72.9%    +3.1           2/4
+#
+# The saturation claim holds exactly: 6.75 and 9.0 are identical to the
+# delivery. What does not hold is "sight separates there". It separates by
+# +3.1 points at 6.75 and by +11.2 at 3.5, and at 7.0 the sighted arm is level
+# with or behind the blind one on half the cells -- perfect recognition removes
+# every barrier collision and every red crossing and buys nothing, because at
+# seven times optimal a courier can walk into every closure on the map and
+# still finish.
+#
+# So the multiple is 3.5, chosen off the second table rather than the first.
+# It is where the gain from looking is largest, and it is the largest multiple
+# at which looking wins in every cell tested rather than half of them.
+#
+# What that costs, stated plainly because it is a real cost: the blind floor on
+# solo and pair falls from about 70% to about 52%, so those tiers are no longer
+# ones a text-only courier passes comfortably. The ``Difficulty`` docstring
+# describes them as rungs that exist "to prove an agent can read an address,
+# find a street and recognise a door at all", and at 3.5 a courier that cannot
+# see fails about half of them -- which is the point: the half it fails are the
+# ones with something in the way. A *sighted* agent still passes comfortably,
+# and that is the property the ladder should have had all along.
+#
+# ``docs/review/tools/clock_sweep.py`` regenerates the second table, and
+# ``docs/review/tools/reference_table.py`` regenerates the figures in
+# docs/RUNNING.md. Both must be re-run if this number moves again.
+TIME_BUDGET_MULTIPLE = 3.5
 # When the dispatcher gives up on an order, as a multiple of the window it
 # quoted. A job nobody can be bothered to finish has to stop being worth points,
 # or "ignore the deadline" is a free strategy: before this, a delivery three
@@ -405,6 +445,16 @@ LATE_FEE_FRACTION = 0.5
 # call it, be told "It is 140 m away", and pay neither a turn nor a second --
 # the same information ``check_map`` charges a turn and five seconds for. An
 # action the benchmark cannot see is an action outside the measurement.
+#
+# Charging for it was necessary and not sufficient, and the arithmetic says why:
+# a block costs 13-26 s to walk, so at 5 s a refusal was *still strictly cheaper
+# than moving*. The optimal endgame became walk-probe-walk -- read the sign of
+# the change in the quoted distance and you have a gradient oracle for the door,
+# needing no photograph, no door number and no street sign. Two independent
+# reviewers found it and both used it to finish an episode. So the distance is
+# gone from the refusal entirely: a refusal now reports arrival, which is a
+# yes/no the courier could get by standing there, and nothing else. Distance to
+# an address is what ``check_map`` sells.
 REJECTED_ACTION_SECONDS = 5.0
 
 
@@ -574,6 +624,9 @@ class CourierEnv:
         difficulty: str | None = None,
         queue_depth: int | None = None,
         stride: str = Stride.WAYPOINT,
+        embodiment: str | Embodiment | None = None,
+        pavement_album_root: Path | None = None,
+        pavement_obstacle_album_root: Path | None = None,
     ):
         # A tier sets the list, the queue and the clock; they are not
         # independent, and the tier is the only place they are chosen together.
@@ -588,6 +641,17 @@ class CourierEnv:
             shift_seconds = None
         if queue_depth is None:
             queue_depth = 1
+        # What is doing the delivering. Speed, stamina, the cost of stopping and
+        # -- the one that matters most for transfer -- which viewpoint's album it
+        # is entitled to see. See ``embodiment.py``.
+        self.embodiment = embodiment_for(embodiment)
+        self.embodiment.require_defined()
+        self.pavement_album_root = (
+            Path(pavement_album_root) if pavement_album_root else None
+        )
+        self.pavement_obstacle_album_root = (
+            Path(pavement_obstacle_album_root) if pavement_obstacle_album_root else None
+        )
         self.difficulty = difficulty
         # How many jobs the dispatcher lets the courier hold at once. This is
         # the difficulty axis: their windows run concurrently, so a deep queue
@@ -616,6 +680,38 @@ class CourierEnv:
         self.network = network
         self.seed = seed
         self.order_count = order_count
+        # The album this body is entitled to. A person on foot is on the
+        # pavement and a rider is in the carriageway, and showing either the
+        # other one's frames trains a policy to recognise a world it will never
+        # stand in. Only the carriageway album has been baked; until the
+        # pavement bake lands, a walking courier is served carriageway frames and
+        # ``viewpoint_served`` in the summary says so, so the debt is measurable
+        # rather than silent.
+        if (self.embodiment.viewpoint == Viewpoint.PAVEMENT
+                and self.pavement_album_root is not None):
+            album_root = self.pavement_album_root
+            self.viewpoint_served = Viewpoint.PAVEMENT
+            # The obstacle album has to move with it. Serving footway frames for
+            # clear streets and centreline frames wherever an obstacle stands
+            # makes the *viewpoint itself* announce the hazard: measured at 19.5%
+            # of a walker's frames, every one of them an obstacle. That is the
+            # filename leak again in a different disguise, so the two albums are
+            # switched together or not at all.
+            if pavement_obstacle_album_root is not None:
+                obstacle_album_root = pavement_obstacle_album_root
+            elif obstacle_album_root is not None:
+                raise ValueError(
+                    "a pavement album was given without a pavement obstacle "
+                    "album: the obstacle frames would come from the carriageway "
+                    "and the change of viewpoint alone would tell the policy an "
+                    "obstacle is there. Pass pavement_obstacle_album_root, or "
+                    "drop obstacle_album_root."
+                )
+        else:
+            self.viewpoint_served = Viewpoint.CARRIAGEWAY
+        self.viewpoint_matches_embodiment = (
+            self.viewpoint_served == self.embodiment.viewpoint
+        )
         self.album_root = Path(album_root) if album_root else None
         # Frames baked in both signal states, one pair per signalised approach.
         self.signal_album_root = Path(signal_album_root) if signal_album_root else None
@@ -651,6 +747,8 @@ class CourierEnv:
         # what separates a good courier from a lucky one.
         self.walked_cm: float = 0.0
         self.optimal_seconds: float = 0.0
+        self.stamina: float = float(self.embodiment.stamina or 0.0)
+        self.rests: int = 0
         self.optimal_walk_cm: float = 0.0
         # Actions the world refused. A policy that spends a third of its turns
         # walking into walls is not the same as one that spends none, and the
@@ -738,6 +836,8 @@ class CourierEnv:
         self.sim_seconds = 0.0
         self.earnings = 0.0
         self.finished = False
+        self.stamina = float(self.embodiment.stamina or 0.0)
+        self.rests = 0
         self.red_crossings = 0
         self.waits_at_red = 0
         self.walked_cm = 0.0
@@ -1245,6 +1345,42 @@ class CourierEnv:
             row["relative"] = relative_of(row["bearing"], facing)
         return rows
 
+    def _block_preview(self, first: str) -> tuple[float, int, str]:
+        """How far ``walk_to`` will actually carry the courier down this street.
+
+        The candidate line quoted ``distance_m``, the distance to the *next
+        waypoint*, at both strides. At block stride that is not what the action
+        does, and on a short stub into a bend it is not even the right direction:
+        a reviewer took a candidate labelled "on your left (south-east) — next
+        junction 7 m" and was carried 61 m north-west. Three numbers described
+        one leg -- the row said 18 m, the route said "1 junction, 29 m", the
+        outcome said "29 m, through 2 junctions" -- and a policy budgeting from
+        the row was wrong every time.
+
+        Walks the same stop rules as ``_run_street`` with no side effects.
+        Obstacles are deliberately not consulted: a preview that shortened
+        itself at a barrier would announce the barrier in the text, which is the
+        one fact the photographs are supposed to hold alone.
+        """
+        street = self.edge_street(self.node_id, first)
+        here, previous, node = self.node_id, self.node_id, first
+        distance = math.dist(self.position(here), self.position(first)) / 100.0
+        junctions = 1
+        for _ in range(len(self.network.nodes)):
+            if self._standing_at_a_door(node):
+                break
+            neighbours = sorted(self.network.nodes[node].neighbours)
+            onward = [n for n in neighbours
+                      if self.edge_street(node, n) == street and n != previous]
+            if len(onward) != 1 or len(neighbours) > 2:
+                break
+            if node in self.signalised and self.signal_is_visible(node, onward[0]):
+                break
+            distance += math.dist(self.position(node), self.position(onward[0])) / 100.0
+            previous, node = node, onward[0]
+            junctions += 1
+        return distance, junctions, node
+
     def candidates(self) -> list[dict[str, Any]]:
         """The numbered streets leaving this junction, with their pictures.
 
@@ -1257,6 +1393,17 @@ class CourierEnv:
         for row in rows:
             row["image"] = self.frame_for(self.node_id, row["node"])
             row["signal_image"] = self.signal_frame_for(self.node_id, row["node"])
+            if self.stride == Stride.BLOCK:
+                # What one call actually buys, so the courier can budget from the
+                # number it is shown. ``distance_m`` stays as it was -- the step
+                # to the next waypoint -- because the geometry and the reference
+                # policies are written against it.
+                reach, junctions, end = self._block_preview(row["node"])
+                row["reach_m"] = reach
+                row["reach_junctions"] = junctions
+                row["reach_heading"] = compass_of(
+                    bearing_deg(self.position(), self.position(end))
+                ) if end != self.node_id else row["heading"]
         return rows
 
     def frame_for(self, node_id: str, toward: str) -> str | None:
@@ -1577,15 +1724,47 @@ class CourierEnv:
         outcome.sim_seconds = seconds
         return outcome
 
-    def _standing_at_a_door(self) -> bool:
+    # ── the body ─────────────────────────────────────────────────────────────
+
+    def travel_speed_cm_s(self) -> float:
+        """How fast this body is moving *now*.
+
+        A tired courier does not stop, it slows: a hard stop turns one bad
+        estimate about stamina into an episode nobody can finish, and that is not
+        what running out of energy does to a rider.
+        """
+        speed = self.embodiment.speed_cm_s or WALK_SPEED_CM_S
+        if self.stamina <= 0.0:
+            speed *= self.embodiment.tired_speed_fraction
+        return speed
+
+    def _spend_stamina(self, metres: float) -> None:
+        """Stamina goes on distance, not on time.
+
+        Charging by time would make the slowest body the most tired one, which
+        is backwards -- a scooter covering the same ground in a third of the
+        time has done less work, not more.
+        """
+        drain = self.embodiment.stamina_per_m or 0.0
+        if drain:
+            self.stamina = max(0.0, self.stamina - metres * drain)
+
+    @property
+    def tired(self) -> bool:
+        return self.stamina <= 0.0
+
+    def _standing_at_a_door(self, node_id: str | None = None) -> bool:
         """At the kerb of any live job -- not merely the one in hand.
 
         A walk that ran past a pickup because the courier happened to be
         carrying a different job would make the block stride worse than walking
         the same ground one waypoint at a time, which is the one thing it must
         never be.
+
+        ``node_id`` lets ``_block_preview`` ask the question about a node the
+        courier has not reached yet.
         """
-        here = self.position()
+        here = self.position(node_id)
         return any(
             math.dist(here, order.target.kerb) <= ARRIVAL_TOLERANCE_CM
             for order in self.live_orders()
@@ -1627,8 +1806,13 @@ class CourierEnv:
             return self._refuse(StepOutcome(
                 ok=False, code="way_blocked",
                 message=(
-                    f"{row['street']} is blocked and you cannot get past. You walk "
-                    "back to the junction. You will have to go round."
+                    # "You walk back to the junction" read as "you are where you
+                    # started", and at block stride that is flatly wrong: the
+                    # metres already walked are kept and the courier is standing
+                    # at the barrier, which the position header says and this
+                    # sentence contradicted.
+                    f"{row['street']} is blocked and you cannot get past. You are "
+                    "at the last junction before it. You will have to go round."
                 ),
             ), seconds=BLOCKED_SECONDS)
         penalty = 0.0
@@ -1642,7 +1826,8 @@ class CourierEnv:
                 # Held up at the kerb, and the delay counts against the deadline.
                 self.sim_seconds += RED_CROSSING_PENALTY_S
         self.turns += 1
-        seconds = row["distance_m"] * 100.0 / WALK_SPEED_CM_S
+        seconds = row["distance_m"] * 100.0 / self.travel_speed_cm_s()
+        self._spend_stamina(row["distance_m"])
         # A congested pavement is passable, so this is not a refusal: it is the
         # same walk, slower. The message stays silent about why, because saying
         # "you were held up by the stand on the pavement" would put the obstacle
@@ -1862,16 +2047,16 @@ class CourierEnv:
                            message="\n".join(lines))
 
     def _check_map_impl(self, address: str) -> StepOutcome:
-        if self.condition in (Condition.NO_PHONE, Condition.VISUAL):
-            return StepOutcome(
-                ok=False, code="no_phone", sim_seconds=1.0,
-                message="Your phone has no signal here. You will have to find it by the streets.",
-            )
         """Phone lookup: which street, how far, roughly which way.
 
         A direction and a distance, which is what a map app gives. Not a route:
         turn-by-turn directions would make the phone the navigator.
         """
+        if self.condition in (Condition.NO_PHONE, Condition.VISUAL):
+            return StepOutcome(
+                ok=False, code="no_phone", sim_seconds=1.0,
+                message="Your phone has no signal here. You will have to find it by the streets.",
+            )
         match = self._find_address(address)
         if match is None:
             known = sorted(self.addresses_by_street)[:4]
@@ -2148,10 +2333,7 @@ class CourierEnv:
         if gap > ARRIVAL_TOLERANCE_CM:
             return self._refuse(StepOutcome(
                 ok=False, code="not_at_pickup",
-                message=(
-                    f"You are not at {order.pickup.text}. It is {gap/100:.0f} m away; you "
-                    f"need to be within {ARRIVAL_TOLERANCE_CM/100:.0f} m."
-                ),
+                message=f"You are not standing at {order.pickup.text}.",
             ))
         self.turns += 1
         order.picked_up = True
@@ -2161,7 +2343,11 @@ class CourierEnv:
         # free, and ``_make_orders`` had already budgeted for it when it sized
         # the deadlines. A tool must not declare a cost it does not pay; that is
         # what ``_charge`` exists to guarantee, and these two bypass it.
-        self.sim_seconds += HANDLING_SECONDS
+        # Handling, plus whatever this body costs to stop with: nothing on
+        # foot, a stand and a lock on a scooter, somewhere to leave a car.
+        # Without that a car strictly dominates and the vehicle is not a
+        # choice.
+        self.sim_seconds += HANDLING_SECONDS + self.embodiment.stop_overhead_s
         self._issue()
         return StepOutcome(ok=True, sim_seconds=HANDLING_SECONDS, reward=0.1,
                            message=f"You collect the order from {order.pickup.text}.")
@@ -2180,15 +2366,16 @@ class CourierEnv:
         if gap > ARRIVAL_TOLERANCE_CM:
             return self._refuse(StepOutcome(
                 ok=False, code="not_at_dropoff",
-                message=(
-                    f"You are not at {order.dropoff.text}. It is {gap/100:.0f} m away; you "
-                    f"need to be within {ARRIVAL_TOLERANCE_CM/100:.0f} m."
-                ),
+                message=f"You are not standing at {order.dropoff.text}.",
             ))
         self.turns += 1
         # The handover takes 30 s and the customer is not served until it is
         # done, so the clock moves before lateness is judged. See ``collect``.
-        self.sim_seconds += HANDLING_SECONDS
+        # Handling, plus whatever this body costs to stop with: nothing on
+        # foot, a stand and a lock on a scooter, somewhere to leave a car.
+        # Without that a car strictly dominates and the vehicle is not a
+        # choice.
+        self.sim_seconds += HANDLING_SECONDS + self.embodiment.stop_overhead_s
         order.delivered = True
         order.delivered_at_s = self.sim_seconds
         on_time = self.sim_seconds <= order.due_at()
@@ -2239,6 +2426,44 @@ class CourierEnv:
         return StepOutcome(ok=True, sim_seconds=seconds,
                            message=f"You wait {seconds:.0f} s.")
 
+    REST_SECONDS = 60.0
+
+    def rest(self) -> StepOutcome:
+        """Spend a minute to get energy back.
+
+        The counterpart to the stamina drain, and without it the drain is not a
+        resource but a decay: an hour-long shift simply got slower and there was
+        nothing for the courier to decide. With it, a small tank and a fast drain
+        cost *turns* -- which is what makes one body different from another in
+        the only currency the benchmark reports.
+
+        A full tank's worth is recovered per rest, so one call is always enough,
+        for the same reason ``wait()`` sees the whole phase out: a tool the agent
+        has to guess the repeat count of is a tool it cannot plan with.
+        """
+        capacity = float(self.embodiment.stamina or 0.0)
+        # Refuse on the same condition the tool is gated on, or a body that is
+        # not offered a rest can still take one by guessing the name.
+        if not (capacity and self.embodiment.stamina_per_m):
+            return self._refuse(StepOutcome(
+                ok=False, code="never_tires",
+                message="You are not the one doing the work; there is nothing to rest.",
+            ))
+        before = self.stamina
+        self.stamina = capacity
+        self.turns += 1
+        self.sim_seconds += self.REST_SECONDS
+        self.rests += 1
+        self._issue()
+        return StepOutcome(
+            ok=True, sim_seconds=self.REST_SECONDS,
+            message=(
+                f"You stop for a minute. You feel ready again."
+                if before < capacity else
+                "You stop for a minute, though you were not tired."
+            ),
+        )
+
     def light_here(self, k: int) -> str | None:
         """Ground truth for the light facing candidate ``k``.
 
@@ -2262,6 +2487,10 @@ class CourierEnv:
         from embodiedbench.agent.courier.tools import available_tools
 
         env_actions = ["VIEW_ORDERS", "ACCEPT_ORDER", "PICKUP", "DROP_OFF", "WAIT", "MOVE_TO"]
+        # A body that never tires must not be offered a rest: a tool that
+        # can only be refused is a turn the agent is invited to lose.
+        if self.embodiment.stamina and self.embodiment.stamina_per_m:
+            env_actions.append("REST")
         allow_consult = self.condition == Condition.FULL
         if self.stride == Stride.BLOCK:
             # ``follow_street`` exists to spend one turn on several waypoints of
@@ -2303,6 +2532,18 @@ class CourierEnv:
             # abandoned ones pay nothing.
             "profit": round(self.earnings, 2),
             "orders": [o.to_dict() for o in self.orders],
+            # The body, and whether it was shown its own viewpoint. A run where
+            # ``viewpoint_matches_embodiment`` is false is still a run, but it is
+            # not evidence about a policy that has to work from a pavement.
+            "embodiment": self.embodiment.name,
+            "viewpoint_expected": self.embodiment.viewpoint,
+            "viewpoint_served": self.viewpoint_served,
+            "viewpoint_matches_embodiment": self.viewpoint_matches_embodiment,
+            "rests": self.rests,
+            "stamina_left": round(self.stamina, 2),
+            "stamina_spent": round(
+                float(self.embodiment.stamina or 0.0) - self.stamina, 2),
+            "tired": self.tired,
             "difficulty": self.difficulty, "turns": self.turns,
             "queue_depth": self.queue_depth,
             "minutes_per_delivery": (
@@ -2318,7 +2559,13 @@ class CourierEnv:
             "orders_issued": self.issued_count,
             "rejected_actions": self.rejected_actions,
             "walked_m": round(walked_m, 1),
-            "optimal_walk_m": round(done_walk_cm / 100.0, 1),
+            # Optimal for the deliveries *actually completed*, not for the shift
+            # as issued -- so it is only a yardstick once something has arrived.
+            # It read 0.0 mid-episode, which looks like a measured bound of zero
+            # and made ``walked_m vs optimal_walk_m`` nonsense on any live
+            # dashboard. ``None`` says "not yet defined", which is the truth.
+            "optimal_walk_m": (round(done_walk_cm / 100.0, 1)
+                               if done_walk_cm else None),
             # Metres walked against metres a perfect courier would have walked
             # for the very same deliveries. 1.0 is a straight line to every
             # door; 2.0 means half the shift was spent lost. Below 1.0 is legal

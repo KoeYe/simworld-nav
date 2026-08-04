@@ -193,9 +193,16 @@ class CourierMemory:
         if self.dead_ends:
             lines.append("Dead ends you found: "
                          + ", ".join(sorted(self.place_label(n) for n in self.dead_ends)))
-        if self.streets_seen:
-            known = list(self.streets_seen.items())[-4:]
-            lines.append("Streets you have seen: " + "; ".join(f"{k} ({v})" for k, v in known))
+        # ``Streets you have seen`` used to be rendered here: the last four
+        # street names with where each was seen from. It is dropped, and the
+        # reason is that it was measured rather than argued about. Across 95
+        # turns of hand play it never once changed a decision, because a street
+        # the courier has *seen* is either on the candidate list in front of it
+        # -- where it appears with a number, a bearing and a photograph -- or it
+        # is somewhere the courier cannot act on from here. It grew every turn
+        # and pushed the two notes that do earn their place, ``Came from`` and
+        # the circling warning, further from the top. The data is still in
+        # ``to_dict`` for anyone analysing a trajectory.
         for note in self.notebook[-MAX_NOTES_SHOWN:]:
             lines.append(f"- {note}")
         if len(lines) == 1:

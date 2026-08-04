@@ -162,7 +162,22 @@ def props_for(kind: str, origin: tuple[float, float], bearing: float,
     return out
 
 
-def plan(map_dir: Path, out: Path, map_name: str) -> list[dict]:
+def plan(map_dir: Path, out: Path, map_name: str, viewpoint: str = "carriageway") -> list[dict]:
+    """Every obstacle site, both ways, both kinds.
+
+    ``viewpoint`` moves the *camera* and nothing else. The props stay exactly
+    where they are, because the obstacle is a fact about the street rather than
+    about who is looking at it.
+
+    A pavement bake is not a nicety. The street album has a pavement edition and
+    this one did not, so a courier on foot was served footway frames on clear
+    streets and centreline frames wherever an obstacle stood -- and since the
+    obstacle album is the only source of those, the *viewpoint itself* told the
+    policy a hazard was present, with no need to look at the picture. Measured
+    before this existed: 19.5% of a walker's frames came from the centreline
+    album and every one of them was an obstacle. That is the filename leak
+    again, wearing a different hat.
+    """
     network = build_road_network(map_dir, map_name=map_name)
     neighbours = {n: sorted(node.neighbours) for n, node in network.nodes.items()}
     jobs = []
@@ -176,10 +191,20 @@ def plan(map_dir: Path, out: Path, map_name: str) -> list[dict]:
             radians = math.radians(bearing)
             origin = (here[0] + math.cos(radians) * standoff,
                       here[1] + math.sin(radians) * standoff)
+            camera = here
+            if viewpoint == "pavement":
+                # Same rule as tools/ue/bake_pavement_views.py: half the street's
+                # own width plus a margin, to the right of travel.
+                street = network.streets[network.nodes[src].street_index]
+                offset = street.width_cm / 2.0 + 60.0
+                right = math.radians(bearing + 90.0)
+                camera = (here[0] + offset * math.cos(right),
+                          here[1] + offset * math.sin(right))
             for kind in OBSTACLE_TYPES:
                 jobs.append({
                     "site": f"{a}|{b}", "node": src, "toward": dst, "type": kind,
-                    "yaw": round(bearing, 1), "x_cm": here[0], "y_cm": here[1],
+                    "viewpoint": viewpoint,
+                    "yaw": round(bearing, 1), "x_cm": camera[0], "y_cm": camera[1],
                     "z_cm": CAMERA_Z_CM, "standoff_cm": round(standoff, 1),
                     "edge_length_m": round(length / 100.0, 1),
                     "origin": [round(origin[0], 1), round(origin[1], 1)],
@@ -199,12 +224,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--scene-token", default="Paris")
     parser.add_argument("--port", type=int, default=8123)
     parser.add_argument("--limit", type=int, default=0, help="render only the first N jobs")
+    parser.add_argument("--viewpoint", default="carriageway",
+                        choices=("carriageway", "pavement"))
     parser.add_argument("--report", type=Path, default=None)
     parser.add_argument("--timeout", type=float, default=90.0)
     args = parser.parse_args(argv)
 
     started = time.time()
-    jobs = plan(args.map_dir, args.out, args.map_name)
+    jobs = plan(args.map_dir, args.out, args.map_name, args.viewpoint)
     if args.limit:
         jobs = jobs[: args.limit]
     print(f"planned {len(jobs)} frames", flush=True)

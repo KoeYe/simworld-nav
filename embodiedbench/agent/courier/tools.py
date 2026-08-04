@@ -319,6 +319,22 @@ WAIT = Tool(
     requires_env_action="WAIT",
 )
 
+REST = Tool(
+    name="rest",
+    kind=ToolKind.ACT,
+    # A tank that only empties is not a resource, it is a decay: over a long
+    # shift the courier simply gets slower and there is nothing to decide. With
+    # somewhere to spend time for energy back, stamina becomes the trade the
+    # tiers are meant to pose -- rest now and walk fast, or push on tired.
+    summary=(
+        "Stop and catch your breath. Costs time and gives energy back, and how "
+        "much you get is what your body can recover."
+    ),
+    example="rest()",
+    time_cost_s=60.0,
+    requires_env_action="REST",
+)
+
 NOTE = Tool(
     name="note",
     kind=ToolKind.CONSULT,
@@ -344,7 +360,7 @@ NOTE = Tool(
 # about 35 turns per order pressing the same button.
 ALL_TOOLS: tuple[Tool, ...] = (
     WALK_TO, FOLLOW_STREET, LOOK, CHECK_ORDER, CHECK_MAP, NAVIGATE,
-    COLLECT, HAND_OVER, WAIT,
+    COLLECT, HAND_OVER, WAIT, REST,
 )
 UNIMPLEMENTED_TOOLS: tuple[Tool, ...] = (LIST_JOBS, ACCEPT_JOB, NOTE)
 TOOLS_BY_NAME: dict[str, Tool] = {t.name: t for t in ALL_TOOLS}

@@ -286,18 +286,40 @@ def build_manifest(
 
 @dataclass
 class Assertion:
+    """One pinned fact, and -- when it fails -- what *kind* of failure it is.
+
+    "43/49 assertions passed" was reported as a single number, and the three
+    things hiding inside it need different people and different actions:
+
+      ``integrity``    a digest changed. Something that was pinned is not what
+                       it was pinned as. This is the one that means "stop".
+      ``unavailable``  the resource is not mounted on this machine. Says
+                       nothing about the baseline; says the host is not set up.
+      ``environment``  the tool that recomputed the digest is not the tool the
+                       baseline was taken with -- a different Python, say.
+                       Digests computed under it are not evidence either way.
+
+    Reporting them as one ratio made a laptop with no content mount look like
+    a corrupted baseline, and made a genuine digest change look like one more
+    missing file.
+    """
+
     name: str
     expected: Any
     observed: Any
     passed: bool
+    kind: str = "integrity"
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        out = {
             "name": self.name,
             "expected": self.expected,
             "observed": self.observed,
             "status": "pass" if self.passed else "fail",
         }
+        if not self.passed:
+            out["failure_kind"] = self.kind
+        return out
 
 
 @dataclass
@@ -309,11 +331,29 @@ class VerificationResult:
     def passed(self) -> bool:
         return not self.errors and all(a.passed for a in self.assertions)
 
+    def failures_by_kind(self) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {}
+        for assertion in self.assertions:
+            if not assertion.passed:
+                out.setdefault(assertion.kind, []).append(assertion.name)
+        return out
+
+    @property
+    def integrity_failures(self) -> list[str]:
+        """The ones that mean a pinned artefact changed. The rest are host setup."""
+        return self.failures_by_kind().get("integrity", [])
+
     def to_dict(self) -> dict[str, Any]:
+        by_kind = self.failures_by_kind()
         return {
             "status": "pass" if self.passed else "fail",
             "assertion_count": len(self.assertions),
             "failed_count": sum(1 for a in self.assertions if not a.passed),
+            # A caller deciding whether to block a release wants this, not the
+            # ratio: a missing content mount and a changed digest are not the
+            # same event and must not be summed.
+            "failures_by_kind": by_kind,
+            "integrity_failures": by_kind.get("integrity", []),
             "errors": self.errors,
             "assertions": [a.to_dict() for a in self.assertions],
         }
@@ -338,6 +378,7 @@ def verify_manifest(
                     Assertion(
                         f"{entry.id}.env.{key}", entry.env.get(key), observed.get(key),
                         entry.env.get(key) == observed.get(key),
+                        kind="environment",
                     )
                 )
             continue
@@ -349,7 +390,9 @@ def verify_manifest(
             continue
 
         exists = target.exists()
-        assertions.append(Assertion(f"{entry.id}.exists", True, exists, exists))
+        assertions.append(
+            Assertion(f"{entry.id}.exists", True, exists, exists, kind="unavailable")
+        )
         if not exists:
             continue
 
@@ -389,7 +432,8 @@ def verify_manifest(
             full = target / pinned_file["relpath"]
             if not full.exists():
                 assertions.append(
-                    Assertion(f"{entry.id}.file[{pinned_file['relpath']}].exists", True, False, False)
+                    Assertion(f"{entry.id}.file[{pinned_file['relpath']}].exists",
+                              True, False, False, kind="unavailable")
                 )
                 continue
             observed_hash = sha256_file(full)

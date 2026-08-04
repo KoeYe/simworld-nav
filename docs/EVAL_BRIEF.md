@@ -92,8 +92,8 @@ cannot be reproduced, and one that cannot be reproduced cannot be fixed.
 Then run the checks and report the numbers:
 
 ```bash
-python -m pytest tests/ -q                       # expect 950 passed, 4 skipped
-python -m embodiedbench.tools.migration_check    # expect exit 0
+python3 -m pytest tests/ -q                       # expect 950 passed, 4 skipped
+python3 -m embodiedbench.tools.migration_check    # expect exit 0
 ```
 
 Finally, please state plainly how your own run went — delivered, turns,
