@@ -22,9 +22,26 @@ from typing import Any
 import torch
 
 
+def _inner(model: Any) -> Any:
+    """The thing that exposes ``.model`` and ``.lm_head``, past any wrapper.
+
+    PEFT wraps the model, so ``model.model`` on a ``PeftModel`` is the LoRA
+    wrapper rather than the transformer, and the selective-head trick below
+    would either fail or silently score the wrong module.
+    """
+    return model.get_base_model() if hasattr(model, "get_base_model") else model
+
+
 def hidden_states(model: Any, inputs: dict[str, Any]) -> torch.Tensor:
-    """Last-layer hidden states, without ever building the full logits tensor."""
-    output = model.model(**inputs)
+    """Last-layer hidden states, without ever building the full logits tensor.
+
+    Unwrapping a PEFT model is safe for the gradient: PEFT injects its adapters
+    into the base model's own Linear layers in place, so the unwrapped model
+    still runs them and the gradient still reaches them. What unwrapping buys is
+    access to ``.model`` and ``.lm_head``, which the wrapper does not expose in
+    the shape this selective-head trick needs.
+    """
+    output = _inner(model).model(**inputs)
     hidden = getattr(output, "last_hidden_state", None)
     if hidden is None:
         hidden = output[0]
@@ -50,7 +67,7 @@ def selected_token_logprobs(
 
     hidden = hidden_states(model, inputs)
     rows = hidden.index_select(0, positions - 1)
-    logits = model.lm_head(rows).float()
+    logits = _inner(model).lm_head(rows).float()
     log_probs = torch.log_softmax(logits, dim=-1)
     return log_probs.gather(-1, targets.unsqueeze(-1)).squeeze(-1)
 
@@ -70,4 +87,18 @@ def build_model_inputs(
     if pixel_values:
         inputs["pixel_values"] = torch.cat([p.to(device, dtype) for p in pixel_values], dim=0)
         inputs["image_grid_thw"] = torch.cat([g.to(device) for g in grid], dim=0)
+        # Which positions are image tokens. Recent transformers requires this
+        # alongside ``image_grid_thw`` to build multimodal RoPE and raises
+        # without it, so a rollout could be captured and then fail to be scored
+        # -- the training step died here while every rollout check passed.
+        # The provenance is already recorded, so it is derived rather than
+        # guessed from token ids.
+        positions = getattr(sample_or_state, "image_token_positions", None) or []
+        if positions:
+            mm = torch.zeros_like(tensor)
+            index = torch.tensor([p for p in positions if p < len(ids)],
+                                 device=device, dtype=torch.long)
+            if index.numel():
+                mm[0, index] = 1
+            inputs["mm_token_type_ids"] = mm
     return inputs

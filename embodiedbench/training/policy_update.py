@@ -99,6 +99,7 @@ def run_policy_update(
     samples: list[TrainingSample],
     *,
     learning_rate: float = 1e-6,
+    optimizer: Any = None,
     baseline: float | None = None,
     probe_prompt: str = "Where should the courier go next?",
 ) -> UpdateResult:
@@ -118,15 +119,38 @@ def run_policy_update(
     logits_before = adapter.logits_for_prompt(probe_prompt)
     digest_before = adapter.parameter_digest()
     trainable = [p for p in model.parameters() if p.requires_grad]
-    before = [p.detach().clone() for p in trainable]
+    # Snapshot on the CPU. Cloning a model's worth of parameters onto the
+    # same card doubles resident weights purely to verify a delta, and on a
+    # 24 GB card that is the difference between a training step and an OOM.
+    before = [p.detach().to("cpu", copy=True) for p in trainable]
 
-    optimizer = torch.optim.SGD(trainable, lr=learning_rate)
+    notes: list[str] = []
+    # The caller may own the optimizer, and for a training *loop* it must.
+    # Building a fresh one per call throws away all optimizer state between
+    # iterations, which makes momentum and Adam's moment estimates useless
+    # and silently reduces any of them to plain SGD. A one-shot gate does
+    # not care; twenty REINFORCE steps very much do.
+    owned = optimizer is None
+    if owned:
+        optimizer = torch.optim.SGD(trainable, lr=learning_rate)
     optimizer.zero_grad(set_to_none=True)
 
+    # Recompute activations in the backward pass instead of holding them.
+    # A 2B VLM with four episodes of multimodal context needs ~23 GB of
+    # activations and OOMs a 24 GB card at batch 4; checkpointing trades
+    # some compute for that, and batch size is what makes the advantage
+    # estimate anything other than noise.
+    checkpointing = False
+    if hasattr(model, "gradient_checkpointing_enable"):
+        try:
+            model.gradient_checkpointing_enable(
+                gradient_checkpointing_kwargs={"use_reentrant": False})
+            checkpointing = True
+        except Exception as error:  # noqa: BLE001
+            notes.append(f"gradient checkpointing unavailable: {error}")
     model.train()
     total_loss = 0.0
     total_masked = 0
-    notes: list[str] = []
     try:
         for sample in samples:
             advantage = sample.reward - baseline
@@ -148,10 +172,13 @@ def run_policy_update(
         optimizer.step()
     finally:
         model.eval()
+        if checkpointing:
+            model.gradient_checkpointing_disable()
 
     delta_sq = 0.0
     for old, parameter in zip(before, trainable):
-        delta_sq += float((parameter.detach() - old).float().pow(2).sum().item())
+        delta_sq += float(
+            (parameter.detach().cpu() - old).float().pow(2).sum().item())
     delta_l2 = delta_sq ** 0.5
 
     logits_after = adapter.logits_for_prompt(probe_prompt)
