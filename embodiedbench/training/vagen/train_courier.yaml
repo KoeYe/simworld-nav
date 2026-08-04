@@ -1,0 +1,27 @@
+# Training episodes for the courier benchmark under VAGEN/verl.
+#
+# The env name must match the key added to the registry on the launch command
+# line (see train_grpo_courier.sh), which is how this plugs in without editing
+# anything inside the gitignored vendor/ checkout.
+#
+# Seeds: [first, last, repeats]. The training range stops at 800 and validation
+# starts at 1000, so the two never overlap. That gap is not cosmetic -- the
+# first hand-rolled run in this repo reported the training batch's own score
+# and produced a curve that --learning-rate 0 reproduced exactly.
+envs:
+  - name: Courier
+    n_envs: 800
+    data_source: courier_paris
+    seed: [0, 800, 1]
+    max_turns: 20
+    response_length_per_turn: 1024   # a cap, not a target: 48 truncated a 4B's
+                                     # reasoning before its fenced call
+    config:
+      difficulty: solo
+      stride: block
+      embodiment: human_on_foot
+      hazards: true
+      max_images: 5
+      # album_root: /data/murray/paris_streets_v2/citycore-paris
+      # ^ uncomment for the sighted task. Without it the episode is text-only,
+      #   which is the blind control, not the benchmark.
