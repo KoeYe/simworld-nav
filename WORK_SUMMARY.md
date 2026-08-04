@@ -192,14 +192,18 @@ CUDA_VISIBLE_DEVICES=7 HF_HOME=/data/murray/hf \
   --model "$M4" --lora --no-hazards \
   --iterations 14 --batch 4 --eval-every 2 \
   --learning-rate 1e-5 --format-weight 0.0 --progress-weight 1.0 \
-  --max-turns 8 --max-images 1 --max-new-tokens 160 \
+  --max-turns 8 --max-images 1 --max-new-tokens 1024 \
   --log artifacts/training/q3vl4b_lora_progress.json
 ```
 
 几个必须知道的参数：
 
 - `--max-new-tokens` **别设太小**。48 会把 Qwen3-VL-4B 的长 THOUGHT 截断在 fenced call 之前，
-  format_score 假摔到 0.125；给到 160 就是 1.0。这是配置问题，不是模型问题。
+  format_score 假摔到 0.125 —— 这是配置问题，不是模型问题。
+  它只是**上限**，生成遇到 EOS 就停，所以设大基本不花额外时间，只在模型真的啰嗦时才有代价。
+  用 1024。实测 160 和 1024 的 held-out 基线完全一样（format 1.0 / progress 0.647），
+  说明对这个模型 160 已经不截断了；但 1024 更安全，换个更啰嗦的模型也不会翻车。
+  显存代价可以忽略：4B + LoRA 在 1024 上占 13.7 GB / 24 GB。
 - `--format-weight` 对已经会输出格式的模型请设 0，否则 advantage 全 0、每轮 `step: skipped`。
 - `--progress-weight` 是第二级课程，只进训练目标不进 benchmark 分数。
 - `--lora` 是 7B 能塞进 24 GB 的原因。

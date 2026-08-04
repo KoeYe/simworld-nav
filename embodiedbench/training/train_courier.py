@@ -81,7 +81,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--eval-every", type=int, default=2)
     parser.add_argument("--max-turns", type=int, default=4)
     parser.add_argument("--max-images", type=int, default=1)
-    parser.add_argument("--max-new-tokens", type=int, default=48)
+    parser.add_argument("--max-new-tokens", type=int, default=1024,
+                        help="a cap, not a target: generation stops at EOS, so "
+                             "a large value costs nothing unless the model "
+                             "rambles. 48 truncated Qwen3-VL-4B's THOUGHT "
+                             "before its fenced call and dropped its held-out "
+                             "format score from 1.0 to 0.125 -- a curve that "
+                             "was measuring the flag, not the policy.")
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--eval-temperature", type=float, default=0.0,
                         help="greedy for evaluation: sampling noise in the metric "
