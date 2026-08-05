@@ -85,6 +85,12 @@ def ask(model: str, system: str, text: str, images: list[str],
 
 def run_episode(paris, args, seed: int, scratch: Path) -> dict:
     endpoint = f"http://127.0.0.1:{getattr(args, 'port', 8200)}/v1/chat/completions"
+    from embodiedbench.agent.courier.loop import parse_reply
+    from embodiedbench.agent.courier.model_io import ModelClient
+
+    client = ModelClient(endpoint, args.model, max_tokens=args.max_tokens,
+                         max_requeries=getattr(args, "max_requeries", 3),
+                         max_tokens_ceiling=max(args.max_tokens * 4, 8192))
     from embodiedbench.runtime.city.courier_env import CourierEnv
     from embodiedbench.agent.courier.session import CourierSession
 
@@ -118,9 +124,21 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
                 if png:
                     images.append(data_url(png))
         started = time.time()
+        content = [{"type": "text", "text": observation.text}]
+        content += [{"type": "image_url", "image_url": {"url": u}} for u in images]
+        messages = [{"role": "system", "content": system},
+                    {"role": "user", "content": content}]
         try:
-            reply = ask(args.model, system, observation.text, images,
-                        args.max_tokens, endpoint=endpoint)
+            # Requeried, not charged: an unparseable reply is retried with the
+            # error fed back and never reaches the world, the way
+            # mini-swe-agent separates a model call from an environment step.
+            # Truncation and reasoning blocks are handled in there too.
+            reply, parsed, rejected = client.act(
+                messages, lambda text: parse_reply(text, set(session.allowed)))
+            if parsed is None:
+                # Nothing parseable after every retry. That IS the model's
+                # turn, and the world is told about it.
+                reply = reply or "(no parseable action)"
             infra_error = None
         except Exception as error:  # noqa: BLE001
             # A failed request is NOT a model output. Feeding the error string
@@ -146,12 +164,14 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
             "turn": turn + 1, "status": log.status, "action": log.action,
             "error": log.error, "latency_s": round(time.time() - started, 1),
             "reply": reply[:400],
+            "requeries": len(rejected),
         })
         if args.verbose:
             print(f"  seed {seed} turn {turn+1:3d} {str(log.action):28} "
                   f"{log.status:13} {round(time.time()-started,1):5.1f}s", flush=True)
 
     summary = env.summary()
+    summary.update(client.stats.as_dict())
     return {"seed": seed, "summary": summary, "turns": len(transcript),
             "termination": session.run.termination_reason,
             "transcript": transcript}
@@ -170,6 +190,9 @@ def main() -> int:
     parser.add_argument("--max-tokens", type=int, default=400)
     parser.add_argument("--out", type=Path,
                         default=REVIEW / "vlm_runs.json")
+    parser.add_argument("--max-requeries", type=int, default=3,
+                        help="retries of an unparseable reply, which are model "
+                             "calls rather than world steps; reported, not hidden")
     parser.add_argument("--port", type=int, default=8200,
                         help="vLLM server port; lets two models be "
                              "evaluated side by side")
