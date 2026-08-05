@@ -111,6 +111,7 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
     system = session.system_prompt()
 
     transcript = []
+    history: list[dict] = []
     for turn in range(args.max_turns):
         if session.finished:
             break
@@ -126,8 +127,32 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
         started = time.time()
         content = [{"type": "text", "text": observation.text}]
         content += [{"type": "image_url", "image_url": {"url": u}} for u in images]
-        messages = [{"role": "system", "content": system},
-                    {"role": "user", "content": content}]
+        # Conversation history, with the pictures dropped from older turns.
+        #
+        # Every turn used to be sent as [system, this observation] and nothing
+        # else, which made the policy stateless: it could not remember where it
+        # had been, what it had tried, or that it was already on the right
+        # street. Measured on Qwen3-VL-4B, 26 of 41 moves returned to a junction
+        # it had already visited and it walked off the slip's street 81 times.
+        # That reads as an agent with no spatial memory, and it was an agent
+        # that was never given one.
+        #
+        # Compaction is not optional: a 640x480 frame is ~380 tokens, so a
+        # dozen turns of pictures exceeds the server's whole context. Older
+        # turns keep their text -- which is where the street names, numbers and
+        # refusals are -- and lose their images, which are only decidable in the
+        # moment they are shown.
+        history.append({"role": "user", "content": content})
+        keep = args.history_turns * 2
+        recent = history[-keep:] if keep > 0 else [history[-1]]
+        stripped = []
+        for i, m in enumerate(recent):
+            if m["role"] == "user" and isinstance(m["content"], list) and i < len(recent) - 1:
+                text = next((c["text"] for c in m["content"] if c["type"] == "text"), "")
+                stripped.append({"role": "user", "content": text})
+            else:
+                stripped.append(m)
+        messages = [{"role": "system", "content": system}, *stripped]
         try:
             # Requeried, not charged: an unparseable reply is retried with the
             # error fed back and never reaches the world, the way
@@ -159,6 +184,7 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
                   flush=True)
             break
 
+        history.append({"role": "assistant", "content": reply})
         log = session.step(reply)
         transcript.append({
             "turn": turn + 1, "status": log.status, "action": log.action,
@@ -190,6 +216,11 @@ def main() -> int:
     parser.add_argument("--max-tokens", type=int, default=400)
     parser.add_argument("--out", type=Path,
                         default=REVIEW / "vlm_runs.json")
+    parser.add_argument("--history-turns", type=int, default=8,
+                        help="turns of conversation kept; 0 sends only the "
+                             "current observation, which is what made the "
+                             "policy stateless. Images are kept on the newest "
+                             "turn only.")
     parser.add_argument("--max-requeries", type=int, default=3,
                         help="retries of an unparseable reply, which are model "
                              "calls rather than world steps; reported, not hidden")
