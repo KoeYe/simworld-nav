@@ -141,6 +141,37 @@ def _bare_call(text: str, allowed: set[str]) -> str | None:
     return None
 
 
+REASONING_START = "<think>"
+REASONING_END = "</think>"
+
+
+def strip_reasoning(reply: str) -> str:
+    """Everything after the model stops thinking.
+
+    A reasoning model emits its chain of thought first, and inside that thought
+    it writes candidate calls in fenced blocks -- exactly the shape this parser
+    looks for. Qwen3.5-9B produced two fenced blocks on every single turn, one
+    rehearsed inside <think> and one real answer after it, and the parser
+    rejected all of them as "Found 2 action blocks": 66 format errors in 80
+    turns, 82.5%, on a model whose answers were in fact perfectly formed.
+
+    The thought is not the action. Only what follows the closing tag is the
+    reply, which is also how the serving stack and the chat template treat it.
+    A reply with no reasoning section is returned unchanged, so this costs
+    nothing for models that do not think out loud.
+    """
+    end = reply.rfind(REASONING_END)
+    if end != -1:
+        return reply[end + len(REASONING_END):]
+    if REASONING_START in reply:
+        # Opened a thought and never closed it: the model was cut off before it
+        # answered. The calls inside are rehearsal, and running one is exactly
+        # the guess this parser exists to refuse -- it would execute a move the
+        # model was in the middle of arguing itself out of.
+        return ""
+    return reply
+
+
 def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
     """Pull exactly one tool call out of a model reply.
 
@@ -149,7 +180,7 @@ def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
     WAIT on any unparseable reply, which spent a turn and told the model nothing
     about what went wrong.
     """
-    text = reply or ""
+    text = strip_reasoning(reply or "")
     blocks = ACTION_BLOCK.findall(text)
     unfenced = False
     if not blocks:

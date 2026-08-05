@@ -362,3 +362,38 @@ class TestTheViewpointDoesNotAnnounceTheHazard:
                        embodiment="human_on_foot",
                        album_root=STREETS, pavement_album_root=PAVEMENT,
                        obstacle_album_root=OBSTACLES)
+
+
+class TestAReasoningModelCanBeEvaluatedAtAll:
+    """The reply contract must not reject a model for thinking out loud.
+
+    Qwen3.5-9B writes a candidate call inside its <think> block and the real one
+    after it. Parsing the whole reply finds two fenced blocks and refuses, which
+    scored 82.5% format errors against a model that was never malformed. Since
+    reasoning models are most of what a benchmark like this now has to measure,
+    that was a hole in the harness, not a property of the policy.
+    """
+
+    def test_only_the_answer_after_the_thought_is_parsed(self):
+        from embodiedbench.agent.courier.loop import parse_reply
+
+        reply = (
+            "<think>\nI could go north.\n```\nwalk_to(9)\n```\nNo, south.\n</think>\n\n"
+            "THOUGHT: south it is.\n```\nwalk_to(2)\n```"
+        )
+        assert parse_reply(reply, {"walk_to"}).render() == "walk_to(2)"
+
+    def test_a_reply_without_a_thought_block_is_untouched(self):
+        from embodiedbench.agent.courier.loop import parse_reply
+
+        assert parse_reply("THOUGHT: go\n```\nwalk_to(1)\n```",
+                           {"walk_to"}).render() == "walk_to(1)"
+
+    def test_a_thought_that_never_closes_is_still_a_format_error(self):
+        """An unterminated thought has no answer in it, and inventing one from
+        the rehearsal is the guessing the parser exists to avoid."""
+        from embodiedbench.agent.courier.loop import FormatError, parse_reply
+
+        with pytest.raises(FormatError):
+            parse_reply("<think>\nmaybe\n```\nwalk_to(1)\n```\nor maybe not",
+                        {"walk_to"})

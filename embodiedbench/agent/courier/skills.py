@@ -83,6 +83,39 @@ class Procedure:
         return f"  {self.name} — {self.when}\n{body}"
 
 
+DECIDE = Procedure(
+    name="Working out your move",
+    when="every turn, before anything else — stop at the first line that fits",
+    # The other runbooks each answer one situation well and say nothing about
+    # which situation you are in. Measured on Qwen3-VL-4B over 40 episodes, that
+    # gap is where the task is lost: it reached the slip's street in 22 of 40
+    # episodes and then walked off it 81 times, and once on the right street its
+    # next move was toward the right number only 37 times against 25 away --
+    # barely better than a coin. Ordering the questions is the missing piece.
+    steps=(
+        Step("At the address? The \"where you are\" line says whether this is the "
+             "street on the slip and which number it wants. If the street matches "
+             "and the numbers here include that one, act now — do not walk on to "
+             "be sure.",
+             requires=("collect",)),
+        "On the slip's street but at the wrong number? Then the door is along "
+        "this street and the only question is which way. Take the street leaving "
+        "here that keeps the same name and runs the way the numbers must go. Do "
+        "not turn off onto a different street: leaving the right street is the "
+        "most expensive mistake available to you.",
+        Step("If you cannot tell which way the numbers run, look(k) reads them "
+             "down street k without walking it, and answers it outright.",
+             requires=("look",)),
+        Step("Not on the slip's street? Then you are travelling: navigate() once, "
+             "take the street its first instruction names, and do not ask again "
+             "until you have made that turn.",
+             requires=("navigate",)),
+        "Before you commit to a street, look at its photograph. A street already "
+        "marked (BLOCKED) stays blocked for the rest of the shift.",
+    ),
+    requires=("walk_to",),
+)
+
 FIND_ADDRESS = Procedure(
     name="Finding an address",
     when="you know the address but not where it is",
@@ -128,11 +161,22 @@ DEAD_END = Procedure(
 
 LOST = Procedure(
     name="When you are going in circles",
-    when="your notes say you have passed somewhere more than twice",
+    # The old wording -- "your notes say you have passed somewhere more than
+    # twice" -- cited a signal the observation does not carry. The notes hold a
+    # "Came from" trail of recent places; nothing counts visits or flags a
+    # repeat. A runbook that tells the courier to read something that is not
+    # written anywhere is worse than no runbook: it reads as followed advice
+    # while nothing was checked. Measured on Qwen3-VL-4B: 26 of 41 moves
+    # returned to a junction already visited, 12 distinct junctions in a whole
+    # episode.
+    when="a street name in \"Came from\" is one you are about to walk again",
     steps=(
         "Stop repeating the last turn; it is the one that brought you back.",
         "Re-anchor on the street named at the top of the turn and the doors beside it.",
         "Prefer a street you have not walked yet, even if it looks less direct.",
+        "Walking back the way you came is a legal move and sometimes the only "
+        "one. At a dead end it is the only one. Refusing to backtrack does not "
+        "find a new street; it spends the shift standing still.",
     ),
     requires=("walk_to",),
 )
@@ -156,6 +200,9 @@ DEADLINE = Procedure(
     when="an order has a deadline",
     steps=(
         "A late delivery still scores, but less. An abandoned one scores nothing.",
+        Step("wait() is for a red pedestrian light and nothing else. Waiting "
+             "anywhere else spends the clock and changes nothing.",
+             requires=("wait",)),
         "Every tool costs time, looking and consulting included. Do not spend turns on "
         "them when the way is already clear.",
     ),
@@ -195,7 +242,7 @@ CROSSINGS = Procedure(
 # what to do about it. A rule the agent is graded on and never told is not a
 # difficulty, it is a scoring error.
 PROCEDURES: tuple[Procedure, ...] = (
-    FIND_ADDRESS, FIND_ADDRESS_NO_PHONE, ARRIVAL, CROSSINGS, WAY_SHUT,
+    DECIDE, FIND_ADDRESS, FIND_ADDRESS_NO_PHONE, ARRIVAL, CROSSINGS, WAY_SHUT,
     DEAD_END, LOST, DEADLINE,
 )
 

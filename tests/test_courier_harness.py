@@ -938,11 +938,25 @@ class TestPromptDoesNotLeak:
             assert leak not in low
 
     def test_the_prompt_fits_a_sensible_budget(self):
-        """Context spent on the runbook is context not spent on the pictures."""
+        """Context spent on the runbook is context not spent on the pictures.
+
+        Raised from 1600 to 2400 to buy one thing: an ordered decision procedure
+        that says which situation the courier is in before the other runbooks say
+        what to do in it. The measurement that justified the spend -- 40 episodes
+        of Qwen3-VL-4B -- found the model reaching the slip's street in 22 of 40
+        episodes and then walking off it 81 times, choosing the right way along
+        it 37 times against 25, and returning to an already-visited junction on
+        26 of 41 moves. None of that is a missing runbook; it is not knowing
+        which of them applies.
+
+        The ceiling still binds, and it is not free: at roughly 380 tokens for a
+        640x480 frame, 800 tokens of prompt is two photographs the turn cannot
+        carry. Anything added here has to beat a picture.
+        """
         prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
         # ~4 characters a token for English prose; the exact tokeniser does not
         # matter for a ceiling this loose.
-        assert len(prompt) / 4 < 1600, "system prompt has grown past its budget"
+        assert len(prompt) / 4 < 2400, "system prompt has grown past its budget"
 
     def test_taking_the_phone_away_takes_its_runbook_away_too(self):
         """Guidance that names a tool the environment will refuse is the same

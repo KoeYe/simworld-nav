@@ -1808,12 +1808,22 @@ class CourierEnv:
         """One waypoint along street ``k``: the atomic move, whatever the stride."""
         rows = {row["k"]: row for row in self.candidates()}
         if k not in rows:
+            legal = ", ".join(str(n) for n in sorted(rows))
+            message = (f"There is no street {k} here. The streets leaving this "
+                       f"junction are {legal}.")
+            if len(rows) == 1:
+                # Naming the legal street was not enough. On three of forty
+                # episodes the courier stood at a dead end and asked for street
+                # 2 twenty-five, twenty-six and thirty-three times in a row --
+                # the whole episode -- because the only legal move went back the
+                # way it came and it would not take it. The refusal now says
+                # that going back is the move, not a mistake.
+                only = next(iter(rows))
+                message += (f" This is a dead end. walk_to({only}) goes back the "
+                            "way you came, and here that is the only way on: "
+                            "take it rather than asking again.")
             return self._refuse(StepOutcome(
-                ok=False, code="no_such_street",
-                message=(
-                    f"There is no street {k} here. The streets leaving this junction are "
-                    f"{', '.join(str(n) for n in sorted(rows))}."
-                ),
+                ok=False, code="no_such_street", message=message,
             ))
         row = rows[k]
         # A barrier is found the way a courier finds one: by walking up to it.

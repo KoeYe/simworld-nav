@@ -52,6 +52,8 @@ How the streets work here:
   - House numbers run in order along a street, odd one side and even the other; if
     they are falling and you want a higher one, turn around.
   - A street keeps its name from junction to junction, so a turn shows a new name.
+  - The same street name can leave a junction twice — once each way. They are
+    different directions along one street, not two streets.
 
 What you have been trained to do:
 {procedures}
