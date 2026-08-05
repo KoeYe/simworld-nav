@@ -135,3 +135,50 @@ class TestTheEpisode:
             if done:
                 break
         run(env.close())
+
+
+class TestTheShapedTermStaysOutOfTheBenchmarkScore:
+    """GRPO's first step on this env reported reward_variance 0.0, pg_loss 0.0
+    and grad_norm 0.0: a policy that never delivers earns the same 0.0 on every
+    sample of the group, so there is no advantage to push on. progress_weight
+    is the dense term that fixes it -- and the thing that must never happen is
+    it leaking into the number the benchmark reports."""
+
+    def test_shaping_moves_reward_and_leaves_env_return_alone(self, config):
+        plain = CourierGymEnv(config)
+        shaped = CourierGymEnv({**config, "progress_weight": 1.0})
+        run(plain.reset(0))
+        run(shaped.reset(0))
+        pr = sr = 0.0
+        for _ in range(4):
+            _, r, d1, i1 = run(plain.step(WALK))
+            _, s, d2, i2 = run(shaped.step(WALK))
+            pr, sr = pr + r, sr + s
+            assert i1["env_return"] == pytest.approx(i2["env_return"], abs=1e-6)
+            if d1 or d2:
+                break
+        assert sr != pr or i2["progress_score"] == 0.0
+        run(plain.close()); run(shaped.close())
+
+    def test_off_by_default(self, config):
+        env = CourierGymEnv(config)
+        run(env.reset(0))
+        _, reward, _, info = run(env.step(WALK))
+        assert info["progress_weight"] == 0.0
+        assert reward == pytest.approx(info["env_return"], abs=1e-6)
+        run(env.close())
+
+    def test_the_dense_term_actually_varies_across_seeds(self, config):
+        """The whole point is variance. If every episode scored the same the
+        group advantage would still be zero and nothing would be fixed."""
+        scores = []
+        for seed in (0, 1, 2, 3):
+            env = CourierGymEnv({**config, "progress_weight": 1.0})
+            run(env.reset(seed))
+            for _ in range(4):
+                _, _, done, info = run(env.step(WALK))
+                if done:
+                    break
+            scores.append(info["progress_score"])
+            run(env.close())
+        assert len(set(scores)) > 1, f"no variance across seeds: {scores}"

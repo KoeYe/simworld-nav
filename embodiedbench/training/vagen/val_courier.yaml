@@ -5,13 +5,18 @@ envs:
     n_envs: 64
     data_source: courier_paris_val
     seed: [1000, 1064, 1]
-    max_turns: 8
+    max_turns: 6
     response_length_per_turn: 1024
     config:
       difficulty: solo
       stride: block
       embodiment: human_on_foot
       hazards: true
+      # Deliberately UNSHAPED, unlike the training set. val-core/.../reward
+      # is the number this run gets reported as, so it has to be the return
+      # the harness accumulated -- shaping the eval set is how a training
+      # trick gets quoted as a benchmark result.
+      progress_weight: 0.0
       max_images: 1
       # One picture per turn, and 8 turns, because the whole trajectory is
       # concatenated into a single prompt. A 640x480 frame costs ~380 tokens

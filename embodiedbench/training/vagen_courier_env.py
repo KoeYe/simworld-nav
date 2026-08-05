@@ -20,11 +20,10 @@ Three things this deliberately does *not* do:
   prompt and the per-turn observation, and this returns them unchanged. A
   training-only prompt would optimise a policy for text it is never scored on,
   which is the single easiest way to produce a number that does not transfer.
-* **It does not shape the reward.** ``step`` returns the turn reward the
-  harness charged. Shaping belongs in the trainer's objective, where it can be
-  kept in a different column from the benchmark score -- see
-  ``courier_rollout.py``, which keeps ``env_return`` and ``reward`` separate
-  for exactly this reason.
+* **It does not shape the reward by default.** ``step`` returns the turn reward
+  the harness charged, and ``info["env_return"]`` is always the unshaped
+  episode return the benchmark scores. ``progress_weight`` can add a dense
+  term, but it is off unless asked for and it never touches ``env_return``.
 * **It does not silently drop images.** A turn can offer nine pictures. The cap
   is a config value and the number dropped is reported in ``info``, because a
   quietly truncated observation looks identical to a policy that ignored what
@@ -44,6 +43,9 @@ from typing import Any
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_MAP = REPO / "vendor/vagen/vagen/envs/deliverybench/maps/citycore-paris"
 IMAGE_PLACEHOLDER = "<image>"
+# One "unit" of shaped progress. A block on this map is 60-110 m, so 100 m
+# makes a good block worth about a tenth of a delivery.
+PROGRESS_SCALE_CM = 10_000.0
 
 
 def _base_class() -> type:
@@ -81,7 +83,17 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
     ``max_images``      per-turn image cap (default 5)
     ``max_turns``       episode length cap; 0 means the harness's own budget
     ``city``            name used in the prompt (default ``Paris``)
+    ``progress_weight`` dense reward for closing on the target (default 0.0)
     ==================  =======================================================
+
+    **On ``progress_weight``.** GRPO normalises the advantage within a group of
+    ``rollout.n`` samples of the same prompt. A policy that never delivers earns
+    exactly 0.0 on every sample, so the group has no variance, every advantage
+    is zero, and the first training step reported ``reward_variance: 0.0``,
+    ``pg_loss: 0.0`` and ``grad_norm: 0.0`` -- a step that cost two minutes and
+    changed nothing. Distance closed on the active order's target is dense
+    enough to have variance and still points at the job. It is potential-based
+    (Ng, Harada & Russell 1999), so it cannot change which policy is optimal.
     """
 
     def __init__(self, env_config: dict[str, Any] | None = None):
@@ -99,6 +111,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self.max_images = int(config.get("max_images", 5))
         self.max_turns = int(config.get("max_turns", 0))
         self.city = config.get("city", "Paris")
+        self.progress_weight = float(config.get("progress_weight", 0.0))
 
         # The road network is the expensive part of a reset -- parsing it per
         # episode would dominate rollout time in a trainer that resets
@@ -108,6 +121,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self._session: Any = None
         self._turns = 0
         self._scratch: Any = None
+        self._progress_cm = 0.0
 
     # ── VAGEN interface ──────────────────────────────────────────────────────
 
@@ -144,6 +158,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self._env.reset()
         self._session = CourierSession(self._env, city=self.city)
         self._turns = 0
+        self._progress_cm = 0.0
 
         obs, dropped = self._observation()
         return obs, {"seed": int(seed), "images_dropped": dropped,
@@ -154,9 +169,23 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         if self._session is None:
             raise RuntimeError("reset() before step()")
 
+        before_cm, before_target = self._remaining_cm()
         log = self._session.step(action_str)
         self._turns += 1
         reward = float(log.reward or 0.0)
+
+        # Potential-based shaping, per turn rather than end-to-end. Collecting a
+        # parcel switches the target from the pickup to the dropoff and the two
+        # are streets apart, so an end-to-end difference would book that switch
+        # as a reward the policy never walked for. Turns where the target
+        # changed are skipped; collection is already worth +0.1 unshaped.
+        after_cm, after_target = self._remaining_cm()
+        step_progress = 0.0
+        if (self.progress_weight and before_cm is not None and after_cm is not None
+                and before_target == after_target):
+            step_progress = (before_cm - after_cm) / PROGRESS_SCALE_CM
+            self._progress_cm += before_cm - after_cm
+            reward += self.progress_weight * step_progress
 
         done = bool(self._session.finished)
         if self.max_turns and self._turns >= self.max_turns:
@@ -177,6 +206,9 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             # The episode return the benchmark scores. Carried so a trainer can
             # log the real number next to whatever objective it optimises.
             "env_return": float(self._session.run.total_reward),
+            "progress_score": round(self._progress_cm / PROGRESS_SCALE_CM, 4),
+            "step_progress": round(step_progress, 4),
+            "progress_weight": self.progress_weight,
             "termination": self._session.run.termination_reason,
         }
         return obs, reward, done, info
@@ -186,6 +218,23 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             self._scratch.cleanup()
             self._scratch = None
         self._session = self._env = None
+
+    def _remaining_cm(self) -> tuple[float | None, str | None]:
+        """How far the courier still has to walk, and what it is walking to.
+
+        ``route_length_cm`` is the environment's own bookkeeping and never
+        appears in an observation. Using it for a *training* signal is
+        legitimate for the same reason a simulator may compute a reward it does
+        not show: the policy is scored on ``env_return``, which this never
+        touches.
+        """
+        if not self.progress_weight:
+            return None, None
+        order = self._env.active_order()
+        if order is None:
+            return None, None
+        target = order.target.kerb_node
+        return self._env.route_length_cm(self._env.node_id, target), target
 
     # ── observations ─────────────────────────────────────────────────────────
 

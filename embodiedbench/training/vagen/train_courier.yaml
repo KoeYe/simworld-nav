@@ -13,7 +13,7 @@ envs:
     n_envs: 800
     data_source: courier_paris
     seed: [0, 800, 1]
-    max_turns: 8
+    max_turns: 6
     response_length_per_turn: 1024   # a cap, not a target: 48 truncated a 4B's
                                      # reasoning before its fenced call
     config:
@@ -21,6 +21,11 @@ envs:
       stride: block
       embodiment: human_on_foot
       hazards: true
+      # Dense term: metres closed on the target, potential-based, never in
+      # env_return. Without it GRPO's first step logged reward_variance 0.0
+      # and grad_norm 0.0 -- a 3B never delivers, so every sample in the
+      # group scores the same and there is no advantage to push on.
+      progress_weight: 1.0
       max_images: 1
       # One picture per turn, and 8 turns, because the whole trajectory is
       # concatenated into a single prompt. A 640x480 frame costs ~380 tokens

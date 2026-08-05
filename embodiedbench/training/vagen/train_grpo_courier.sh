@@ -25,6 +25,13 @@ DATASET_VAL=${REPO}/embodiedbench/training/vagen/val_courier.yaml
 MODEL_PATH=${MODEL_PATH:?set MODEL_PATH to a local checkpoint}
 
 export HYDRA_FULL_ERROR=1
+# NOTE: do not set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True here.
+# It looks like the right answer to the backward pass OOMing on a 1.92 GiB
+# allocation with 889 MiB free, but vLLM refuses to start with it:
+#   AssertionError: Expandable segments are not compatible with memory pool.
+# The failure surfaces as "Engine core initialization failed" during
+# load_model, which reads as not enough memory for the weights and sends you
+# tuning gpu_memory_utilization instead. Shorten the sequence instead.
 export WANDB_MODE=${WANDB_MODE:-offline}
 # The adapter lives in this repo, not in VAGEN, so both must be importable.
 export PYTHONPATH=${REPO}:${VAGEN}:${PYTHONPATH}
@@ -38,20 +45,21 @@ PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
     +env_registry.Courier=embodiedbench.training.vagen_courier_env.CourierGymEnv \
     data.train_files="${DATASET_TRAIN}" \
     data.val_files="${DATASET_VAL}" \
-    data.train_batch_size=1 \
-    data.max_prompt_length=16384 \
-    data.max_response_length=16384 \
+    data.train_batch_size=${TRAIN_BS:-2} \
+    data.max_prompt_length=${PROMPT_LEN:-4096} \
+    data.max_response_length=${RESP_LEN:-8192} \
     algorithm.adv_estimator=grpo \
     algorithm.kl_ctrl.kl_coef=0.0 \
     actor_rollout_ref.model.path="${MODEL_PATH}" \
     actor_rollout_ref.model.use_remove_padding=True \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \
     actor_rollout_ref.actor.optim.lr=1e-6 \
-    actor_rollout_ref.actor.ppo_mini_batch_size=1 \
+    actor_rollout_ref.actor.ppo_mini_batch_size=${TRAIN_BS:-2} \
     actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu=1 \
     actor_rollout_ref.actor.use_kl_loss=False \
     actor_rollout_ref.actor.entropy_coeff=0.0 \
     actor_rollout_ref.actor.strategy=fsdp2 \
+    actor_rollout_ref.actor.ulysses_sequence_parallel_size=${SP:-1} \
     actor_rollout_ref.actor.fsdp_config.optimizer_offload=True \
     actor_rollout_ref.actor.fsdp_config.param_offload=True \
     actor_rollout_ref.ref.strategy=fsdp2 \
