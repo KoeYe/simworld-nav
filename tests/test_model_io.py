@@ -210,3 +210,49 @@ class TestTheBudgetNeverWalksIntoTheContextLimit:
         c._post_with_retries = fake  # type: ignore[assignment]
         with pytest.raises(RuntimeError, match="At most 6 image"):
             c.act([{"role": "user", "content": "x"}], parse_walk)
+
+
+class TestAnOverlongPromptShedsHistoryRatherThanDying:
+    """When the budget cannot shrink any further, the prompt is what is too big.
+
+    A reasoning model behind a 10k context fills it after a handful of turns of
+    history, and every turn then 400s. The alternative to shedding history here
+    is a per-model history setting, which is one more number to guess wrong for
+    each new model.
+    """
+
+    def test_the_oldest_exchange_is_dropped_and_the_call_retried(self):
+        c = ModelClient("http://unused", "stub", max_tokens=512)
+        sizes = []
+
+        def fake(payload):
+            n = len(payload["messages"])
+            sizes.append(n)
+            if n > 3:
+                raise RuntimeError(
+                    'HTTP 400: {"message":"This model\'s maximum context length '
+                    'is 10240 tokens. However, you requested 512 output tokens '
+                    'and your prompt contains 10200 tokens"}')
+            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+
+        c._post_with_retries = fake  # type: ignore[assignment]
+        convo = [{"role": "system", "content": "s"}]
+        convo += [{"role": "user", "content": "u"}, {"role": "assistant", "content": "a"}] * 3
+        _, parsed, _ = c.act(convo, parse_walk)
+        assert parsed == "walk_to(1)"
+        assert c.stats.history_drops >= 1
+        assert sizes[-1] < sizes[0]
+
+    def test_it_gives_up_rather_than_looping_when_nothing_is_left_to_drop(self):
+        c = ModelClient("http://unused", "stub")
+
+        def fake(payload):
+            raise RuntimeError(
+                'HTTP 400: {"message":"This model\'s maximum context length is '
+                '10240 tokens. However, you requested 100 output tokens and '
+                'your prompt contains 10200 tokens"}')
+
+        c._post_with_retries = fake  # type: ignore[assignment]
+        with pytest.raises(RuntimeError):
+            c.act([{"role": "system", "content": "s"},
+                   {"role": "user", "content": "u"}], parse_walk)

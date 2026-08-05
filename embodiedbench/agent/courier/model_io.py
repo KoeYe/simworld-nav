@@ -72,6 +72,7 @@ class CallStats:
     requeries: int = 0
     truncations: int = 0
     budget_clamps: int = 0
+    history_drops: int = 0
     transport_retries: int = 0
     unparseable: int = 0
 
@@ -81,6 +82,7 @@ class CallStats:
             "requeries": self.requeries,
             "truncations": self.truncations,
             "budget_clamps": self.budget_clamps,
+            "history_drops": self.history_drops,
             "transport_retries": self.transport_retries,
             "unparseable_turns": self.unparseable,
         }
@@ -213,12 +215,22 @@ class ModelClient:
                     room = int(limit.group(1)) - int(used.group(1)) - 64
                 elif limit:
                     room = int(limit.group(1)) // 4
-                if room is None or room < 128 or room >= budget:
-                    raise
-                self.stats.budget_clamps += 1
-                self.max_tokens_ceiling = min(self.max_tokens_ceiling, room)
-                budget = room
-                continue
+                if room is not None and 128 <= room < budget:
+                    self.stats.budget_clamps += 1
+                    self.max_tokens_ceiling = min(self.max_tokens_ceiling, room)
+                    budget = room
+                    continue
+                # No room left to give back: the prompt itself is too long for
+                # this model. Shed the oldest exchange and try again. A
+                # reasoning model behind a 10k context runs out this way after
+                # a handful of turns, and the alternative is a per-model
+                # history setting -- another number to guess wrong.
+                if limit and len(conversation) > 2:
+                    self.stats.history_drops += 1
+                    conversation = conversation[2:]
+                    budget = min(budget, self.max_tokens)
+                    continue
+                raise
             self.stats.calls += 1
             choice = body["choices"][0]
             reply, reasoning = split_reasoning(choice.get("message") or {})
