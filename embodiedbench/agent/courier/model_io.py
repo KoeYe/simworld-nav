@@ -57,6 +57,13 @@ THINK_BLOCKS = (
 )
 
 
+# The server knows its own limits and says so in plain text when they are
+# broken. Reading that back is what keeps this layer model-agnostic: nothing
+# here has to be told a context size per model.
+CONTEXT_LIMIT = re.compile(r"maximum context length is (\d+) tokens", re.I)
+PROMPT_TOKENS = re.compile(r"prompt contains (\d+) tokens", re.I)
+
+
 @dataclass
 class CallStats:
     """What it cost to get an action out of the model, in the model's own terms."""
@@ -64,6 +71,7 @@ class CallStats:
     calls: int = 0
     requeries: int = 0
     truncations: int = 0
+    budget_clamps: int = 0
     transport_retries: int = 0
     unparseable: int = 0
 
@@ -72,6 +80,7 @@ class CallStats:
             "model_calls": self.calls,
             "requeries": self.requeries,
             "truncations": self.truncations,
+            "budget_clamps": self.budget_clamps,
             "transport_retries": self.transport_retries,
             "unparseable_turns": self.unparseable,
         }
@@ -186,10 +195,30 @@ class ModelClient:
         rejected: list[str] = []
 
         for attempt in range(self.max_requeries + 1):
-            body = self._post_with_retries({
-                "model": self.model, "messages": conversation,
-                "max_tokens": budget, "temperature": 0.0,
-            })
+            try:
+                body = self._post_with_retries({
+                    "model": self.model, "messages": conversation,
+                    "max_tokens": budget, "temperature": 0.0,
+                })
+            except RuntimeError as error:
+                # Raising the budget after a truncation can walk it straight
+                # into the context limit: escalating to 10000 output tokens on
+                # a 10240-token model leaves 240 for the prompt, and every turn
+                # 400s. The server names both numbers in the refusal, so use
+                # them rather than guessing a ceiling per model.
+                limit = CONTEXT_LIMIT.search(str(error))
+                used = PROMPT_TOKENS.search(str(error))
+                room = None
+                if limit and used:
+                    room = int(limit.group(1)) - int(used.group(1)) - 64
+                elif limit:
+                    room = int(limit.group(1)) // 4
+                if room is None or room < 128 or room >= budget:
+                    raise
+                self.stats.budget_clamps += 1
+                self.max_tokens_ceiling = min(self.max_tokens_ceiling, room)
+                budget = room
+                continue
             self.stats.calls += 1
             choice = body["choices"][0]
             reply, reasoning = split_reasoning(choice.get("message") or {})

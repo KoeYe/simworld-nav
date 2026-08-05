@@ -154,3 +154,59 @@ class TestTransportFailuresAreNeverReplies:
         with pytest.raises(RuntimeError):
             c._post_with_retries({})
         assert len(tries) == 1
+
+
+class TestTheBudgetNeverWalksIntoTheContextLimit:
+    """Raising max_tokens after a truncation is right until it is not.
+
+    Escalating to 10000 output tokens against a 10240-token model leaves 240
+    for the prompt, and every turn 400s. Qwen3.5-9B episodes ended after a mean
+    of 2.6 turns that way, with zero format errors -- the harness had broken its
+    own requests while adapting. The server states both numbers in the refusal,
+    so the fix is to read them rather than carry a per-model ceiling.
+    """
+
+    def _clamping_client(self):
+        c = ModelClient("http://unused", "stub", max_tokens=8000,
+                        max_tokens_ceiling=10000)
+        seen = []
+
+        def fake(payload):
+            # A realistic server: it refuses exactly when the request cannot
+            # fit, and says so with both numbers.
+            seen.append(payload["max_tokens"])
+            if payload["max_tokens"] + 8000 > 10240:
+                raise RuntimeError(
+                    'HTTP 400: {"message":"This model\'s maximum context length '
+                    'is 10240 tokens. However, you requested '
+                    f'{payload["max_tokens"]} output tokens and your prompt '
+                    'contains 8000 tokens"}')
+            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+
+        c._post_with_retries = fake  # type: ignore[assignment]
+        c.seen = seen  # type: ignore[attr-defined]
+        return c
+
+    def test_it_backs_off_to_the_room_the_server_reports(self):
+        c = self._clamping_client()
+        _, parsed, _ = c.act([{"role": "user", "content": "x"}], parse_walk)
+        assert parsed == "walk_to(1)"
+        assert c.seen[1] == 10240 - 8000 - 64
+        assert c.stats.budget_clamps == 1
+
+    def test_the_clamp_sticks_for_later_turns(self):
+        c = self._clamping_client()
+        c.act([{"role": "user", "content": "x"}], parse_walk)
+        assert c.max_tokens_ceiling <= 10240 - 8000 - 64
+
+    def test_an_unrelated_400_still_raises(self):
+        """Only a context-limit refusal carries a usable number. Swallowing
+        every 400 would hide the six-image limit that started all this."""
+        c = ModelClient("http://unused", "stub")
+
+        def fake(payload):
+            raise RuntimeError('HTTP 400: {"message":"At most 6 image(s)"}')
+
+        c._post_with_retries = fake  # type: ignore[assignment]
+        with pytest.raises(RuntimeError, match="At most 6 image"):
+            c.act([{"role": "user", "content": "x"}], parse_walk)
