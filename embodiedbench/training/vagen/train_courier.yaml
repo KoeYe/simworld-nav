@@ -13,7 +13,7 @@ envs:
     n_envs: 800
     data_source: courier_paris
     seed: [0, 800, 1]
-    max_turns: 20
+    max_turns: 8
     response_length_per_turn: 1024   # a cap, not a target: 48 truncated a 4B's
                                      # reasoning before its fenced call
     config:
@@ -21,7 +21,17 @@ envs:
       stride: block
       embodiment: human_on_foot
       hazards: true
-      max_images: 5
-      # album_root: /data/murray/paris_streets_v2/citycore-paris
+      max_images: 1
+      # One picture per turn, and 8 turns, because the whole trajectory is
+      # concatenated into a single prompt. A 640x480 frame costs ~380 tokens
+      # after the vision merge, so the harness's usual five-per-turn over 20
+      # turns is ~38k image tokens against an 8k budget. When the prompt is
+      # truncated the image tokens go with it, but multi_modal_data still
+      # lists every image, and get_rope_index then walks one grid too many:
+      #   RuntimeError: shape mismatch: value tensor of shape [3, 8145]
+      #   cannot be broadcast to indexing result of shape [3, 7765]
+      # -- a difference of exactly one image. This is an image budget, not a
+      # cosmetic default.
+      album_root: /data/murray/paris_streets_v2/citycore-paris
       # ^ uncomment for the sighted task. Without it the episode is text-only,
       #   which is the blind control, not the benchmark.

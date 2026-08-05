@@ -91,6 +91,13 @@ REINFORCE + batch mean baseline，masked policy loss。
 | Qwen2-VL-2B | full FT | 0.2812 → **0.8125**（lr=0 对照组：0.2812，纹丝不动） |
 | Qwen2-VL-2B | LoRA | 0.2812 → **1.0**（第 3 轮到顶） |
 | Qwen2.5-VL-7B | LoRA | 0.5 → **0.6875**，env_return 非零（0.0125） |
+| Qwen3-VL-4B | LoRA + progress | **没学到**，见下 |
+
+**Qwen3-VL-4B 那次要如实记一笔**：held-out progress 跑完 14 轮是
+`0.647 → 0.727 → 0.333 → 0.831 → 0.823 → 0.596 → 0.625 → 0.547` ——
+**围绕 0.65 的噪声，没有趋势**，`delivered` 全程 0。
+中途取第 8 轮的 0.823 说「在涨」是挑点，不成立。
+这也是把主线换到 verl/GRPO 的直接原因。
 
 一路上真正卡住的坑：optimizer 每次调用都被重建，state 全丢 —— 这是之前学不动的主因。
 其余是 OOM 链：参数快照放 GPU→改放 CPU、没开 gradient checkpointing→开、
@@ -235,7 +242,59 @@ held-out 曲线如果和 lr=0 分不开，那就不是学习。这条是硬要�
 - Qwen3.5-9B 权重已经下到 `/data/murray/hf`，但 vllm 0.12.0 不认 `Qwen3_5ForConditionalGeneration`；
   升级 vllm 会重新触发 cu130 / flashinfer 那个死结。想上 3.5 得先解决这个。
 
-**RL**
+**RL：VAGEN / verl（GRPO）**
+
+正式的 RL 走 VAGEN 的 verl 栈（`ymzhang0303/VAGEN`，vendor 在 `vendor/vagen`），
+我手写的 REINFORCE 只作为对照保留。
+
+环境：conda env **`vagen`**（python 3.12），严格按 `vendor/vagen/README.md` 装。
+
+```bash
+setsid nohup /data/murray/run_grpo_courier.sh > /data/murray/grpo_courier.log 2>&1 &
+```
+
+配好这套环境踩到的坑，按撞到的顺序（每一条都是真的会卡死的）：
+
+1. **conda ToS 没接受** → `conda create` 直接 exit 1。
+2. **`vendor/vagen/verl/` 是空目录** —— verl 是没初始化的 submodule，
+   而空目录会让 `import verl` 假装成功。`git submodule update --init --recursive`。
+3. **submodule 落在 `main` 的 commit 上，不是 `.gitmodules` 写的 `vagen-lite`** →
+   `ImportError: cannot import name 'compute_reward'`。必须 `git checkout vagen-lite`
+   （并先清掉 `main` 上遗留的嵌套 `recipe` submodule）。
+4. **flashinfer JIT 编译失败**（`error: math.h: No such file or directory`）→
+   `/usr/bin/nvcc` 是 CUDA 12.0 而 torch 是 cu128。换 sglang→vllm **没用**，
+   两个后端都要 flashinfer。真正的修法是在 env 里装 `cuda-nvcc=12.8` 并
+   `export CUDA_HOME=$CONDA_PREFIX`。
+5. **`curand.h` 找不到** —— conda 把头文件放在 `$CUDA_HOME/targets/x86_64-linux/include/`，
+   flashinfer 只找 `$CUDA_HOME/include/`。软链过去。
+   *（改完这两条要 `rm -rf ~/.cache/flashinfer`，否则复用失败的产物。）*
+6. **KV cache 不够** → `ROLLOUT_MEM=0.4` 太小，3B 权重就吃掉大半。用 0.7。
+7. **图像预算**（见下）。
+
+**图像预算是这个 benchmark 特有的约束。** courier 每回合最多 9 张图，
+一张 640×480 经 vision merge 约 **380 token**。5 张 × 20 回合 ≈ 38,000 图像 token。
+prompt 或 response 被截断时，image-pad token 跟着被砍，但 `multi_modal_data`
+仍然列着全部图片，`get_rope_index` 就会多走一张图的 grid：
+
+```
+RuntimeError: shape mismatch: value tensor of shape [3, 8145]
+cannot be broadcast to indexing result of shape [3, 7765]
+```
+
+差值恰好是一张图。**注意 response 侧同样要算** —— 多轮拼接里第一回合之后的
+observation 全在 response 段，只调 prompt 预算会以更小的差值再报一次同样的错。
+当前配置：`max_images=1`、`max_turns=8`、prompt 和 response 各 16384。
+
+代价要说清楚：**每回合只给 1 张图，agent 只能看到一条街的照片**，
+这削弱了视觉任务本身。要恢复多图，应该降低图片分辨率（380 token/图可以砍到 ~100），
+而不是继续砍回合数。
+
+**模型版本约束**：这套 frozen 依赖是 transformers 4.56.1 + sglang 0.5.2，
+**都不认识 `Qwen3VLForConditionalGeneration`**，所以 verl 这条路目前只能跑
+**Qwen2.5-VL**（用的 3B）。上 Qwen3-VL 需要升 transformers ≥4.57，会动这套
+已知能跑的组合，属于要单独验证的一步。
+
+**手写 REINFORCE（对照，不是主线）**
 
 - 目前只在 `--no-hazards`（无红灯、无路障）的最简设置上验证过学习。
 - 只跑到 `solo` tier，`pair/triple/shift/endless` 没训过。
