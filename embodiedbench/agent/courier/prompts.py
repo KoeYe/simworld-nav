@@ -77,6 +77,7 @@ OBSERVATION_TEMPLATE = """{memory}
 
 ### streets leaving this junction
 {candidates}
+(choose by the number at the start of a line; nothing else is a street)
 
 ### photographs
 {photographs}
@@ -239,7 +240,20 @@ def render_candidates(rows: list[dict]) -> str:
             parts.append(f"next junction {row['distance_m']:.0f} m")
         if row.get("numbers"):
             parts.append(f"numbers {row['numbers']}")
+        if row.get("blocked_seen"):
+            # What the courier saw with its own eyes last time it tried. The
+            # phone is still not told; this is memory, not routing. Without it
+            # the menu after a refusal is byte-identical to the menu before,
+            # and a policy re-picks the barrier -- 52 of 93 times, measured.
+            parts.append("(BLOCKED — you tried this and could not get past)")
         if row.get("seen"):
             parts.append("(you have walked this before)")
         lines.append(" — ".join(parts))
-    return "\n".join(lines)
+
+    body = "\n".join(lines)
+    if len(rows) == 1:
+        # A dead end reads as an ordinary one-line menu, and a policy used to
+        # two or three choices asks for street 2. Twenty of twenty-five
+        # no_such_street refusals were exactly that.
+        body += "\nThis is a dead end: street 1 is the only way on."
+    return body

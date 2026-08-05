@@ -759,6 +759,9 @@ class CourierEnv:
         # are time a courier that read the photograph never spends, so they are
         # the two numbers that say whether looking paid.
         self.blocked_attempts: int = 0
+        # Edges this courier has personally walked into and been turned back
+        # from. Not the phone's knowledge -- the courier's own eyes.
+        self.witnessed_blocks: set[tuple[str, str]] = set()
         self.slow_passages: int = 0
         # What is on the phone's screen. A map app does not switch off when you
         # put the phone in your pocket: the route it drew stays drawn and the
@@ -845,6 +848,7 @@ class CourierEnv:
         self.expired_count = 0
         self.turns = 0
         self.blocked_attempts = 0
+        self.witnessed_blocks = set()
         self.slow_passages = 0
         self.screen_route = []
         self.screen_target = None
@@ -1393,6 +1397,7 @@ class CourierEnv:
         for row in rows:
             row["image"] = self.frame_for(self.node_id, row["node"])
             row["signal_image"] = self.signal_frame_for(self.node_id, row["node"])
+            row["blocked_seen"] = (self.node_id, row["node"]) in self.witnessed_blocks
             if self.stride == Stride.BLOCK:
                 # What one call actually buys, so the courier can budget from the
                 # number it is shown. ``distance_m`` stays as it was -- the step
@@ -1588,7 +1593,26 @@ class CourierEnv:
         if numbers:
             noun = "number" if numbers.isdigit() else "numbers"
             text += f", outside {noun} {numbers}"
-        return text + "."
+        text += "."
+
+        # Say out loud whether this street is the one on the slip.
+        #
+        # This is not privileged information: it is string equality between two
+        # things already printed a few lines apart, the job line and this one.
+        # It is here because the comparison is the step policies skip. Measured
+        # on Qwen3-VL-4B over 40 episodes: 42 collect() attempts, 32 of them
+        # refused because it was not at the door -- 32 turns spent asking a
+        # question the observation had already answered. Nothing here says
+        # which way the address is; finding it is still the task.
+        order = self.active_order()
+        if order is not None:
+            target = order.target
+            if target.street_name == street:
+                text += (f" This is the street on the slip; the slip says "
+                         f"{target.number}.")
+            else:
+                text += f" The slip says {target.street_name}, which is not this street."
+        return text
 
     def clock_text(self) -> str:
         """Every job in hand and how long each has left.
@@ -1798,6 +1822,14 @@ class CourierEnv:
         # what the photograph was worth. Nothing before this moment mentions it.
         if self.obstacles.blocks(self.node_id, row["node"]):
             self.blocked_attempts += 1
+            # The courier is standing at the barrier. The phone still does not
+            # know -- a survey does not learn -- but a person who has just been
+            # stopped by a barrier can still see it on the next turn, and
+            # re-offering the street as though nothing happened is not realism,
+            # it is the opposite. Measured on Qwen3-VL-4B: 96 of 153 refused
+            # actions were way_blocked, and in 52 of 93 cases the very next
+            # action was the same street again, because the menu was identical.
+            self.witnessed_blocks.add((self.node_id, row["node"]))
             # Nothing is recorded. Whatever the courier now knows about this
             # street it knows the way a person does -- it was just standing at
             # the barrier -- and remembering it is the agent's job. The phone is

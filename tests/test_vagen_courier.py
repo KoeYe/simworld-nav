@@ -28,7 +28,14 @@ WALK = "THOUGHT: go\n```\nwalk_to(1)\n```"
 
 
 def run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro)
+    """asyncio.run per call.
+
+    get_event_loop() passed in isolation and failed under the full suite --
+    "There is no current event loop in thread 'MainThread'" -- because another
+    test had already closed the implicit loop. A helper that only works when
+    its file is run alone is worse than no helper.
+    """
+    return asyncio.run(coro)
 
 
 @pytest.fixture(scope="module")
