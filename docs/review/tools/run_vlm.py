@@ -36,6 +36,7 @@ OBSTACLES = Path("/data/murray/paris_obstacles/citycore-paris")
 PAVEMENT_OBSTACLES = Path("/data/murray/paris_obstacles_pavement/citycore-paris")
 
 ENDPOINT = "http://127.0.0.1:8200/v1/chat/completions"
+# Overridden by --port so two models can be evaluated side by side.
 
 
 def data_url(path: Path) -> str:
@@ -53,7 +54,8 @@ def rasterise(svg: str, out: Path) -> Path | None:
 
 
 def ask(model: str, system: str, text: str, images: list[str],
-        max_tokens: int, timeout: float = 300.0) -> str:
+        max_tokens: int, timeout: float = 300.0,
+        endpoint: str | None = None) -> str:
     content: list[dict] = [{"type": "text", "text": text}]
     for url in images:
         content.append({"type": "image_url", "image_url": {"url": url}})
@@ -65,14 +67,24 @@ def ask(model: str, system: str, text: str, images: list[str],
         "temperature": 0.0,
     }
     request = urllib.request.Request(
-        ENDPOINT, data=json.dumps(payload).encode(),
+        endpoint or ENDPOINT, data=json.dumps(payload).encode(),
         headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        body = json.loads(response.read().decode())
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            body = json.loads(response.read().decode())
+    except urllib.error.HTTPError as error:
+        # The server's own message, not just the status line. A bare
+        # "HTTP Error 400: Bad Request" fed back as the model's reply is
+        # indistinguishable from the model producing garbage, and that is
+        # exactly how a context-length overflow got counted as the model's
+        # format-error rate.
+        detail = error.read().decode(errors="replace")[:400]
+        raise RuntimeError(f"HTTP {error.code}: {detail}") from None
     return body["choices"][0]["message"]["content"]
 
 
 def run_episode(paris, args, seed: int, scratch: Path) -> dict:
+    endpoint = f"http://127.0.0.1:{getattr(args, 'port', 8200)}/v1/chat/completions"
     from embodiedbench.runtime.city.courier_env import CourierEnv
     from embodiedbench.agent.courier.session import CourierSession
 
@@ -108,9 +120,27 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
         started = time.time()
         try:
             reply = ask(args.model, system, observation.text, images,
-                        args.max_tokens)
-        except Exception as error:  # noqa: BLE001 - a dead server is a result
-            reply = f"(request failed: {type(error).__name__}: {error})"
+                        args.max_tokens, endpoint=endpoint)
+            infra_error = None
+        except Exception as error:  # noqa: BLE001
+            # A failed request is NOT a model output. Feeding the error string
+            # to the parser made it a format error, three in a row ended the
+            # episode, and 26 of 40 episodes died that way -- a number that
+            # reads as "the model cannot follow the reply format" and is
+            # actually the harness reporting its own broken requests.
+            infra_error = f"{type(error).__name__}: {error}"
+            reply = None
+
+        if infra_error is not None:
+            transcript.append({
+                "turn": turn + 1, "status": "infra_error", "action": None,
+                "error": infra_error, "latency_s": round(time.time() - started, 1),
+                "reply": None,
+            })
+            print(f"  seed {seed} turn {turn+1}: REQUEST FAILED: {infra_error[:160]}",
+                  flush=True)
+            break
+
         log = session.step(reply)
         transcript.append({
             "turn": turn + 1, "status": log.status, "action": log.action,
@@ -140,6 +170,9 @@ def main() -> int:
     parser.add_argument("--max-tokens", type=int, default=400)
     parser.add_argument("--out", type=Path,
                         default=REVIEW / "vlm_runs.json")
+    parser.add_argument("--port", type=int, default=8200,
+                        help="vLLM server port; lets two models be "
+                             "evaluated side by side")
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
