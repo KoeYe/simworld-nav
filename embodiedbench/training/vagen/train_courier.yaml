@@ -13,7 +13,7 @@ envs:
     n_envs: 800
     data_source: courier_paris
     seed: [0, 800, 1]
-    max_turns: 6
+    max_turns: 4
     response_length_per_turn: 1024   # a cap, not a target: 48 truncated a 4B's
                                      # reasoning before its fenced call
     config:

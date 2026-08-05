@@ -289,10 +289,36 @@ observation 全在 response 段，只调 prompt 预算会以更小的差值再�
 这削弱了视觉任务本身。要恢复多图，应该降低图片分辨率（380 token/图可以砍到 ~100），
 而不是继续砍回合数。
 
-**模型版本约束**：这套 frozen 依赖是 transformers 4.56.1 + sglang 0.5.2，
-**都不认识 `Qwen3VLForConditionalGeneration`**，所以 verl 这条路目前只能跑
-**Qwen2.5-VL**（用的 3B）。上 Qwen3-VL 需要升 transformers ≥4.57，会动这套
-已知能跑的组合，属于要单独验证的一步。
+**用 Qwen3-VL 需要两处改动**（已完成）：
+
+1. **升 transformers 4.56.1 → 4.57.1**。frozen 那套不认识
+   `Qwen3VLForConditionalGeneration`。注意 sglang 0.5.2 也不认识，但
+   **rollout 后端已经是 vllm，而 vllm 0.11.0 本来就支持 Qwen3-VL** ——
+   所以真正的障碍只有 transformers 一个。升级后 verl/vagen/vllm 全部仍能 import。
+2. **打补丁修 verl 的 mrope 分派**：
+   `python -m embodiedbench.training.vagen.patches.agent_loop_qwen3vl_rope`
+
+   `rl_dataset.py` 会按 processor 分派到 `qwen3_vl.get_rope_index`，
+   但**多轮训练走的 `agent_loop.py` 无条件用 qwen2_vl 的版本**。
+   更阴的是 Qwen3-VL 的 image_processor 名叫 `Qwen2VLImageProcessorFast`，
+   外层 `"Qwen2VLImageProcessor" in ...` 的判断照样通过 —— 不报错、不警告，
+   只是位置编码算错。补丁放在本仓库而不是直接改 `vendor/`（gitignore，改了没人能 review）。
+   幂等，`git submodule update` 后重跑即可。
+
+**24 GB × 4 上跑 4B 的可行配置**（两头夹得很紧，别随意动）：
+
+```
+ROLLOUT_MEM=0.7   PROMPT_LEN=3072   RESP_LEN=5120   max_turns=4   max_images=1
+```
+
+`ROLLOUT_MEM` 只有 0.7 能同时满足两边：0.5/0.6 时 KV cache 都放不下
+（`1.12 GiB KV cache is needed`），而 0.7 配上 32k 上下文又会在 backward OOM。
+所以是 **0.7 + 短上下文**，不是降 rollout 显存。
+
+代价：**只有 4 回合**。4B 在 benchmark 上跑满 25 回合都没送到，4 回合几乎不可能
+`traj_success > 0`。这一版只能验证「梯度在动、reward 有方差」，
+**验证不了「学会送快递」**。要给回合数，应该降每回合 token 成本
+（图片 640×480 ≈ 380 token → 448×336 ≈ 186），而不是继续砍回合。
 
 **手写 REINFORCE（对照，不是主线）**
 
