@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+source /data/murray/miniconda3/etc/profile.d/conda.sh
+conda activate vagen
+export HF_HOME=/data/murray/hf
+# flashinfer JIT-compiles against CUDA_HOME; /usr/bin/nvcc is 12.0
+# while torch is cu128, and the mismatch fails on math.h.
+export CUDA_HOME=/data/murray/miniconda3/envs/vagen
+export PATH="$CUDA_HOME/bin:$PATH"
+export CUDA_VISIBLE_DEVICES=1,2,4
+export MODEL_PATH=/data/murray/hf/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17
+export EXPERIMENT_DIR=/data/murray/exps/grpo_courier
+export N_GPUS=3
+export TRAIN_BS=6
+# 0.4 left the 3B weights resident with nothing over for KV cache.
+export ROLLOUT_MEM=0.7
+export SP=1
+export PROMPT_LEN=4096
+export RESP_LEN=10240
+exec bash /home/murray/simworld_nav/embodiedbench/training/vagen/train_grpo_courier.sh

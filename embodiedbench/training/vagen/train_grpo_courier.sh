@@ -25,6 +25,15 @@ DATASET_VAL=${REPO}/embodiedbench/training/vagen/val_courier.yaml
 MODEL_PATH=${MODEL_PATH:?set MODEL_PATH to a local checkpoint}
 
 export HYDRA_FULL_ERROR=1
+# Peer-to-peer between these cards hangs. A multi-GPU run dies with
+#   Watchdog caught collective operation timeout:
+#   WorkNCCL(SeqNum=3, OpType=BROADCAST, ...) ran for 600000ms
+# ten minutes into what looks like a healthy startup -- no error, no OOM, the
+# log simply stops. The same hang appeared when serving an 8B with
+# tensor-parallel 2 on this machine and the same switch cleared it. It costs
+# interconnect bandwidth, not correctness.
+export NCCL_P2P_DISABLE=${NCCL_P2P_DISABLE:-1}
+export NCCL_SHM_DISABLE=${NCCL_SHM_DISABLE:-1}
 # NOTE: do not set PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True here.
 # It looks like the right answer to the backward pass OOMing on a 1.92 GiB
 # allocation with 889 MiB free, but vLLM refuses to start with it:
@@ -86,6 +95,7 @@ PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
     algorithm.kl_ctrl.kl_coef=0.0 \
     actor_rollout_ref.model.path="${MODEL_PATH}" \
     actor_rollout_ref.model.use_remove_padding=True \
+    actor_rollout_ref.model.use_fused_kernels=True \
     actor_rollout_ref.model.enable_gradient_checkpointing=True \
     actor_rollout_ref.actor.optim.lr=1e-6 \
     actor_rollout_ref.actor.ppo_mini_batch_size=${TRAIN_BS:-2} \
@@ -96,14 +106,17 @@ PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
     actor_rollout_ref.actor.ulysses_sequence_parallel_size=${SP:-1} \
     actor_rollout_ref.actor.fsdp_config.optimizer_offload=True \
     actor_rollout_ref.actor.fsdp_config.param_offload=True \
+    actor_rollout_ref.actor.fsdp_config.offload_policy=True \
     actor_rollout_ref.ref.strategy=fsdp2 \
     actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu=1 \
     actor_rollout_ref.rollout.name=${ROLLOUT_BACKEND:-vllm} \
     actor_rollout_ref.rollout.mode=async \
-    actor_rollout_ref.rollout.n=4 \
+    actor_rollout_ref.rollout.n=${GROUP:-4} \
     actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
     actor_rollout_ref.rollout.gpu_memory_utilization=${ROLLOUT_MEM:-0.4} \
     actor_rollout_ref.rollout.enforce_eager=True \
+    actor_rollout_ref.rollout.max_num_seqs=${ROLLOUT_SEQS:-8} \
+    actor_rollout_ref.rollout.max_num_batched_tokens=${ROLLOUT_TOKENS:-16384} \
     actor_rollout_ref.rollout.free_cache_engine=True \
     actor_rollout_ref.rollout.log_prob_micro_batch_size_per_gpu=1 \
     actor_rollout_ref.rollout.multi_turn.enable=True \
