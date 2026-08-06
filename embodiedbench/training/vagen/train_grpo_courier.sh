@@ -37,6 +37,40 @@ export WANDB_MODE=${WANDB_MODE:-offline}
 export PYTHONPATH=${REPO}:${VAGEN}:${PYTHONPATH}
 mkdir -p "${EXPERIMENT_DIR}"
 
+# PREFLIGHT: torch must actually see the GPUs before ray is told there are
+# N of them.
+#
+# A GPU released moments earlier still lists free memory in nvidia-smi while
+# CUDA cannot open it yet, and torch then reports a smaller device_count than
+# CUDA_VISIBLE_DEVICES names. verl asks for the rank it was configured for and
+# dies with "device >= 0 && device < num_gpus ... device=2, num_gpus=2", which
+# reads like a framework bug about device indexing. It is not: it is launching
+# too soon after killing whatever held the card. Four separate GPU counts were
+# blamed for this before the cards were simply checked.
+# Counting is not enough: device_count has reported four while a later import
+# in the same run saw two. Every card is opened and written to here, which is
+# the only claim that matters.
+SEEN=$("${PYTHON:-python3}" - <<'PYEOF'
+import torch
+ok = 0
+for i in range(torch.cuda.device_count()):
+    try:
+        torch.zeros(8, device=f"cuda:{i}")
+        ok += 1
+    except Exception as error:
+        print(f"cuda:{i} unusable: {error}", flush=True)
+print(ok)
+PYEOF
+)
+SEEN=$(echo "${SEEN}" | tail -1)
+WANT=${N_GPUS:-1}
+if [ "${SEEN}" != "${WANT}" ]; then
+  echo "PREFLIGHT FAILED: torch sees ${SEEN} GPU(s), N_GPUS=${WANT}, CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
+  echo "the cards named are not all open yet -- wait for whatever held them to exit, then retry"
+  exit 1
+fi
+echo "PREFLIGHT: torch sees ${SEEN} GPU(s), as configured"
+
 cd "${VAGEN}" || exit 1
 
 PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
