@@ -60,8 +60,27 @@ THINK_BLOCKS = (
 # The server knows its own limits and says so in plain text when they are
 # broken. Reading that back is what keeps this layer model-agnostic: nothing
 # here has to be told a context size per model.
-CONTEXT_LIMIT = re.compile(r"maximum context length is (\d+) tokens", re.I)
-PROMPT_TOKENS = re.compile(r"prompt contains (\d+) tokens", re.I)
+# vLLM alone phrases this two ways depending on where the check fires:
+#   "This model's maximum context length is 10240 tokens. However, you
+#    requested 10000 output tokens and your prompt contains 8000 tokens"
+#   "Input length (10384) exceeds model's maximum context length (10240)."
+# Matching only the first let the second through as a fatal error and ended
+# Qwen3.5-9B episodes after a mean of 6.6 turns. Reading the server's limits
+# only works if it covers what the server actually says.
+CONTEXT_LIMIT = re.compile(
+    r"maximum context length is (\d+) tokens|maximum context length \((\d+)\)", re.I)
+PROMPT_TOKENS = re.compile(
+    r"prompt contains (\d+) tokens|Input length \((\d+)\)", re.I)
+
+
+def _first_group(match: re.Match[str] | None) -> int | None:
+    """The one group that matched, whichever alternative it came from."""
+    if match is None:
+        return None
+    for value in match.groups():
+        if value is not None:
+            return int(value)
+    return None
 
 
 @dataclass
@@ -208,13 +227,13 @@ class ModelClient:
                 # a 10240-token model leaves 240 for the prompt, and every turn
                 # 400s. The server names both numbers in the refusal, so use
                 # them rather than guessing a ceiling per model.
-                limit = CONTEXT_LIMIT.search(str(error))
-                used = PROMPT_TOKENS.search(str(error))
+                limit = _first_group(CONTEXT_LIMIT.search(str(error)))
+                used = _first_group(PROMPT_TOKENS.search(str(error)))
                 room = None
-                if limit and used:
-                    room = int(limit.group(1)) - int(used.group(1)) - 64
-                elif limit:
-                    room = int(limit.group(1)) // 4
+                if limit is not None and used is not None:
+                    room = limit - used - 64
+                elif limit is not None:
+                    room = limit // 4
                 if room is not None and 128 <= room < budget:
                     self.stats.budget_clamps += 1
                     self.max_tokens_ceiling = min(self.max_tokens_ceiling, room)
@@ -225,7 +244,7 @@ class ModelClient:
                 # reasoning model behind a 10k context runs out this way after
                 # a handful of turns, and the alternative is a per-model
                 # history setting -- another number to guess wrong.
-                if limit and len(conversation) > 2:
+                if limit is not None and len(conversation) > 2:
                     self.stats.history_drops += 1
                     conversation = conversation[2:]
                     budget = min(budget, self.max_tokens)

@@ -256,3 +256,34 @@ class TestAnOverlongPromptShedsHistoryRatherThanDying:
         with pytest.raises(RuntimeError):
             c.act([{"role": "system", "content": "s"},
                    {"role": "user", "content": "u"}], parse_walk)
+
+
+class TestBothWordingsOfTheContextRefusalAreUnderstood:
+    """vLLM phrases the same refusal two ways depending on where it fires.
+
+    Handling only the first shape let the second through as fatal and ended
+    Qwen3.5-9B episodes after a mean of 6.6 turns -- the harness reading the
+    server's limits, but only when the server used the words it expected.
+    """
+
+    @pytest.mark.parametrize("message", [
+        "This model's maximum context length is 10240 tokens. However, you "
+        "requested 4000 output tokens and your prompt contains 10200 tokens",
+        "Input length (10384) exceeds model's maximum context length (10240).",
+    ])
+    def test_an_overlong_prompt_sheds_history_either_way(self, message):
+        c = ModelClient("http://unused", "stub", max_tokens=512)
+        seen = []
+
+        def fake(payload):
+            seen.append(len(payload["messages"]))
+            if len(payload["messages"]) > 3:
+                raise RuntimeError('HTTP 400: {"message":"%s"}' % message)
+            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+
+        c._post_with_retries = fake  # type: ignore[assignment]
+        convo = [{"role": "system", "content": "s"}]
+        convo += [{"role": "user", "content": "u"}, {"role": "assistant", "content": "a"}] * 3
+        _, parsed, _ = c.act(convo, parse_walk)
+        assert parsed == "walk_to(1)", f"not handled: {message[:40]}"
+        assert c.stats.history_drops >= 1
