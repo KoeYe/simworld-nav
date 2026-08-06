@@ -287,3 +287,41 @@ class TestBothWordingsOfTheContextRefusalAreUnderstood:
         _, parsed, _ = c.act(convo, parse_walk)
         assert parsed == "walk_to(1)", f"not handled: {message[:40]}"
         assert c.stats.history_drops >= 1
+
+
+class TestATimeoutIsQueueingNotAnEndedEpisode:
+    """A busy server is not a result.
+
+    Running two evaluations against one server doubled latency past the
+    deadline; 16 of 40 episodes ended on a timeout and were recorded as having
+    finished, which pulled the mean episode length from 35 turns to 18 and made
+    the delivery rate an underestimate of unknown size. Same class of mistake
+    as parsing an HTTP error as the model's reply.
+    """
+
+    def test_a_timeout_is_retried_more_patiently_than_other_faults(self):
+        c = ModelClient("http://unused", "stub", max_transport_retries=1,
+                        max_timeout_retries=4)
+        tries = []
+
+        def flaky(payload):
+            tries.append(1)
+            if len(tries) < 4:
+                raise TimeoutError("timed out")
+            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+
+        c._post = flaky  # type: ignore[assignment]
+        c._sleep_patch = True
+        import embodiedbench.agent.courier.model_io as mio
+        real_sleep, mio.time.sleep = mio.time.sleep, lambda _: None
+        try:
+            out = c._post_with_retries({})
+        finally:
+            mio.time.sleep = real_sleep
+        assert out["choices"][0]["message"]["content"].startswith("THOUGHT")
+        assert c.stats.timeouts == 3
+
+    def test_timeouts_are_counted_in_the_summary(self):
+        c = ModelClient("http://unused", "stub")
+        c.stats.timeouts = 2
+        assert c.stats.as_dict()["timeouts"] == 2

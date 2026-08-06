@@ -93,6 +93,7 @@ class CallStats:
     budget_clamps: int = 0
     history_drops: int = 0
     transport_retries: int = 0
+    timeouts: int = 0
     unparseable: int = 0
 
     def as_dict(self) -> dict[str, int]:
@@ -103,6 +104,7 @@ class CallStats:
             "budget_clamps": self.budget_clamps,
             "history_drops": self.history_drops,
             "transport_retries": self.transport_retries,
+            "timeouts": self.timeouts,
             "unparseable_turns": self.unparseable,
         }
 
@@ -148,6 +150,7 @@ class ModelClient:
         max_tokens: int = 2048,
         max_requeries: int = 3,
         max_transport_retries: int = 2,
+        max_timeout_retries: int = 5,
         truncation_growth: float = 2.0,
         max_tokens_ceiling: int = 8192,
         timeout: float = 600.0,
@@ -157,6 +160,7 @@ class ModelClient:
         self.max_tokens = max_tokens
         self.max_requeries = max_requeries
         self.max_transport_retries = max_transport_retries
+        self.max_timeout_retries = max_timeout_retries
         self.truncation_growth = truncation_growth
         self.max_tokens_ceiling = max_tokens_ceiling
         self.timeout = timeout
@@ -180,7 +184,8 @@ class ModelClient:
 
     def _post_with_retries(self, payload: dict[str, Any]) -> dict[str, Any]:
         last: Exception | None = None
-        for attempt in range(self.max_transport_retries + 1):
+        attempt = 0
+        while True:
             try:
                 return self._post(payload)
             except Exception as error:  # noqa: BLE001
@@ -190,9 +195,22 @@ class ModelClient:
                 # worth another go.
                 if isinstance(error, RuntimeError) and str(error).startswith("HTTP 4"):
                     raise
-                if attempt < self.max_transport_retries:
+                # A timeout is a busy server, not a broken request, and it gets
+                # its own larger allowance. Two evaluations sharing one server
+                # doubled latency past the deadline and killed 16 of 40
+                # episodes outright -- a queueing artefact recorded as the
+                # episode ending, which is the same class of mistake as an
+                # HTTP error recorded as the model's reply.
+                timed_out = isinstance(error, TimeoutError) or "timed out" in str(error)
+                allowance = self.max_timeout_retries if timed_out else self.max_transport_retries
+                if attempt >= allowance:
+                    break
+                if timed_out:
+                    self.stats.timeouts += 1
+                else:
                     self.stats.transport_retries += 1
-                    time.sleep(2 ** attempt)
+                time.sleep(min(2 ** attempt, 30))
+                attempt += 1
         raise last  # type: ignore[misc]
 
     # ── one turn ─────────────────────────────────────────────────────────────
