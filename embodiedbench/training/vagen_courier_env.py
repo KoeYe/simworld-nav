@@ -84,6 +84,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
     ``max_turns``       episode length cap; 0 means the harness's own budget
     ``city``            name used in the prompt (default ``Paris``)
     ``progress_weight`` dense reward for closing on the target (default 0.0)
+    ``image_max_side``  downscale frames to this long side (0 = leave alone)
     ==================  =======================================================
 
     **On ``progress_weight``.** GRPO normalises the advantage within a group of
@@ -112,6 +113,14 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self.max_turns = int(config.get("max_turns", 0))
         self.city = config.get("city", "Paris")
         self.progress_weight = float(config.get("progress_weight", 0.0))
+        # Turns are what this task needs and images are what crowds them out.
+        # A 640x480 frame costs ~380 tokens after the vision merge, so at four
+        # turns -- which is what the token budget forced -- the window covers
+        # two of the ten successful collections measured on this model, which
+        # happened on turns 2, 3, 5, 5, 8, 14, 14, 17, 26 and 36. Halving the
+        # long side quarters the pixels and roughly quarters the token cost,
+        # and buys back the turns that the signal actually lives in.
+        self.image_max_side = int(config.get("image_max_side", 0))
 
         # The road network is the expensive part of a reset -- parsing it per
         # episode would dominate rollout time in a trainer that resets
@@ -275,7 +284,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
                 dropped += 1
                 continue
             try:
-                chosen.append(Image.open(frame.path).convert("RGB"))
+                chosen.append(self._fit(Image.open(frame.path).convert("RGB")))
             except Exception:  # noqa: BLE001 - a bad frame is the album's problem
                 dropped += 1
         for frame in drawings:
@@ -288,6 +297,17 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             else:
                 chosen.append(raster)
         return chosen, dropped
+
+    def _fit(self, image: Any) -> Any:
+        """Downscale to the configured long side, preserving aspect ratio."""
+        if not self.image_max_side:
+            return image
+        longest = max(image.size)
+        if longest <= self.image_max_side:
+            return image
+        scale = self.image_max_side / longest
+        size = (max(1, round(image.width * scale)), max(1, round(image.height * scale)))
+        return image.resize(size)
 
     def _rasterise(self, svg: str, index: int) -> Any:
         """The phone map as pixels, or nothing.

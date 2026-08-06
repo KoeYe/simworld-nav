@@ -13,7 +13,7 @@ envs:
     n_envs: 800
     data_source: courier_paris
     seed: [0, 800, 1]
-    max_turns: 4
+    max_turns: 12
     response_length_per_turn: 1024   # a cap, not a target: 48 truncated a 4B's
                                      # reasoning before its fenced call
     config:
@@ -27,6 +27,11 @@ envs:
       # group scores the same and there is no advantage to push on.
       progress_weight: 1.0
       max_images: 1
+      # 320px long side is ~1/4 the tokens of the 640x480 frame,
+      # which is what pays for 12 turns instead of 4. Successful
+      # collections were measured on turns 2,3,5,5,8,14,14,17,26,36:
+      # a four-turn window saw two of them.
+      image_max_side: 320
       # One picture per turn, and 8 turns, because the whole trajectory is
       # concatenated into a single prompt. A 640x480 frame costs ~380 tokens
       # after the vision merge, so the harness's usual five-per-turn over 20

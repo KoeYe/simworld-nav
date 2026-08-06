@@ -189,3 +189,35 @@ class TestTheShapedTermStaysOutOfTheBenchmarkScore:
             scores.append(info["progress_score"])
             run(env.close())
         assert len(set(scores)) > 1, f"no variance across seeds: {scores}"
+
+
+class TestImagesCanBeMadeCheaperToBuyTurns:
+    """Token budget is turns. A 640x480 frame is ~380 tokens and the four-turn
+    window it forced covered two of the ten successful collections this model
+    managed, which fell on turns 2, 3, 5, 5, 8, 14, 14, 17, 26 and 36."""
+
+    def test_frames_are_downscaled_to_the_configured_side(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        env = CourierGymEnv({**config, "image_max_side": 320})
+        obs, _ = run(env.reset(0))
+        for image in obs["multi_modal_input"][IMAGE_PLACEHOLDER]:
+            assert max(image.size) <= 320
+        run(env.close())
+
+    def test_zero_leaves_the_frame_alone(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        env = CourierGymEnv({**config, "image_max_side": 0})
+        obs, _ = run(env.reset(0))
+        assert max(obs["multi_modal_input"][IMAGE_PLACEHOLDER][0].size) == 640
+        run(env.close())
+
+    def test_aspect_ratio_survives(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        env = CourierGymEnv({**config, "image_max_side": 320})
+        obs, _ = run(env.reset(0))
+        w, h = obs["multi_modal_input"][IMAGE_PLACEHOLDER][0].size
+        assert abs(w / h - 640 / 480) < 0.02
+        run(env.close())

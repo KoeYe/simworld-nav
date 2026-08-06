@@ -5,7 +5,7 @@ envs:
     n_envs: 64
     data_source: courier_paris_val
     seed: [1000, 1064, 1]
-    max_turns: 4
+    max_turns: 12
     response_length_per_turn: 1024
     config:
       difficulty: solo
@@ -18,6 +18,11 @@ envs:
       # trick gets quoted as a benchmark result.
       progress_weight: 0.0
       max_images: 1
+      # 320px long side is ~1/4 the tokens of the 640x480 frame,
+      # which is what pays for 12 turns instead of 4. Successful
+      # collections were measured on turns 2,3,5,5,8,14,14,17,26,36:
+      # a four-turn window saw two of them.
+      image_max_side: 320
       # One picture per turn, and 8 turns, because the whole trajectory is
       # concatenated into a single prompt. A 640x480 frame costs ~380 tokens
       # after the vision merge, so the harness's usual five-per-turn over 20
