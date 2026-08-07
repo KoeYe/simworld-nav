@@ -5,7 +5,7 @@ envs:
     n_envs: 64
     data_source: courier_paris_val
     seed: [1000, 1064, 1]
-    max_turns: 32
+    max_turns: 50
     response_length_per_turn: 1024
     config:
       difficulty: solo

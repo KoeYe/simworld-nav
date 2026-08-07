@@ -221,3 +221,46 @@ class TestImagesCanBeMadeCheaperToBuyTurns:
         w, h = obs["multi_modal_input"][IMAGE_PLACEHOLDER][0].size
         assert abs(w / h - 640 / 480) < 0.02
         run(env.close())
+
+
+class TestTheJobIsMeasuredInMoney:
+    """Earnings are what a courier is actually judged on.
+
+    The fee is 3.00 plus a cent a metre, paid in full on time and in part when
+    late, so punctuality and job size are inside the number already. Nothing
+    about it was chosen here, unlike env_return's +1.0/+/-0.5/+0.1/-1.0.
+
+    It is reported, not optimised. Across 40 evaluation episodes earnings were
+    non-zero in exactly the 8 that delivered, so a policy that has never
+    delivered sees a constant zero -- no variance, no gradient.
+    """
+
+    def test_earnings_are_reported_every_turn(self, config):
+        env = CourierGymEnv(config)
+        run(env.reset(0))
+        _, _, _, info = run(env.step(WALK))
+        assert "earnings" in info and "earnings_per_hour" in info
+        run(env.close())
+
+    def test_earnings_are_zero_until_something_is_delivered(self, config):
+        env = CourierGymEnv(config)
+        run(env.reset(0))
+        for _ in range(4):
+            _, _, done, info = run(env.step(WALK))
+            if done:
+                break
+            assert info["earnings"] == 0.0 or info["delivered"]
+        run(env.close())
+
+    def test_shaping_never_touches_earnings(self, config):
+        """The training objective may be anything; the money may not move."""
+        plain = CourierGymEnv(config)
+        shaped = CourierGymEnv({**config, "progress_weight": 1.0})
+        run(plain.reset(0)); run(shaped.reset(0))
+        for _ in range(4):
+            _, _, d1, i1 = run(plain.step(WALK))
+            _, _, d2, i2 = run(shaped.step(WALK))
+            assert i1["earnings"] == i2["earnings"]
+            if d1 or d2:
+                break
+        run(plain.close()); run(shaped.close())

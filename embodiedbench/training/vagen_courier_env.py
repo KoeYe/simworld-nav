@@ -214,6 +214,21 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             "on_time": summary.get("on_time"),
             # The episode return the benchmark scores. Carried so a trainer can
             # log the real number next to whatever objective it optimises.
+            # What the job actually paid. This is the courier's own measure of
+            # a shift and it is defined by the task rather than by constants
+            # chosen here: the fee is 3.00 plus 0.01 a metre, full on time and
+            # a fraction late, so punctuality and distance are already inside
+            # it. env_return, by contrast, is +1.0 a delivery, +/-0.5 for
+            # punctuality, +0.1 a collection and -1.0 for a red light -- four
+            # numbers with no external justification.
+            #
+            # It is reported and never optimised. Earnings are zero unless a
+            # delivery completes, and traj_success has been zero on every RL
+            # measurement so far, so training against money directly would hand
+            # the optimiser a constant and no gradient at all. That is the same
+            # sparsity that progress shaping exists to bridge.
+            "earnings": float(summary.get("earnings") or 0.0),
+            "earnings_per_hour": float(summary.get("earnings_per_hour") or 0.0),
             "env_return": float(self._session.run.total_reward),
             "progress_score": round(self._progress_cm / PROGRESS_SCALE_CM, 4),
             "step_progress": round(step_progress, 4),
