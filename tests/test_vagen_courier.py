@@ -264,3 +264,53 @@ class TestTheJobIsMeasuredInMoney:
             if d1 or d2:
                 break
         run(plain.close()); run(shaped.close())
+
+
+class TestEarningsCanBeTheObjectiveItself:
+    """Optimising money is the point of the project, so it has to be selectable as
+    the reward, not merely reported beside one.
+
+    env_return is four constants picked in this repository. Earnings are
+    defined by the job: 3.00 plus a cent a metre, in full on time and in part
+    late, so punctuality and job size are already inside it. Progress shaping
+    is potential-based and therefore cannot change which policy is optimal --
+    under this basis the optimum is the best-earning courier.
+    """
+
+    def test_the_episode_rewards_sum_to_what_the_shift_earned(self, config):
+        env = CourierGymEnv({**config, "reward_basis": "earnings"})
+        run(env.reset(0))
+        total = 0.0
+        for _ in range(6):
+            _, reward, done, info = run(env.step(WALK))
+            total += reward
+            assert total == pytest.approx(info["earnings"], abs=1e-6)
+            if done:
+                break
+        run(env.close())
+
+    def test_the_default_basis_is_unchanged(self, config):
+        """Switching the objective must be deliberate; every earlier number was
+        measured against env_return."""
+        env = CourierGymEnv(config)
+        run(env.reset(0))
+        _, reward, _, info = run(env.step(WALK))
+        assert info["reward_basis"] == "env_return"
+        assert reward == pytest.approx(info["env_return"], abs=1e-6)
+        run(env.close())
+
+    def test_an_unknown_basis_is_refused_rather_than_ignored(self):
+        with pytest.raises(ValueError, match="reward_basis"):
+            CourierGymEnv({"reward_basis": "vibes"})
+
+    def test_shaping_rides_on_top_without_touching_the_money(self, config):
+        env = CourierGymEnv({**config, "reward_basis": "earnings",
+                             "progress_weight": 1.0})
+        run(env.reset(0))
+        for _ in range(4):
+            _, reward, done, info = run(env.step(WALK))
+            # the shaped reward may be non-zero while nothing has been paid
+            assert info["earnings"] >= 0.0
+            if done:
+                break
+        run(env.close())

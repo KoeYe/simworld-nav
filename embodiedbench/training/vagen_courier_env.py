@@ -83,6 +83,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
     ``max_images``      per-turn image cap (default 5)
     ``max_turns``       episode length cap; 0 means the harness's own budget
     ``city``            name used in the prompt (default ``Paris``)
+    ``reward_basis``    ``earnings`` (the job's own measure) or ``env_return``
     ``progress_weight`` dense reward for closing on the target (default 0.0)
     ``image_max_side``  downscale frames to this long side (0 = leave alone)
     ==================  =======================================================
@@ -113,6 +114,23 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self.max_turns = int(config.get("max_turns", 0))
         self.city = config.get("city", "Paris")
         self.progress_weight = float(config.get("progress_weight", 0.0))
+        # What the policy is ultimately being paid to maximise.
+        #
+        # ``env_return`` is +1.0 a delivery, +/-0.5 for punctuality, +0.1 a
+        # collection and -1.0 for a red light: four constants chosen in this
+        # repository, none of them derived from the task. ``earnings`` is the
+        # fee the job actually pays -- 3.00 plus a cent a metre, in full when
+        # on time and in part when late -- so punctuality and job size are
+        # inside the number rather than bolted onto it, and a policy that
+        # maximises it is a courier that earns.
+        #
+        # Progress shaping sits on top of whichever basis is chosen. It is
+        # potential-based, so it cannot change which policy is optimal: the
+        # optimum under ``earnings`` remains the best-earning courier.
+        self.reward_basis = str(config.get("reward_basis", "env_return"))
+        if self.reward_basis not in ("earnings", "env_return"):
+            raise ValueError(f"unknown reward_basis {self.reward_basis!r}")
+        self._last_earnings = 0.0
         # Turns are what this task needs and images are what crowds them out.
         # A 640x480 frame costs ~380 tokens after the vision merge, so at four
         # turns -- which is what the token budget forced -- the window covers
@@ -168,6 +186,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self._session = CourierSession(self._env, city=self.city)
         self._turns = 0
         self._progress_cm = 0.0
+        self._last_earnings = 0.0
 
         obs, dropped = self._observation()
         return obs, {"seed": int(seed), "images_dropped": dropped,
@@ -181,7 +200,14 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         before_cm, before_target = self._remaining_cm()
         log = self._session.step(action_str)
         self._turns += 1
-        reward = float(log.reward or 0.0)
+
+        # The turn's pay, as a delta, so the episode's rewards sum to what the
+        # shift earned. The harness's own step reward is the alternative basis.
+        earned_now = float(self._env.summary().get("earnings") or 0.0)
+        earned_this_turn = earned_now - self._last_earnings
+        self._last_earnings = earned_now
+        reward = (earned_this_turn if self.reward_basis == "earnings"
+                  else float(log.reward or 0.0))
 
         # Potential-based shaping, per turn rather than end-to-end. Collecting a
         # parcel switches the target from the pickup to the dropoff and the two
@@ -227,6 +253,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             # measurement so far, so training against money directly would hand
             # the optimiser a constant and no gradient at all. That is the same
             # sparsity that progress shaping exists to bridge.
+            "reward_basis": self.reward_basis,
             "earnings": float(summary.get("earnings") or 0.0),
             "earnings_per_hour": float(summary.get("earnings_per_hour") or 0.0),
             "env_return": float(self._session.run.total_reward),
