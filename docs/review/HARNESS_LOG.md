@@ -322,6 +322,62 @@ while `gpu_memory_utilization` is global -- so adding a card someone else is
 using cuts the budget on the empty ones too. Three empty cards at 0.88 gave
 6.11 GiB of KV; six cards including shared ones at 0.72 gave 2.34.
 
+## The measurement was the problem, not just the environment
+
+Four bugs were found in one day by reading, and then a fifth thing was found
+that mattered more than all of them: **the number being used to decide whether
+any of it helped could not tell a real effect from noise.**
+
+Validation is 64 held-out seeds, decoded greedily -- `do_sample: False`,
+`temperature: 0`. Deterministic, so the same policy gives the same answer
+twice. It is not *stable*: one token earlier in the prompt sends a forty-turn
+trajectory somewhere else entirely. Between two runs the only change was
+`check_order()` replying `Job 1` instead of `Job 0`, and held-out earnings went
+1.0619 -> 0.6023 while success went 23.4% -> 14.1%.
+
+Both of those were read here as results before they were read as noise. The
+first was written up as "the bug fixes raised the baseline 16%". The second
+looked like a 43% regression caused by renumbering the jobs. With 64 binary
+episodes the standard error on a success rate is about five points, so 23.4%
+and 14.1% are 1.9 standard errors apart -- which is to say, nothing.
+
+The fix costs nothing and was sitting in the data the whole time. Every
+validation runs **the same 64 seeds in the same order**, so the two are paired,
+and most of the variance between them is *which seeds are hard* -- which
+cancels when each seed is compared against itself. What is left is the seeds
+whose outcome actually changed. McNemar's exact test on those counts, plus the
+paired difference in earnings for the seeds that improved without crossing
+zero, is several times more sensitive at no extra compute. Only the mean was
+being kept, so the pairing was being thrown away every time.
+
+`trainer.validation_data_dir` dumps the per-episode results;
+`docs/review/tools/paired_validation.py` does the comparison, and was written
+before the first dump landed so the test could not be chosen after seeing the
+numbers.
+
+**The general lesson, and it is the one this whole log keeps arriving at from
+different directions: a benchmark's headline number is a measuring instrument,
+and an instrument that has never had its own noise floor measured cannot
+support the conclusions being drawn from it.** Four rounds of environment work
+were justified by comparisons of single 40-seed runs. Those comparisons had a
+noise floor of several points and nobody had checked.
+
+### And one self-inflicted wound worth recording
+
+The comment explaining `validation_data_dir` was written into the middle of the
+launch command's backslash continuation. A comment line ends the continuation,
+so the last three arguments -- checkpoint directory, rollout dump, validation
+dump -- were silently discarded, and a run started with none of them. Nothing
+failed. Training proceeded normally and simply stopped writing the files the
+analysis depends on. The only evidence was `'rollout_data_dir': None`, ten
+thousand lines into the resolved config.
+
+It is the same shape as everything else here: **the failure was silent, it
+looked like normal operation, and what made it findable was checking the thing
+that was supposed to have happened rather than the thing that did.** A test now
+walks every launch script and asserts no continued line is followed by a
+comment.
+
 ## The honest state
 
 Reward has not yet been shown to rise. The one run that reached a second
