@@ -112,6 +112,13 @@ class CourierSession:
         self.memory = CourierMemory()
         self.spend = Spend()
         self.run = CourierRun(spend=self.spend, budgets=self.budgets, memory=self.memory)
+        # How many times in a row the identical call has been refused, and what
+        # it was. Four, because three is a run a policy can plausibly be working
+        # through -- of the measured runs, every one of length 2 or 3 was a
+        # model trying something adjacent, and every one of length 5 or more was
+        # a model repeating itself word for word.
+        self._repeats = 0
+        self._last_refused: str | None = None
         self.feedback = ""
         self.allowed = list(env.allowed_tool_names())
         self.tools = [TOOLS_BY_NAME[name] for name in self.allowed]
@@ -222,6 +229,8 @@ class CourierSession:
 
     # ── one turn ─────────────────────────────────────────────────────────────
 
+    STUCK_REPEATS = 4
+
     def step(self, reply: str) -> TurnLog:
         """Parse one model reply, execute it, charge for it, and record it."""
         observation = self.observe()
@@ -276,8 +285,27 @@ class CourierSession:
         turn.memory = self.memory.to_dict()
         self.run.turns.append(turn)
 
+        if not outcome.ok and turn.action == self._last_refused:
+            self._repeats += 1
+        else:
+            self._repeats = 0 if outcome.ok else 1
+        self._last_refused = None if outcome.ok else turn.action
+
         if outcome.finished or self.env.shift_over:
             self._finish("delivered" if outcome.finished else "shift_over")
+        elif self._repeats >= self.STUCK_REPEATS:
+            # The same refused call, over and over, with the refusal unchanged.
+            # This is not a courier working a problem: on 22 measured episodes
+            # it was 47 turns -- 6.8% of every turn spent -- and one episode
+            # made the identical refused call 28 times in a row while its own
+            # reasoning said "the order cannot be collected". Nothing in the
+            # remaining turns can differ, because nothing in the world has.
+            #
+            # It ends the session, not the city: the environment is not allowed
+            # to disappear because the courier pressed the wrong button. And it
+            # cannot be gamed, because a shift that stops early earns nothing
+            # extra -- stopping is never better than carrying on.
+            self._finish("stuck")
         else:
             stopped = budget_exceeded(self.spend, self.budgets)
             if stopped:

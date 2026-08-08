@@ -968,3 +968,71 @@ class TestPromptDoesNotLeak:
         # What is left is the runbook that does not need a phone: read the doors
         # and follow the numbers.
         assert "look(k)" in hard
+
+
+class TestTheSameRefusalFourTimesEndsTheSession:
+    """A courier repeating one refused call is not working a problem.
+
+    On the 22 episodes that actually ran, 47 turns -- 6.8% of every turn spent
+    -- went into repeating an identical refused call, and one episode made the
+    same one 28 times in a row while its own reasoning said "the order cannot
+    be collected". Nothing in the remaining turns can differ, because nothing
+    in the world has.
+
+    It ends the session, not the city: the environment does not disappear
+    because the courier pressed the wrong button, and a shift that stops early
+    earns nothing extra, so there is nothing to game.
+    """
+
+    def session(self):
+        from embodiedbench.agent.courier.session import CourierSession
+        from embodiedbench.runtime.city.courier_env import CourierEnv
+        from pathlib import Path
+
+        from embodiedbench.compiler.road_network import build_road_network
+
+        maps = (Path(__file__).resolve().parents[1] / "vendor" / "vagen"
+                / "vagen" / "envs" / "deliverybench" / "maps")
+        paris = build_road_network(maps / "citycore-paris",
+                                   map_name="citycore-paris")
+        env = CourierEnv(paris, seed=19, difficulty="solo", stride="block")
+        env.reset()
+        return CourierSession(env, city="Paris")
+
+    def refuse(self, session, times, call="navigate(9)"):
+        for _ in range(times):
+            if session.finished:
+                break
+            session.step(f"THOUGHT: x\n```\n{call}\n```")
+        return session
+
+    def test_four_identical_refusals_stop_it(self):
+        session = self.refuse(self.session(), 6)
+        assert session.finished
+        assert session.run.termination_reason == "stuck"
+        assert len(session.run.turns) == 4
+
+    def test_three_are_allowed(self):
+        """Three is a run a policy can plausibly be working through; every
+        measured run of 2 or 3 was a model trying something adjacent."""
+        session = self.refuse(self.session(), 3)
+        assert not session.finished
+
+    def test_a_different_refused_call_resets_the_count(self):
+        session = self.session()
+        self.refuse(session, 3, "navigate(9)")
+        self.refuse(session, 3, "navigate(8)")
+        assert not session.finished
+
+    def test_an_accepted_call_in_between_resets_the_count(self):
+        session = self.session()
+        self.refuse(session, 3, "navigate(9)")
+        session.step("THOUGHT: x\n```\ncheck_order()\n```")
+        self.refuse(session, 3, "navigate(9)")
+        assert not session.finished
+
+    def test_a_working_courier_is_never_stopped(self):
+        session = self.session()
+        for _ in range(8):
+            session.step("THOUGHT: x\n```\ncheck_order()\n```")
+        assert not session.finished
