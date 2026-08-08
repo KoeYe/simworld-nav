@@ -30,7 +30,18 @@ envs:
       # env_return. Without it GRPO's first step logged reward_variance 0.0
       # and grad_norm 0.0 -- a 3B never delivers, so every sample in the
       # group scores the same and there is no advantage to push on.
-      progress_weight: 0.2
+      # Off. The ladder was for a policy that never delivered: a group of
+      # four all scoring zero has no advantage to push on. Success is now
+      # 17.2% held-out, so 53% of groups contain at least one paying episode
+      # and the money has variance of its own.
+      #
+      # Left on, it drowns the objective. Distance accumulates over forty
+      # turns while a fee is one payment that rarely lands, so even at 0.2 the
+      # split at step 20 was 2.22 shaping against 0.077 earnings -- 96.7% of
+      # the gradient was "walk closer". Training score rose to its maximum
+      # while held-out earnings fell 90% and deliveries went 17.2% -> 1.6%.
+      # The policy learned exactly what it was paid to learn.
+      progress_weight: 0.0
       max_images: 1
       # 320px long side is ~1/4 the tokens of the 640x480 frame,
       # which is what pays for 12 turns instead of 4. Successful
