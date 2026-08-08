@@ -140,6 +140,15 @@ PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
     trainer.total_epochs=10 \
     trainer.project_name=${PROJECT_NAME} \
     trainer.experiment_name=${EXPERIMENT_NAME} \
+    # Per-episode validation results, not just the mean. Two validations are
+    # 64 greedy episodes each on the same 64 seeds, and comparing their means
+    # is comparing two proportions with a standard error of about 5 points --
+    # so a real 5-point gain and pure noise look identical. The episodes are
+    # paired by construction (same seeds, same order), and a paired test looks
+    # only at the seeds that changed, which is several times more sensitive at
+    # no extra compute. Without this dump only the mean survives and the
+    # pairing is thrown away.
     trainer.default_local_dir="${EXPERIMENT_DIR}/verl_checkpoints" \
     trainer.rollout_data_dir="${EXPERIMENT_DIR}/rollout_data" \
+    trainer.validation_data_dir="${EXPERIMENT_DIR}/validation_data" \
     2>&1 | tee "${EXPERIMENT_DIR}/${EXPERIMENT_NAME}.log"
