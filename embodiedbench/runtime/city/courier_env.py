@@ -1062,7 +1062,16 @@ class CourierEnv:
         budget = (self.shift_seconds * SHIFT_FILL
                   if self.shift_seconds is not None and self.difficulty is None else None)
         elapsed, cursor = 0.0, self.node_id
-        for index in range(self.order_count):
+        # Jobs are numbered from 1, like everything else the courier is offered.
+        # They used to start at 0 while streets started at 1, and nothing ever
+        # showed the number -- the slip says "Job: collect from 8 Rue Bonaparte"
+        # and the tool signature says "navigate(job: int = default)". A model
+        # reading an interface whose every other index is 1-based writes
+        # navigate(1) for its only job, and got "You are not carrying job 1. In
+        # hand: 0." Measured on 40 held-out seeds: 23 refusals, 8 of them in one
+        # episode, which is a fifth of that episode's forty turns spent on an
+        # off-by-one in the interface rather than on the city.
+        for index in range(1, self.order_count + 1):
             left = None if budget is None else budget - elapsed
             order = self._draw_order(index, rng, budget_left=left)
             if order is None:
@@ -1111,7 +1120,7 @@ class CourierEnv:
                 order.issued_at_s = self.sim_seconds
                 live += 1
         while self.unbounded and live < self.queue_depth:
-            order = self._draw_order(len(self.orders), self._order_rng)
+            order = self._draw_order(len(self.orders) + 1, self._order_rng)
             if order is None:
                 return
             order.issued_at_s = self.sim_seconds
@@ -2239,7 +2248,7 @@ class CourierEnv:
                     ok=False, code="no_such_job", sim_seconds=1.0,
                     message=(
                         f"You are not carrying job {job}. In hand: "
-                        f"{', '.join(str(o.index) for o in live)}."
+                        f"{', '.join('job ' + str(o.index) for o in live)}."
                     ),
                 )
         if order is None:

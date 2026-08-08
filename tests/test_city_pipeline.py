@@ -655,6 +655,51 @@ class TestSignalChargeIsGated:
 
 
 @needs_maps
+class TestEveryIndexTheCourierIsOfferedStartsAtOne:
+    """One interface, one counting convention.
+
+    Streets are offered as "[1] Rue de la Paix" and taken with walk_to(1);
+    route legs are numbered from 1; looking down a street is look(2). Jobs
+    were numbered from 0, and the number was never shown -- the slip says
+    "Job: collect from 8 Rue Bonaparte" and the signature says
+    "navigate(job: int = default)". A model reading that interface writes
+    navigate(1) for its only job and is told it is not carrying it. On 40
+    held-out seeds that was 23 refusals, 8 of them inside one episode.
+    """
+
+    def env(self, tier="solo", seed=19):
+        env = CourierEnv(build_road_network(PARIS, map_name="citycore-paris"),
+                         seed=seed, difficulty=tier)
+        env.reset()
+        return env
+
+    def test_the_only_job_is_job_one(self):
+        env = self.env()
+        assert [o.index for o in env.orders] == [1]
+        assert env.navigate(1).ok
+
+    def test_a_deeper_tier_numbers_its_jobs_from_one(self):
+        env = self.env(tier="shift")
+        assert [o.index for o in env.orders][:3] == [1, 2, 3]
+        assert 0 not in [o.index for o in env.orders]
+
+    def test_a_job_drawn_later_continues_the_numbering(self):
+        """ENDLESS draws lazily, and a second series starting at 0 would put
+        two different jobs on the same number."""
+        env = self.env(tier="endless")
+        first = [o.index for o in env.orders]
+        assert first and min(first) == 1
+        assert len(set(first)) == len(first)
+
+    def test_the_refusal_names_the_numbers_as_numbers(self):
+        """"In hand: 0" reads as a count, which is the opposite of what it
+        meant."""
+        env = self.env(tier="solo")
+        out = env.navigate(7)
+        assert out.code == "no_such_job"
+        assert "job 1" in out.message
+
+
 class TestObservationHonesty:
     """Round-2 findings: every claim the prompt makes must hold in the data."""
 
