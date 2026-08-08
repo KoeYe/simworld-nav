@@ -60,6 +60,29 @@ class FormatError(Exception):
     """The reply did not contain exactly one well-formed action."""
 
 
+class TruncatedReply(FormatError):
+    """The reply stops mid-sentence: the generation budget ran out.
+
+    This is a configuration fault, not a model output. ``model_io`` already
+    says so for the evaluation path -- it raises the budget and asks again
+    rather than parsing the stump -- but the RL path has no requery, so a
+    truncation arrived here as a format error and three in a row ended the
+    episode. Measured on 64 held-out episodes: 11 died that way, every one at
+    zero earnings, discarding 308 of their 440 remaining turns. That is the
+    same size as the whole reported success rate.
+
+    Worse, it lands asymmetrically. Validation decodes greedily and greedy is
+    what degenerates into the repetition loops that exhaust the budget;
+    training samples and never hits it (0 truncations in 1531 training turns).
+    So the policy was losing a sixth of its score to a failure mode it
+    received no gradient on.
+
+    It is a FormatError subclass so that anything catching FormatError still
+    catches this; what changes is the counter it charges and the words it gets
+    back.
+    """
+
+
 class RejectedAction(Exception):
     """The action was understood but the world refused it."""
 
@@ -77,6 +100,11 @@ class Budgets:
     sim_seconds: float | None = 3600.0
     output_tokens: int | None = 60000
     max_format_errors: int = 3
+    # Truncations get their own, looser budget. They are the harness's fault
+    # and the reply the model was trying to give is unknown, so charging them
+    # against the same three-strike count meant a generation cap could end a
+    # shift that was going fine.
+    max_truncated_replies: int = 8
     wall_seconds: float | None = 1800.0
 
     def to_dict(self) -> dict[str, Any]:
@@ -95,6 +123,9 @@ class Spend:
     # and counted, so format-following stays a reportable number rather
     # than a silent leniency.
     unfenced_actions: int = 0
+    # Replies that stopped mid-sentence because the generation budget ran out.
+    # Charged separately from format errors: see ``TruncatedReply``.
+    truncated_replies: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return dict(self.__dict__)
@@ -143,6 +174,42 @@ def _bare_call(text: str, allowed: set[str]) -> str | None:
 
 REASONING_START = "<think>"
 REASONING_END = "</think>"
+
+
+# A sentence the model finished ends in one of these. A generation that ran
+# out of budget almost never does -- it stops inside a word or a clause.
+_ENDINGS = (".", "!", "?", "`", ")", '"', "'", ":", "\u3002", "\uff1f", "\uff01")
+_SHORTEST_PLAUSIBLE_TRUNCATION = 120
+
+
+def looks_cut_off(reply: str) -> bool:
+    """Did the generation stop because it ran out of room?
+
+    Two signals, both from the text alone, because the harness that parses a
+    reply does not always know the budget that produced it. An odd number of
+    fences means one was opened and never closed. Otherwise, a reply that ends
+    without any terminal punctuation stopped mid-sentence: on the held-out set
+    this separates the 26 replies killed by the generation cap from the 7 that
+    genuinely said nothing actionable.
+
+    Deliberately conservative in the other direction: a reply that ends cleanly
+    but names no action is a format error, not a truncation, and calling it a
+    truncation would forgive a model that simply did not answer.
+    """
+    text = reply.strip()
+    if not text:
+        return False
+    if text.count("```") % 2 == 1:
+        return True
+    # Too short to have run out of a 1024-token budget. On the held-out set the
+    # replies killed by the cap have a median length of 3365 characters, while
+    # the ones that simply forgot the action are 60 to 100 -- a finished
+    # sentence like "I am at the pickup address. I should collect the order."
+    # Without a floor, any short unpunctuated reply is excused as a truncation,
+    # and the leniency stops distinguishing anything.
+    if len(text) < _SHORTEST_PLAUSIBLE_TRUNCATION:
+        return False
+    return not text.endswith(_ENDINGS)
 
 
 def strip_reasoning(reply: str) -> str:
@@ -199,9 +266,15 @@ def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
         # "how well does this model follow the reply format" stays answerable.
         bare = _bare_call(text, allowed)
         if bare is None:
+            if looks_cut_off(text):
+                raise TruncatedReply(
+                    "Your reply stopped before it named an action -- it ran out "
+                    "of room. Put the action first next time, and keep the "
+                    "reasoning to one line."
+                )
             raise FormatError(
-                "No action found. End your reply with a fenced block containing exactly "
-                "one call, for example:\n```\nwalk_to(3)\n```"
+                "No action found. End your reply with a fenced block containing "
+                "exactly one call. The block holds the call and nothing else."
             )
         blocks, unfenced = [bare], True
     if len(blocks) > 1:
@@ -423,6 +496,8 @@ def budget_exceeded(spend: Spend, budgets: Budgets) -> str | None:
         return "output_token_budget_exhausted"
     if spend.consecutive_format_errors >= budgets.max_format_errors:
         return "repeated_format_errors"
+    if spend.truncated_replies >= budgets.max_truncated_replies:
+        return "repeated_truncations"
     return None
 
 

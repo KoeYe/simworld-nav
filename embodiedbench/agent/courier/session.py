@@ -34,6 +34,7 @@ from embodiedbench.agent.courier.loop import (
     Budgets,
     CourierRun,
     FormatError,
+    TruncatedReply,
     ParsedAction,
     Spend,
     TurnLog,
@@ -44,6 +45,7 @@ from embodiedbench.agent.courier.frame_alias import FrameAliases
 from embodiedbench.agent.courier.memory import CourierMemory
 from embodiedbench.agent.courier.prompts import (
     FORMAT_ERROR_TEMPLATE,
+    TRUNCATED_TEMPLATE,
     build_observation,
     build_system_prompt,
     render_candidates,
@@ -249,6 +251,19 @@ class CourierSession:
 
         try:
             action = parse_reply(reply, set(self.allowed))
+        except TruncatedReply as error:
+            # The generation budget ran out, not the model's competence. It is
+            # counted and answered, but it does not spend the three-strike
+            # format budget: on the held-out set that budget was ending one
+            # episode in six, every one at zero, on a fault of the harness's
+            # own configuration.
+            self.spend.truncated_replies += 1
+            turn.status, turn.error = "truncated_reply", str(error)
+            self.feedback = TRUNCATED_TEMPLATE.format(error=error)
+            self.run.turns.append(turn)
+            if budget_exceeded(self.spend, self.budgets) == "repeated_truncations":
+                self._finish("repeated_truncations")
+            return turn
         except FormatError as error:
             self.spend.format_errors += 1
             self.spend.consecutive_format_errors += 1

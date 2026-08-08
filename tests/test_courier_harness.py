@@ -200,8 +200,14 @@ class TestActionParsing:
     def test_the_error_message_shows_the_grammar(self):
         """A format error that does not show the format teaches nothing."""
         with pytest.raises(FormatError) as caught:
-            parse_reply("no action here", self.allowed())
-        assert "```" in str(caught.value)
+            parse_reply("no action here.", self.allowed())
+        # The message deliberately carries no fenced example of its own. The
+        # reminder it is wrapped in (FORMAT_ERROR_TEMPLATE) already shows one,
+        # and two fences inside a message that says "exactly one fenced block"
+        # demonstrates the violation it is correcting -- running the parser
+        # over that message finds two action blocks.
+        assert "```" not in str(caught.value)
+        assert "fenced block" in str(caught.value)
 
     def test_parsing_never_guesses(self):
         """Falling back to a default action spends a turn on something the model
@@ -852,7 +858,11 @@ class TestSession:
     def test_three_malformed_replies_in_a_row_end_the_episode(self, paris):
         session = CourierSession(courier(paris))
         for _ in range(3):
-            session.step("no action here")
+            # A finished sentence with no action in it -- the model answered
+            # and simply did not act. A reply that stops mid-sentence is a
+            # truncation and is charged to a different budget; see
+            # TestATruncatedReplyIsNotAFormatError.
+            session.step("no action here.")
         assert session.finished
         assert session.run.termination_reason == "repeated_format_errors"
 
@@ -1035,4 +1045,101 @@ class TestTheSameRefusalFourTimesEndsTheSession:
         session = self.session()
         for _ in range(8):
             session.step("THOUGHT: x\n```\ncheck_order()\n```")
+        assert not session.finished
+
+
+class TestATruncatedReplyIsNotAFormatError:
+    """A generation that ran out of room is the harness's fault, not the model's.
+
+    ``model_io`` already says so on the evaluation path -- it raises the budget
+    and asks again rather than parsing the stump. The RL path has no requery,
+    so a truncation arrived as a format error and three in a row ended the
+    episode. Measured on 64 held-out episodes: 11 died that way, all at zero
+    earnings, discarding 308 of their 440 remaining turns -- the same size as
+    the entire reported success rate.
+
+    It lands asymmetrically, which is what makes it poisonous. Validation
+    decodes greedily and greedy degenerates into the repetition loops that
+    exhaust the budget; training samples and never hits it. The policy was
+    losing a sixth of its score to a failure mode it got no gradient on.
+    """
+
+    ALLOWED = {"walk_to", "collect", "navigate", "look", "wait", "check_order"}
+
+    def parse(self, reply):
+        from embodiedbench.agent.courier.loop import parse_reply
+        return parse_reply(reply, self.ALLOWED)
+
+    # What a real one looks like: greedy decoding falls into a repetition loop
+    # and the generation budget ends it inside a word. Median length of the
+    # ones that killed an episode on the held-out set was 3365 characters.
+    CUT_OFF = (
+            "THOUGHT: I am on Rue Mouffetard and I need the address of the "
+            "customer. I need the address of the customer. I need the "
+            "address of the customer. I need the address of the cust")
+
+    def test_a_reply_cut_mid_word_is_a_truncation(self):
+        from embodiedbench.agent.courier.loop import TruncatedReply
+        with pytest.raises(TruncatedReply):
+            self.parse(self.CUT_OFF)
+
+    def test_a_short_unpunctuated_reply_is_not_excused_as_truncation(self):
+        """Too short to have exhausted a 1024-token budget. Without this floor
+        any brief non-answer is forgiven and the leniency means nothing."""
+        from embodiedbench.agent.courier.loop import FormatError, TruncatedReply
+        with pytest.raises(FormatError) as caught:
+            self.parse("no action here")
+        assert not isinstance(caught.value, TruncatedReply)
+
+    def test_an_unclosed_fence_is_a_truncation(self):
+        from embodiedbench.agent.courier.loop import TruncatedReply
+        with pytest.raises(TruncatedReply):
+            self.parse("THOUGHT: going west.\n```\nwalk_to(1")
+
+    def test_a_finished_sentence_with_no_action_is_still_a_format_error(self):
+        """Otherwise a model that simply declines to answer is forgiven, and
+        the leniency stops meaning anything."""
+        from embodiedbench.agent.courier.loop import FormatError, TruncatedReply
+        with pytest.raises(FormatError) as caught:
+            self.parse("THOUGHT: I looked around and decided to do nothing.")
+        assert not isinstance(caught.value, TruncatedReply)
+
+    def test_a_truncation_is_caught_by_anything_catching_format_errors(self):
+        from embodiedbench.agent.courier.loop import FormatError
+        with pytest.raises(FormatError):
+            self.parse(self.CUT_OFF)
+
+    def test_truncations_do_not_spend_the_three_strike_format_budget(self):
+        from embodiedbench.agent.courier.loop import Budgets, Spend, budget_exceeded
+        spend, budgets = Spend(), Budgets()
+        for _ in range(5):
+            spend.truncated_replies += 1
+            assert budget_exceeded(spend, budgets) is None
+        assert spend.consecutive_format_errors == 0
+
+    def test_but_they_are_not_unlimited(self):
+        from embodiedbench.agent.courier.loop import Budgets, Spend, budget_exceeded
+        spend, budgets = Spend(), Budgets()
+        spend.truncated_replies = budgets.max_truncated_replies
+        assert budget_exceeded(spend, budgets) == "repeated_truncations"
+
+    def test_a_session_charges_a_truncation_to_its_own_counter(self):
+        from pathlib import Path
+
+        from embodiedbench.agent.courier.session import CourierSession
+        from embodiedbench.compiler.road_network import build_road_network
+        from embodiedbench.runtime.city.courier_env import CourierEnv
+
+        maps = (Path(__file__).resolve().parents[1] / "vendor" / "vagen"
+                / "vagen" / "envs" / "deliverybench" / "maps")
+        env = CourierEnv(build_road_network(maps / "citycore-paris",
+                                            map_name="citycore-paris"),
+                         seed=0, difficulty="solo")
+        env.reset()
+        session = CourierSession(env, city="Paris")
+        for _ in range(4):
+            turn = session.step(self.CUT_OFF)
+        assert turn.status == "truncated_reply"
+        assert session.spend.truncated_replies == 4
+        assert session.spend.consecutive_format_errors == 0
         assert not session.finished

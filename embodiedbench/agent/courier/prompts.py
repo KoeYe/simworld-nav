@@ -135,6 +135,11 @@ Reply with a short THOUGHT, then exactly one action in a fenced block:
 walk_to(3)
 ```"""
 
+TRUNCATED_TEMPLATE = """{error}
+
+Your reply is cut off when it gets too long, and a cut-off reply loses the
+turn. Lead with the action and keep the reasoning to a single line."""
+
 REJECTED_TEMPLATE = """That did not work: {reason}
 
 You are still where you were. Choose a different action."""
