@@ -40,7 +40,12 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-from embodiedbench.runtime.city.courier_env import COMPASS, CourierEnv
+from embodiedbench.runtime.city.courier_env import (
+    COMPASS,
+    CourierEnv,
+    bearing_deg,
+    compass_of,
+)
 
 # Two fields, read separately, because they are measured in two frames: the
 # distance is along the road and the bearing is as the crow flies. Reading them
@@ -187,6 +192,15 @@ class ObservationOnlyCourier:
             self.target_number = int(parsed.group(1))
             self.target_street = parsed.group(2).strip()
 
+    def _address_position(self, address: str):
+        """Where an address actually is. Oracle privilege, used knowingly.
+
+        Resolved through the environment's own lookup rather than by matching
+        text, so the courier and the phone agree on which door is meant.
+        """
+        match = self.env._find_address(address)
+        return match.kerb if match is not None else None
+
     def consult_map(self, address: str) -> None:
         self.read_slip(address)
         outcome = self.env.check_map(address)
@@ -201,9 +215,21 @@ class ObservationOnlyCourier:
             self.target_street = match.group(1)
             self.target_distance_m = float(match.group(2))
             self.note_distance(self.target_distance_m)
-        heading = _MAP_HEADING.search(outcome.message)
-        if heading:
-            self.target_bearing = compass_degrees(heading.group(1))
+        # The bearing is no longer in the phone's words -- it is drawn on the
+        # map, because a direction stated in text made choosing a street a
+        # reading exercise and the photographs decoration. This courier is an
+        # oracle, not an agent: it is entitled to the geometry directly, and
+        # what it establishes is that the world is solvable, which was always
+        # the claim. It no longer establishes that the world is solvable *from
+        # the text alone*, and that is the point of the change.
+        target = self._address_position(address)
+        # Quantised to the same eight points the phone used to speak, so this
+        # is the identical signal by a different route rather than a sharper
+        # one. An exact bearing changes which street wins a near-tie and this
+        # courier is a solvability floor, not a competitor.
+        self.target_bearing = (
+            compass_degrees(compass_of(bearing_deg(self.env.position(), target)))
+            if target else None)
 
     # How much worse than the best range seen counts as "I have gone wrong".
     # A courier who has walked half as far again as their closest approach and
@@ -664,7 +690,7 @@ class ObservationOnlyCourier:
             # several junctions blind throws that feedback away: measured 3.12
             # -> 0.00 deliveries, and still only 1.33 with the macro gated to
             # long range. Turn count is not this policy's binding constraint.
-            outcome = env.walk_to(choice)
+            outcome = env.walk_to(*env.street_at(choice))
             if not outcome.ok:
                 result.rejected += 1
                 if outcome.code == "way_blocked" and toward is not None:

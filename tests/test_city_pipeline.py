@@ -280,14 +280,18 @@ class TestRuntimeSelfConsistency:
         env = self.env()
         rows = env.candidates()
         target = rows[0]["node"]
-        assert env.walk_to(rows[0]["k"]).ok
+        assert env.walk_to(*env.street_at(rows[0]["k"])).ok
         assert env.node_id == target
 
-    def test_an_invalid_street_number_is_refused_with_the_valid_ones(self):
+    def test_a_street_that_is_not_here_is_refused_with_the_ones_that_are(self):
         env = self.env()
-        outcome = env.walk_to(99)
+        outcome = env.walk_to("Rue Imaginaire", "north")
         assert not outcome.ok and outcome.code == "no_such_street"
-        assert "1" in outcome.message
+        # The refusal has to be actionable: it names what the courier can
+        # actually take, in the words walk_to takes them in.
+        for row in env.candidates():
+            assert row["street"] in outcome.message
+            assert row["heading"] in outcome.message
 
     def test_the_map_lookup_gives_direction_and_distance_but_not_a_route(self):
         """A phone gives a bearing and a distance. Turn-by-turn directions would
@@ -357,14 +361,50 @@ class TestSolvabilityFloor:
             delivered += run_reference_courier(env, seed).delivered
         assert delivered >= 9, f"Paris solvability regressed to {delivered}/10"
 
-    def test_the_reference_courier_uses_no_privileged_state(self):
-        """Its whole value is the restriction. Given the graph it would navigate
-        an observation that tells a real policy nothing."""
+    def test_the_reference_courier_reaches_for_geometry_and_says_so(self):
+        """The floor it establishes changed, and the change is the point.
+
+        This courier used to navigate on the phone's spoken bearing -- "it lies
+        to the east of you" -- which made it an observation-only policy and its
+        success a proof that the task was solvable from text. That was also the
+        problem: if a text policy can solve it, the photographs and the map are
+        decoration, and the benchmark is a reading exercise with pictures
+        attached.
+
+        The bearing is now drawn rather than spoken. Nothing in the words says
+        which way to walk, so no text-only policy can navigate at all, and this
+        one reads the geometry directly and is honest about doing it. What it
+        proves is narrower and still worth having: the world is solvable. What
+        it no longer proves -- that the world is solvable without looking -- is
+        exactly the property the benchmark wanted gone.
+        """
         import inspect
 
         source = inspect.getsource(ObservationOnlyCourier)
-        for forbidden in ("route_length_cm", "network.nodes", ".kerb", ".door", "position("):
+        assert "_address_position" in source
+        assert "Oracle privilege, used knowingly" in source
+        # Still not allowed to route: reading where a place is differs from
+        # being handed the way there, which is the whole task.
+        for forbidden in ("route_length_cm", "route_legs", "shortest"):
             assert forbidden not in source, f"reference courier reached for {forbidden}"
+
+    def test_no_direction_to_walk_survives_anywhere_in_the_words(self):
+        """The property the change exists to create, pinned where it can break.
+
+        Every place the environment speaks to the courier is checked, because
+        one sentence naming a compass point anywhere puts the whole navigation
+        problem back into the text.
+        """
+        network = build_road_network(PARIS, map_name="citycore-paris")
+        env = CourierEnv(network, seed=0, difficulty="solo", stride="block")
+        env.reset()
+        order = env.orders[0]
+        spoken = [env.navigate().message,
+                  env.check_map(order.pickup.text).message,
+                  env.check_order().message]
+        for message in spoken:
+            for word in ("north", "south", "east", "west", "crow flies"):
+                assert word not in message.lower(), message
 
     def test_it_leaves_headroom_for_a_learned_policy(self):
         """A reference that walks the optimal route would make the benchmark
@@ -415,7 +455,7 @@ class TestDifficultyLadder:
         for condition in Condition.ALL:
             env = CourierEnv(network, seed=0, condition=condition)
             env.reset()
-            message = env.look(1).message
+            message = env.look(*env.street_at(1)).message
             reads_numbers = "doors read" in message
             assert reads_numbers is (condition != Condition.VISUAL), message
 
@@ -488,7 +528,7 @@ class TestVisionIsLoadBearing:
             if not options:
                 return False
             seen.add(env.node_id)
-            env.walk_to(options[0]["k"])
+            env.walk_to(*env.street_at(options[0]["k"]))
         return (env.node_id in env.signalised) is want_signalised
 
     def signalled_env(self, **kwargs):
@@ -531,7 +571,7 @@ class TestVisionIsLoadBearing:
         assert self._walk_to_signalised(env), "no signalised junction found nearby"
         strings = [
             env.location_text(), env.clock_text(),
-            env.check_order().message, env.look(1).message,
+            env.check_order().message, env.look(*env.street_at(1)).message,
         ] + [f"{r['street']} {r['heading']}" for r in env.candidates()]
         # Word boundaries, not substrings: "numbered 9" contains "red", and the
         # naive check failed on the environment's own correct output.
@@ -575,7 +615,7 @@ class TestVisionIsLoadBearing:
         assert self._walk_to_signalised(env), "no signalised junction found nearby"
         red = next((r["k"] for r in env.candidates() if env.light_here(r["k"]) == "red"), None)
         assert red is not None
-        outcome = env.walk_to(red)
+        outcome = env.walk_to(*env.street_at(red))
         assert outcome.ok and outcome.moved
         assert outcome.reward == pytest.approx(-RED_CROSSING_PENALTY)
         assert env.red_crossings == 1
@@ -611,12 +651,15 @@ class TestVisionIsLoadBearing:
             env.reset()
             original = env.walk_to
 
-            def guarded(k, _env=env, _original=original):
+            def guarded(street, heading=None, _env=env, _original=original):
+                k, refusal = _env.resolve_street(street, heading)
+                if refusal is not None:
+                    return refusal
                 waited = 0
                 while _env.light_here(k) == "red" and waited < 5:
                     _env.wait()
                     waited += 1
-                return _original(k)
+                return _original(street, heading)
 
             env.walk_to = guarded
             run_reference_courier(env, seed, max_steps=150)
@@ -863,7 +906,7 @@ class TestFollowStreetIsMechanical:
             for _ in range(12):
                 row = env.candidates()[0]
                 street, start = row["street"], env.node_id
-                outcome = env.follow_street(row["k"], 6)
+                outcome = env.follow_street(*env.street_at(row["k"]), 6)
                 assert outcome.ok
                 assert street in outcome.message
                 if env.node_id != start:
@@ -875,7 +918,7 @@ class TestFollowStreetIsMechanical:
         seen_fork = False
         for _ in range(40):
             row = env.candidates()[0]
-            outcome = env.follow_street(row["k"], 6)
+            outcome = env.follow_street(*env.street_at(row["k"]), 6)
             if "forks here" in outcome.message or "does not go on" in outcome.message:
                 seen_fork = True
                 break
@@ -884,7 +927,7 @@ class TestFollowStreetIsMechanical:
     def test_it_never_walks_further_than_asked(self):
         env = self.env()
         before = env.sim_seconds
-        outcome = env.follow_street(env.candidates()[0]["k"], 2)
+        outcome = env.follow_street(*env.street_at(env.candidates()[0]["k"]), 2)
         from embodiedbench.runtime.city.courier_env import WALK_SPEED_CM_S
 
         assert outcome.ok
@@ -893,7 +936,7 @@ class TestFollowStreetIsMechanical:
 
     def test_it_refuses_a_street_that_is_not_there(self):
         env = self.env()
-        outcome = env.follow_street(99)
+        outcome = env.follow_street("Rue Imaginaire", "north")
         assert not outcome.ok and outcome.code == "no_such_street"
 
     def test_it_hands_control_back_at_a_crossing_it_can_see(self):
@@ -905,7 +948,7 @@ class TestFollowStreetIsMechanical:
         env.visible_signals = {f"{n}|{m}" for n in env.signalised
                                for m in network.nodes[n].neighbours}
         for _ in range(60):
-            outcome = env.follow_street(env.candidates()[0]["k"], 6)
+            outcome = env.follow_street(*env.street_at(env.candidates()[0]["k"]), 6)
             assert env.red_crossings == 0 or "pedestrian light" in outcome.message
         assert env.red_crossings == 0
 
@@ -943,7 +986,7 @@ class TestTheLightIsChargedOnlyWhereItCanBeSeen:
                 return True
             options = [r for r in env.candidates() if r["node"] not in seen] or env.candidates()
             seen.add(env.node_id)
-            env.walk_to(options[0]["k"])
+            env.walk_to(*env.street_at(options[0]["k"]))
         return env.node_id in env.signalised
 
     def test_an_album_that_declares_nothing_charges_nothing(self):
@@ -960,7 +1003,7 @@ class TestTheLightIsChargedOnlyWhereItCanBeSeen:
         red = next((r for r in rows if env.light_here(r["k"]) == "red"), None)
         assert red is not None
         env.visible_signals = set()
-        env.walk_to(red["k"])
+        env.walk_to(*env.street_at(red["k"]))
         assert env.red_crossings == 0, "charged for a lamp the album does not show"
 
         env = self.env()
@@ -968,7 +1011,7 @@ class TestTheLightIsChargedOnlyWhereItCanBeSeen:
         rows = env.candidates()
         red = next((r for r in rows if env.light_here(r["k"]) == "red"), None)
         env.visible_signals = {f"{env.node_id}|{red['node']}"}
-        env.walk_to(red["k"])
+        env.walk_to(*env.street_at(red["k"]))
         assert env.red_crossings == 1, "not charged for a lamp the album does show"
 
     def test_the_sidecar_is_read_from_the_album(self):

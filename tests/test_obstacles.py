@@ -191,7 +191,7 @@ class TestTheMechanicBites:
             env.node_id, env.arrived_from = a, None
             k = next(r["k"] for r in env.candidates() if r["node"] == b)
             before = env.sim_seconds
-            outcome = env.walk_to(k)
+            outcome = env.walk_to(*env.street_at(k))
             assert not outcome.ok and outcome.code == "way_blocked"
             assert env.node_id == a, "the courier moved through a barrier"
             assert env.sim_seconds - before == pytest.approx(BLOCKED_SECONDS)
@@ -211,7 +211,7 @@ class TestTheMechanicBites:
             env.node_id, env.arrived_from = a, None
             row = next(r for r in env.candidates() if r["node"] == b)
             plain = row["distance_m"] * 100.0 / 140.0
-            outcome = env.walk_to(row["k"])
+            outcome = env.walk_to(*env.street_at(row["k"]))
             assert outcome.ok and env.node_id == b
             assert outcome.sim_seconds == pytest.approx(plain + SLOW_SECONDS)
             assert env.summary()["slow_passages"] == 1
@@ -292,7 +292,7 @@ class TestNothingSaysItIsThere:
                 session = CourierSession(env, with_images=True)
                 out.append(session.observe().text)
                 for k in (r["k"] for r in env.candidates()):
-                    out.append(env.look(k).message)
+                    out.append(env.look(*env.street_at(k)).message)
                 out.append(env.check_order().message)
                 out.append(env.navigate().message)
                 target = env.target_address()
@@ -361,37 +361,26 @@ class TestTheRouteCanBeActedOn:
     against the street list rejects the street it was told to take.
     """
 
-    def test_the_first_leg_names_the_direction_its_first_step_goes(self, paris):
-        checked = mismatched = 0
+    def test_the_route_never_names_a_direction_to_walk(self, paris):
+        """It used to name one per leg, which is the navigation given away.
+
+        Walked across eight shifts and asked for a route from wherever the
+        courier happens to be, because the sentence that leaks is the one
+        produced in some state nobody thought to check.
+        """
         for seed in range(8):
             env = CourierEnv(paris, seed=seed, difficulty=Difficulty.SHIFT)
             env.reset()
-            # Walk the shift, asking for a route from wherever it happens to be.
             for _ in range(10):
-                target = env.target_address()
                 rows = env.candidates()
-                if target is None or not rows:
+                if env.target_address() is None or not rows:
                     break
                 message = env.navigate().message
-                first = next((l for l in message.splitlines() if l.startswith("  1. ")), None)
-                # The very first hop of the route, which is the step the first
-                # instruction is telling the courier to take.
-                path = env.route_nodes(env.node_id, target.kerb_node) or []
-                if first is not None and len(path) >= 2:
-                    step = next((r for r in rows if r["node"] == path[1]), None)
-                    if step is not None:
-                        checked += 1
-                        mismatched += step["heading"] not in first
-                env.walk_to(rows[checked % len(rows)]["k"])
-        assert checked >= 8
-        assert mismatched == 0, (
-            f"{mismatched} of {checked} routes opened with a compass point that "
-            "no street leaving the junction has"
-        )
+                for word in ("north", "south", "east", "west"):
+                    assert word not in message.lower(), (seed, message)
+                row = rows[0]
+                env.walk_to(row["street"], row["heading"])
 
-
-@needs_maps
-class TestTheChargeIsGated:
     def test_no_album_means_no_obstacle_bites(self, paris):
         """The default. An unphotographed obstacle is not an obstacle."""
         env = CourierEnv(paris, seed=0)

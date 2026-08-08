@@ -103,7 +103,7 @@ def random_walk(env: CourierEnv, seed: int, max_steps: int = 20000) -> None:
             return
         row = rng.choice([r for r in rows if r["node"] != previous] or rows)
         previous = env.node_id
-        env.walk_to(row["k"])
+        env.walk_to(*env.street_at(row["k"]))
 
 
 @needs_maps
@@ -328,7 +328,8 @@ class TestEasyTiersAreEasy:
                 rows = {r["node"]: r for r in env.candidates()}
                 if path[1] not in rows:
                     return
-                env.walk_to(rows[path[1]]["k"])
+                row = rows[path[1]]
+                env.walk_to(row["street"], row["heading"])
 
         for tier in (Difficulty.TRIPLE, Difficulty.SHIFT):
             delivered = issued = 0
@@ -391,7 +392,7 @@ class TestNoActionIsFree:
     def test_walking_into_a_wall_costs_something(self, paris):
         env = self.env(paris)
         turns, seconds = env.turns, env.sim_seconds
-        assert not env.walk_to(999).ok
+        assert not env.walk_to("Rue Imaginaire", "north").ok
         assert env.turns == turns + 1 and env.sim_seconds > seconds
 
     def test_every_action_tool_counts_as_a_turn(self, paris):
@@ -404,7 +405,7 @@ class TestNoActionIsFree:
             (lambda: env.wait(), 1),
             (lambda: env.collect(), 1),
             (lambda: env.hand_over(), 1),
-            (lambda: env.look(1), 1),
+            (lambda: env.look(*env.street_at(1)), 1),
             (lambda: env.check_order(), 1),
         ):
             before = env.turns
@@ -430,7 +431,7 @@ class TestNoActionIsFree:
         to allow."""
         env = self.env(paris)
         before = env.turns
-        outcome = env.follow_street(1, 6)
+        outcome = env.follow_street(*env.street_at(1), 6)
         assert outcome.ok
         assert env.turns == before + 1
         assert outcome.walked_m > 0
@@ -612,18 +613,21 @@ class TestTheQueueIsVisibleAndServable:
 class TestThePhoneStatesItsOwnFrame:
     """Two numbers, two frames, and the sentence has to say which is which."""
 
-    def test_the_bearing_is_labelled_as_the_crow_flying(self, paris):
-        """The distance is along the road and the bearing is not, and they were
-        read out as one instruction. Over 1495 sampled lookups the two differ by
-        more than 90 degrees on 22.7% and by more than 135 on 8.4%, so a courier
-        treating "to the east" as "go east" is being pointed at a wall about a
-        fifth of the time."""
+    def test_the_phone_says_how_far_and_never_which_way(self, paris):
+        """A spoken bearing made choosing a street a reading exercise.
+
+        The lookup used to end "it lies to the east of you as the crow flies",
+        which a policy can act on without looking at anything -- and once the
+        phone speaks a direction, the photographs and the map are decoration.
+        The distance is a number a courier could ask for; the direction is on
+        the map, which is a picture.
+        """
         env = CourierEnv(paris, seed=0, difficulty=Difficulty.SOLO)
         env.reset()
         message = env.check_map(env.orders[0].dropoff.text).message
         assert "on foot" in message
-        assert "crow flies" in message
-        assert "the streets may not go that way" in message
+        for word in ("north", "south", "east", "west", "crow flies"):
+            assert word not in message.lower(), message
 
     def test_the_courier_recognises_being_lost_and_goes_back(self, paris):
         """The recovery that every easy-tier failure needed. Without it the
@@ -705,8 +709,8 @@ class TestStride:
     def test_a_block_covers_more_ground_per_call_than_a_waypoint(self, paris):
         fine, blocks = self.env(paris, "waypoint"), self.env(paris, "block")
         assert fine.node_id == blocks.node_id, "same seed, same start"
-        one = fine.walk_to(1)
-        many = blocks.walk_to(1)
+        one = fine.walk_to(*fine.street_at(1))
+        many = blocks.walk_to(*blocks.street_at(1))
         assert one.ok and many.ok
         assert many.walked_m >= one.walked_m
 
@@ -718,7 +722,7 @@ class TestStride:
         """
         env = self.env(paris, "block")
         before = env.sim_seconds
-        out = env.walk_to(1)
+        out = env.walk_to(*env.street_at(1))
         assert out.ok and out.walked_m > 0
         # Walking speed is the same constant either way, so the seconds charged
         # follow the metres covered rather than the number of calls.
@@ -728,7 +732,7 @@ class TestStride:
     def test_one_block_is_one_turn(self, paris):
         env = self.env(paris, "block")
         before = env.turns
-        env.walk_to(1)
+        env.walk_to(*env.street_at(1))
         assert env.turns == before + 1
 
     def test_a_block_stops_where_a_choice_exists(self, paris):
@@ -743,7 +747,7 @@ class TestStride:
             rows = env.candidates()
             if len(rows) > 2 and env.turns:
                 break
-            if not env.walk_to(1).ok:
+            if not env.walk_to(*env.street_at(1)).ok:
                 break
         else:
             pytest.skip("no junction reached within the walk")
@@ -757,7 +761,7 @@ class TestStride:
             if math.dist(env.position(), order.target.kerb) <= ARRIVAL_TOLERANCE_CM:
                 break
             rows = env.candidates()
-            if not rows or not env.walk_to(rows[0]["k"]).ok:
+            if not rows or not env.walk_to(*env.street_at(rows[0]["k"])).ok:
                 break
         # Whether this seed's greedy walk reaches the door is not the claim; the
         # claim is that if it is standing at one, the walk stopped there.
@@ -893,7 +897,7 @@ class TestTheRouteSpeaksTheStrideYouWalk:
                         and r["node"] != env.arrived_from), None)
             if row is None or env.node_id == first["end"]:
                 break
-            if not env.walk_to(row["k"]).ok:
+            if not env.walk_to(*env.street_at(row["k"])).ok:
                 break
             calls += 1
             if env.node_id == first["end"]:
@@ -901,37 +905,22 @@ class TestTheRouteSpeaksTheStrideYouWalk:
         assert calls <= first["junctions"], (
             f"the leg promised {first['junctions']} calls and took {calls}")
 
-    def test_a_leg_says_which_frame_its_compass_is_in(self, paris):
-        """Two right numbers in two frames read as one contradiction.
+    def test_the_route_is_drawn_rather_than_dictated(self, paris):
+        """Turn-by-turn text is the whole navigation problem, given away.
 
-        "Take Rue Oberkampf - south-east" then "Continue onto Avenue de Crimee -
-        north-west" is a 180-degree reversal described as continuing. Both were
-        right: the first is the bearing of the hop the courier takes now, the
-        second where the later leg goes overall, and the corner between them
-        leaves on a 2 m stub pointing the other way. Naming the frame is the fix;
-        changing either number would make one of them wrong.
+        Every leg used to be spelled out -- "Take Rue de Grenelle, east, 1
+        junction, 18 m" -- so a courier holding that text never had to look at
+        anything. What survives is what a phone tells you at a glance: how far,
+        how long, how many streets. Which way is on the map.
         """
         env = CourierEnv(paris, seed=7, difficulty="pair", stride="block")
         env.reset()
         message = env.navigate().message
-        lines = [line for line in message.splitlines() if line.strip().startswith(("1.", "2."))]
-        assert lines, message
-        assert "overall" not in lines[0], "the leg walked now is a direction to walk in"
-        if len(lines) > 1:
-            assert "overall" in lines[1], "a later leg must say it is not a heading to take"
-
-
-class TestThePhoneNeverLearns:
-    """The channel from the courier's eyes to the phone does not exist.
-
-    ``report_blocked`` used to be that channel: see a barrier, tell the app, and
-    every route afterwards goes round it. It was a crutch. A rider who meets a
-    skip takes the next street; they do not file a report with the map app. With
-    it gone the phone routes on a survey for the whole shift, will name the same
-    shut street every time it is asked, and going round is something the courier
-    has to work out from the photographs -- which is what makes looking
-    necessary rather than merely rewarded.
-    """
+        assert "m," in message and "min on foot" in message
+        for word in ("north", "south", "east", "west", "left", "right"):
+            assert word not in message.lower(), message
+        assert not any(line.strip().startswith(("1.", "2.", "3."))
+                       for line in message.splitlines()), message
 
     def blocked_env(self, paris, stride):
         env = CourierEnv(paris, seed=0, difficulty=Difficulty.TRIPLE, stride=stride,
@@ -964,7 +953,7 @@ class TestThePhoneNeverLearns:
             target = env.target_address()
             before = env.route_nodes(env.node_id, target.kerb_node) if target else None
             row = rows[0]
-            outcome = env.walk_to(row["k"])
+            outcome = env.walk_to(*env.street_at(row["k"]))
             if not outcome.ok and outcome.code == "way_blocked":
                 after = env.route_nodes(env.node_id, target.kerb_node)
                 assert after == before, (

@@ -200,12 +200,13 @@ class CourierSession:
         # them, which would let a policy read ``road_block`` off the path instead
         # of the picture. See ``frame_alias``.
         frames = [
-            Frame(f"[{row['k']}] {row['street']}, {row.get('relative') or row['heading']}",
+            Frame(f"[{row['street']}, {row['heading']}] the view down it",
                   self.frames_seen.alias(row["image"]))
             for row in rows if row.get("image")
         ]
         frames += [
-            Frame(f"[light {row['k']}] pedestrian light for street {row['k']}",
+            Frame(f"[light: {row['street']}, {row['heading']}] the pedestrian "
+                  "light for that crossing",
                   self.frames_seen.alias(row["signal_image"]))
             for row in rows if row.get("signal_image")
         ]

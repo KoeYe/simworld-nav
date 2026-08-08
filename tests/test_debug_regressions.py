@@ -51,7 +51,8 @@ def drive(session, env, turns=25):
         rows = env.candidates()
         if not rows or session.finished:
             return
-        session.step(f"THOUGHT: step\n```\nwalk_to({rows[0]['k']})\n```")
+        session.step(f'THOUGHT: step\n```\n'
+                     f'walk_to("{rows[0]["street"]}", "{rows[0]["heading"]}")\n```')
 
 
 class TestTheMeasurementCannotBeShortCircuited:
@@ -160,7 +161,7 @@ class TestTheNumbersTheCourierIsToldAreTrue:
                     break
                 row = rows[0]
                 quoted, junctions = row["reach_m"], row["reach_junctions"]
-                outcome = env.walk_to(row["k"])
+                outcome = env.walk_to(*env.street_at(row["k"]))
                 if not outcome.ok:
                     break
                 assert outcome.walked_m == pytest.approx(quoted, abs=0.6)
@@ -224,7 +225,7 @@ class TestTheBodyDoingTheDelivering:
             env.reset()
             for _ in range(6):
                 rows = env.candidates()
-                if not rows or not env.walk_to(rows[0]["k"]).ok:
+                if not rows or not env.walk_to(*env.street_at(rows[0]["k"])).ok:
                     break
             spent[name] = env.summary()["stamina_spent"]
         assert spent["human_on_foot"] > spent["human_on_scooter"] > 0
@@ -351,7 +352,7 @@ class TestTheViewpointDoesNotAnnounceTheHazard:
                     seen += 1
                     assert "pavement" in path, path
                 rows = env.candidates()
-                if not rows or not env.walk_to(rows[0]["k"]).ok:
+                if not rows or not env.walk_to(*env.street_at(rows[0]["k"])).ok:
                     break
         assert seen > 200, "walked too little to be evidence"
 
@@ -378,16 +379,16 @@ class TestAReasoningModelCanBeEvaluatedAtAll:
         from embodiedbench.agent.courier.loop import parse_reply
 
         reply = (
-            "<think>\nI could go north.\n```\nwalk_to(9)\n```\nNo, south.\n</think>\n\n"
-            "THOUGHT: south it is.\n```\nwalk_to(2)\n```"
+            "<think>\nI could go north.\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```\nNo, south.\n</think>\n\n"
+            "THOUGHT: south it is.\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```"
         )
-        assert parse_reply(reply, {"walk_to"}).render() == "walk_to(2)"
+        assert parse_reply(reply, {"walk_to"}).render() == "walk_to(\"Rue de Grenelle\", \"east\")"
 
     def test_a_reply_without_a_thought_block_is_untouched(self):
         from embodiedbench.agent.courier.loop import parse_reply
 
-        assert parse_reply("THOUGHT: go\n```\nwalk_to(1)\n```",
-                           {"walk_to"}).render() == "walk_to(1)"
+        assert parse_reply("THOUGHT: go\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```",
+                           {"walk_to"}).render() == "walk_to(\"Rue de Grenelle\", \"east\")"
 
     def test_a_thought_that_never_closes_is_still_a_format_error(self):
         """An unterminated thought has no answer in it, and inventing one from
@@ -395,5 +396,5 @@ class TestAReasoningModelCanBeEvaluatedAtAll:
         from embodiedbench.agent.courier.loop import FormatError, parse_reply
 
         with pytest.raises(FormatError):
-            parse_reply("<think>\nmaybe\n```\nwalk_to(1)\n```\nor maybe not",
+            parse_reply("<think>\nmaybe\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```\nor maybe not",
                         {"walk_to"})

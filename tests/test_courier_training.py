@@ -84,7 +84,7 @@ class StubAdapter:
 
     IMAGE_TOKEN = 999_999
 
-    def __init__(self, reply: str = "THOUGHT: go\n```\nwalk_to(1)\n```"):
+    def __init__(self, reply: str = "THOUGHT: go\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```"):
         self.reply = reply
         self.generated = 0
 
@@ -289,15 +289,15 @@ class TestTheReplyFormatDoesNotDiscardCorrectActions:
         from embodiedbench.agent.courier.loop import parse_reply
 
         action = parse_reply(
-            "THOUGHT: the route says south-west.\nI will take it.\nwalk_to(2)",
+            "THOUGHT: the route says south-west.\nI will take it.\nwalk_to(\"Rue de Grenelle\", \"east\")",
             {"walk_to"})
-        assert action.render() == "walk_to(2)"
+        assert action.render() == "walk_to(\"Rue de Grenelle\", \"east\")"
         assert action.unfenced is True
 
     def test_a_fenced_call_is_still_not_flagged(self, paris):
         from embodiedbench.agent.courier.loop import parse_reply
 
-        action = parse_reply("THOUGHT: x\n```\nwalk_to(2)\n```", {"walk_to"})
+        action = parse_reply("THOUGHT: x\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```", {"walk_to"})
         assert action.unfenced is False
 
     def test_a_call_inside_a_sentence_is_not_an_action(self, paris):
@@ -306,7 +306,7 @@ class TestTheReplyFormatDoesNotDiscardCorrectActions:
         from embodiedbench.agent.courier.loop import FormatError, parse_reply
 
         with pytest.raises(FormatError):
-            parse_reply("THOUGHT: I will walk_to(2) once I am past the barrier.",
+            parse_reply("THOUGHT: I will walk_to(\"Rue de Grenelle\", \"east\") once I am past the barrier.",
                         {"walk_to"})
 
     def test_leniency_is_counted_not_hidden(self, paris):
@@ -314,7 +314,7 @@ class TestTheReplyFormatDoesNotDiscardCorrectActions:
 
         env = make_env(paris)
         session = CourierSession(env, city="Paris")
-        session.step("THOUGHT: go\nwalk_to(1)")
+        session.step("THOUGHT: go\nwalk_to(\"Rue de Grenelle\", \"east\")")
         assert session.spend.unfenced_actions == 1
 
 

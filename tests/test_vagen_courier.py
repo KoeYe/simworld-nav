@@ -24,7 +24,16 @@ from embodiedbench.training.vagen_courier_env import (
 )
 
 STREETS = Path("/data/murray/paris_streets_v2/citycore-paris")
-WALK = "THOUGHT: go\n```\nwalk_to(1)\n```"
+def walk(env):
+    """A reply that takes this junction's first street, whatever it is called.
+
+    Streets are named rather than numbered now, so no fixed string is a legal
+    move at every junction. This reads the name off the environment the same
+    way a courier reads it off the observation.
+    """
+    street, heading = env._env.street_at(1)
+    return f'THOUGHT: go\n```\nwalk_to("{street}", "{heading}")\n```'
+
 
 
 def run(coro):
@@ -56,7 +65,7 @@ class TestTheObservationContract:
         assert obs["obs_str"].count(IMAGE_PLACEHOLDER) == len(images)
 
         for _ in range(3):
-            obs, _, done, _ = run(env.step(WALK))
+            obs, _, done, _ = run(env.step(walk(env)))
             if done:
                 break
             images = obs.get("multi_modal_input", {}).get(IMAGE_PLACEHOLDER, [])
@@ -103,7 +112,7 @@ class TestTheEpisode:
         done = False
         steps = 0
         while not done and steps < 10:
-            _, reward, done, info = run(env.step(WALK))
+            _, reward, done, info = run(env.step(walk(env)))
             steps += 1
             assert isinstance(reward, float)
         assert done, "max_turns did not end the episode"
@@ -136,7 +145,7 @@ class TestTheEpisode:
         run(env.reset(0))
         total = 0.0
         for _ in range(4):
-            _, reward, done, info = run(env.step(WALK))
+            _, reward, done, info = run(env.step(walk(env)))
             total += reward
             assert info["env_return"] == pytest.approx(total, abs=1e-6)
             if done:
@@ -158,8 +167,8 @@ class TestTheShapedTermStaysOutOfTheBenchmarkScore:
         run(shaped.reset(0))
         pr = sr = 0.0
         for _ in range(4):
-            _, r, d1, i1 = run(plain.step(WALK))
-            _, s, d2, i2 = run(shaped.step(WALK))
+            _, r, d1, i1 = run(plain.step(walk(plain)))
+            _, s, d2, i2 = run(shaped.step(walk(shaped)))
             pr, sr = pr + r, sr + s
             assert i1["env_return"] == pytest.approx(i2["env_return"], abs=1e-6)
             if d1 or d2:
@@ -170,7 +179,7 @@ class TestTheShapedTermStaysOutOfTheBenchmarkScore:
     def test_off_by_default(self, config):
         env = CourierGymEnv(config)
         run(env.reset(0))
-        _, reward, _, info = run(env.step(WALK))
+        _, reward, _, info = run(env.step(walk(env)))
         assert info["progress_weight"] == 0.0
         assert reward == pytest.approx(info["env_return"], abs=1e-6)
         run(env.close())
@@ -183,7 +192,7 @@ class TestTheShapedTermStaysOutOfTheBenchmarkScore:
             env = CourierGymEnv({**config, "progress_weight": 1.0})
             run(env.reset(seed))
             for _ in range(4):
-                _, _, done, info = run(env.step(WALK))
+                _, _, done, info = run(env.step(walk(env)))
                 if done:
                     break
             scores.append(info["progress_score"])
@@ -238,7 +247,7 @@ class TestTheJobIsMeasuredInMoney:
     def test_earnings_are_reported_every_turn(self, config):
         env = CourierGymEnv(config)
         run(env.reset(0))
-        _, _, _, info = run(env.step(WALK))
+        _, _, _, info = run(env.step(walk(env)))
         assert "earnings" in info and "earnings_per_hour" in info
         run(env.close())
 
@@ -246,7 +255,7 @@ class TestTheJobIsMeasuredInMoney:
         env = CourierGymEnv(config)
         run(env.reset(0))
         for _ in range(4):
-            _, _, done, info = run(env.step(WALK))
+            _, _, done, info = run(env.step(walk(env)))
             if done:
                 break
             assert info["earnings"] == 0.0 or info["delivered"]
@@ -258,8 +267,8 @@ class TestTheJobIsMeasuredInMoney:
         shaped = CourierGymEnv({**config, "progress_weight": 1.0})
         run(plain.reset(0)); run(shaped.reset(0))
         for _ in range(4):
-            _, _, d1, i1 = run(plain.step(WALK))
-            _, _, d2, i2 = run(shaped.step(WALK))
+            _, _, d1, i1 = run(plain.step(walk(plain)))
+            _, _, d2, i2 = run(shaped.step(walk(shaped)))
             assert i1["earnings"] == i2["earnings"]
             if d1 or d2:
                 break
@@ -282,7 +291,7 @@ class TestEarningsCanBeTheObjectiveItself:
         run(env.reset(0))
         total = 0.0
         for _ in range(6):
-            _, reward, done, info = run(env.step(WALK))
+            _, reward, done, info = run(env.step(walk(env)))
             total += reward
             assert total == pytest.approx(info["earnings"], abs=1e-6)
             if done:
@@ -294,7 +303,7 @@ class TestEarningsCanBeTheObjectiveItself:
         measured against env_return."""
         env = CourierGymEnv(config)
         run(env.reset(0))
-        _, reward, _, info = run(env.step(WALK))
+        _, reward, _, info = run(env.step(walk(env)))
         assert info["reward_basis"] == "env_return"
         assert reward == pytest.approx(info["env_return"], abs=1e-6)
         run(env.close())
@@ -308,7 +317,7 @@ class TestEarningsCanBeTheObjectiveItself:
                              "progress_weight": 1.0})
         run(env.reset(0))
         for _ in range(4):
-            _, reward, done, info = run(env.step(WALK))
+            _, reward, done, info = run(env.step(walk(env)))
             # the shaped reward may be non-zero while nothing has been paid
             assert info["earnings"] >= 0.0
             if done:
@@ -365,7 +374,7 @@ class TestSuccessIsActuallyReported:
     def test_the_key_exists_every_turn(self, config):
         env = CourierGymEnv(config)
         run(env.reset(0))
-        _, _, _, info = run(env.step(WALK))
+        _, _, _, info = run(env.step(walk(env)))
         assert "success" in info
         assert isinstance(info["success"], bool)
         run(env.close())
@@ -374,7 +383,7 @@ class TestSuccessIsActuallyReported:
         env = CourierGymEnv(config)
         run(env.reset(0))
         for _ in range(4):
-            _, _, done, info = run(env.step(WALK))
+            _, _, done, info = run(env.step(walk(env)))
             if info["delivered"]:
                 break
             assert info["success"] is False
@@ -392,7 +401,7 @@ class TestSuccessIsActuallyReported:
 
         env = CourierGymEnv(config)
         run(env.reset(0))
-        _, _, _, info = run(env.step(WALK))
+        _, _, _, info = run(env.step(walk(env)))
         assert extract_success(info) == info["success"]
         run(env.close())
 
@@ -416,7 +425,7 @@ class TestTheCaptionDescribesWhatWasActuallySent:
         obs, info = run(env.reset(0))
         assert info["images_dropped"] >= 1, "need a turn where something was cut"
         caption = re.search(r"### photographs(.*?)(\n###|\Z)", obs["obs_str"], re.S)
-        named = re.findall(r"\[(\d+)\]", caption.group(1))
+        named = re.findall(r"^\s*\[([^\]]+)\]", caption.group(1), re.M)
         sent = len(obs["multi_modal_input"][IMAGE_PLACEHOLDER])
         assert len(named) == sent, f"caption names {named} but {sent} were sent"
         run(env.close())
@@ -456,7 +465,7 @@ class TestALampTravelsWithItsStreet:
         pytest.skip("no signalised junction with a visible lamp in this bake")
 
     def _caption(self, obs):
-        import re
+        import re  # noqa: F811 - the module-level import is inside another test
         block = re.search(r"### photographs\n(.*?)(\n###|\Z)",
                           obs["obs_str"], re.S)
         # The placeholder line is appended after the caption and the
@@ -467,10 +476,13 @@ class TestALampTravelsWithItsStreet:
     def test_the_lamp_is_sent_with_the_street_it_governs(self, config):
         if not STREETS.exists():
             pytest.skip("albums not mounted")
+        import re
+
         env, (obs, _dropped) = self._signalised_turn(config, 1)
         lines = self._caption(obs)
-        assert lines[0].startswith("[1]"), lines
-        assert lines[1].startswith("[light 1]"), lines
+        street = re.match(r"\[([^\],]+),\s*([^\]]+)\]", lines[0])
+        assert street, lines
+        assert lines[1].startswith(f"[light: {street.group(1)}, {street.group(2)}]"), lines
         assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == 2
         run(env.close())
 
@@ -481,9 +493,9 @@ class TestALampTravelsWithItsStreet:
 
         env, (obs, _dropped) = self._signalised_turn(config, 2)
         lines = self._caption(obs)
-        streets = {re.match(r"\[(\d+)\]", line).group(1)
-                   for line in lines if re.match(r"\[\d+\]", line)}
-        lamps = {re.match(r"\[light (\d+)\]", line).group(1)
+        streets = {re.match(r"\[([^\]]+)\]", line).group(1)
+                   for line in lines if not line.startswith("[light")}
+        lamps = {re.match(r"\[light:\s*([^\]]+)\]", line).group(1)
                  for line in lines if line.startswith("[light")}
         assert lamps <= streets, f"lamps {lamps} without streets {streets}"
         assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == len(lines)
@@ -497,7 +509,7 @@ class TestALampTravelsWithItsStreet:
 
         env, (obs, _dropped) = self._signalised_turn(config, 2)
         lines = self._caption(obs)
-        streets = [line for line in lines if re.match(r"\[\d+\]", line)]
+        streets = [line for line in lines if not line.startswith("[light")]
         assert len(streets) == 2, lines
         run(env.close())
 

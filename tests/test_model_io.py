@@ -51,9 +51,10 @@ def body(content, finish="stop", **message):
 class TestReasoningIsNotTheAnswer:
     def test_inline_think_block_is_cut_off(self):
         answer, reasoning = split_reasoning(
-            {"content": "<think>\nmaybe ```walk_to(9)```\n</think>\nTHOUGHT: go\n```\nwalk_to(2)\n```"})
-        assert "walk_to(9)" not in answer
-        assert "walk_to(2)" in answer
+            {"content": "<think>\nmaybe ```walk_to(\"Rue Cujas\", \"north\")```\n</think>\n"
+                        "THOUGHT: go\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```"})
+        assert "Rue Cujas" not in answer
+        assert "walk_to(\"Rue de Grenelle\", \"east\")" in answer
         assert "maybe" in reasoning
 
     def test_a_separate_reasoning_field_is_respected(self):
@@ -61,14 +62,14 @@ class TestReasoningIsNotTheAnswer:
         leaves content clean. The same model does the opposite without one, so
         neither shape can be assumed."""
         answer, reasoning = split_reasoning(
-            {"content": "```\nwalk_to(2)\n```", "reasoning_content": "thinking"})
-        assert answer == "```\nwalk_to(2)\n```"
+            {"content": "```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```", "reasoning_content": "thinking"})
+        assert answer == "```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```"
         assert reasoning == "thinking"
 
     def test_an_unclosed_thought_yields_no_answer(self):
         """Cut off mid-thought. The calls inside are the ones it was arguing
         itself out of, and running one is a guess."""
-        answer, _ = split_reasoning({"content": "<think>\nmaybe ```walk_to(9)```"})
+        answer, _ = split_reasoning({"content": "<think>\nmaybe ```walk_to(\"Rue de Grenelle\", \"east\")```"})
         assert answer == ""
 
     @pytest.mark.parametrize("open_tag,close_tag", [
@@ -77,17 +78,17 @@ class TestReasoningIsNotTheAnswer:
     ])
     def test_the_common_conventions_are_all_handled(self, open_tag, close_tag):
         answer, _ = split_reasoning(
-            {"content": f"{open_tag}x{close_tag}\n```\nwalk_to(1)\n```"})
-        assert answer == "```\nwalk_to(1)\n```"
+            {"content": f"{open_tag}x{close_tag}\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```"})
+        assert answer == "```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```"
 
 
 class TestATruncatedReplyIsNotAModelFailure:
     def test_length_finish_raises_the_budget_and_retries(self):
         c = client([body("THOUGHT: I am thinking about", finish="length"),
-                    body("THOUGHT: go\n```\nwalk_to(2)\n```")],
+                    body("THOUGHT: go\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")],
                    max_tokens=100)
         reply, parsed, rejected = c.act([{"role": "user", "content": "x"}], parse_walk)
-        assert parsed == "walk_to(2)"
+        assert parsed == "walk_to(\"Rue de Grenelle\", \"east\")"
         assert c.stats.truncations == 1
         assert rejected == [], "a truncated reply must not count as a bad reply"
         assert c.sent[1]["max_tokens"] > c.sent[0]["max_tokens"]
@@ -104,9 +105,9 @@ class TestAFormatErrorIsRequeriedNotCharged:
 
     def test_a_bad_reply_is_retried_with_the_error_fed_back(self):
         c = client([body("I will walk north."),
-                    body("THOUGHT: ok\n```\nwalk_to(1)\n```")])
+                    body("THOUGHT: ok\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")])
         reply, parsed, rejected = c.act([{"role": "user", "content": "x"}], parse_walk)
-        assert parsed == "walk_to(1)"
+        assert parsed == "walk_to(\"Rue de Grenelle\", \"east\")"
         assert c.stats.requeries == 1
         assert rejected == ["I will walk north."]
         # the failed attempt and the complaint are both in the retry
@@ -123,7 +124,7 @@ class TestAFormatErrorIsRequeriedNotCharged:
     def test_requeries_are_counted_not_hidden(self):
         """A model needing three attempts a turn should still look worse than
         one needing none, so the count is part of the result."""
-        c = client([body("bad"), body("bad"), body("THOUGHT: x\n```\nwalk_to(3)\n```")])
+        c = client([body("bad"), body("bad"), body("THOUGHT: x\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")])
         c.act([{"role": "user", "content": "x"}], parse_walk)
         assert c.stats.as_dict()["requeries"] == 2
         assert c.stats.as_dict()["model_calls"] == 3
@@ -181,7 +182,7 @@ class TestTheBudgetNeverWalksIntoTheContextLimit:
                     'is 10240 tokens. However, you requested '
                     f'{payload["max_tokens"]} output tokens and your prompt '
                     'contains 8000 tokens"}')
-            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+            return body("THOUGHT: ok\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")
 
         c._post_with_retries = fake  # type: ignore[assignment]
         c.seen = seen  # type: ignore[attr-defined]
@@ -190,7 +191,7 @@ class TestTheBudgetNeverWalksIntoTheContextLimit:
     def test_it_backs_off_to_the_room_the_server_reports(self):
         c = self._clamping_client()
         _, parsed, _ = c.act([{"role": "user", "content": "x"}], parse_walk)
-        assert parsed == "walk_to(1)"
+        assert parsed == "walk_to(\"Rue de Grenelle\", \"east\")"
         assert c.seen[1] == 10240 - 8000 - 64
         assert c.stats.budget_clamps == 1
 
@@ -233,13 +234,13 @@ class TestAnOverlongPromptShedsHistoryRatherThanDying:
                     'HTTP 400: {"message":"This model\'s maximum context length '
                     'is 10240 tokens. However, you requested 512 output tokens '
                     'and your prompt contains 10200 tokens"}')
-            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+            return body("THOUGHT: ok\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")
 
         c._post_with_retries = fake  # type: ignore[assignment]
         convo = [{"role": "system", "content": "s"}]
         convo += [{"role": "user", "content": "u"}, {"role": "assistant", "content": "a"}] * 3
         _, parsed, _ = c.act(convo, parse_walk)
-        assert parsed == "walk_to(1)"
+        assert parsed == "walk_to(\"Rue de Grenelle\", \"east\")"
         assert c.stats.history_drops >= 1
         assert sizes[-1] < sizes[0]
 
@@ -279,13 +280,13 @@ class TestBothWordingsOfTheContextRefusalAreUnderstood:
             seen.append(len(payload["messages"]))
             if len(payload["messages"]) > 3:
                 raise RuntimeError('HTTP 400: {"message":"%s"}' % message)
-            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+            return body("THOUGHT: ok\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")
 
         c._post_with_retries = fake  # type: ignore[assignment]
         convo = [{"role": "system", "content": "s"}]
         convo += [{"role": "user", "content": "u"}, {"role": "assistant", "content": "a"}] * 3
         _, parsed, _ = c.act(convo, parse_walk)
-        assert parsed == "walk_to(1)", f"not handled: {message[:40]}"
+        assert parsed == "walk_to(\"Rue de Grenelle\", \"east\")", f"not handled: {message[:40]}"
         assert c.stats.history_drops >= 1
 
 
@@ -308,7 +309,7 @@ class TestATimeoutIsQueueingNotAnEndedEpisode:
             tries.append(1)
             if len(tries) < 4:
                 raise TimeoutError("timed out")
-            return body("THOUGHT: ok\n```\nwalk_to(1)\n```")
+            return body("THOUGHT: ok\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")
 
         c._post = flaky  # type: ignore[assignment]
         c._sleep_patch = True

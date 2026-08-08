@@ -39,6 +39,8 @@ RejectedAction     the action parsed but the world refused it (walked into a
 
 from __future__ import annotations
 
+import json
+
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -143,9 +145,19 @@ class ParsedAction:
     unfenced: bool = False
 
     def render(self) -> str:
+        """The call as the prompt asks for it to be written.
+
+        Double quotes, not Python's ``repr``. The prompt teaches
+        walk_to("Rue de Grenelle", "east") and the transcript is read beside
+        it -- a log that renders the same call with single quotes reports an
+        action in a grammar the model was told not to use.
+        """
+        def one(value: Any) -> str:
+            return json.dumps(value) if isinstance(value, str) else str(value)
+
         inner = ", ".join(
-            [repr(a) if isinstance(a, str) else str(a) for a in self.args]
-            + [f"{k}={v!r}" for k, v in self.kwargs.items()]
+            [one(a) for a in self.args]
+            + [f"{k}={one(v)}" for k, v in self.kwargs.items()]
         )
         return f"{self.tool}({inner})"
 

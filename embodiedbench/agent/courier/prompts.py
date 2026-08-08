@@ -46,30 +46,41 @@ street's photograph before you take it.{blocked_advice}
 {tool_menu}
 
 How the streets work here:
-  - walk_to(k) takes the street numbered k, and photograph k is the view down it.
-  - Each street is listed both by compass heading and by where it lies relative to
-    the way you face, so "turn left onto Rue X" is something you can act on.
-  - House numbers run in order along a street, odd one side and even the other; if
-    they are falling and you want a higher one, turn around.
-  - A street keeps its name from junction to junction, so a turn shows a new name.
-  - The same street name can leave a junction twice — once each way. They are
-    different directions along one street, not two streets.
+  - You take a street by naming it and the way you are going:
+    walk_to("Rue de Grenelle", "east"). Both are written on the line above it,
+    and the photograph captioned with the same two words is the view down it.
+  - The same street name usually leaves a junction twice, once each way. They
+    are two directions along one street, not two streets, which is why the
+    bearing is part of naming one.
+  - A street name means the same thing everywhere in the city. If you walked
+    "Rue de Grenelle" going east an hour ago, that is the same street you are
+    looking at now — so a street you have already tried is a street you can
+    recognise and rule out.
+  - Each street also says where it lies relative to the way you face, so
+    "turn left onto Rue X" is something you can act on.
+  - House numbers run in order along a street, odd one side and even the other;
+    if they are falling and you want a higher one, turn around.
+  - A street keeps its name from junction to junction, so a turn shows a new
+    name. A new name means you have left the street you were on.
 
 What you have been trained to do:
 {procedures}
 
 HOW TO REPLY — exactly this shape, every turn:
 
-THOUGHT: one or two lines saying what you read and what you concluded.
+THOUGHT: one line saying what you read and what you concluded.
 ```
-walk_to(2)
+{number_example}
 ```
 
   - Exactly one fenced block, containing exactly one call, and nothing after it.
   - The name must be one of the tools listed above.
-  - Whole numbers go bare: {number_example}.
-  - Any text argument goes in double quotes.
-  - A tool with no arguments still needs its brackets: {no_arg_example}"""
+  - Street names and bearings go in double quotes, spelled as they are written
+    in the list: {number_example}.
+  - Whole numbers go bare.
+  - A tool with no arguments still needs its brackets: {no_arg_example}
+  - Keep the THOUGHT to one line. A reply that runs too long is cut off before
+    it reaches the action, and a cut-off reply loses the turn."""
 
 OBSERVATION_TEMPLATE = """{memory}
 
@@ -79,7 +90,8 @@ OBSERVATION_TEMPLATE = """{memory}
 
 ### streets leaving this junction
 {candidates}
-(choose by the number at the start of a line; nothing else is a street)
+(take one with walk_to("street name", "bearing") — the name and the bearing
+ exactly as they are written above; nothing else is a street)
 
 ### photographs
 {photographs}
@@ -92,7 +104,9 @@ def render_photographs(rows: list[dict], *, phone_map: bool = False) -> str:
     The images arrive as an ordered list beside the text, and a model that
     cannot tell which picture is which street will read them in whatever order
     it likes. So every frame gets a caption here, in the same order the frames
-    are attached, and the caption names the street number it belongs to.
+    are attached, and the caption names the street it belongs to -- in the
+    same words ``walk_to`` takes, so reading the picture and acting on it do
+    not require a translation step.
 
     The phone's map, when there is one, is captioned last and captioned as a
     *drawing*. It is the one picture in the list that did not come through the
@@ -100,23 +114,21 @@ def render_photographs(rows: list[dict], *, phone_map: bool = False) -> str:
     harness telling the courier its phone can see the street.
     """
     lines: list[str] = []
-    # One line for all the street views instead of one line each. The per-street
-    # caption repeated the candidate line above it almost word for word -- same
-    # index, same street, same relative bearing -- so a four-way junction spent
-    # eight lines saying what four could. What the caption block has to preserve
-    # is the *ordering contract*: which attached image is which street. That is
-    # an index list, not a sentence per image.
-    views = [row["k"] for row in rows if row.get("image")]
-    if views:
-        numbers = ", ".join(f"[{k}]" for k in views)
-        lines.append(
-            f"  {numbers} — the view down each of those streets, in that order"
-        )
+    # One caption per frame, naming the street the way walk_to takes it. This
+    # used to be a single index list ("[1], [2] — the view down each of those
+    # streets, in that order") because a per-street caption repeated the
+    # candidate line above it word for word. With the streets named rather
+    # than numbered there is no index to carry the ordering contract, so the
+    # caption carries it by naming, which also survives the image budget
+    # dropping some of them.
+    for row in rows:
+        if row.get("image"):
+            lines.append(f'  [{row["street"]}, {row["heading"]}] '
+                         "the view down it from here")
     for row in rows:
         if row.get("signal_image"):
-            lines.append(
-                f"  [light {row['k']}] the pedestrian light for street {row['k']}"
-            )
+            lines.append(f'  [light: {row["street"]}, {row["heading"]}] '
+                         "the pedestrian light for that crossing")
     if phone_map:
         lines.append(
             "  [map] your phone's map — a drawing, not a photograph: it has the "
@@ -176,9 +188,9 @@ def build_system_prompt(*, city: str, tools: list[Tool]) -> str:
     # Even the formatting examples have to come from the live tool set. This line
     # read "walk_to(2), follow_street(2, 4)" at every stride, so the block-stride
     # prompt demonstrated the syntax of a tool the runtime would refuse.
-    number_example = "walk_to(2)"
+    number_example = 'walk_to("Rue de Grenelle", "east")'
     if "follow_street" in names:
-        number_example += ", follow_street(2, 4)"
+        number_example += ', follow_street("Rue de Grenelle", "east", 4)"'.rstrip('"')
     # Likewise the no-argument example: it named check_order(), which no_phone
     # takes away, so that condition's prompt demonstrated a tool it had removed.
     no_arg = next((t.name for t in tools if not t.params), "")
@@ -212,18 +224,24 @@ def build_observation(
 
 
 def render_candidates(rows: list[dict]) -> str:
-    """The numbered street list.
+    """The streets leaving this junction, named as a courier would name them.
 
-    Each line carries what a rider reads off a corner: the street's name, how far
-    the next junction is, which way it heads, and the house numbers that way. It
-    deliberately does not say which one is correct -- that is the decision under
-    test.
+    Each line carries what a rider reads off a corner: the street's name, how
+    far the next junction is, which way it heads, and the house numbers that
+    way. It deliberately does not say which one is correct -- that is the
+    decision under test.
+
+    The lines used to be numbered, and the courier chose by number. The number
+    is stable within one junction and meaningless across junctions, so nothing
+    the policy learned about a street survived walking to the next corner. A
+    name and a bearing are the same everywhere, which is what makes "I have
+    already tried that one" a thought the policy can have.
     """
     if not rows:
         return "There is no way on from here."
     lines = []
     for row in rows:
-        parts = [f"  {row['k']}. {row['street']}"]
+        parts = [f'  "{row["street"]}"']
         # Relative first, compass second. A courier on a corner decides in left
         # and right; the compass is what the phone speaks, and both are needed to
         # act on a route instruction, but only one of them is what the body does.
@@ -233,10 +251,16 @@ def render_candidates(rows: list[dict]) -> str:
         # different action from the one the number was attached to: a 7 m stub
         # labelled south-east carried a reviewer 61 m north-west.
         heading = row.get("reach_heading") or row.get("heading", "")
-        if row.get("relative"):
-            parts.append(f"{row['relative']} ({heading})")
-        elif heading:
-            parts.append(f"heading {heading}")
+        # The bearing is the second half of the street's name here: it is what
+        # walk_to needs, so it is printed in the words walk_to takes rather
+        # than only as scenery. The relative direction stays alongside it,
+        # because a courier on a corner thinks in left and right while the
+        # phone speaks compass, and acting on a route needs both.
+        if heading:
+            parts.append(f"going {heading}"
+                         + (f", {row['relative']}" if row.get("relative") else ""))
+        elif row.get("relative"):
+            parts.append(str(row["relative"]))
         if row.get("reach_m") is not None:
             junctions = row.get("reach_junctions", 1)
             parts.append(

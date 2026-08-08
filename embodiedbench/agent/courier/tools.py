@@ -172,9 +172,18 @@ class Tool:
 WALK_TO = Tool(
     name="walk_to",
     kind=ToolKind.ACT,
-    summary="Walk to a numbered waypoint on a street leaving this junction.",
-    params=(ToolParam("k", "int", "the number beside the street you want to take"),),
-    example="walk_to(3)",
+    summary=(
+        "Walk down a street leaving this junction, naming it and the way you "
+        "are going. The bearing is only needed when the same street leaves "
+        "this junction twice, which is most junctions."
+    ),
+    params=(
+        ToolParam("street", "str", "the name of the street, as it is written"),
+        ToolParam("heading", "str",
+                  "which way along it: north, north-east, east, and so on",
+                  required=False),
+    ),
+    example='walk_to("Rue de Grenelle", "east")',
     time_cost_s=0.0,
     requires_env_action="MOVE_TO",
 )
@@ -183,15 +192,16 @@ FOLLOW_STREET = Tool(
     name="follow_street",
     kind=ToolKind.ACT,
     summary=(
-        "Take street k and keep going along it for up to n junctions (6 at most). "
-        "Stops early at a fork, a dead end, a crossing with a light, anything "
-        "blocking the way, or your address."
+        "Take a street and keep going along it for up to n junctions (6 at "
+        "most). Stops early at a fork, a dead end, a crossing with a light, "
+        "anything blocking the way, or your address."
     ),
     params=(
-        ToolParam("k", "int", "the number beside the street you want to take"),
+        ToolParam("street", "str", "the name of the street"),
+        ToolParam("heading", "str", "which way along it", required=False),
         ToolParam("n", "int", "how many junctions to walk, at most 6", required=False),
     ),
-    example="follow_street(3, 6)",
+    example='follow_street("Rue de Grenelle", "east", 6)',
     time_cost_s=0.0,
     requires_env_action="MOVE_TO",
 )
@@ -208,8 +218,11 @@ LOOK = Tool(
         "Read the door numbers running away down street k, without walking it. "
         "The numbers tell you which way they climb."
     ),
-    params=(ToolParam("k", "int", "the number of the street to look down"),),
-    example="look(2)",
+    params=(
+        ToolParam("street", "str", "the name of the street to look down"),
+        ToolParam("heading", "str", "which way along it", required=False),
+    ),
+    example='look("Rue de Grenelle", "east")',
     # A rider glances down a street in a couple of seconds. Charging something
     # keeps looking honest without making it precious.
     time_cost_s=2.0,

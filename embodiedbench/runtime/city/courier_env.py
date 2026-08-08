@@ -46,6 +46,11 @@ from embodiedbench.compiler.road_network import (
 from embodiedbench.runtime.city.embodiment import Embodiment, Viewpoint
 from embodiedbench.runtime.city.embodiment import get as embodiment_for
 from embodiedbench.runtime.city.map_image import MapDrawing, render_map
+from embodiedbench.runtime.city.street_names import (
+    StreetAmbiguous,
+    StreetNotHere,
+    match_street,
+)
 from embodiedbench.runtime.city.obstacles import (
     BLOCKED_SECONDS,
     ROAD_BLOCK,
@@ -1844,12 +1849,68 @@ class CourierEnv:
             for order in self.live_orders()
         )
 
-    def walk_to(self, k: int) -> StepOutcome:
-        """Take street ``k``. How far one call carries is the stride.
+    def resolve_street(self, street: str, heading: str | None = None):
+        """Which street leaving this junction the courier named.
+
+        Returns ``(k, None)`` or ``(None, refusal)``. Streets are chosen by
+        name and bearing rather than by a number the observation assigns,
+        because the number is only stable within one junction: Rue de Grenelle
+        is street 3 here, street 1 at the next corner and absent at the one
+        after. A policy given numbers cannot carry a single fact about a
+        street from one corner to the next -- "I have already tried that one"
+        is not expressible. A name and a bearing are the same everywhere.
+
+        The refusals are written to be acted on. Naming a street that is not
+        here lists the ones that are; naming one that is here twice asks for
+        the bearing and says which two are available.
+        """
+        rows = self.candidates()
+        try:
+            row = match_street(rows, street, heading)
+        except StreetNotHere:
+            return None, self._refuse(StepOutcome(
+                ok=False, code="no_such_street",
+                message=(
+                    f"There is no {street} leaving this junction. From here you "
+                    f"can take: {self._street_menu(rows)}."
+                ),
+            ))
+        except StreetAmbiguous as error:
+            return None, self._refuse(StepOutcome(
+                ok=False, code="which_way",
+                message=(
+                    f"{street} leaves this junction in more than one direction "
+                    f"({' and '.join(error.headings)}). Say which: "
+                    f'walk_to("{street}", "{error.headings[0]}").'
+                ),
+            ))
+        return row["k"], None
+
+    def street_at(self, k: int) -> tuple[str, str]:
+        """The name and bearing of this junction's k-th street, clockwise from north.
+
+        The courier no longer sees these numbers -- it names streets -- but the
+        reference policies and the tests still need a way to say "the first
+        street here" without knowing the map. Nothing the policy can reach
+        calls this.
+        """
+        row = next(row for row in self.candidates() if row["k"] == k)
+        return row["street"], row["heading"]
+
+    def _street_menu(self, rows: list[dict[str, Any]] | None = None) -> str:
+        """The streets here, as a courier would say them back."""
+        rows = self.candidates() if rows is None else rows
+        return ", ".join(f'"{row["street"]}" {row["heading"]}' for row in rows)
+
+    def walk_to(self, street: str, heading: str | None = None) -> StepOutcome:
+        """Take the named street. How far one call carries is the stride.
 
         Two resolutions of the same city, and the difference is only where the
         courier is asked to stop and choose. See ``Stride``.
         """
+        k, refusal = self.resolve_street(street, heading)
+        if refusal is not None:
+            return refusal
         if self.stride == Stride.BLOCK:
             return self._run_street(k, steps=None, to_corner=True)
         return self._step_to(k)
@@ -1858,9 +1919,8 @@ class CourierEnv:
         """One waypoint along street ``k``: the atomic move, whatever the stride."""
         rows = {row["k"]: row for row in self.candidates()}
         if k not in rows:
-            legal = ", ".join(str(n) for n in sorted(rows))
-            message = (f"There is no street {k} here. The streets leaving this "
-                       f"junction are {legal}.")
+            message = (f"That street does not leave this junction. From here "
+                       f"you can take: {self._street_menu()}.")
             if len(rows) == 1:
                 # Naming the legal street was not enough. On three of forty
                 # episodes the courier stood at a dead end and asked for street
@@ -1868,10 +1928,11 @@ class CourierEnv:
                 # the whole episode -- because the only legal move went back the
                 # way it came and it would not take it. The refusal now says
                 # that going back is the move, not a mistake.
-                only = next(iter(rows))
-                message += (f" This is a dead end. walk_to({only}) goes back the "
-                            "way you came, and here that is the only way on: "
-                            "take it rather than asking again.")
+                only = rows[next(iter(rows))]
+                message += (f' This is a dead end. walk_to("{only["street"]}", '
+                            f'"{only["heading"]}") goes back the way you came, '
+                            "and here that is the only way on: take it rather "
+                            "than asking again.")
             return self._refuse(StepOutcome(
                 ok=False, code="no_such_street", message=message,
             ))
@@ -1949,8 +2010,9 @@ class CourierEnv:
     # declared in ``skills.py``, which is where the argument for it is written.
     MAX_FOLLOW = 6
 
-    def follow_street(self, k: int, n: int = MAX_FOLLOW) -> StepOutcome:
-        """Take street ``k`` and keep going straight, up to ``n`` junctions.
+    def follow_street(self, street: str, heading: str | None = None,
+                      n: int = MAX_FOLLOW) -> StepOutcome:
+        """Take the named street and keep going straight, up to ``n`` junctions.
 
         The turn budget and the graph were sized against different worlds. A
         delivery leg is a median 530 m; an edge on the compiled carriageway is a
@@ -1968,6 +2030,9 @@ class CourierEnv:
         caller could not have walked one step at a time, and it cannot walk it
         past the turn it should have taken.
         """
+        k, refusal = self.resolve_street(street, heading)
+        if refusal is not None:
+            return refusal
         return self._run_street(k, steps=max(1, min(int(n), self.MAX_FOLLOW)),
                                 to_corner=False)
 
@@ -1990,8 +2055,8 @@ class CourierEnv:
             return self._refuse(StepOutcome(
                 ok=False, code="no_such_street",
                 message=(
-                    f"There is no street {k} here. The streets leaving this junction are "
-                    f"{', '.join(str(number) for number in sorted(rows))}."
+                    f"That street does not leave this junction. From here you "
+                    f"can take: {self._street_menu()}."
                 ),
             ))
         street = rows[k]["street"]
@@ -2067,7 +2132,7 @@ class CourierEnv:
             ),
         )
 
-    def _look_impl(self, k: int) -> StepOutcome:
+    def _look_impl(self, street: str, heading: str | None = None) -> StepOutcome:
         """The door numbers down street k, and nothing the turn already said.
 
         It used to open with the street's name, compass heading and distance to
@@ -2081,11 +2146,10 @@ class CourierEnv:
         chooses a direction along a road when no phone will, and it is worth two
         seconds precisely because it is not free every turn for every street.
         """
-        rows = {row["k"]: row for row in self.candidates()}
-        if k not in rows:
-            return StepOutcome(ok=False, code="no_such_street",
-                               message=f"There is no street {k} here.")
-        row = rows[k]
+        k, refusal = self.resolve_street(street, heading)
+        if refusal is not None:
+            return refusal
+        row = next(row for row in self.candidates() if row["k"] == k)
         if self.condition == Condition.VISUAL:
             # The numbers are meant to be on the doors under this condition. They
             # are not legible in these renders -- see ``Condition`` -- so this
@@ -2191,13 +2255,16 @@ class CourierEnv:
         # benchmark with two tools that both route. So the wording carries the
         # frame instead, and the courier is told which of the two numbers is a
         # direction to walk in -- neither.
-        heading = compass_of(bearing_deg(here, match.kerb))
+        # No bearing in the words. A phone shows you where a place is by
+        # drawing it, and every direction this benchmark spoke aloud was a
+        # direction the policy could act on without looking at anything --
+        # which made choosing a street a text problem and the photographs
+        # decoration. The bearing is on the map, where a person reads it.
         return StepOutcome(
             ok=True, sim_seconds=5.0,
             message=(
-                f"{match.text} is on {match.street_name}, about {distance:.0f} m away "
-                f"on foot. It lies to the {heading} of you as the crow flies; the "
-                f"streets may not go that way."
+                f"{match.text} is on {match.street_name}, about {distance:.0f} m "
+                f"away on foot. Your phone is showing you where it is."
             ),
         )
 
@@ -2271,65 +2338,24 @@ class CourierEnv:
             )
         metres = sum(leg["metres"] for leg in legs)
         minutes = metres * 100.0 / WALK_SPEED_CM_S / 60.0
+        # The route is drawn, not dictated. Every leg used to be spelled out
+        # -- "Take Rue de Grenelle, east, 1 junction, 18 m" -- and a courier
+        # holding that text never had to look at anything: the street to take
+        # was named, the bearing was named, and the photographs and the map
+        # were both decoration. Choosing a street was a reading exercise.
+        #
+        # What the phone says now is what a phone says when you glance at it
+        # without stopping: how far, how long, and that it is on the screen.
+        # Which way to go is on the map, which is a picture. The names of the
+        # streets are on the corner, which is text. Whether the way is open,
+        # and whether the light is red, are in the photographs. No one of them
+        # is enough.
         lines = [
-            f"Route to {target.text} — {metres:.0f} m, about {minutes:.0f} min on foot."
+            f"Route to {target.text} — {metres:.0f} m, about {minutes:.0f} min "
+            f"on foot, {len(legs)} street{'' if len(legs) == 1 else 's'} to walk.",
+            "  Your phone is showing the route. Read it off the map: the line "
+            "runs from where you are to where you are going.",
         ]
-        shown = legs[: self.NAVIGATE_LEGS_SHOWN]
-        for number, leg in enumerate(shown, start=1):
-            junctions = leg["junctions"]
-            hop = f"{junctions} junction{'' if junctions == 1 else 's'}"
-            # Every instruction has the same shape:
-            #     N. <verb> <street> — <directions> — <j> junctions, <m> m.
-            # The first draft gave the opening leg one shape ("Head south-west on
-            # Rue X, on your left for 2 junctions") and every later leg another
-            # ("Turn left onto Rue Y (south-east) and go 9 junctions"), so the
-            # street name landed in a different place depending on which leg it
-            # was. Anything reading the route -- a model or a parser -- has to
-            # get the street name out of it to match a numbered corner, and two
-            # shapes is one more than the instruction needs.
-            verb = "Take" if leg["turn"] == "head" else f"{leg['turn'].capitalize()} onto"
-            # Later legs are announced by where the leg *goes*, the leg being
-            # walked now by the direction it *leaves in*, and until this said so
-            # the two read as a contradiction. Playing the environment by hand
-            # turned one up in three turns: "Take Rue Oberkampf - south-east,
-            # sharp right - 2 junctions" followed by "Continue onto Avenue de
-            # Crimee - north-west", which is a 180-degree reversal described as
-            # continuing. Both numbers were right and measured in different
-            # frames -- the first hop out of that corner is a 2 m stub pointing
-            # south-east off a street that runs north-west -- so the fix is to
-            # name the frame rather than to change either number.
-            where = f"{leg['heading']} overall"
-            if leg["turn"] == "head":
-                # Only the leg being walked *now* gets a left/right: by the time
-                # the courier reaches leg 3 it will be facing another way, and a
-                # relative direction quoted against the wrong facing is worse
-                # than none.
-                #
-                # And for that leg the compass point is the *first hop's*, not
-                # the leg's overall direction. The two disagree by more than 90
-                # degrees on 10.1% of legs and by more than 135 on 7.8% -- a
-                # curving street can leave a junction south-east and end up
-                # north-west -- and the leg's own phrase was quoting the overall
-                # bearing beside a left/right computed from the first hop. So
-                # "Take Rue Saint-Antoine — north-west, on your left" named a
-                # street that leaves this corner to the south-east, and an agent
-                # matching the compass against the street list rejected the very
-                # street it had been told to take. Later legs keep the overall
-                # heading: the courier cannot act on them yet, and what it wants
-                # from them is where the leg goes.
-                where = compass_of(leg["bearing"])
-                relative = relative_of(leg["bearing"], self.facing())
-                if relative:
-                    where = f"{where}, {relative}"
-            lines.append(
-                f"  {number}. {verb} {leg['street']} — {where} — {hop}, {leg['metres']:.0f} m."
-            )
-        if len(legs) > len(shown):
-            rest = len(legs) - len(shown)
-            lines.append(f"  … then {rest} more turn{'' if rest == 1 else 's'}; ask again on the way.")
-        else:
-            lines.append(f"  Then {target.text} is on {target.street_name}.")
-        lines.append("  The map on your screen shows the route.")
         return StepOutcome(
             ok=True, sim_seconds=self.NAVIGATE_SECONDS, message="\n".join(lines),
             drawing=self.map_drawing(target, legs).svg,

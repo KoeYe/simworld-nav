@@ -99,7 +99,7 @@ class ShortestPathCourier:
                 env.wait()
                 continue
             here = env.node_id
-            outcome = env.walk_to(k)
+            outcome = env.walk_to(*env.street_at(k))
             if not outcome.ok:
                 # A barrier, found the way anyone finds one. It is remembered
                 # here, in the courier, because there is nowhere else to put it:

@@ -402,9 +402,13 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             if frame.kind == "map" and frame.svg:
                 drawings.append(frame)
             elif frame.kind == "photograph" and frame.path:
-                match = re.match(r"\[light (\d+)\]", frame.label)
+                # The label names the street and its bearing -- "[Rue de la
+                # Paix, west]" for a view, "[light: Rue de la Paix, west]" for
+                # its lamp -- so the two are paired on that text. They used to
+                # be paired on an index, which went away with the numbers.
+                match = re.match(r"\[light:\s*([^\]]+)\]", frame.label)
                 if match:
-                    lamps[match.group(1)] = frame
+                    lamps[match.group(1).strip()] = frame
                 else:
                     streets.append(frame)
 
@@ -422,8 +426,8 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
 
         sent_streets = 0
         for frame in streets:
-            index = re.match(r"\[(\d+)\]", frame.label)
-            key = index.group(1) if index else None
+            named = re.match(r"\[([^\]]+)\]", frame.label)
+            key = named.group(1).strip() if named else None
             if sent_streets >= self.max_images:
                 dropped += 1 + (1 if key in lamps else 0)
                 continue

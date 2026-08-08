@@ -171,7 +171,7 @@ class TestWhatTheMapDraws:
             rows = env.candidates()
             if not rows:
                 break
-            outcome = env.walk_to(rows[0]["k"])
+            outcome = env.walk_to(*env.street_at(rows[0]["k"]))
             if not outcome.ok and outcome.code == "way_blocked":
                 walked_into_one = True
                 break
@@ -250,7 +250,8 @@ class TestTheMapReachesTheCourier:
         first = next(f for f in session.observe().frames if f.kind == "map")
         drawings = []
         for _ in range(3):
-            session.step("THOUGHT: t\n```\nwalk_to(1)\n```")
+            street, heading = session.env.street_at(1)
+            session.step(f'THOUGHT: t\n```\nwalk_to("{street}", "{heading}")\n```')
             frames = [f for f in session.observe().frames if f.kind == "map"]
             assert len(frames) == 1, "the map went out while the courier walked"
             drawings.append(frames[0].svg)

@@ -164,9 +164,9 @@ class TestActionParsing:
         return {t.name for t in available_tools(PARIS_ACTIONS)}
 
     def test_a_well_formed_reply_parses(self):
-        action = parse_reply(fence("walk_to(3)", "street 3 heads west"), self.allowed())
+        action = parse_reply(fence("walk_to(\"Rue de Grenelle\", \"east\")", "street 3 heads west"), self.allowed())
         assert action.tool == "walk_to"
-        assert action.args == [3]
+        assert action.args == ["Rue de Grenelle", "east"]
         assert "west" in action.thought
 
     def test_a_string_argument_survives(self):
@@ -179,17 +179,17 @@ class TestActionParsing:
 
     def test_no_fenced_block_is_a_format_error(self):
         with pytest.raises(FormatError, match="No action found"):
-            parse_reply("I think I should walk_to(3).", self.allowed())
+            parse_reply("I think I should walk_to(\"Rue de Grenelle\", \"east\").", self.allowed())
 
     def test_two_actions_is_a_format_error(self):
         """One action per turn, so a turn maps to exactly one transition and the
         trajectory stays replayable."""
         with pytest.raises(FormatError, match="exactly one"):
-            parse_reply("```\nwalk_to(3)\nlook(2)\n```", self.allowed())
+            parse_reply("```\nwalk_to(\"Rue de Grenelle\", \"east\")\nlook(\"Rue de Grenelle\", \"east\")\n```", self.allowed())
 
     def test_two_blocks_is_a_format_error(self):
         with pytest.raises(FormatError, match="action blocks"):
-            parse_reply("```\nwalk_to(3)\n```\ntext\n```\nlook(1)\n```", self.allowed())
+            parse_reply("```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```\ntext\n```\nlook(\"Rue de Grenelle\", \"east\")\n```", self.allowed())
 
     def test_an_unavailable_tool_is_refused_by_name(self):
         """Refused at parse time, with the list, rather than passed to the world
@@ -339,7 +339,7 @@ class TestSkills:
     def test_follow_street_does_not_choose_the_street(self):
         """It walks the street the model named. If it picked one, it would be
         doing the navigation."""
-        assert any(p.name == "k" for p in FOLLOW_STREET.tool.params)
+        assert any(p.name == "street" for p in FOLLOW_STREET.tool.params)
         assert "never chooses" in FOLLOW_STREET.rationale
 
 
@@ -371,7 +371,7 @@ class TestPrompts:
         tools = available_tools([a for a in PARIS_ACTIONS if a != "PICKUP"])
         prompt = build_system_prompt(city="Paris", tools=tools)
         assert "collect()" not in prompt
-        assert "walk_to(k)" in prompt
+        assert 'walk_to("Rue de Grenelle", "east")' in prompt
 
     def test_the_system_prompt_shows_the_action_grammar(self):
         prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
@@ -525,7 +525,7 @@ class TestNavigationTool:
                     out.append(({r["street"] for r in rows}, outcome))
                 if not rows:
                     break
-                env.walk_to(rows[len(out) % len(rows)]["k"])
+                env.walk_to(*env.street_at(rows[len(out) % len(rows)]["k"]))
         return out
 
     def test_a_route_never_mentions_a_light_or_a_hazard(self, paris):
@@ -546,23 +546,13 @@ class TestNavigationTool:
             for line in outcome.message.splitlines():
                 assert not re.search(r"\bwalk_to\b|\bfollow_street\b|\bstreet \d\b", line)
 
-    def test_every_leg_is_written_in_one_shape(self, paris):
-        """One shape, so the street name is always in the same place.
-
-        The first draft gave the opening leg one grammar and later legs another,
-        and an agent that parses the route to match a corner had to handle both.
-        """
-        shape = re.compile(
-            r"^  \d+\. (?:Take|Turn left onto|Turn right onto|Bear left onto|"
-            r"Bear right onto|Continue onto|Turn back onto) .+ — .+ — \d+ junctions?, \d+ m\.$"
-        )
-        seen = 0
+    def test_the_route_gives_scale_and_not_steps(self, paris):
+        """The legs are gone: they were the navigation, written out."""
         for _, outcome in self.routes(paris, seeds=range(3)):
-            for line in outcome.message.splitlines():
-                if re.match(r"^  \d+\. ", line):
-                    assert shape.match(line), line
-                    seen += 1
-        assert seen >= 40
+            assert "min on foot" in outcome.message
+            assert "street" in outcome.message
+            for word in ("north", "south", "east", "west"):
+                assert word not in outcome.message.lower(), outcome.message
 
     def test_the_first_instruction_names_a_street_that_leaves_this_junction(self, paris):
         """A route the courier cannot start is not a route."""
@@ -590,7 +580,7 @@ class TestNavigationTool:
             assert legs
             path = env.route_nodes(env.node_id, target.kerb_node)
             row = next(r for r in env.candidates() if r["node"] == path[1])
-            env.walk_to(row["k"])
+            env.walk_to(*env.street_at(row["k"]))
             after = env.route_length_cm(env.node_id, target.kerb_node)
             assert after < before
 
@@ -648,7 +638,7 @@ class TestRelativeDirections:
     def test_the_way_you_came_is_behind_you(self, paris):
         env = courier(paris)
         rows = env.candidates()
-        env.walk_to(rows[0]["k"])
+        env.walk_to(*env.street_at(rows[0]["k"]))
         back = [r for r in env.candidates() if r["back"]]
         assert back and back[0]["relative"] == "behind you"
 
@@ -784,16 +774,21 @@ class TestPhotographCaptions:
              "heading": "south", "image": "/b.png", "signal_image": None},
         ]
         captions = render_photographs(rows)
-        # The contract is the ordering, not the prose: every attached frame is
-        # identified, and in the order the frames are attached. The per-street
-        # sentence was dropped because it restated the candidate line above it
-        # word for word; the index list carries the mapping on one line.
-        assert "[1]" in captions
-        assert "[2]" in captions
-        assert "[light 1]" in captions
-        assert "[light 2]" not in captions
-        # Street views first, then lamps.
-        assert captions.index("[2]") < captions.index("[light 1]")
+        # The contract is the ordering: every attached frame is identified, in
+        # the order the frames are attached, and identified by the words
+        # walk_to takes so that reading a picture and acting on it need no
+        # translation. With the streets named rather than numbered there is no
+        # index to carry that mapping, so the names carry it.
+        for row in rows:
+            if row.get("image"):
+                assert f'[{row["street"]}, {row["heading"]}]' in captions
+            if row.get("signal_image"):
+                assert f'[light: {row["street"]}, {row["heading"]}]' in captions
+        # Rue Cujas has no lamp, so it must not be given one.
+        assert "[light: Rue Cujas, south]" not in captions
+        # Street views first, then lamps -- the order the frames are attached.
+        assert (captions.index("[Rue Cujas, south]")
+                < captions.index("[light: Rue Monge, north]"))
 
     def test_a_junction_with_no_pictures_says_so(self):
         assert "no photographs" in render_photographs([])
@@ -868,10 +863,10 @@ class TestSession:
 
     def test_a_refusal_is_information_and_the_episode_continues(self, paris):
         session = CourierSession(courier(paris))
-        turn = session.step("THOUGHT: t\n```\nwalk_to(99)\n```")
+        turn = session.step("THOUGHT: t\n```\nwalk_to(\"Rue de Grenelle\", \"east\")\n```")
         assert turn.status == "rejected"
         assert not session.finished
-        assert "no street 99" in session.feedback
+        assert "leaving this junction" in session.feedback
 
     def test_the_wrong_arity_is_reported_rather_than_crashing(self, paris):
         session = CourierSession(courier(paris))
@@ -943,7 +938,7 @@ class TestPromptDoesNotLeak:
     def test_the_prompt_never_says_which_way_to_go(self):
         prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
         low = prompt.lower()
-        for leak in ("the light is red", "the light is green", "walk_to(1) is correct",
+        for leak in ("the light is red", "the light is green", "walk_to(\"Rue de Grenelle\", \"east\") is correct",
                      "the answer is", "the shortest"):
             assert leak not in low
 
