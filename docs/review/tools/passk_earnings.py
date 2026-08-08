@@ -39,6 +39,9 @@ OBSTACLES = Path("/data/murray/paris_obstacles/citycore-paris")
 PAVEMENT_OBSTACLES = Path("/data/murray/paris_obstacles_pavement/citycore-paris")
 
 
+from embodiedbench.training.vagen_courier_env import _rewrite_photo_caption
+
+
 def build_env(paris, seed: int, args):
     from embodiedbench.runtime.city.courier_env import CourierEnv
 
@@ -73,14 +76,23 @@ def one_rollout(paris, seed, args, client, scratch, temperature):
         if session.finished:
             break
         observation = session.observe()
-        content: list[dict] = [{"type": "text", "text": observation.text}]
         shown = 0
+        picture_parts = []
         for frame in observation.frames:
             if frame.kind == "photograph" and frame.path and shown < args.max_images:
                 data = base64.b64encode(Path(frame.path).read_bytes()).decode()
-                content.append({"type": "image_url",
-                                "image_url": {"url": "data:image/png;base64," + data}})
+                picture_parts.append({"type": "image_url",
+                                      "image_url": {"url": "data:image/png;base64," + data}})
                 shown += 1
+        # Trim the caption to the frames that survived the cap, or the model is
+        # told it can see streets whose pictures were never attached. Measured
+        # earn@1 and earn@8 were both taken with the untrimmed caption, so the
+        # policy was reasoning about images it did not have.
+        text = observation.text
+        offered = sum(1 for f in observation.frames if f.kind == "photograph" and f.path)
+        if shown < offered:
+            text = _rewrite_photo_caption(text, shown)
+        content: list[dict] = [{"type": "text", "text": text}, *picture_parts]
 
         history.append({"role": "user", "content": content})
         keep = args.history_turns * 2

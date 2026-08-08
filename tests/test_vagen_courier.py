@@ -395,3 +395,37 @@ class TestSuccessIsActuallyReported:
         _, _, _, info = run(env.step(WALK))
         assert extract_success(info) == info["success"]
         run(env.close())
+
+
+class TestTheCaptionDescribesWhatWasActuallySent:
+    """The turn's words must not promise pictures the policy never receives.
+
+    The harness captions every frame the turn offers -- "[1], [2] -- the view
+    down each of those streets, in that order" -- and the image cap here then
+    sends one. A model told it can see two streets while holding one picture
+    has no way to know which is missing, so a reply reasoning about "the
+    photograph of street 2" reasons about an image it never got.
+    """
+
+    def test_the_caption_names_only_the_frames_that_survived(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        import re
+
+        env = CourierGymEnv({**config, "max_images": 1})
+        obs, info = run(env.reset(0))
+        assert info["images_dropped"] >= 1, "need a turn where something was cut"
+        caption = re.search(r"### photographs(.*?)(\n###|\Z)", obs["obs_str"], re.S)
+        named = re.findall(r"\[(\d+)\]", caption.group(1))
+        sent = len(obs["multi_modal_input"][IMAGE_PLACEHOLDER])
+        assert len(named) == sent, f"caption names {named} but {sent} were sent"
+        run(env.close())
+
+    def test_an_uncapped_turn_keeps_the_original_caption(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        env = CourierGymEnv({**config, "max_images": 16})
+        obs, info = run(env.reset(0))
+        assert info["images_dropped"] == 0
+        assert "in that order" in obs["obs_str"] or "the view down" in obs["obs_str"]
+        run(env.close())

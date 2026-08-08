@@ -48,6 +48,26 @@ IMAGE_PLACEHOLDER = "<image>"
 PROGRESS_SCALE_CM = 10_000.0
 
 
+def _rewrite_photo_caption(text: str, kept: int) -> str:
+    """Trim the photograph caption to the frames that were really sent.
+
+    The captions are written in the order the images are appended, so the
+    survivors are the first ``kept`` of them.
+    """
+    import re
+
+    match = re.search(r"(### photographs\n)(.*?)(\n###|\Z)", text, re.S)
+    if match is None:
+        return text
+    if kept == 0:
+        body = "  (no photographs this turn)"
+    else:
+        indices = ", ".join(f"[{i}]" for i in range(1, kept + 1))
+        noun = "the view down that street" if kept == 1 else "the view down each of those streets, in that order"
+        body = f"  {indices} — {noun}"
+    return text[:match.start(2)] + body + text[match.end(2):]
+
+
 def _base_class() -> type:
     """VAGEN's base class if it is importable, else a stand-in.
 
@@ -344,6 +364,18 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         observation = self._session.observe()
         images, dropped = self._load_images(observation)
         text = observation.text
+        if dropped:
+            # Say what was actually sent.
+            #
+            # The harness writes its caption for every frame the turn offers --
+            # "[1], [2] -- the view down each of those streets, in that order"
+            # -- and the image cap here then sends one of them. The model was
+            # being told it could see two streets while holding one picture,
+            # with no way to know which was missing, so a reply reasoning about
+            # "the photograph of street 2" was reasoning about an image it had
+            # never received. Describing an observation the policy does not get
+            # is the same defect as hiding one it should.
+            text = _rewrite_photo_caption(text, len(images))
         if images:
             text = f"{text}\n\n{' '.join([IMAGE_PLACEHOLDER] * len(images))}"
         obs: dict[str, Any] = {"obs_str": text}
