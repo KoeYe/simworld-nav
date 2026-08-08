@@ -31,7 +31,8 @@ harness had never sent the model its own conversation.
 
 ## What helped
 
-**Conversation history (round 6) — 2/20 → 8/20.** The eval harness sent
+**Conversation history (round 6) — 2/20 → 8/20** (delivery rate 33%, see the
+withdrawn-findings table: 16 of the 40 seeds never ran).** The eval harness sent
 `[system, current observation]` every turn and nothing else. The policy was
 stateless: it could not remember where it had been, what it had tried, or that
 it was already standing on the right street. Five seeds succeeded only with
@@ -104,6 +105,13 @@ had already been believed once:
 | "9.7% format errors, 26 of 40 episodes killed by malformed replies" | HTTP 400s from a six-image serving limit, fed to the parser as if the model had said them |
 | "Qwen3.5-9B: 82.5% format errors" | It rehearses calls inside `<think>`; the parser found two fenced blocks and refused replies that were all well formed |
 | "held-out format score 0.125" (RL) | `max_new_tokens=48` cut the reasoning off before the fenced call |
+| "8 of 40 delivered — 20%" (the headline result of round 6) | Seeds 24-39 ended on turn 1 against a server that had stopped answering. The model was asked 24 times and delivered 8, which is **33%** |
+
+The fourth one is the same mistake as the first, made again after it had been
+fixed. Round 1 stopped the harness handing a failed request to the parser; the
+totals kept counting those episodes in the denominator anyway. Recording a
+fault and excluding it from the arithmetic are two different jobs, and doing
+the first is what makes it look like the second is done.
 
 All three present as *the model cannot follow the reply contract*. That is the
 signature of a harness measuring its own configuration, and it is why the

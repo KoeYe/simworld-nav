@@ -244,14 +244,28 @@ def main() -> int:
               f"format_errors={sum(1 for t in runs[-1]['transcript'] if t['status']=='format_error')}",
               flush=True)
 
-    delivered = sum(r["summary"]["delivered"] for r in runs)
-    issued = sum(r["summary"]["orders_issued"] for r in runs)
-    fmt = sum(1 for r in runs for t in r["transcript"] if t["status"] == "format_error")
-    rej = sum(1 for r in runs for t in r["transcript"] if t["status"] == "rejected")
-    total = sum(r["turns"] for r in runs)
+    # An episode the server cut short is not an episode the model failed.
+    # Recording the fault was only half the job: the totals below counted
+    # those episodes in the denominator anyway, and one run of 40 seeds lost
+    # seeds 24-39 to a server that stopped answering -- sixteen episodes that
+    # ended on turn 1 and were reported as sixteen non-deliveries. That put
+    # the delivery rate at 8/40 = 20% when the model had actually been asked
+    # 24 times and delivered 8, which is 33%. Every comparison drawn against
+    # that 20% was drawn against the harness's own downtime.
+    aborted = [r for r in runs
+               if any(t["status"] == "infra_error" for t in r["transcript"])]
+    scored = [r for r in runs if r not in aborted]
+    delivered = sum(r["summary"]["delivered"] for r in scored)
+    issued = sum(r["summary"]["orders_issued"] for r in scored)
+    fmt = sum(1 for r in scored for t in r["transcript"] if t["status"] == "format_error")
+    rej = sum(1 for r in scored for t in r["transcript"] if t["status"] == "rejected")
+    total = sum(r["turns"] for r in scored)
     out = {
         "model": args.model, "tier": args.tier, "stride": args.stride,
         "embodiment": args.embodiment, "seeds": args.seeds,
+        "scored_episodes": len(scored),
+        "aborted_by_infrastructure": len(aborted),
+        "aborted_seeds": [r["seed"] for r in aborted],
         "delivered": delivered, "issued": issued,
         "turns": total,
         "format_error_rate": round(fmt / max(total, 1), 3),
@@ -262,9 +276,14 @@ def main() -> int:
     # Qwen3-VL run finished all three seeds and then died here.
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=1, default=str))
-    print(f"\n{args.model} {args.tier}/{args.stride}: delivered {delivered}/{issued}, "
+    print(f"\n{args.model} {args.tier}/{args.stride}: delivered {delivered}/{issued} "
+          f"over {len(scored)} scored episodes, "
           f"{total} turns, format errors {fmt} ({out['format_error_rate']:.1%}), "
           f"rejected {rej} ({out['rejected_rate']:.1%})")
+    if aborted:
+        print(f"  {len(aborted)} episode(s) cut short by the server and excluded: "
+              f"seeds {out['aborted_seeds']}. These are harness downtime, not "
+              f"model failures, and counting them would understate the model.")
     print("wrote", args.out)
     return 0
 

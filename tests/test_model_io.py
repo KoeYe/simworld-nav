@@ -325,3 +325,53 @@ class TestATimeoutIsQueueingNotAnEndedEpisode:
         c = ModelClient("http://unused", "stub")
         c.stats.timeouts = 2
         assert c.stats.as_dict()["timeouts"] == 2
+
+
+class TestDowntimeIsNotFailure:
+    """An episode the server cut short is not an episode the model failed.
+
+    ``run_vlm.py`` already refused to hand a failed request to the parser --
+    that fix came after 26 of 40 episodes were killed by HTTP 400s reported as
+    format errors. It then counted those same episodes in the denominator
+    anyway. One run lost seeds 24-39 to a server that stopped answering:
+    sixteen episodes that ended on turn 1, reported as sixteen non-deliveries,
+    putting the delivery rate at 8/40 = 20% when the model had been asked 24
+    times and delivered 8, which is 33%.
+    """
+
+    def summarise(self, runs):
+        """The arithmetic run_vlm.py does, isolated so it can be pinned."""
+        aborted = [r for r in runs
+                   if any(t["status"] == "infra_error" for t in r["transcript"])]
+        scored = [r for r in runs if r not in aborted]
+        return {
+            "delivered": sum(r["summary"]["delivered"] for r in scored),
+            "issued": sum(r["summary"]["orders_issued"] for r in scored),
+            "scored": len(scored),
+            "aborted": len(aborted),
+        }
+
+    def episode(self, seed, delivered, statuses):
+        return {"seed": seed,
+                "summary": {"delivered": delivered, "orders_issued": 1},
+                "transcript": [{"status": s} for s in statuses]}
+
+    def test_an_aborted_episode_leaves_the_denominator(self):
+        runs = ([self.episode(i, 1, ["accepted"] * 3) for i in range(8)]
+                + [self.episode(i, 0, ["accepted"] * 3) for i in range(8, 24)]
+                + [self.episode(i, 0, ["infra_error"]) for i in range(24, 40)])
+        out = self.summarise(runs)
+        assert out["aborted"] == 16
+        assert (out["delivered"], out["issued"]) == (8, 24)
+        assert out["delivered"] / out["issued"] == pytest.approx(1 / 3)
+
+    def test_a_run_with_no_downtime_is_unchanged(self):
+        runs = [self.episode(i, i % 2, ["accepted"]) for i in range(10)]
+        out = self.summarise(runs)
+        assert out["aborted"] == 0
+        assert out["issued"] == 10
+
+    def test_downtime_late_in_an_episode_still_excludes_it(self):
+        """The model never got to finish, so its zero says nothing."""
+        runs = [self.episode(0, 0, ["accepted"] * 19 + ["infra_error"])]
+        assert self.summarise(runs)["scored"] == 0
