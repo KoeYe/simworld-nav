@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -39,7 +40,7 @@ OBSTACLES = Path("/data/murray/paris_obstacles/citycore-paris")
 PAVEMENT_OBSTACLES = Path("/data/murray/paris_obstacles_pavement/citycore-paris")
 
 
-from embodiedbench.training.vagen_courier_env import _rewrite_photo_caption
+from embodiedbench.training.vagen_courier_env import _replace_photo_caption
 
 
 def build_env(paris, seed: int, args):
@@ -76,22 +77,36 @@ def one_rollout(paris, seed, args, client, scratch, temperature):
         if session.finished:
             break
         observation = session.observe()
-        shown = 0
-        picture_parts = []
+        # Street views come with their pedestrian lamp: the benchmark charges for
+        # crossing on red and its own rule is that a mechanic is charged only
+        # when the album can show it. max_images counts streets; a lamp rides
+        # along with its street.
+        lamps = {}
+        streets = []
         for frame in observation.frames:
-            if frame.kind == "photograph" and frame.path and shown < args.max_images:
-                data = base64.b64encode(Path(frame.path).read_bytes()).decode()
+            if frame.kind != "photograph" or not frame.path:
+                continue
+            m = re.match(r"\[light (\d+)\]", frame.label)
+            (lamps.__setitem__(m.group(1), frame) if m else streets.append(frame))
+
+        picture_parts, labels, sent = [], [], 0
+        for frame in streets:
+            if sent >= args.max_images:
+                continue
+            index = re.match(r"\[(\d+)\]", frame.label)
+            key = index.group(1) if index else None
+            for f in [frame] + ([lamps[key]] if key in lamps else []):
+                data = base64.b64encode(Path(f.path).read_bytes()).decode()
                 picture_parts.append({"type": "image_url",
                                       "image_url": {"url": "data:image/png;base64," + data}})
-                shown += 1
-        # Trim the caption to the frames that survived the cap, or the model is
-        # told it can see streets whose pictures were never attached. Measured
-        # earn@1 and earn@8 were both taken with the untrimmed caption, so the
-        # policy was reasoning about images it did not have.
+                labels.append(f.label)
+            sent += 1
+
         text = observation.text
-        offered = sum(1 for f in observation.frames if f.kind == "photograph" and f.path)
-        if shown < offered:
-            text = _rewrite_photo_caption(text, shown)
+        offered = sum(1 for f in observation.frames
+                      if f.kind == "photograph" and f.path)
+        if len(labels) < offered:
+            text = _replace_photo_caption(text, labels)
         content: list[dict] = [{"type": "text", "text": text}, *picture_parts]
 
         history.append({"role": "user", "content": content})

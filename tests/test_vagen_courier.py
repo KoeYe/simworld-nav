@@ -429,3 +429,74 @@ class TestTheCaptionDescribesWhatWasActuallySent:
         assert info["images_dropped"] == 0
         assert "in that order" in obs["obs_str"] or "the view down" in obs["obs_str"]
         run(env.close())
+
+
+class TestALampTravelsWithItsStreet:
+    """A red light is charged for, so the lamp must be sent with its crossing.
+
+    The environment charges time for crossing on red exactly where the album
+    can show the lamp -- ``signal_frame_for`` refuses to render one it cannot
+    see, and that gate exists so a mechanic is only charged when it is
+    visible. The image cap then broke the same rule from the other end: at
+    ``max_images=1`` it sent the first street view and no lamp at all, so
+    training penalised a crossing the policy had no picture of. Streets are
+    what the cap counts; a lamp rides along with the street it governs.
+    """
+
+    def _signalised_turn(self, config, max_images):
+        env = CourierGymEnv({**config, "max_images": max_images})
+        run(env.reset(0))
+        for node in sorted(env._env.signalised):
+            env._env.node_id = node
+            frames = env._session.observe().frames
+            if any(f.label.startswith("[light") for f in frames
+                   if f.kind == "photograph" and f.path):
+                return env, env._observation()
+        run(env.close())
+        pytest.skip("no signalised junction with a visible lamp in this bake")
+
+    def _caption(self, obs):
+        import re
+        block = re.search(r"### photographs\n(.*?)(\n###|\Z)",
+                          obs["obs_str"], re.S)
+        # The placeholder line is appended after the caption and the
+        # photographs block is last, so it falls inside this match.
+        return [line.strip() for line in block.group(1).splitlines()
+                if line.strip() and IMAGE_PLACEHOLDER not in line]
+
+    def test_the_lamp_is_sent_with_the_street_it_governs(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        env, (obs, _dropped) = self._signalised_turn(config, 1)
+        lines = self._caption(obs)
+        assert lines[0].startswith("[1]"), lines
+        assert lines[1].startswith("[light 1]"), lines
+        assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == 2
+        run(env.close())
+
+    def test_a_lamp_is_never_sent_without_its_street(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        import re
+
+        env, (obs, _dropped) = self._signalised_turn(config, 2)
+        lines = self._caption(obs)
+        streets = {re.match(r"\[(\d+)\]", line).group(1)
+                   for line in lines if re.match(r"\[\d+\]", line)}
+        lamps = {re.match(r"\[light (\d+)\]", line).group(1)
+                 for line in lines if line.startswith("[light")}
+        assert lamps <= streets, f"lamps {lamps} without streets {streets}"
+        assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == len(lines)
+        run(env.close())
+
+    def test_the_cap_counts_streets_not_lamps(self, config):
+        """Otherwise a signalised junction shows half as far as a plain one."""
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        import re
+
+        env, (obs, _dropped) = self._signalised_turn(config, 2)
+        lines = self._caption(obs)
+        streets = [line for line in lines if re.match(r"\[\d+\]", line)]
+        assert len(streets) == 2, lines
+        run(env.close())

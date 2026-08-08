@@ -36,6 +36,7 @@ does.
 
 from __future__ import annotations
 
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -48,23 +49,20 @@ IMAGE_PLACEHOLDER = "<image>"
 PROGRESS_SCALE_CM = 10_000.0
 
 
-def _rewrite_photo_caption(text: str, kept: int) -> str:
-    """Trim the photograph caption to the frames that were really sent.
+def _replace_photo_caption(text: str, labels: list[str]) -> str:
+    """Write the photographs block from the frames that were actually sent.
 
-    The captions are written in the order the images are appended, so the
-    survivors are the first ``kept`` of them.
+    Built from the frames' own labels rather than by editing the harness's
+    sentence, because that sentence changes shape: three street views at a
+    plain junction, street views plus "[light k]" lines at a signalised one,
+    plus the phone map once a route has been asked for. A pattern that handles
+    the first quietly destroys the others.
     """
-    import re
-
     match = re.search(r"(### photographs\n)(.*?)(\n###|\Z)", text, re.S)
     if match is None:
         return text
-    if kept == 0:
-        body = "  (no photographs this turn)"
-    else:
-        indices = ", ".join(f"[{i}]" for i in range(1, kept + 1))
-        noun = "the view down that street" if kept == 1 else "the view down each of those streets, in that order"
-        body = f"  {indices} — {noun}"
+    body = ("  (no photographs this turn)" if not labels
+            else "\n".join(f"  {label}" for label in labels))
     return text[:match.start(2)] + body + text[match.end(2):]
 
 
@@ -354,28 +352,18 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
     # ── observations ─────────────────────────────────────────────────────────
 
     def _observation(self) -> tuple[dict[str, Any], int]:
-        """The harness's own text, with one placeholder per image actually sent.
+        """The harness's own text, with a caption naming exactly what was sent.
 
-        The placeholders replace the caption block's index list rather than
-        being appended, so the picture appears where the text says it does. A
-        mismatch between placeholder count and image count is a hard error in
-        the agent loop, so the two are built from the same list.
+        The photographs block is rebuilt from the labels of the frames that
+        went out. The harness writes a caption for every frame the turn offers,
+        and this cap sends a subset, so leaving its text alone tells the policy
+        it can see streets and lamps whose pictures never arrived.
         """
         observation = self._session.observe()
-        images, dropped = self._load_images(observation)
+        images, dropped, labels = self._load_images(observation)
         text = observation.text
         if dropped:
-            # Say what was actually sent.
-            #
-            # The harness writes its caption for every frame the turn offers --
-            # "[1], [2] -- the view down each of those streets, in that order"
-            # -- and the image cap here then sends one of them. The model was
-            # being told it could see two streets while holding one picture,
-            # with no way to know which was missing, so a reply reasoning about
-            # "the photograph of street 2" was reasoning about an image it had
-            # never received. Describing an observation the policy does not get
-            # is the same defect as hiding one it should.
-            text = _rewrite_photo_caption(text, len(images))
+            text = _replace_photo_caption(text, labels)
         if images:
             text = f"{text}\n\n{' '.join([IMAGE_PLACEHOLDER] * len(images))}"
         obs: dict[str, Any] = {"obs_str": text}
@@ -383,38 +371,70 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             obs["multi_modal_input"] = {IMAGE_PLACEHOLDER: images}
         return obs, dropped
 
-    def _load_images(self, observation: Any) -> tuple[list[Any], int]:
-        """Photographs first, then the phone map, in caption order.
+    def _load_images(self, observation: Any) -> tuple[list[Any], int, list[str]]:
+        """The pictures for one turn, and the captions that describe exactly them.
 
-        Caption order matters: a policy that matches captions to pictures by
-        position must not be misled by the trainer reordering them.
+        Two rules beyond "take the first n".
+
+        A street view and its pedestrian lamp travel together. The benchmark
+        charges for crossing on red, and its own rule is that a mechanic is only
+        charged when the album can show it -- so sending the street without the
+        lamp reintroduces the very defect the visibility gate exists to prevent,
+        and adds a coin-flip penalty the policy cannot avoid. ``max_images``
+        therefore counts street views; a lamp rides along with its street.
+
+        The captions are rebuilt from the labels of the frames that actually
+        went out. Rewriting the harness's text with a pattern was fine while a
+        turn was three street views and became wrong the moment a signalised
+        junction added "[light k]" lines to the same block.
         """
         from PIL import Image
 
-        photographs = [f for f in observation.frames
-                       if f.kind == "photograph" and f.path]
-        drawings = [f for f in observation.frames if f.kind == "map" and f.svg]
+        streets, lamps, drawings = [], {}, []
+        for frame in observation.frames:
+            if frame.kind == "map" and frame.svg:
+                drawings.append(frame)
+            elif frame.kind == "photograph" and frame.path:
+                match = re.match(r"\[light (\d+)\]", frame.label)
+                if match:
+                    lamps[match.group(1)] = frame
+                else:
+                    streets.append(frame)
 
         chosen: list[Any] = []
+        labels: list[str] = []
         dropped = 0
-        for frame in photographs:
-            if len(chosen) >= self.max_images:
-                dropped += 1
-                continue
+
+        def load(frame) -> bool:
             try:
                 chosen.append(self._fit(Image.open(frame.path).convert("RGB")))
+                labels.append(frame.label)
+                return True
             except Exception:  # noqa: BLE001 - a bad frame is the album's problem
-                dropped += 1
-        for frame in drawings:
-            if len(chosen) >= self.max_images:
+                return False
+
+        sent_streets = 0
+        for frame in streets:
+            index = re.match(r"\[(\d+)\]", frame.label)
+            key = index.group(1) if index else None
+            if sent_streets >= self.max_images:
+                dropped += 1 + (1 if key in lamps else 0)
+                continue
+            if not load(frame):
                 dropped += 1
                 continue
+            sent_streets += 1
+            if key in lamps and not load(lamps[key]):
+                dropped += 1
+
+        for frame in drawings:
             raster = self._rasterise(frame.svg, len(chosen))
             if raster is None:
                 dropped += 1
             else:
                 chosen.append(raster)
-        return chosen, dropped
+                labels.append(frame.label)
+        return chosen, dropped, labels
 
     def _fit(self, image: Any) -> Any:
         """Downscale to the configured long side, preserving aspect ratio."""
