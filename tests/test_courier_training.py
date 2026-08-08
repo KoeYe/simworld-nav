@@ -316,3 +316,43 @@ class TestTheReplyFormatDoesNotDiscardCorrectActions:
         session = CourierSession(env, city="Paris")
         session.step("THOUGHT: go\nwalk_to(1)")
         assert session.spend.unfenced_actions == 1
+
+
+class TestTheLaunchScriptIsOneCommand:
+    """A comment inside a backslash-continued command ends the command there.
+
+    A note was added in the middle of the trainer.* arguments and silently
+    dropped the last three: the run started with no checkpoint directory, no
+    rollout dump and no validation dump, and nothing failed -- the training
+    just quietly stopped writing the files the analysis depends on. Nothing in
+    the log says so except the resolved config, ten thousand lines in.
+    """
+
+    def scripts(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1] / "embodiedbench" / "training"
+        return sorted(root.rglob("*.sh"))
+
+    def test_no_comment_interrupts_a_continued_command(self):
+        assert self.scripts(), "no launch scripts found"
+        for path in self.scripts():
+            lines = path.read_text().splitlines()
+            for i, line in enumerate(lines[:-1]):
+                if not line.rstrip().endswith("\\"):
+                    continue
+                following = lines[i + 1].strip()
+                assert not following.startswith("#"), (
+                    f"{path.name}:{i + 2} is a comment inside a continued "
+                    f"command, which ends it there and drops every argument "
+                    f"after it:\n  {lines[i]}\n  {lines[i + 1]}")
+
+    def test_the_grpo_launcher_still_passes_its_output_directories(self):
+        """The three that were dropped, named so a later edit cannot drop them
+        again without a test saying which."""
+        text = next(p for p in self.scripts()
+                    if p.name == "train_grpo_courier.sh").read_text()
+        for key in ("trainer.default_local_dir",
+                    "trainer.rollout_data_dir",
+                    "trainer.validation_data_dir"):
+            assert key in text, f"{key} is missing from the launcher"

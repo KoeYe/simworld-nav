@@ -82,6 +82,17 @@ echo "PREFLIGHT: torch sees ${SEEN} GPU(s), as configured"
 
 cd "${VAGEN}" || exit 1
 
+# trainer.validation_data_dir below dumps per-episode validation results, not
+# just the mean. Two validations are 64 greedy episodes each on the same 64
+# seeds; comparing their means compares two proportions with a standard error
+# of about 5 points, so a real 5-point gain and pure noise look identical. The
+# episodes are paired by construction, and a paired test looks only at the
+# seeds that changed -- several times more sensitive, at no extra compute.
+#
+# Note for anyone editing the command below: it is one command continued with
+# backslashes, and a comment line inside it ENDS THE COMMAND THERE. Putting
+# this note in the middle silently dropped the last three trainer.* arguments
+# and one run started with no checkpoint directory and no data dumps at all.
 PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
     --config-path="${VAGEN}/vagen/configs" \
     --config-name='vagen_multiturn' \
@@ -140,14 +151,6 @@ PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
     trainer.total_epochs=10 \
     trainer.project_name=${PROJECT_NAME} \
     trainer.experiment_name=${EXPERIMENT_NAME} \
-    # Per-episode validation results, not just the mean. Two validations are
-    # 64 greedy episodes each on the same 64 seeds, and comparing their means
-    # is comparing two proportions with a standard error of about 5 points --
-    # so a real 5-point gain and pure noise look identical. The episodes are
-    # paired by construction (same seeds, same order), and a paired test looks
-    # only at the seeds that changed, which is several times more sensitive at
-    # no extra compute. Without this dump only the mean survives and the
-    # pairing is thrown away.
     trainer.default_local_dir="${EXPERIMENT_DIR}/verl_checkpoints" \
     trainer.rollout_data_dir="${EXPERIMENT_DIR}/rollout_data" \
     trainer.validation_data_dir="${EXPERIMENT_DIR}/validation_data" \
