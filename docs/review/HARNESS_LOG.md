@@ -322,6 +322,43 @@ while `gpu_memory_utilization` is global -- so adding a card someone else is
 using cuts the budget on the empty ones too. Three empty cards at 0.88 gave
 6.11 GiB of KV; six cards including shared ones at 0.72 gave 2.34.
 
+## The earnings objective is not reaching the gradient
+
+GRPO's advantage is `(score - group mean) / group standard deviation`, and
+dividing by the standard deviation removes the scale of the score entirely.
+Measured on the run's own rollouts:
+
+```
+earnings [4.31, 0, 0, 0]  ->  advantage [1.5, -0.5, -0.5, -0.5]
+earnings [2.43, 0, 0, 0]  ->  advantage [1.5, -0.5, -0.5, -0.5]
+earnings [5.36, 0, 0, 0]  ->  advantage [1.5, -0.5, -0.5, -0.5]
+```
+
+A trajectory that earned 5.36 and one that earned 2.43 produce **the same
+gradient**. The advantage depends only on how many of the four samples in the
+group succeeded, so on a one-order tier `reward_basis: earnings` and a binary
+delivered/not-delivered reward are very nearly the same objective. The
+switch from `env_return` to earnings, written up here as raising the reward
+scale 2.5x, raised the *score* and changed nothing the optimiser saw.
+
+It matters less than it sounds on SOLO, where a shift holds one order and the
+fee spans 3.00 to 5.50, so earnings and delivery rate are close to
+proportional. It matters completely on the deeper tiers, which are where "how
+much did it earn" and "how many did it deliver" stop being the same question --
+and those tiers are the reason the earnings objective was chosen.
+
+Two ways to put the money back into the gradient, neither yet tried:
+`norm_adv_by_std_in_grpo=False`, which subtracts the mean without dividing
+(the Dr.GRPO correction, motivated there by the difficulty bias the division
+introduces), or a multi-order tier where the group's earnings differ by more
+than which samples succeeded.
+
+The general point is the same one this log keeps making: **a design decision is
+only real if it survives every layer between where it is written and where it
+takes effect.** This one was written in the config, computed correctly by the
+environment, reported honestly in the metrics, and normalised away in the last
+step before the gradient.
+
 ## The measurement was the problem, not just the environment
 
 Four bugs were found in one day by reading, and then a fifth thing was found
