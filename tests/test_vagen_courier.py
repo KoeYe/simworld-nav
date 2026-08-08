@@ -500,3 +500,52 @@ class TestALampTravelsWithItsStreet:
         streets = [line for line in lines if re.match(r"\[\d+\]", line)]
         assert len(streets) == 2, lines
         run(env.close())
+
+
+class TestTrainingSeesTheSameWorldAsEvaluation:
+    """Every conclusion in this project is drawn across both paths at once.
+
+    Training and evaluation have now drifted apart three separate times -- a
+    different city (the hazard albums were silently skipped), a different
+    caption (frames promised but not sent), a different set of charged
+    crossings (lamps not sent while red was charged). Each time the numbers
+    stayed comparable-looking and stopped being comparable.
+
+    The image budget is a deliberate difference: evaluation sends every frame,
+    training sends one street per turn because the whole trajectory shares one
+    context. Everything else must be word for word identical, and that is what
+    these pin.
+    """
+
+    def test_the_adapter_changes_nothing_but_the_photographs_block(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        import re
+
+        env = CourierGymEnv({**config, "max_images": 1})
+        obs, _info = run(env.reset(0))
+        harness = env._session.observe().text
+
+        def without_photographs(text):
+            text = re.sub(r"### photographs\n.*?(?=\n###|\Z)", "", text, flags=re.S)
+            return text.replace(IMAGE_PLACEHOLDER, "").strip()
+
+        assert without_photographs(obs["obs_str"]) == without_photographs(harness)
+        run(env.close())
+
+    def test_the_charged_crossings_are_the_ones_the_frames_can_show(self, config):
+        """served_long_edge narrows the gate; it must never widen it, and the
+        environment must not charge an approach the harness downscales past
+        legibility."""
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        small = CourierGymEnv({**config, "image_max_side": 320})
+        big = CourierGymEnv({**config, "image_max_side": 0})
+        run(small.reset(0))
+        run(big.reset(0))
+        narrow = small._env.visible_signals
+        wide = big._env.visible_signals
+        assert narrow <= wide
+        assert len(narrow) < len(wide), "320 px should cost some approaches"
+        run(small.close())
+        run(big.close())
