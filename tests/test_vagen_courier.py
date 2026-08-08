@@ -351,3 +351,47 @@ class TestTrainingSeesTheSameCityEvaluationDoes:
         run(env.reset(0))
         assert env._env.signal_album_root is None
         run(env.close())
+
+
+class TestSuccessIsActuallyReported:
+    """VAGEN reads success from info["success"]; the key has to be there.
+
+    Without it extract_success returns False forever, traj_success is 0.0 in
+    every log, and that zero gets read as evidence the policy never delivers.
+    It also gates the agent loop's early exit, so a completed delivery could
+    not end its own episode.
+    """
+
+    def test_the_key_exists_every_turn(self, config):
+        env = CourierGymEnv(config)
+        run(env.reset(0))
+        _, _, _, info = run(env.step(WALK))
+        assert "success" in info
+        assert isinstance(info["success"], bool)
+        run(env.close())
+
+    def test_it_is_false_while_nothing_is_delivered(self, config):
+        env = CourierGymEnv(config)
+        run(env.reset(0))
+        for _ in range(4):
+            _, _, done, info = run(env.step(WALK))
+            if info["delivered"]:
+                break
+            assert info["success"] is False
+            if done:
+                break
+        run(env.close())
+
+    def test_vagen_would_read_it(self, config):
+        """Exactly the function the agent loop calls."""
+        def extract_success(info, success_keys="success|is_success"):
+            for key in success_keys.split("|"):
+                if key in info:
+                    return bool(info[key])
+            return False
+
+        env = CourierGymEnv(config)
+        run(env.reset(0))
+        _, _, _, info = run(env.step(WALK))
+        assert extract_success(info) == info["success"]
+        run(env.close())

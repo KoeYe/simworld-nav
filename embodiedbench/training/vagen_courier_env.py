@@ -271,6 +271,16 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             "images_dropped": dropped,
             "delivered": summary.get("delivered"),
             "orders_issued": summary.get("orders_issued"),
+            # VAGEN reads trajectory success out of info["success"], and this
+            # dict did not have the key, so extract_success returned False on
+            # every turn of every run. traj_success was reported as 0.0
+            # throughout and read here as "the courier never delivered" -- a
+            # claim about the policy that was really a claim about a missing
+            # dictionary entry. It also gates early termination in the agent
+            # loop, so a finished delivery could not end its episode.
+            "success": bool(summary.get("orders_issued")
+                            and (summary.get("delivered") or 0)
+                            >= summary.get("orders_issued")),
             "on_time": summary.get("on_time"),
             # The episode return the benchmark scores. Carried so a trainer can
             # log the real number next to whatever objective it optimises.
