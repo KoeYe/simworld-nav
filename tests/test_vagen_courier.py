@@ -314,3 +314,40 @@ class TestEarningsCanBeTheObjectiveItself:
             if done:
                 break
         run(env.close())
+
+
+class TestTrainingSeesTheSameCityEvaluationDoes:
+    """The albums are named, not guessed.
+
+    They used to be derived as album_root.parent/"signals"/name, which resolves
+    to a directory that does not exist, and an `if path.exists()` guard skipped
+    it without a word. Training ran with no pedestrian lamps, no barrier frames,
+    no pavement views -- an on-foot courier shown the carriageway -- and with
+    enforce_signals silently False, while evaluation had all of them. Two
+    different environments, one set of conclusions.
+    """
+
+    def test_every_album_reaches_the_environment(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        env = CourierGymEnv({**config, "hazards": True})
+        run(env.reset(0))
+        inner = env._env
+        for key in ("album_root", "pavement_album_root", "signal_album_root",
+                    "obstacle_album_root"):
+            assert getattr(inner, key, None) is not None, f"{key} was dropped"
+        assert inner.enforce_signals, "red lights were not being enforced"
+        run(env.close())
+
+    def test_a_missing_album_is_refused_rather_than_skipped(self, config):
+        env = CourierGymEnv({**config, "signal_album_root": "/nonexistent/album"})
+        with pytest.raises(FileNotFoundError, match="signal_album_root"):
+            run(env.reset(0))
+
+    def test_hazards_false_still_drops_the_hazard_albums(self, config):
+        if not STREETS.exists():
+            pytest.skip("albums not mounted")
+        env = CourierGymEnv({**config, "hazards": False})
+        run(env.reset(0))
+        assert env._env.signal_album_root is None
+        run(env.close())

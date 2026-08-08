@@ -221,6 +221,7 @@ class ModelClient:
         parse: Callable[[str], Any],
         *,
         on_requery: Callable[[str, str], None] | None = None,
+        temperature: float = 0.0,
     ) -> tuple[str, Any | None, list[str]]:
         """Get one *parseable* action, or report that none was forthcoming.
 
@@ -237,7 +238,7 @@ class ModelClient:
             try:
                 body = self._post_with_retries({
                     "model": self.model, "messages": conversation,
-                    "max_tokens": budget, "temperature": 0.0,
+                    "max_tokens": budget, "temperature": temperature,
                 })
             except RuntimeError as error:
                 # Raising the budget after a truncation can walk it straight

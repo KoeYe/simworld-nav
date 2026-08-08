@@ -1,0 +1,650 @@
+{
+ "model": "qwen3-vl-4b",
+ "k": 8,
+ "temperature": 1.0,
+ "max_turns": 40,
+ "pass_at_1": 0.225,
+ "pass_at_k": 0.6,
+ "rows": [
+  {
+   "seed": 0,
+   "draws": [
+    {
+     "seed": 0,
+     "earnings": 2.71,
+     "delivered": 1,
+     "turns": 35,
+     "infra_error": null
+    },
+    {
+     "seed": 0,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 0,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 0,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 0,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 0,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 0,
+     "earnings": 5.43,
+     "delivered": 1,
+     "turns": 25,
+     "infra_error": null
+    },
+    {
+     "seed": 0,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    }
+   ],
+   "any_earned": true,
+   "best": 5.43,
+   "mean": 1.0175
+  },
+  {
+   "seed": 1,
+   "draws": [
+    {
+     "seed": 1,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 1,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 1,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 1,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 1,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 1,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 1,
+     "earnings": 5.46,
+     "delivered": 1,
+     "turns": 33,
+     "infra_error": null
+    },
+    {
+     "seed": 1,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    }
+   ],
+   "any_earned": true,
+   "best": 5.46,
+   "mean": 0.6825
+  },
+  {
+   "seed": 2,
+   "draws": [
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 16,
+     "infra_error": null
+    },
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 21,
+     "infra_error": null
+    },
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 26,
+     "infra_error": null
+    },
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 17,
+     "infra_error": null
+    },
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 21,
+     "infra_error": null
+    },
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 22,
+     "infra_error": null
+    },
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 21,
+     "infra_error": null
+    },
+    {
+     "seed": 2,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 18,
+     "infra_error": null
+    }
+   ],
+   "any_earned": false,
+   "best": 0.0,
+   "mean": 0.0
+  },
+  {
+   "seed": 3,
+   "draws": [
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 3,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    }
+   ],
+   "any_earned": false,
+   "best": 0.0,
+   "mean": 0.0
+  },
+  {
+   "seed": 4,
+   "draws": [
+    {
+     "seed": 4,
+     "earnings": 5.02,
+     "delivered": 1,
+     "turns": 23,
+     "infra_error": null
+    },
+    {
+     "seed": 4,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 4,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 4,
+     "earnings": 5.02,
+     "delivered": 1,
+     "turns": 20,
+     "infra_error": null
+    },
+    {
+     "seed": 4,
+     "earnings": 5.02,
+     "delivered": 1,
+     "turns": 20,
+     "infra_error": null
+    },
+    {
+     "seed": 4,
+     "earnings": 5.02,
+     "delivered": 1,
+     "turns": 21,
+     "infra_error": null
+    },
+    {
+     "seed": 4,
+     "earnings": 5.02,
+     "delivered": 1,
+     "turns": 19,
+     "infra_error": null
+    },
+    {
+     "seed": 4,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 31,
+     "infra_error": null
+    }
+   ],
+   "any_earned": true,
+   "best": 5.02,
+   "mean": 3.1374999999999997
+  },
+  {
+   "seed": 5,
+   "draws": [
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 37,
+     "infra_error": null
+    },
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 39,
+     "infra_error": null
+    },
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 5,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    }
+   ],
+   "any_earned": false,
+   "best": 0.0,
+   "mean": 0.0
+  },
+  {
+   "seed": 6,
+   "draws": [
+    {
+     "seed": 6,
+     "earnings": 2.49,
+     "delivered": 1,
+     "turns": 39,
+     "infra_error": null
+    },
+    {
+     "seed": 6,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 38,
+     "infra_error": null
+    },
+    {
+     "seed": 6,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 34,
+     "infra_error": null
+    },
+    {
+     "seed": 6,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 33,
+     "infra_error": null
+    },
+    {
+     "seed": 6,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 28,
+     "infra_error": null
+    },
+    {
+     "seed": 6,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 38,
+     "infra_error": null
+    },
+    {
+     "seed": 6,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 24,
+     "infra_error": null
+    },
+    {
+     "seed": 6,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 25,
+     "infra_error": null
+    }
+   ],
+   "any_earned": true,
+   "best": 2.49,
+   "mean": 0.31125
+  },
+  {
+   "seed": 7,
+   "draws": [
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 7,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    }
+   ],
+   "any_earned": false,
+   "best": 0.0,
+   "mean": 0.0
+  },
+  {
+   "seed": 8,
+   "draws": [
+    {
+     "seed": 8,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 36,
+     "infra_error": null
+    },
+    {
+     "seed": 8,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 28,
+     "infra_error": null
+    },
+    {
+     "seed": 8,
+     "earnings": 2.58,
+     "delivered": 1,
+     "turns": 34,
+     "infra_error": null
+    },
+    {
+     "seed": 8,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 8,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 34,
+     "infra_error": null
+    },
+    {
+     "seed": 8,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 8,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    },
+    {
+     "seed": 8,
+     "earnings": 0.0,
+     "delivered": 0,
+     "turns": 40,
+     "infra_error": null
+    }
+   ],
+   "any_earned": true,
+   "best": 2.58,
+   "mean": 0.3225
+  },
+  {
+   "seed": 9,
+   "draws": [
+    {
+     "seed": 9,
+     "earnings": 4.51,
+     "delivered": 1,
+     "turns": 10,
+     "infra_error": null
+    },
+    {
+     "seed": 9,
+     "earnings": 4.51,
+     "delivered": 1,
+     "turns": 12,
+     "infra_error": null
+    },
+    {
+     "seed": 9,
+     "earnings": 2.25,
+     "delivered": 1,
+     "turns": 19,
+     "infra_error": null
+    },
+    {
+     "seed": 9,
+     "earnings": 4.51,
+     "delivered": 1,
+     "turns": 10,
+     "infra_error": null
+    },
+    {
+     "seed": 9,
+     "earnings": 4.51,
+     "delivered": 1,
+     "turns": 10,
+     "infra_error": null
+    },
+    {
+     "seed": 9,
+     "earnings": 4.51,
+     "delivered": 1,
+     "turns": 10,
+     "infra_error": null
+    },
+    {
+     "seed": 9,
+     "earnings": 2.25,
+     "delivered": 1,
+     "turns": 15,
+     "infra_error": null
+    },
+    {
+     "seed": 9,
+     "earnings": 4.51,
+     "delivered": 1,
+     "turns": 10,
+     "infra_error": null
+    }
+   ],
+   "any_earned": true,
+   "best": 4.51,
+   "mean": 3.945
+  }
+ ]
+}

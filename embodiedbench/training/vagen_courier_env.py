@@ -106,6 +106,22 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self.map_dir = Path(config.get("map_dir") or DEFAULT_MAP)
         album = config.get("album_root")
         self.album_root = Path(album) if album else None
+
+        def _album(key: str, default: str):
+            """An album path, defaulting to where the bakes actually live."""
+            raw = config.get(key, default if self.album_root else None)
+            return Path(raw) if raw else None
+
+        name = self.album_root.name if self.album_root else "citycore-paris"
+        self.pavement_album_root = _album(
+            "pavement_album_root", f"/data/murray/paris_streets_pavement/{name}")
+        self.signal_album_root = _album(
+            "signal_album_root", f"/data/murray/paris_signals_kerb/{name}")
+        self.obstacle_album_root = _album(
+            "obstacle_album_root", f"/data/murray/paris_obstacles/{name}")
+        self.pavement_obstacle_album_root = _album(
+            "pavement_obstacle_album_root",
+            f"/data/murray/paris_obstacles_pavement/{name}")
         self.difficulty = config.get("difficulty", "solo")
         self.stride = config.get("stride", "block")
         self.embodiment = config.get("embodiment", "human_on_foot")
@@ -174,12 +190,30 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         }
         if self.album_root is not None:
             kwargs["album_root"] = self.album_root
-            if self.hazards:
-                for name, sub in (("signal_album_root", "signals"),
-                                  ("obstacle_album_root", "obstacles")):
-                    path = self.album_root.parent / sub / self.album_root.name
-                    if path.exists():
-                        kwargs[name] = path
+            # Named, not guessed.
+            #
+            # These used to be derived as album_root.parent/"signals"/name,
+            # which resolves to a directory that does not exist, and the
+            # `if path.exists()` guard then skipped it in silence. Training
+            # therefore ran without pedestrian lamps, without barrier frames,
+            # and -- worse -- without the pavement views, so an on-foot courier
+            # was shown the carriageway. Evaluation had all three. The two were
+            # not the same environment, and nothing said so.
+            for key, value in (("pavement_album_root", self.pavement_album_root),
+                               ("signal_album_root", self.signal_album_root),
+                               ("obstacle_album_root", self.obstacle_album_root),
+                               ("pavement_obstacle_album_root",
+                                self.pavement_obstacle_album_root)):
+                if value is None:
+                    continue
+                if not value.exists():
+                    raise FileNotFoundError(
+                        f"{key} does not exist: {value}. A missing album used to "
+                        "be skipped quietly, which is how training and evaluation "
+                        "drifted apart.")
+                if key.startswith(("signal", "obstacle", "pavement_obstacle")) and not self.hazards:
+                    continue
+                kwargs[key] = value
 
         self._env = CourierEnv(self._network, **kwargs)
         self._env.reset()
