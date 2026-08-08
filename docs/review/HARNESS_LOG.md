@@ -204,6 +204,31 @@ way. The 2.7x headroom survives -- both halves were handicapped identically --
 but the absolute figures came from a policy being misled and should be
 re-measured before being quoted as a ceiling.
 
+**The lamp was never sent, and then charged for anyway.** Two defects, one
+mechanic. The image cap counted frames, so at `max_images: 1` a signalised
+junction sent the first street view and no pedestrian lamp at all -- ten frames
+offered at `s002_n002`, one sent -- while the album fix had switched
+`enforce_signals` on. Training was charging 75 s of shift clock for crossings
+the policy had no picture of: 2.12 red crossings per episode on the fixed
+harness, up to 11, so roughly 9% of a shift on average and 46% in the worst
+episode. The cap now counts street views and a lamp travels with the street it
+governs.
+
+The second half is subtler and was found by asking whether the lamp is legible
+once sent. The album certifies legibility after a resize to 768 px on the long
+edge at a 2x2 patch of area; training serves 320. Area falls with the square of
+the resize, so of the 130 certified approaches only 96 keep a lamp above that
+floor at 320 px. The other 34 were penalties on a light too few pixels wide to
+read -- the same defect the visibility gate exists to prevent, one stage
+further down the pipe. The gate asked "can the album show it"; it now also asks
+"at the size this harness sends", from lamp sizes published in the sidecar.
+
+Both share a shape worth naming: **a rule enforced at one stage of the pipeline
+and silently unenforced at the next.** The environment's own rule is that a
+mechanic is only charged when its album can show it. The environment kept that
+rule. The adapter that decides which frames leave, and at what size, had never
+been asked to.
+
 ## What the optimiser needed
 
 Separately from the bugs, three configuration facts were established by
