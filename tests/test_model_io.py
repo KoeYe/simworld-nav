@@ -375,3 +375,66 @@ class TestDowntimeIsNotFailure:
         """The model never got to finish, so its zero says nothing."""
         runs = [self.episode(0, 0, ["accepted"] * 19 + ["infra_error"])]
         assert self.summarise(runs)["scored"] == 0
+
+
+class TestThePairedComparison:
+    """The arithmetic that decides whether a training run worked.
+
+    It has to be right, because the whole point of it is that the unpaired
+    comparison it replaces was reading noise as signal.
+    """
+
+    def tool(self):
+        import importlib.util
+        from pathlib import Path
+
+        path = (Path(__file__).resolve().parents[1] / "docs" / "review"
+                / "tools" / "paired_validation.py")
+        spec = importlib.util.spec_from_file_location("paired_validation", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def rows(self, scores):
+        return [{"score": s} for s in scores]
+
+    def test_the_unchanged_seeds_do_not_enter_the_test(self):
+        """Sixty seeds that failed both times say nothing about a change; a
+        test that counts them would call any run insignificant."""
+        tool = self.tool()
+        few = tool.mcnemar_exact(gained=5, lost=0)
+        assert few == pytest.approx(2 / 2 ** 5)
+        assert few < 0.07
+
+    def test_a_symmetric_change_is_not_a_change(self):
+        tool = self.tool()
+        assert tool.mcnemar_exact(gained=6, lost=6) == pytest.approx(1.0)
+
+    def test_nothing_moved_is_not_significant(self):
+        assert self.tool().mcnemar_exact(0, 0) == 1.0
+
+    def test_a_run_that_only_improved_is_reported_as_improvement(self, capsys):
+        tool = self.tool()
+        before = self.rows([0.0] * 10)
+        after = self.rows([5.0] * 6 + [0.0] * 4)
+        out = tool.compare(before, after, "test")
+        assert (out["gained"], out["lost"]) == (6, 0)
+        assert out["p"] < 0.05
+        assert out["mean_diff"] == pytest.approx(3.0)
+
+    def test_mismatched_lengths_are_refused_not_truncated(self):
+        """Silently zipping to the shorter one would compare seed i with seed
+        j and report it as paired."""
+        tool = self.tool()
+        with pytest.raises(SystemExit):
+            tool.compare(self.rows([0.0] * 8), self.rows([0.0] * 6), "test")
+
+    def test_earnings_that_move_without_crossing_zero_still_count(self):
+        """A seed delivering late for half the fee and then on time for all of
+        it has improved, and McNemar cannot see it -- the paired difference
+        can."""
+        tool = self.tool()
+        out = tool.compare(self.rows([2.5] * 8), self.rows([5.0] * 8), "test")
+        assert (out["gained"], out["lost"]) == (0, 0)
+        assert out["mean_diff"] == pytest.approx(2.5)
+        assert out["ci"][0] > 0
