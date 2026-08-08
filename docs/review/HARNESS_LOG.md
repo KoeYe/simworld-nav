@@ -252,9 +252,16 @@ a turn offers, and the image cap then sends one. A model reasoning about "the
 photograph of street 2" was reasoning about an image it had never received.
 This one has a retrospective cost: `earn@1 = 0.942` and `earn@8 = 2.549`, the
 numbers the whole case for an earnings objective rests on, were measured that
-way. The 2.7x headroom survives -- both halves were handicapped identically --
-but the absolute figures came from a policy being misled and should be
-re-measured before being quoted as a ceiling.
+way.
+
+Re-measured on the fixed harness, same ten seeds, same k=8 at temperature 1:
+`earn@1 = 0.852`, `earn@8 = 2.006`, **headroom 2.4x**, `pass@1 = 0.200`,
+`pass@8 = 0.500`. Every figure is slightly lower and none of the movement is
+distinguishable from sampling: the paired difference per seed averages -0.089
+and changes sign four times across ten seeds. So the fix did not measurably
+change what the policy can reach, and the finding the earnings objective rests
+on -- **sampling finds roughly two and a half times the money a single greedy
+attempt does** -- survives being measured properly.
 
 **The lamp was never sent, and then charged for anyway.** Two defects, one
 mechanic. The image cap counted frames, so at `max_images: 1` a signalised
