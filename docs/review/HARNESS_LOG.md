@@ -163,3 +163,87 @@ the environment work — which removed 87% of wasted actions — moved deliverie
 by two. The next question is not another harness round; it is where the
 remaining failures actually are, measured on the fixed harness rather than on
 the one that was reporting its own configuration.
+
+
+---
+
+# Part two: the RL harness
+
+The evaluation harness above was fixed first, and then the same class of defect
+turned up in the training path -- three times, each one silently changing what
+was being measured rather than announcing itself.
+
+## The three bugs
+
+**Training ran in a different city from evaluation.** The adapter derived the
+hazard albums as `album_root.parent/"signals"/name`, a directory that has never
+existed -- the bakes live in `paris_signals_kerb`, `paris_obstacles`,
+`paris_streets_pavement` -- and an `if path.exists()` guard skipped each one
+without a word. So training had no pedestrian lamps, no barrier frames, no
+pavement views (an on-foot courier shown the carriageway, which is the exact
+defect the pavement bake exists to fix) and `enforce_signals` quietly False,
+while every evaluation number was measured with all of them. Two environments,
+one set of conclusions drawn across both.
+
+**traj_success could not be non-zero.** VAGEN takes trajectory success from
+`info["success"]` or `info["is_success"]`; this environment's info dict had
+neither, so `extract_success` returned False on every turn of every episode. It
+was reported as 0.0 throughout, and read here -- repeatedly, in writing -- as
+"the model never delivers". The moment the key was added it read 0.172, against
+20% measured independently in evaluation. The metric had never been measuring
+the policy. It also gates the agent loop's early exit, so a completed delivery
+could not end its own episode.
+
+**The caption promised photographs that were never sent.** The harness writes
+"[1], [2] — the view down each of those streets, in that order" for every frame
+a turn offers, and the image cap then sends one. A model reasoning about "the
+photograph of street 2" was reasoning about an image it had never received.
+This one has a retrospective cost: `earn@1 = 0.942` and `earn@8 = 2.549`, the
+numbers the whole case for an earnings objective rests on, were measured that
+way. The 2.7x headroom survives -- both halves were handicapped identically --
+but the absolute figures came from a policy being misled and should be
+re-measured before being quoted as a ceiling.
+
+## What the optimiser needed
+
+Separately from the bugs, three configuration facts were established by
+watching the run fail:
+
+* **The reward scale and the learning rate multiply.** Switching the basis from
+  `env_return` to earnings raised the scale 2.5x; raising the learning rate 5x
+  at the same time made the effective step 12x larger, and held-out earnings
+  fell 1.42 -> 0.63 in twenty steps.
+* **Nothing was anchoring the policy.** `use_kl_loss=False`, `kl_coef=0.0`,
+  `entropy_coeff=0.0`, all copied from a reference script tuned elsewhere.
+  Entropy doubled every step (0.30, 0.61, 1.14) while the score collapsed to
+  0.01 -- textbook policy collapse with no reference to fall back on. A KL
+  coefficient of 0.005 stopped it dead: entropy has since sat between 0.18 and
+  0.23 for eight steps.
+* **The shaping outweighed the money.** Training score averaged 3.8 against
+  held-out earnings of 1.07, so roughly 70% of the gradient signal was "walk
+  closer" rather than "earn". Group variance was 8-11 where earlier runs saw
+  0.6-2. Dropping `progress_weight` to 0.2 brought variance back to 0.3-2.9.
+
+## What this cost, and the rule that follows
+
+Fifteen launches died on `Free memory on device ... less than desired`, because
+GPUs were being chosen from a snapshot taken when the config was edited and the
+server starts two or three minutes later. On a shared machine that snapshot is
+already wrong. The launcher now picks cards and computes the memory fraction at
+launch time, from the tightest chosen card minus a margin.
+
+Prefer emptier cards to more cards. The rollout is data parallel, so every GPU
+holds a whole vLLM replica and each one's KV cache comes out of its own budget,
+while `gpu_memory_utilization` is global -- so adding a card someone else is
+using cuts the budget on the empty ones too. Three empty cards at 0.88 gave
+6.11 GiB of KV; six cards including shared ones at 0.72 gave 2.34.
+
+## The honest state
+
+Reward has not yet been shown to rise. The one run that reached a second
+validation fell (1.42 -> 0.63), and it was running the wrong environment, with
+no KL anchor, at twelve times the intended step size, reporting a success
+metric that could not leave zero. Every conclusion drawn before those were
+fixed is void. The current run is the first with all four corrected, and its
+baseline -- earnings 0.769, success 17.2% -- is the first number here that is
+directly comparable to an evaluation figure.
