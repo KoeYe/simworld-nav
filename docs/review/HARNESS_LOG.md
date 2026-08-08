@@ -175,6 +175,50 @@ the one that was reporting its own configuration.
 
 ---
 
+## Where the failures actually are
+
+Measured on the 24 episodes of the history run that the server did not cut
+short, split by how far the courier got:
+
+| Outcome | Episodes |
+|---|---|
+| Never collected | 16 |
+| Collected, never delivered | 4 |
+| Delivered | 8 |
+
+**Two thirds of the failures happen before the parcel is ever picked up.** The
+second leg — carrying a collected parcel to its destination — almost never
+fails. And when the courier does deliver it is not wandering: 8.77 minutes a
+job, 1.13x the optimal walk, 8 of 8 on time, 37.59 an hour. The pricing is not
+the problem and neither is route efficiency. Finding an address is.
+
+Sorting the refusals in the failing episodes separates the two kinds of cause,
+which is the question worth asking of any benchmark result:
+
+| Refusal | Count | Whose defect |
+|---|---|---|
+| `not_at_pickup` | 30 | the model's — it says in its own reasoning that it cannot reach the address, then calls `collect()` five times in a row |
+| `no_such_job` | 23 | **the environment's** — jobs were numbered from 0 while every other index is 1-based, and the number is never shown |
+| `TimeoutError` | 16 | **the harness's** — the server stopped answering and the episodes were scored as failures |
+| `way_blocked` | 10 | the model's, and the intended cost of not looking |
+
+Half of what looked like model failure was ours. The `no_such_job` case is the
+cleanest example of the distinction: nothing about it is a capability. The
+interface offers `walk_to(1)`, `look(2)`, `[1] Rue de la Paix`, route step 1 —
+and then `navigate(job: int = default)` where the only job is job 0, a number
+that appears nowhere on screen. A model that writes `navigate(1)` has read the
+interface correctly. One episode spent eight of its forty turns on it and never
+worked it out.
+
+The `not_at_pickup` case is the opposite, and worth stating as plainly: the
+model announces "I cannot reach 15 Quai Montorgueil without going in circles,
+and the order cannot be collected" and then calls `collect()` five times
+saying the same sentence each time. Nothing in the environment misled it. That
+is a policy with no way to represent having given up, and it is the kind of
+failure reinforcement learning is for.
+
+---
+
 # Part two: the RL harness
 
 The evaluation harness above was fixed first, and then the same class of defect
