@@ -936,6 +936,51 @@ class TestTheLightIsChargedOnlyWhereItCanBeSeen:
             assert env.visible_signals == {"a|b", "c|d"}
             assert env.enforce_signals is True
 
+    def test_a_lamp_too_small_at_the_served_size_is_not_charged(self):
+        """The album certifies at 768 px; a harness that sends 320 has not seen
+        the frame that was certified. Area falls with the square of the resize,
+        so a 20 px lamp in a 1280-wide bake is 1.25 px by the time a 320 px
+        harness is done with it -- under the album's own 2x2 floor. On the
+        Paris kerb album this is 34 of the 130 certified approaches, and
+        charging them is charging for a light the policy was never sent enough
+        pixels to see."""
+        with tempfile.TemporaryDirectory() as tmp:
+            album = Path(tmp)
+            (album / "signal_visibility.json").write_text(json.dumps({
+                "legible": ["a|b", "c|d"],
+                # [smaller lamp px, frame width, frame height]
+                "lamp_px": {"a|b": [400, 1280, 960], "c|d": [20, 1280, 960]},
+            }))
+            network = build_road_network(PARIS, map_name="citycore-paris")
+            big = CourierEnv(network, seed=0, order_count=1,
+                             signal_album_root=album, served_long_edge=768)
+            small = CourierEnv(network, seed=0, order_count=1,
+                               signal_album_root=album, served_long_edge=320)
+            assert big.visible_signals == {"a|b", "c|d"}
+            assert small.visible_signals == {"a|b"}
+
+    def test_an_unmeasured_approach_keeps_the_albums_answer(self):
+        """This is a refinement of the gate, not a second gate that fails
+        closed on its own for a different reason."""
+        with tempfile.TemporaryDirectory() as tmp:
+            album = Path(tmp)
+            (album / "signal_visibility.json").write_text(json.dumps({
+                "legible": ["a|b", "c|d"], "lamp_px": {"a|b": [400, 1280, 960]}}))
+            env = CourierEnv(build_road_network(PARIS, map_name="citycore-paris"),
+                             seed=0, order_count=1, signal_album_root=album,
+                             served_long_edge=320)
+            assert env.visible_signals == {"a|b", "c|d"}
+
+    def test_a_harness_that_says_nothing_gets_the_albums_answer(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            album = Path(tmp)
+            (album / "signal_visibility.json").write_text(json.dumps({
+                "legible": ["a|b", "c|d"],
+                "lamp_px": {"a|b": [400, 1280, 960], "c|d": [20, 1280, 960]}}))
+            env = CourierEnv(build_road_network(PARIS, map_name="citycore-paris"),
+                             seed=0, order_count=1, signal_album_root=album)
+            assert env.visible_signals == {"a|b", "c|d"}
+
     def test_one_wait_clears_a_red_light(self):
         """A flat 15 s against a 60 s phase meant one wait usually left the light
         exactly as red, so obeying it cost one to four turns and the courier

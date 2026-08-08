@@ -627,6 +627,7 @@ class CourierEnv:
         embodiment: str | Embodiment | None = None,
         pavement_album_root: Path | None = None,
         pavement_obstacle_album_root: Path | None = None,
+        served_long_edge: float | None = None,
     ):
         # A tier sets the list, the queue and the clock; they are not
         # independent, and the tier is the only place they are chosen together.
@@ -786,6 +787,13 @@ class CourierEnv:
         # is what makes looking necessary rather than merely rewarded.
 
         self.signalised = network.signalised_nodes()
+        # The long edge the harness actually sends, if it says. The album
+        # certifies legibility after a resize to MODEL_LONG_EDGE_PX; a harness
+        # that downscales further is not looking at the frame that was
+        # certified, and the gate has to be asked again at the size the policy
+        # gets. Silence means the album's own answer stands.
+        self.served_long_edge = (
+            float(served_long_edge) if served_long_edge else None)
         self.visible_signals = self._load_signal_visibility()
         # Where an obstacle can stand on this map. Seed-free and computed once:
         # it is a property of the road network, which is what lets one bake of
@@ -816,7 +824,40 @@ class CourierEnv:
             data = json.loads(path.read_text())
         except (OSError, ValueError):
             return None
-        return {str(k) for k in data.get("legible", [])}
+        legible = {str(k) for k in data.get("legible", [])}
+        return legible & self._readable_at_served_size(data, legible)
+
+    # A 2x2 patch after the resize -- the album's own floor, restated here so
+    # the runtime is not silently more permissive than the measurement was.
+    SERVED_MIN_PIXELS = 4.0
+
+    def _readable_at_served_size(self, data: dict, legible: set[str]) -> set[str]:
+        """Of the certified approaches, those still readable at the served size.
+
+        The album records each lamp's area in the frame as baked. Area falls
+        with the square of the resize, so a lamp certified at 768 px can be
+        under a 2x2 patch by the time a 320 px harness has finished with it --
+        on the Paris kerb album that is 34 of 130 approaches. Charging those is
+        charging for a light the policy was never sent enough pixels to see,
+        which is the same defect the visibility gate exists to prevent, one
+        stage further down the pipe.
+        """
+        sizes = data.get("lamp_px")
+        if not self.served_long_edge or not isinstance(sizes, dict):
+            return legible
+        readable = set()
+        for key in legible:
+            row = sizes.get(key)
+            if not row:
+                # Unmeasured. Keep it: the album certified it and this check is
+                # a refinement, not a second gate with a different default.
+                readable.add(key)
+                continue
+            px, width, height = row
+            scale = min(1.0, self.served_long_edge / max(width, height))
+            if px * scale * scale >= self.SERVED_MIN_PIXELS:
+                readable.add(key)
+        return readable
 
     def signal_is_visible(self, node_id: str, toward: str) -> bool:
         """Can the courier standing at ``node_id`` see the lamp for this crossing?"""

@@ -48,7 +48,8 @@ def build_env(paris, seed: int, args):
 
     kwargs = dict(seed=seed, difficulty=args.tier, stride=args.stride,
                   embodiment="human_on_foot",
-                  album_root=STREETS, signal_album_root=SIGNALS)
+                  album_root=STREETS, signal_album_root=SIGNALS,
+                  served_long_edge=float(getattr(args, "image_long_edge", 0)) or None)
     if PAVEMENT.exists():
         kwargs["pavement_album_root"] = PAVEMENT
         if PAVEMENT_OBSTACLES.exists():

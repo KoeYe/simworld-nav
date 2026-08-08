@@ -594,6 +594,16 @@ class AlbumLegibility:
             "static_red_present": sum(1 for r in legible if r.confusers),
             "static_red_bigger_than_lamp": sum(
                 1 for r in legible if r.biggest_confuser_px > r.red_lamp.px),
+            # The lamp's size in the frame as baked, so a runtime serving the
+            # frame smaller can ask the question again at its own resolution.
+            # "legible" above answers it at MODEL_LONG_EDGE_PX and nothing
+            # else; a harness that downscales to 320 px keeps only 96 of these
+            # 130 above a 2x2 patch, and charging for the other 34 is charging
+            # for a lamp the policy was never sent enough pixels to see.
+            "lamp_px": {
+                r.key: [min(r.red_lamp.px, r.green_lamp.px), r.width, r.height]
+                for r in legible
+            },
         }
 
 

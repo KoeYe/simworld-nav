@@ -233,6 +233,13 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
                     continue
                 kwargs[key] = value
 
+        # Tell the environment how small the frames arrive, so it charges for
+        # a red light only where the lamp survives the downscale. The album
+        # certifies legibility at 768 px on the long edge; at 320 that keeps 96
+        # of 130 approaches, and the other 34 would be penalties on a lamp too
+        # few pixels wide to read.
+        if self.image_max_side:
+            kwargs["served_long_edge"] = float(self.image_max_side)
         self._env = CourierEnv(self._network, **kwargs)
         self._env.reset()
         self._session = CourierSession(self._env, city=self.city)
