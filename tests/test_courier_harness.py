@@ -971,13 +971,21 @@ class TestPromptDoesNotLeak:
         route is walked one junction at a time, and that a repeated refusal will
         be refused again.
 
+        Raised a third time, 3000 to 3200, for one tool: ``note``. That is the
+        smallest raise of the three and it buys back something already assumed
+        to exist -- the LOST skill has always told the courier to "note() that
+        this way was a dead end", while ``note`` sat in UNIMPLEMENTED_TOOLS with
+        no executor anywhere, so the instruction named a call that could not be
+        made. The entry costs about 60 characters against a runbook that spends
+        them referring to it.
+
         The ceiling still binds, and it is not free: anything added here has to
         beat a picture.
         """
         prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
         # ~4 characters a token for English prose; the exact tokeniser does not
         # matter for a ceiling this loose.
-        assert len(prompt) / 4 < 3000, "system prompt has grown past its budget"
+        assert len(prompt) / 4 < 3200, "system prompt has grown past its budget"
 
     def test_taking_the_phone_away_takes_its_runbook_away_too(self):
         """Guidance that names a tool the environment will refuse is the same

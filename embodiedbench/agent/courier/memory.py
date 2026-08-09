@@ -63,6 +63,8 @@ class CourierMemory:
     visit_counts: Counter = field(default_factory=Counter)
     streets_seen: dict[str, str] = field(default_factory=dict)
     dead_ends: set[str] = field(default_factory=set)
+    # junction -> the (street, heading) pairs already walked out of it
+    taken: dict[str, set] = field(default_factory=dict)
     notebook: list[str] = field(default_factory=list)
     goal: str = ""
     goal_kind: str = ""
@@ -90,6 +92,19 @@ class CourierMemory:
 
     def mark_dead_end(self, node_id: str) -> None:
         self.dead_ends.add(node_id)
+
+    def took(self, node_id: str, street: str, heading: str) -> None:
+        """Record that this exact way out of this exact junction was walked.
+
+        Keyed on the junction as well as the street, because "I have walked
+        Rue Monge" is not a useful thought -- a street is walked in both
+        directions and from several corners -- while "I have already left this
+        corner by Rue Monge going east" is exactly the fact that stops a loop.
+        """
+        self.taken.setdefault(node_id, set()).add((street, heading))
+
+    def has_taken(self, node_id: str, street: str, heading: str) -> bool:
+        return (street, heading) in self.taken.get(node_id, set())
 
     def write(self, text: str) -> None:
         line = " ".join(str(text).split())[:160]
@@ -216,6 +231,7 @@ class CourierMemory:
             "visit_counts": dict(self.visit_counts),
             "streets_seen": dict(self.streets_seen),
             "dead_ends": sorted(self.dead_ends),
+            "taken": {node: sorted(ways) for node, ways in self.taken.items()},
             "notebook": list(self.notebook),
             "looping": self.is_looping(),
         }

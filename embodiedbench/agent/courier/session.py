@@ -122,12 +122,20 @@ class CourierSession:
         # a model repeating itself word for word.
         self._repeats = 0
         self._last_refused: str | None = None
+        # The junction a walk started from, so it can be credited with the way
+        # out that was taken rather than the one arrived at.
+        self._leaving: str | None = None
         self.feedback = ""
         self.allowed = list(env.allowed_tool_names())
         self.tools = [TOOLS_BY_NAME[name] for name in self.allowed]
+        # Tools the session runs itself. The notebook belongs to the courier,
+        # not to the city: nothing about the world changes when a line is
+        # written, and putting a no-op on CourierEnv purely to satisfy the
+        # lookup would put a lie in the environment's interface.
+        self._own_tools: dict[str, Callable[..., Any]] = {"note": self._note}
         self.dispatch: dict[str, Callable[..., Any]] = {}
         for name in self.allowed:
-            call = getattr(env, name, None)
+            call = self._own_tools.get(name) or getattr(env, name, None)
             if call is None:
                 # The prompt is generated from this same list. A name in it that
                 # the runtime cannot execute is a turn the agent is guaranteed to
@@ -177,6 +185,16 @@ class CourierSession:
 
     def observe(self) -> Observation:
         rows = self.env.candidates()
+        # ``render_candidates`` has always been able to print "(you have walked
+        # this before)" and nothing has ever set the flag it reads, so the line
+        # had never once appeared. Setting it here is the whole of the fix: the
+        # fact belongs next to the choice it bears on, not in a list further up
+        # the prompt that has to be cross-referenced against a menu.
+        here = self.env.node_id
+        for row in rows:
+            row["seen"] = self.memory.has_taken(
+                here, row.get("street", ""),
+                row.get("reach_heading") or row.get("heading", ""))
         text = build_observation(
             memory=self.memory.render(),
             location=self.env.location_text(),
@@ -283,6 +301,7 @@ class CourierSession:
         turn.tool_kind = TOOLS_BY_NAME[action.tool].kind.value
 
         before = self.env.sim_seconds
+        self._leaving = self.env.node_id
         outcome = self._execute(action)
         turn.sim_seconds = self.env.sim_seconds - before
         turn.reward = outcome.reward
@@ -335,6 +354,29 @@ class CourierSession:
                 self._finish(stopped)
         return turn
 
+    def _note(self, text: str = ""):
+        """Write a line in the notebook. Costs a turn, and not a second of clock.
+
+        The tool has existed in the menu-building code since the beginning and
+        has never been runnable -- it sat in ``UNIMPLEMENTED_TOOLS`` because no
+        executor existed anywhere, so the one place a courier could put a fact
+        it had worked out was unreachable. The skills refer to it by name.
+
+        It takes a turn because a turn is a model call, and it does not move the
+        clock because writing on your own hand does not take a minute. That
+        split is deliberate: the courier can afford to think, but not for free.
+        """
+        from embodiedbench.runtime.city.courier_env import StepOutcome
+
+        line = " ".join(str(text).split())
+        if not line:
+            return StepOutcome(
+                ok=False, code="empty_note",
+                message="A note needs something written on it.")
+        self.memory.write(line)
+        return StepOutcome(ok=True, code="noted",
+                           message=f"Written down: {line}")
+
     def _execute(self, action: ParsedAction):
         call = self.dispatch[action.tool]
         try:
@@ -383,6 +425,14 @@ class CourierSession:
     def _remember(self, action: ParsedAction, outcome: Any) -> None:
         self._set_goal()
         if outcome.ok and action.tool in ("walk_to", "follow_street"):
+            # Recorded against the junction it was left by, which is where the
+            # menu offering it will be shown again. ``leaving`` is captured
+            # before the walk in ``step``; without it this would record the
+            # junction arrived at, and mark the way *back* as already tried.
+            if self._leaving is not None and action.args:
+                street = str(action.args[0])
+                heading = str(action.args[1]) if len(action.args) > 1 else ""
+                self.memory.took(self._leaving, street, heading)
             rows = self.env.candidates()
             if len(rows) <= 1:
                 self.memory.mark_dead_end(self.env.node_id)

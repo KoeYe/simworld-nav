@@ -375,9 +375,9 @@ NOTE = Tool(
 # about 35 turns per order pressing the same button.
 ALL_TOOLS: tuple[Tool, ...] = (
     WALK_TO, FOLLOW_STREET, LOOK, CHECK_ORDER, CHECK_MAP, NAVIGATE,
-    COLLECT, HAND_OVER, WAIT, REST,
+    COLLECT, HAND_OVER, WAIT, REST, NOTE,
 )
-UNIMPLEMENTED_TOOLS: tuple[Tool, ...] = (LIST_JOBS, ACCEPT_JOB, NOTE)
+UNIMPLEMENTED_TOOLS: tuple[Tool, ...] = (LIST_JOBS, ACCEPT_JOB)
 TOOLS_BY_NAME: dict[str, Tool] = {t.name: t for t in ALL_TOOLS}
 # Tools that were in the menu and are not any more, with the reason, so a
 # reviewer can tell a deliberate retirement from an oversight.

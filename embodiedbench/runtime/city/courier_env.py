@@ -2793,12 +2793,15 @@ class CourierEnv:
                 t.name for t in available_tools(env_actions, allow_consult=allow_consult)
                 if t.name != "follow_street"
             ]
-        # ``note`` used to be appended here unconditionally. It is in
-        # ``UNIMPLEMENTED_TOOLS`` -- no executor exists on this class or anywhere
-        # else -- so this line put a tool the runtime cannot run into the list
-        # that decides what the prompt advertises, which is the exact defect the
-        # UNIMPLEMENTED_TOOLS split was introduced to make impossible.
-        return [t.name for t in available_tools(env_actions, allow_consult=allow_consult)]
+        # ``note`` is back, and this time it runs. It was removed because it
+        # was advertised with no executor anywhere -- the defect the
+        # UNIMPLEMENTED_TOOLS split exists to make impossible. CourierSession
+        # now executes it itself, because a notebook is the courier's and not
+        # the city's, so the name is dispatchable again.
+        names = [t.name for t in available_tools(env_actions, allow_consult=allow_consult)]
+        if allow_consult and "note" not in names:
+            names.append("note")
+        return names
 
     def summary(self) -> dict[str, Any]:
         """Everything needed to judge a run, including how it was judged.

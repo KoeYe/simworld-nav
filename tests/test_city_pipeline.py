@@ -955,10 +955,44 @@ class TestFollowStreetIsMechanical:
         assert env.red_crossings == 0
 
     def test_every_advertised_tool_can_actually_be_run(self):
-        """The rule that removed the macros in the first place, enforced."""
+        """The rule that removed the macros in the first place, enforced.
+
+        Asked of the dispatch table rather than of the environment. The rule
+        being protected is "a name in the prompt can be executed", and the
+        executor need not be the city: ``note`` writes in the courier's own
+        notebook, where nothing about the world changes, and the session runs
+        it. Asking ``getattr(env, name)`` would forbid that for no reason and
+        would push a no-op onto CourierEnv purely to satisfy the check.
+        """
+        from embodiedbench.agent.courier.session import CourierSession
+
         env = self.env()
+        session = CourierSession(env, with_images=False)
         for name in env.allowed_tool_names():
-            assert callable(getattr(env, name, None)), f"{name} is advertised but absent"
+            assert callable(session.dispatch.get(name)), \
+                f"{name} is advertised but nothing can run it"
+
+    def test_the_notebook_can_be_written_and_reads_back(self):
+        """``note`` was advertised for a long time with no executor anywhere.
+
+        The skills tell the courier to note a dead end by name, so the one
+        place it could record a conclusion was unreachable, and the failure was
+        silent: the call parsed, then died in dispatch.
+        """
+        from embodiedbench.agent.courier.session import CourierSession
+
+        env = self.env()
+        session = CourierSession(env, with_images=False)
+        if "note" not in session.dispatch:
+            pytest.skip("this condition does not offer a notebook")
+        before = env.sim_seconds
+        outcome = session.dispatch["note"]("Rue Monge north end is a dead end")
+        assert outcome.ok
+        assert "Rue Monge" in session.memory.render()
+        # A turn, but not a second: writing on your own hand does not take a
+        # minute, and the clock is what the shift is scored against.
+        assert env.sim_seconds == before
+        assert not session.dispatch["note"]("   ").ok
 
 
 @needs_maps
