@@ -2279,21 +2279,54 @@ class CourierEnv:
     # walking should lose the race to one that calls it once a leg.
     NAVIGATE_SECONDS = 15.0
 
-    def _navigate_impl(self, job: int | None = None) -> StepOutcome:
-        """Turn-by-turn directions to the job in hand. The route, and only the route.
+    def _navigate_impl(self, where: str | None = None) -> StepOutcome:
+        """Put a route to an address on the phone's screen.
+
+        Takes the address, the way a person types one in:
+        ``navigate("13 Avenue Dauphine")``. It used to take a job number, which
+        is a thing the dispatcher knows and a phone does not, and which the
+        courier had to be told separately. An address is on the slip in front
+        of it. A bare ``navigate()`` still routes to the job in hand, and a
+        number still selects among several jobs, because at the deeper tiers
+        sequencing is the task and "route to my second job" is a real thing to
+        want.
 
         This is the phone's map app, and it is deliberately the *only* thing in
-        the environment that will tell a courier which way to go. Everything a
-        rider has to do with their eyes stays with their eyes: it says nothing
-        about the pedestrian light at the next crossing, nothing about what is in
-        the way, and it does not name the numbered street to take -- it names the
-        street, the turn and the distance, exactly as a phone speaking into an
-        earpiece would, and leaves the courier to match that against the corner
-        it is standing on and the photographs of it.
+        the environment that will tell a courier which way to go -- and it now
+        does that by drawing rather than by speaking. Everything a rider does
+        with their eyes stays with their eyes: it says nothing about the
+        pedestrian light at the next crossing and nothing about what is in the
+        way.
 
-        A route is not a solution. The courier still has to execute it, watch the
-        crossings, and recognise the door at the end.
+        A route is not a solution. The courier still has to read it off the
+        screen, execute it, watch the crossings, and recognise the door.
         """
+        # Addresses only. The signature says text and the implementation used
+        # to also take a job number, which is the shape of mismatch this
+        # benchmark keeps finding in itself: a contract stated in one place and
+        # quietly widened in another. Selecting among several jobs is still
+        # expressible, because each one has its own address on the slip.
+        job: int | None = None
+        if isinstance(where, str) and where.strip():
+            match = self._find_address(where)
+            if match is None:
+                known = sorted(self.addresses_by_street)[:4]
+                return self._refuse(StepOutcome(
+                    ok=False, code="unknown_address", sim_seconds=5.0,
+                    message=(
+                        f"Your phone cannot find {where}. Streets it knows "
+                        f"include {', '.join(known)}."
+                    ),
+                ))
+            order = next(
+                (o for o in self.live_orders()
+                 if o.target.text.strip().lower() == match.text.strip().lower()),
+                None)
+            if order is None:
+                # A real map app routes anywhere; it does not check your job
+                # list first. The screen goes to the address asked for.
+                return self._route_to(match)
+            job = order.index
         if self.condition in (Condition.NO_PHONE, Condition.VISUAL):
             return StepOutcome(
                 ok=False, code="no_phone", sim_seconds=1.0,
@@ -2320,7 +2353,10 @@ class CourierEnv:
                 )
         if order is None:
             return StepOutcome(ok=True, sim_seconds=1.0, message="You have no job in hand.")
-        target = order.target
+        return self._route_to(order.target)
+
+    def _route_to(self, target: Address) -> StepOutcome:
+        """Put a route to one address on the screen, whoever asked for it."""
         gap = math.dist(self.position(), target.kerb)
         if gap <= ARRIVAL_TOLERANCE_CM:
             return StepOutcome(

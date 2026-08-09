@@ -1004,7 +1004,7 @@ class TestTheSameRefusalFourTimesEndsTheSession:
         env.reset()
         return CourierSession(env, city="Paris")
 
-    def refuse(self, session, times, call="navigate(9)"):
+    def refuse(self, session, times, call='navigate("9 Rue Imaginaire")'):
         for _ in range(times):
             if session.finished:
                 break
@@ -1025,15 +1025,15 @@ class TestTheSameRefusalFourTimesEndsTheSession:
 
     def test_a_different_refused_call_resets_the_count(self):
         session = self.session()
-        self.refuse(session, 3, "navigate(9)")
-        self.refuse(session, 3, "navigate(8)")
+        self.refuse(session, 3, 'navigate("9 Rue Imaginaire")')
+        self.refuse(session, 3, 'navigate("8 Rue Imaginaire")')
         assert not session.finished
 
     def test_an_accepted_call_in_between_resets_the_count(self):
         session = self.session()
-        self.refuse(session, 3, "navigate(9)")
+        self.refuse(session, 3, 'navigate("9 Rue Imaginaire")')
         session.step("THOUGHT: x\n```\ncheck_order()\n```")
-        self.refuse(session, 3, "navigate(9)")
+        self.refuse(session, 3, 'navigate("9 Rue Imaginaire")')
         assert not session.finished
 
     def test_a_working_courier_is_never_stopped(self):

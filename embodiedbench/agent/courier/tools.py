@@ -266,13 +266,15 @@ NAVIGATE = Tool(
     name="navigate",
     kind=ToolKind.CONSULT,
     summary=(
-        "Ask your phone for directions to the address you are heading for: which street, "
-        "which turn, how far. The route and nothing else — it cannot see crossings, "
-        "traffic or doors. Name a job number to route to that one instead of the "
-        "job in hand."
+        "Put a route on your phone's screen. Give the address you are heading "
+        "for; leave it out to route to the job in hand. The route is DRAWN on "
+        "the map, not written out — read which way to go off the picture. The "
+        "phone cannot see crossings, traffic or doors."
     ),
-    params=(ToolParam("job", "int", "which job to route to", required=False),),
-    example="navigate(1)",
+    params=(ToolParam("where", "str",
+                      "the address to route to, or leave out for the job in hand",
+                      required=False),),
+    example='navigate("13 Avenue Dauphine")',
     # A phone lookup and reading the route off the screen, standing still. Dearer
     # than check_map because it answers a bigger question: a policy that calls it
     # every turn instead of walking should lose to one that calls it once a leg.

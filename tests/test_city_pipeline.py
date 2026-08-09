@@ -734,13 +734,15 @@ class TestEveryIndexTheCourierIsOfferedStartsAtOne:
         assert first and min(first) == 1
         assert len(set(first)) == len(first)
 
-    def test_the_refusal_names_the_numbers_as_numbers(self):
-        """"In hand: 0" reads as a count, which is the opposite of what it
-        meant."""
-        env = self.env(tier="solo")
-        out = env.navigate(7)
-        assert out.code == "no_such_job"
-        assert "job 1" in out.message
+    def test_the_slip_shows_the_number_it_uses(self):
+        """The number was never on screen anywhere, which is how a model came
+        to guess it. navigate no longer takes one at all -- it takes an address
+        -- but check_order still numbers the jobs, and a number the courier is
+        shown has to be the number the environment means."""
+        env = self.env(tier="pair")
+        message = env.check_order().message
+        assert "Job 1:" in message
+        assert "Job 0:" not in message
 
 
 class TestObservationHonesty:
