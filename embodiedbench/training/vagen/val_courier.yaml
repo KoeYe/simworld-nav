@@ -22,7 +22,7 @@ envs:
       # the harness accumulated -- shaping the eval set is how a training
       # trick gets quoted as a benchmark result.
       progress_weight: 0.0
-      max_images: 1
+      max_images: 3
       # 320px long side is ~1/4 the tokens of the 640x480 frame,
       # which is what pays for 12 turns instead of 4. Successful
       # collections were measured on turns 2,3,5,5,8,14,14,17,26,36:
