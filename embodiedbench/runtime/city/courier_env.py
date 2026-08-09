@@ -782,6 +782,10 @@ class CourierEnv:
         # can see that it has and must decide whether the answer is worth 15 s.
         self.screen_route: list[tuple[float, float]] = []
         self.screen_target: Address | None = None
+        # The last door number read on the street the courier is on, so the
+        # observation can say which way the numbers run rather than making the
+        # policy remember across turns.
+        self._last_numbers: tuple[str | None, int | None] = (None, None)
         # Nothing here records what the courier knows about barriers, and that
         # is the design. ``report_blocked`` used to let the courier tell its
         # phone a street was shut, and the phone would route round it -- which
@@ -898,6 +902,7 @@ class CourierEnv:
         self.slow_passages = 0
         self.screen_route = []
         self.screen_target = None
+        self._last_numbers = (None, None)
 
         # Which sites are live this shift. Deterministic in (map, seed), so a
         # replay of a seed meets the same city; different every seed, so the
@@ -1665,9 +1670,36 @@ class CourierEnv:
             if target.street_name == street:
                 text += (f" This is the street on the slip; the slip says "
                          f"{target.number}.")
+                trend = self._number_trend(street, numbers)
+                if trend:
+                    text += " " + trend
             else:
                 text += f" The slip says {target.street_name}, which is not this street."
         return text
+
+    def _number_trend(self, street: str, numbers: str) -> str:
+        """Whether the doors counted up or down on the way here.
+
+        This is the signal a person actually uses to find a door: not the
+        number on this building, but which way the numbers are going. Two
+        thirds of failed episodes never reach the pickup at all, and the
+        observation was giving the courier a number with nothing to compare it
+        against -- it had to hold the last one in its head across a turn, and
+        across forty turns of context it did not.
+
+        Facts only, no advice. It says the numbers rose or fell; it does not
+        say to turn around. Which way to walk is still the decision under test.
+        """
+        here = _leading_number(numbers)
+        last_street, last_number = self._last_numbers
+        self._last_numbers = (street, here if here is not None else last_number)
+        if here is None or last_street != street or last_number is None:
+            return ""
+        if here == last_number:
+            return ""
+        return ("The numbers rose as you walked here."
+                if here > last_number else
+                "The numbers fell as you walked here.")
 
     def clock_text(self) -> str:
         """Every job in hand and how long each has left.
