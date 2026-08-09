@@ -4,50 +4,47 @@ Everything in this repository is text. The city the courier walks is not: it is
 2.6 GB of baked photographs that cannot go in git. This document is what you
 need to get from a fresh machine to a training run.
 
-There are two things to install, in this order: the **photographs** (below),
+Two things to install, in this order: the **photographs** (one archive, below)
 and the **two Python environments** (further down). Nothing runs without both.
 
 ---
 
 ## 1. The photographs
 
-Five archives, published separately. Download them, verify, and unpack into one
-directory — call it `$COURIER_DATA`.
+One archive, `courier-city.tar`, 2.6 GB. It holds the compiled map and all five
+albums under a single directory, so unpacking it is the whole install.
 
-| Archive | Size | Needed for |
-|---|---|---|
-| `courier-map.tar.gz` | 3 MB | **Always.** The compiled city: nodes, streets, addresses, junctions. |
-| `courier-album-streets.tar` | 470 MB | **Always.** The view down each street from each junction. Without it the task is text-only. |
-| `courier-album-signals.tar` | 1.4 GB | `hazards: true`. Pedestrian lamps, one frame per phase, plus `signal_visibility.json`. |
-| `courier-album-obstacles.tar` | 132 MB | `hazards: true`. Barriers and crowded pavements. |
-| `courier-album-pavement.tar` | 571 MB | On-foot embodiment. The same views from the pavement rather than the carriageway. |
+**Where to put it.** Anywhere with 6 GB free — 2.6 for the archive plus 2.6 for
+what comes out of it, and you can delete the archive afterwards. Prefer a disk
+you are not sharing with a training run's checkpoints. Then export
+`COURIER_DATA` pointing at the unpacked directory; everything below reads that
+one variable.
 
 ```bash
-export COURIER_DATA=/somewhere/with/space          # 3 GB free
-mkdir -p "$COURIER_DATA" && cd "$COURIER_DATA"
-# ... download the five archives here ...
-sha256sum -c SHA256SUMS                            # shipped with the archives
-for f in *.tar;    do tar -xf  "$f"; done
-for f in *.tar.gz; do tar -xzf "$f"; done
+export COURIER_DATA=/scratch/courier-city          # or wherever you like
+mkdir -p "$(dirname "$COURIER_DATA")" && cd "$(dirname "$COURIER_DATA")"
+# ... put courier-city.tar here ...
+sha256sum -c SHA256SUMS
+tar -xf courier-city.tar                           # creates courier-city/
 ```
 
 You should end up with:
 
 ```
 $COURIER_DATA/
-  citycore-paris/                 # the map
-  paris_streets_v2/citycore-paris/
-  paris_signals_kerb/citycore-paris/     # + signal_visibility.json
-  paris_obstacles/citycore-paris/        # + obstacle_visibility.json
-  paris_streets_pavement/citycore-paris/
-  paris_obstacles_pavement/citycore-paris/
+  citycore-paris/                            the compiled map: nodes, streets, addresses
+  paris_streets_v2/citycore-paris/           the view down each street            (always)
+  paris_signals_kerb/citycore-paris/         pedestrian lamps, one frame a phase  (hazards)
+  paris_obstacles/citycore-paris/            barriers and crowded pavements       (hazards)
+  paris_streets_pavement/citycore-paris/     the same views from the pavement     (on foot)
+  paris_obstacles_pavement/citycore-paris/   obstacles from the pavement          (on foot)
 ```
 
 **The sidecar JSONs matter.** `signal_visibility.json` lists the approaches
 whose lamp the album can actually show, and the environment charges for
 crossing on red *only* on those. An album without its sidecar charges nothing,
-which is the intended failure mode — silence is not consent — but it means
-half the benchmark quietly switches off. Check they came through:
+which is the intended failure mode — silence is not consent — but it means half
+the benchmark quietly switches off. Check they came through:
 
 ```bash
 ls "$COURIER_DATA"/paris_signals_kerb/citycore-paris/signal_visibility.json
@@ -61,11 +58,9 @@ cd /path/to/simworld_nav
 python scripts/point_at_albums.py "$COURIER_DATA"
 ```
 
-That rewrites the album paths in `embodiedbench/training/vagen/*.yaml` and
-prints what it changed. It is idempotent, and `--check` reports without
-writing.
-
----
+That rewrites the album paths in `embodiedbench/training/vagen/*.yaml`, copies
+nothing, prints every change, and refuses to write a path that is not there.
+`--check` reports without writing.
 
 ## 2. The two environments
 
