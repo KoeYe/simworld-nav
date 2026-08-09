@@ -204,7 +204,13 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
     summary = env.summary()
     summary.update(client.stats.as_dict())
     return {"seed": seed, "summary": summary, "turns": len(transcript),
-            "termination": session.run.termination_reason,
+            # An episode that simply ran out of turns had no reason recorded
+            # at all and reported as an empty string -- 15 of 40 on the run
+            # that found this. "Out of turns" is a different outcome from
+            # "stuck" and from "shift over", and reading them as one hides
+            # which of the three the harness should be spending effort on.
+            "termination": (session.run.termination_reason
+                            or ("out_of_turns" if not session.finished else "")),
             "transcript": transcript}
 
 
