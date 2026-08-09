@@ -240,9 +240,9 @@ def build_system_prompt(*, city: str, tools: list[Tool]) -> str:
     # Even the formatting examples have to come from the live tool set. This line
     # read "walk_to(2), follow_street(2, 4)" at every stride, so the block-stride
     # prompt demonstrated the syntax of a tool the runtime would refuse.
+    # One call only: the fence it lands in says "exactly one call", and a
+    # second comma-joined call made the shown example a reply the parser rejects.
     number_example = 'walk_to("Rue de Grenelle", "east")'
-    if "follow_street" in names:
-        number_example += ', follow_street("Rue de Grenelle", "east", 4)"'.rstrip('"')
     # Likewise the no-argument example: it named check_order(), which no_phone
     # takes away, so that condition's prompt demonstrated a tool it had removed.
     no_arg = next((t.name for t in tools if not t.params), "")
