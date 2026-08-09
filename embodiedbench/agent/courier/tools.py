@@ -127,6 +127,52 @@ class Tool:
     # acts rather than informs -- ``collect`` earns its place by what it does.
     provides: frozenset[str] = frozenset()
 
+    # ── the manual ───────────────────────────────────────────────────────────
+    #
+    # A one-line summary and an example told the courier what a tool is called
+    # and not what it does with what it is given. Measured over 1206 turns of
+    # Qwen3-VL-4B: 1139 of them were walk_to and three were look, against 47
+    # no_such_street refusals -- a courier with one hammer, repeatedly told the
+    # street it named is not here. The three things it was never told are the
+    # three below: what a call gives back, what a refusal means and what to do
+    # about it, and when the tool is the wrong one.
+    #
+    # They live on the tool rather than in the prose because the prose is
+    # generated per condition: a tool the environment has taken away must take
+    # its manual with it, exactly as it takes its menu line.
+    returns: str = ""
+    # (refusal wording as the courier sees it, what to do about it)
+    refusals: tuple[tuple[str, str], ...] = ()
+    use_when: str = ""
+    not_for: str = ""
+
+    def manual(self) -> str:
+        """The full entry for this tool: call, result, refusals, judgement."""
+        out = [f"{self.typed_signature()}", f"    {self.summary}"]
+        for param in self.params:
+            out.append(f"    {param.name} — {param.description}")
+        if self.example:
+            out.append(f"    call it like this: {self.example}")
+        if self.returns:
+            out.append(f"    you get back: {self.returns}")
+        for wording, remedy in self.refusals:
+            out.append(f'    refused "{wording}" — {remedy}')
+        if self.use_when:
+            out.append(f"    use it when: {self.use_when}")
+        if self.not_for:
+            out.append(f"    not for: {self.not_for}")
+        # Walking's cost is the distance, not a constant, so quoting a fixed
+        # number for it would be a figure the courier could not reconcile with
+        # its own clock.
+        if self.kind is ToolKind.ACT and not self.time_cost_s:
+            cost = "costs the time it takes to walk it, and one turn"
+        elif not self.time_cost_s:
+            cost = "costs no clock time, but it still costs you the turn"
+        else:
+            cost = f"costs about {self.time_cost_s:.0f} s of the shift, and one turn"
+        out.append(f"    {cost}")
+        return "\n".join(out)
+
     def informative(self, already_known: frozenset[str] = OBSERVATION_PROVIDES) -> bool:
         """Can this call tell the courier something the turn has not already?"""
         return not self.provides or bool(self.provides - already_known)
@@ -186,6 +232,28 @@ WALK_TO = Tool(
     example='walk_to("Rue de Grenelle", "east")',
     time_cost_s=0.0,
     requires_env_action="MOVE_TO",
+    returns=(
+        "the next junction: its street, the door numbers beside you, the "
+        "streets leaving it, and a photograph down each. If the numbers moved "
+        "the turn says which way they went."
+    ),
+    refusals=(
+        ("that street does not leave this junction",
+         "the name is not on this turn's list. The route crosses streets you "
+         "have not reached yet; take the listed street whose bearing is "
+         "nearest the way the map line goes, and you will reach it."),
+        ("which way along it",
+         "that street leaves here twice. Say the bearing as well: "
+         'walk_to("Rue de Grenelle", "east").'),
+        ("blocked and you cannot get past",
+         "you are still at the junction and that street stays shut for the "
+         "rest of the shift. Take a different one."),
+    ),
+    use_when="you know which street you want and which way along it",
+    not_for=(
+        "finding out what is down a street -- the photograph is already in "
+        "front of you, and look() reads the numbers without walking"
+    ),
 )
 
 FOLLOW_STREET = Tool(
@@ -204,6 +272,19 @@ FOLLOW_STREET = Tool(
     example='follow_street("Rue de Grenelle", "east", 6)',
     time_cost_s=0.0,
     requires_env_action="MOVE_TO",
+    returns=(
+        "wherever it stopped, and why: a fork, a dead end, a crossing with a "
+        "light, something blocking the way, or your address"
+    ),
+    refusals=(
+        ("that street does not leave this junction",
+         "same as walk_to -- take a street that is on this turn's list"),
+    ),
+    use_when=(
+        "the route says stay on this street for several junctions. It is one "
+        "turn instead of six"
+    ),
+    not_for="the junction where you mean to turn off; it may carry you past it",
 )
 
 LOOK = Tool(
@@ -228,6 +309,21 @@ LOOK = Tool(
     time_cost_s=2.0,
     counts_as_step=True,
     provides=frozenset({FACT_NUMBERS_AHEAD}),
+    returns=(
+        "the door numbers running away down that street, and which way they "
+        "climb -- without walking it"
+    ),
+    refusals=(
+        ("that street does not leave this junction",
+         "look only sees streets on this turn's list"),
+    ),
+    use_when=(
+        "you are on the right street at the wrong number and cannot tell "
+        "which way the numbers rise. This is the one question it answers "
+        "outright, and it answers it for the price of one turn instead of a "
+        "walk in the wrong direction"
+    ),
+    not_for="seeing a red light or a barrier -- those are in the photographs",
 )
 
 # ``read_sign`` was here, and it is gone. It answered "The sign says Quai
@@ -247,6 +343,11 @@ CHECK_ORDER = Tool(
     # The turn header names the end the courier is walking to and when it is due.
     # The slip is where both ends and the money are.
     provides=frozenset({FACT_ORDER_ADDRESSES, FACT_ORDER_FEE, FACT_DEADLINES}),
+    returns="the slip again: pickup, dropoff, deadline, fee",
+    use_when="you have lost track of which address you are heading for",
+    not_for=(
+        "every turn -- the job is already written at the top of your notes"
+    ),
 )
 
 CHECK_MAP = Tool(
@@ -260,6 +361,16 @@ CHECK_MAP = Tool(
     # courier can name -- including one no live job mentions. ``navigate`` routes
     # only to a job in hand, and says how to get there rather than where it is.
     provides=frozenset({FACT_ROUTE_DISTANCE, FACT_TARGET_BEARING}),
+    returns=(
+        "one address looked up: which street it is on, roughly how far, and "
+        "roughly which way"
+    ),
+    refusals=(
+        ("no such address",
+         "the address has to be one the city has -- copy it from the slip"),
+    ),
+    use_when="you want to know where an address is without routing to it",
+    not_for="reading the route; that is drawn on the map picture",
 )
 
 NAVIGATE = Tool(
@@ -280,6 +391,25 @@ NAVIGATE = Tool(
     # every turn instead of walking should lose to one that calls it once a leg.
     time_cost_s=15.0,
     provides=frozenset({FACT_TURN_BY_TURN, FACT_ROUTE_DISTANCE}),
+    returns=(
+        "a route DRAWN on the map picture, which stays on the screen every "
+        "turn afterwards. Nothing is written out in words: you read which way "
+        "to go off the drawing"
+    ),
+    refusals=(
+        ("no such address",
+         "copy the address from the slip exactly"),
+        ("no route",
+         "nothing walkable reaches it; go a different way and ask again"),
+    ),
+    use_when=(
+        "you are travelling to an address and the screen is not already "
+        "showing the way there, or what you can see has stopped matching it"
+    ),
+    not_for=(
+        "getting past a barrier. The map has never seen the barrier, there is "
+        "no way to tell it, and it will route you into the same street again"
+    ),
 )
 
 
@@ -290,6 +420,16 @@ COLLECT = Tool(
     example="collect()",
     time_cost_s=30.0,
     requires_env_action="PICKUP",
+    returns="the parcel in your bag, and the job becomes a delivery",
+    refusals=(
+        ("you are not at the pickup",
+         "you are somewhere else. It does not tell you where the pickup is "
+         "and it costs a turn, so do not call it to test whether you have "
+         "arrived -- compare the street and number at the top of the turn "
+         "against the slip instead."),
+    ),
+    use_when="the street and the door number both match the pickup on the slip",
+    not_for="checking whether you have arrived",
 )
 
 HAND_OVER = Tool(
@@ -299,6 +439,15 @@ HAND_OVER = Tool(
     example="hand_over()",
     time_cost_s=30.0,
     requires_env_action="DROP_OFF",
+    returns="the fee, and the order is done",
+    refusals=(
+        ("you are not at the dropoff",
+         "same as collect: it is not a way to search, it is a way to finish"),
+        ("you have not collected it yet",
+         "go to the pickup first"),
+    ),
+    use_when="the street and the door number both match the dropoff",
+    not_for="checking whether you have arrived",
 )
 
 ACCEPT_JOB = Tool(
@@ -332,6 +481,15 @@ WAIT = Tool(
     example="wait()",
     time_cost_s=10.0,
     requires_env_action="WAIT",
+    returns="the crossing, with the light having changed",
+    use_when=(
+        "the pedestrian light for the street you want is red. One call sees "
+        "the whole phase out, so one is always enough"
+    ),
+    not_for=(
+        "anywhere else. Nothing in this city changes because you stood still; "
+        "waiting off a crossing spends the clock and buys nothing"
+    ),
 )
 
 REST = Tool(
@@ -348,6 +506,12 @@ REST = Tool(
     example="rest()",
     time_cost_s=60.0,
     requires_env_action="REST",
+    returns="energy back, at the cost of clock",
+    refusals=(
+        ("you never tire", "this body has no stamina to recover"),
+    ),
+    use_when="you are tired enough that walking has slowed you down",
+    not_for="a pause to think; thinking is free and this is not",
 )
 
 NOTE = Tool(
@@ -361,6 +525,18 @@ NOTE = Tool(
     params=(ToolParam("text", "str", "what to remember, in a few words"),),
     example='note("Rue Monge north end is a dead end")',
     time_cost_s=0.0,
+    returns="the line, written into your notes, where it stays every turn",
+    refusals=(
+        ("a note needs something written on it", "give it some text"),
+    ),
+    use_when=(
+        "you have worked out something the turn will not tell you again -- a "
+        "street that was a dead end, a corner you have already searched"
+    ),
+    not_for=(
+        "what is already in front of you. The streets here, the numbers and "
+        "the job are printed every turn"
+    ),
 )
 
 # Only tools the runtime dispatches. `accept_job`, `list_jobs` and `note` are
@@ -435,16 +611,25 @@ def available_tools(
 def render_tool_menu(tools: list[Tool]) -> str:
     """The tool section of the system prompt, grouped by what each kind does."""
     groups = {
-        ToolKind.ACT: "Actions — these change the world and take time",
-        ToolKind.LOOK: "Looking — these tell you about where you are standing",
-        ToolKind.CONSULT: "Consulting — these query what you carry, not what you see",
+        ToolKind.ACT: ("ACTIONS — these change the world and take time",
+                       "Each entry says what the call gives back, what a "
+                       "refusal means and what to do about it, and when the "
+                       "tool is the wrong one."),
+        ToolKind.LOOK: ("LOOKING — these tell you about where you are standing",
+                        ""),
+        ToolKind.CONSULT: ("CONSULTING — these query what you carry, not what "
+                           "you see", ""),
     }
     lines: list[str] = []
-    for kind, heading in groups.items():
+    for kind, (heading, note) in groups.items():
         chosen = [t for t in tools if t.kind is kind]
         if not chosen:
             continue
         lines.append(heading + ":")
-        lines.extend("  " + t.describe().replace("\n", "\n  ") for t in chosen)
+        if note:
+            lines.append("  " + note)
+        for tool in chosen:
+            lines.append("")
+            lines.append("  " + tool.manual().replace("\n", "\n  "))
         lines.append("")
     return "\n".join(lines).rstrip()

@@ -91,7 +91,28 @@ class TestToolSet:
 
     def test_the_menu_groups_tools_by_kind(self):
         menu = render_tool_menu(available_tools(PARIS_ACTIONS))
-        assert "Actions" in menu and "Looking" in menu and "Consulting" in menu
+        # Case-insensitively: the headings are shouted now, because the menu
+        # became a manual and each entry runs to several lines, so the reader
+        # needs the three groups to stand off the page.
+        low = menu.lower()
+        assert "actions" in low and "looking" in low and "consulting" in low
+
+    def test_every_tool_says_what_it_gives_back_and_when_not_to_use_it(self):
+        """The gap that made the courier a one-tool policy.
+
+        Over 1206 measured turns, 1139 were walk_to and three were look,
+        against 47 refusals saying the named street is not at this junction.
+        The menu named the tools and never said what a call returns, what a
+        refusal means, or when the tool is the wrong one -- so a model with a
+        hammer kept swinging it. Each of those is now a field on the tool, and
+        a tool that has none is one nobody has written the manual for.
+        """
+        for tool in available_tools(PARIS_ACTIONS):
+            assert tool.returns, f"{tool.name} does not say what it gives back"
+            assert tool.use_when, f"{tool.name} does not say when to use it"
+            entry = tool.manual()
+            assert tool.example.split("(")[0] in entry
+            assert "costs" in entry
 
 
 class TestNoToolRepeatsTheObservation:
@@ -971,6 +992,16 @@ class TestPromptDoesNotLeak:
         route is walked one junction at a time, and that a repeated refusal will
         be refused again.
 
+        Raised a fourth time, 3200 to 4800, to make the tool menu a manual.
+        The measurement that bought it: over 1206 turns of Qwen3-VL-4B, 1139
+        were walk_to and three were look, against 47 "that street does not
+        leave this junction" refusals. A courier with one hammer, repeatedly
+        told the street it named is not here -- and never told that look()
+        answers which way the numbers run without walking, or what to do when
+        a street it wants is not on the list. Each tool now says what a call
+        gives back, what each refusal means and what to do about it, and when
+        it is the wrong tool. That is where the 1600 went.
+
         Raised a third time, 3000 to 3200, for one tool: ``note``. That is the
         smallest raise of the three and it buys back something already assumed
         to exist -- the LOST skill has always told the courier to "note() that
@@ -985,7 +1016,7 @@ class TestPromptDoesNotLeak:
         prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
         # ~4 characters a token for English prose; the exact tokeniser does not
         # matter for a ceiling this loose.
-        assert len(prompt) / 4 < 3200, "system prompt has grown past its budget"
+        assert len(prompt) / 4 < 4800, "system prompt has grown past its budget"
 
     def test_taking_the_phone_away_takes_its_runbook_away_too(self):
         """Guidance that names a tool the environment will refuse is the same
