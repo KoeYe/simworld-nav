@@ -80,8 +80,10 @@ def build(bake: Path, out: Path) -> dict:
             "dist": row["dist"], "facing": row["facing"],
             "variant": row["variant"],
             "box": "x".join(map(str, row["red"]["box_px"])),
-            "red_px": row["red"]["red_px"], "red_g": row["red"]["green_px"],
-            "green_px": row["green"]["green_px"], "green_r": row["green"]["red_px"],
+            # Red minus green over the box's brightest pixels: positive is a
+            # red-dominant lamp, negative a green-dominant one.
+            "red_score": row["red"]["red_over_green"],
+            "green_score": -row["green"]["red_over_green"],
             "pass": row["pass"], "why": row.get("why", []),
             "images": (red_full, red_crop, green_full, green_crop),
         })
@@ -118,16 +120,14 @@ def _html(cards: list[dict], passed: int) -> str:
         <img src="data:image/jpeg;base64,{red_full}" alt="red phase">
         <img class="crop" src="data:image/jpeg;base64,{red_crop}" alt="red phase, served size">
       </div>
-      <figcaption><b>red</b> — {c['red_px']} red px in the box,
-        {c['red_g']} green</figcaption>
+      <figcaption><b>red</b> — red over green {c['red_score']:+.0f}</figcaption>
     </figure>
     <figure class="phase green">
       <div class="shots">
         <img src="data:image/jpeg;base64,{green_full}" alt="green phase">
         <img class="crop" src="data:image/jpeg;base64,{green_crop}" alt="green phase, served size">
       </div>
-      <figcaption><b>green</b> — {c['green_px']} green px in the box,
-        {c['green_r']} red</figcaption>
+      <figcaption><b>green</b> — green over red {c['green_score']:+.0f}</figcaption>
     </figure>
   </div>
   <p class="why">{why}</p>
@@ -209,12 +209,15 @@ colour was measured.</p>
   <div><b>{len(cards)}</b><span>crossings baked</span></div>
   <div><b>{passed}</b><span>readable in both phases</span></div>
   <div><b>{len(cards) - passed}</b><span>dropped</span></div>
-  <div><b>75</b><span>lamp heads in the scene</span></div>
+  <div><b>151</b><span>lamp heads in the scene</span></div>
 </div>
-<p class="note">The box is the lamp's own 24 cm aperture projected to the frame,
-not a fixed fraction of it. That is deliberate: an earlier fixed box reached the
-No&nbsp;Entry sign on the same pole and scored its paint as a red lamp — the very
-confusion this album exists to avoid, committed by the thing checking it.</p>
+<p class="note">The box is the lamp's own 24&nbsp;cm aperture projected into the
+frame, not a fixed fraction of it. That is deliberate: an earlier fixed box
+reached the No&nbsp;Entry sign on the same pole and scored its paint as a red
+lamp — the very confusion this album exists to avoid, committed by the thing
+checking it. Colour is judged as red minus green over the box's brightest
+pixels, because a lit LED blows out towards white at its core and a per-channel
+threshold fails the brightest lamps while passing dimmer ones.</p>
 {''.join(body)}
 </main>"""
 

@@ -58,13 +58,18 @@ JUNCTION_RADIUS_CM = 2500.0
 # person crossing that leg reads. A junction's lamps sit one per corner, so the
 # arc has to be generous; beyond 50 degrees the lamp belongs to the next leg.
 LEG_ARC_DEG = 60.0
-# How far off the lamp's lit face the courier can stand and still read it. A
-# lamp seen edge-on shows nothing, so this is well inside 90 degrees. 70 is a
-# starting bound, not a measurement -- what settles it is the bake, which
-# measures the lit figure in each rendered frame at the size the harness serves
-# and drops any lamp that does not survive. A crossing is charged because its
-# frame was checked, never because this constant let it through.
-FACING_ARC_DEG = 70.0
+# How far off the lamp's lit face the courier can stand and still read it.
+# This started at 70 as a guess and is now what the bake measured. Rendering
+# every candidate and reading the figure at served size draws a sharp line: at
+# 43 degrees and beyond the housing's own side wall clips the aperture, and it
+# clips the thin walking figure far more than the fat standing one, so the
+# green phase goes unreadable while the red still looks fine. Everything at 38
+# and below reads in both phases. 40 sits in that gap.
+#
+# The rule still is not trusted on its own -- every frame is measured, and one
+# lamp at 3 degrees is dropped because a vehicle head stands in front of it,
+# which no angle could have predicted.
+FACING_ARC_DEG = 40.0
 # The lit face is turned this far from the head's own forward direction. Not a
 # guess -- see the module docstring. Confirmed twice over: four cameras around a
 # lamp show the figure only from yaw+90, and the lens quad's own normal in the

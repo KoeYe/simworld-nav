@@ -143,28 +143,91 @@ def measure(frame_path: Path, pose: dict[str, Any],
     if patch.size == 0:
         return {"ok": False, "why": "lamp projects outside the frame"}
 
-    red, green, blue = patch[..., 0], patch[..., 1], patch[..., 2]
+    # Judge the colour on the brightest pixels in the box, not on all of them
+    # and not on a per-pixel threshold. Two things defeat a threshold here:
+    # the box necessarily contains housing and background as well as figure,
+    # and a lit LED blows out towards white at its core, so its brightest
+    # pixels are the *least* saturated ones. The lamps added to the level are
+    # brighter than the authored ones -- they wear the LED material directly,
+    # while the authored ones sit behind a dynamic instance -- and a
+    # green-versus-blue test failed every one of them at (220, 255, 249)
+    # while passing the dimmer authored lamps at (188, 255, 246). Red minus
+    # green over the brightest pixels separates both cleanly, because bloom
+    # lifts every channel but does not change which hue is dominant.
     level = patch.max(axis=2)
-    # Thresholds low enough to survive the downscale. A lit LED figure is thin,
-    # and LANCZOS blends its edge pixels with the black housing behind it, so
-    # requiring a fully saturated channel throws away most of a real figure.
-    is_red = (red > 70) & (red > green * 1.4) & (red > blue * 1.4)
-    is_green = (green > 70) & (green > red * 1.25) & (green > blue * 1.1)
+    flat = patch.reshape(-1, 3)
+    order = np.argsort(level.reshape(-1))
+    keep = max(8, int(0.15 * flat.shape[0]))
+    brightest = flat[order[-keep:]]
+    mean = brightest.mean(axis=0)
     return {
         "ok": True,
         "at": [u, v],
         "box": [left, top, right, bottom],
         "box_px": [right - left, bottom - top],
-        "red_px": int(is_red.sum()),
-        "green_px": int(is_green.sum()),
+        # Positive means red-dominant, negative green-dominant.
+        "red_over_green": round(float(mean[0] - mean[1]), 1),
         "peak_level": float(level.max()),
+        "mean_rgb": [round(float(c), 1) for c in mean],
         "served_size": list(served.size),
+    }
+
+
+# How far red has to beat green, on the brightest pixels, for a phase to count
+# as read. Squarely-seen lamps score +67 to +151 red and -38 to -73 green,
+# against roughly zero for background. 12 clears background comfortably without
+# failing a bright lamp whose lit core has bloomed towards white.
+COLOUR_MARGIN = 12.0
+# A lamp hidden behind a vehicle head leaves the box showing only facade, which
+# is dimmer than any lit lens.
+MIN_PEAK_LEVEL = 90.0
+
+
+def verdict(red: dict, green: dict) -> list[str]:
+    """Why this crossing cannot be charged, or an empty list if it can."""
+    why = []
+    if not red.get("ok") or not green.get("ok"):
+        return ["lamp projects outside its own frame"]
+    if red["peak_level"] < MIN_PEAK_LEVEL or green["peak_level"] < MIN_PEAK_LEVEL:
+        why.append("nothing lit in the box")
+    if red["red_over_green"] < COLOUR_MARGIN:
+        why.append("red phase does not read red")
+    if -green["red_over_green"] < COLOUR_MARGIN:
+        why.append("green phase does not read green")
+    return why
+
+
+def verified_sidecar(sidecar: dict, rows: list[dict]) -> dict:
+    """The sidecar the runtime reads: only crossings whose frame was checked.
+
+    Everything dropped stays in the file under ``rejected``, with the reason.
+    An album that quietly forgets what it could not photograph is how a lamp
+    that does not exist ends up being charged for.
+    """
+    keep = {row["key"] for row in rows if row["pass"]}
+    dropped = {row["key"]: row["why"] for row in rows if not row["pass"]}
+    return {
+        **sidecar,
+        "method": sidecar["method"] + (
+            " Every crossing listed here was then rendered in both phases and "
+            "measured at the 320 px the harness serves, inside a box that is "
+            "the lamp's own 24 cm aperture projected into the frame. A "
+            "crossing that could not be read in both phases is not listed, "
+            "whatever the geometry said about it."
+        ),
+        "verified_against_renders": True,
+        "legible": sorted(keep),
+        "legible_count": len(keep),
+        "lamp_pose": {k: v for k, v in sidecar["lamp_pose"].items() if k in keep},
+        "rejected": dropped,
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--sidecar", type=Path, required=True)
+    parser.add_argument("--measured", type=Path,
+                        help="measured.json; with it, --out is a verified sidecar")
     parser.add_argument("--map", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
@@ -175,6 +238,15 @@ def main() -> int:
                            / "vendor/vagen/vagen/envs/deliverybench/maps/citycore-paris")
     network = build_road_network(map_dir, map_name=map_dir.name)
     sidecar = json.loads(args.sidecar.read_text())
+    if args.measured:
+        rows = json.loads(args.measured.read_text())
+        verified = verified_sidecar(sidecar, rows)
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(verified, indent=1))
+        print(f"{verified['legible_count']} crossings verified against their "
+              f"own frames, {len(verified['rejected'])} dropped")
+        print("wrote", args.out)
+        return 0
     plan = poses(sidecar, network)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({"fov_deg": FOV_DEG, "poses": plan}, indent=1))
