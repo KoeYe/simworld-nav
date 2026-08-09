@@ -189,9 +189,24 @@ TRUNCATED_TEMPLATE = """{error}
 Your reply is cut off when it gets too long, and a cut-off reply loses the
 turn. Lead with the action and keep the reasoning to a single line."""
 
+# A refusal that only says no gets repeated at. Measured on 40 held-out
+# episodes: after being refused, the model stopped reasoning entirely -- four
+# turns in a row of a bare `walk_to("Rue de Mazarine", "north-west")` with no
+# THOUGHT at all, the same call each time, until the session ended stuck. It
+# had not thought the wrong thing, it had stopped thinking.
+#
+# So the refusal asks for the reasoning back, in the order the move is made,
+# and asks for it in words before the call. It gives no answer away: the
+# bearing has to be read off the map, and which street matches it is still the
+# decision under test.
 REJECTED_TEMPLATE = """That did not work: {reason}
 
-You are still where you were. Choose a different action."""
+You are still where you were, and nothing about the junction has changed, so
+the same call will fail the same way. Work it out again in your THOUGHT before
+you act:
+  1. Which way does the route line leave you on the map — which compass point?
+  2. Of the streets listed above, which one goes most nearly that way?
+  3. Is that street's photograph clear — light green, nothing across the road?"""
 
 REQUIRED_FIELDS = {
     "system": {"city", "tool_menu", "procedures", "blocked_advice"},

@@ -45,6 +45,7 @@ from embodiedbench.agent.courier.frame_alias import FrameAliases
 from embodiedbench.agent.courier.memory import CourierMemory
 from embodiedbench.agent.courier.prompts import (
     FORMAT_ERROR_TEMPLATE,
+    REJECTED_TEMPLATE,
     TRUNCATED_TEMPLATE,
     build_observation,
     build_system_prompt,
@@ -288,7 +289,13 @@ class CourierSession:
         turn.status = "accepted" if outcome.ok else "rejected"
         if not outcome.ok:
             turn.error = outcome.code
-        self.feedback = outcome.message
+        # A refusal carries the reason and then asks for the reasoning back.
+        # REJECTED_TEMPLATE existed and was never wired to anything, so a
+        # refused courier got the bare sentence and nothing else -- and on the
+        # held-out set it answered by repeating the identical call with no
+        # THOUGHT at all until the session ended stuck.
+        self.feedback = (REJECTED_TEMPLATE.format(reason=outcome.message)
+                         if not outcome.ok else outcome.message)
 
         self.spend.steps += 1
         self.spend.tool_calls += 1
