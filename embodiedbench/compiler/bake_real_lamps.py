@@ -223,11 +223,41 @@ def verified_sidecar(sidecar: dict, rows: list[dict]) -> dict:
     }
 
 
+def assemble(bake: Path, album: Path, rows: list[dict],
+             plan: list[dict]) -> dict:
+    """Lay the rendered frames out the way the runtime reads them.
+
+    ``images/<node>/toward_<neighbour>_<state>.png`` -- the same layout the
+    earlier albums use, so nothing in the runtime has to learn a new one. Only
+    crossings that passed are copied: a frame on disk that the sidecar does not
+    list is a trap for the next person, and a frame the sidecar lists that is
+    not on disk is worse.
+    """
+    import shutil
+
+    images = album / "images"
+    written = 0
+    for row in rows:
+        if not row["pass"]:
+            continue
+        node, toward = row["key"].split("|")
+        target = images / node
+        target.mkdir(parents=True, exist_ok=True)
+        for atlas, state in (("E01", "red"), ("E02", "green")):
+            source = bake / f"real/{atlas}/{row['i']:04d}.png"
+            shutil.copyfile(source, target / f"toward_{toward}_{state}.png")
+            written += 1
+    return {"frames": written, "crossings": sum(r["pass"] for r in rows)}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--sidecar", type=Path, required=True)
     parser.add_argument("--measured", type=Path,
                         help="measured.json; with it, --out is a verified sidecar")
+    parser.add_argument("--album", type=Path,
+                        help="lay the passing frames out as an album here")
+    parser.add_argument("--bake", type=Path, default=Path("/data/murray/lamp_bake"))
     parser.add_argument("--map", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
@@ -240,6 +270,11 @@ def main() -> int:
     sidecar = json.loads(args.sidecar.read_text())
     if args.measured:
         rows = json.loads(args.measured.read_text())
+        if args.album:
+            plan = json.loads((args.bake / "real_poses.json").read_text())["poses"]
+            laid = assemble(args.bake, args.album, rows, plan)
+            print(f"{laid['frames']} frames for {laid['crossings']} crossings "
+                  f"-> {args.album}")
         verified = verified_sidecar(sidecar, rows)
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(verified, indent=1))
