@@ -50,6 +50,7 @@ from embodiedbench.runtime.city.street_names import (
     StreetAmbiguous,
     StreetNotHere,
     match_street,
+    resolve_relative,
 )
 from embodiedbench.runtime.city.obstacles import (
     BLOCKED_SECONDS,
@@ -852,7 +853,21 @@ class CourierEnv:
         stage further down the pipe.
         """
         sizes = data.get("lamp_px")
-        if not self.served_long_edge or not isinstance(sizes, dict):
+        if not self.served_long_edge:
+            return legible
+        if not isinstance(sizes, dict):
+            # Album baked before lamp_px existed: the gate cannot run. Say so once.
+            if not getattr(self, "_warned_no_lamp_px", False):
+                self._warned_no_lamp_px = True
+                import logging
+
+                logging.getLogger(__name__).warning(
+                    "served_long_edge=%s but this album has no lamp_px "
+                    "metadata; the served-size visibility gate is OFF and "
+                    "red-light charging follows the bake resolution. Re-bake "
+                    "the album to get served-size gating.",
+                    self.served_long_edge,
+                )
             return legible
         readable = set()
         for key in legible:
@@ -1927,6 +1942,8 @@ class CourierEnv:
         the bearing and says which two are available.
         """
         rows = self.candidates()
+        # "left"/"right" mean relative to facing, not west/east.
+        heading = resolve_relative(heading, self.facing())
         try:
             row = match_street(rows, street, heading)
         except StreetNotHere:
@@ -2368,6 +2385,12 @@ class CourierEnv:
         # benchmark keeps finding in itself: a contract stated in one place and
         # quietly widened in another. Selecting among several jobs is still
         # expressible, because each one has its own address on the slip.
+        # Condition gate first, before the address branch's early returns.
+        if self.condition in (Condition.NO_PHONE, Condition.VISUAL):
+            return StepOutcome(
+                ok=False, code="no_phone", sim_seconds=1.0,
+                message="Your phone has no signal here. You will have to find it by the streets.",
+            )
         job: int | None = None
         if isinstance(where, str) and where.strip():
             match = self._find_address(where)
@@ -2389,11 +2412,6 @@ class CourierEnv:
                 # list first. The screen goes to the address asked for.
                 return self._route_to(match)
             job = order.index
-        if self.condition in (Condition.NO_PHONE, Condition.VISUAL):
-            return StepOutcome(
-                ok=False, code="no_phone", sim_seconds=1.0,
-                message="Your phone has no signal here. You will have to find it by the streets.",
-            )
         live = self.live_orders()
         if not live:
             return StepOutcome(ok=True, sim_seconds=1.0, message="You have no job in hand.")
