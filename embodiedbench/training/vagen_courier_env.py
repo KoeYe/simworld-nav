@@ -445,7 +445,11 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             if key in lamps and not load(lamps[key]):
                 dropped += 1
 
-        for frame in drawings:
+        # The blind control has no album, and the map is a picture: sending it
+        # would give the text-only condition the one visual the sighted
+        # condition navigates by, which is the comparison the control exists to
+        # make.
+        for frame in (drawings if self.album_root else []):
             raster = self._rasterise(frame.svg, len(chosen))
             if raster is None:
                 dropped += 1
@@ -481,6 +485,12 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             out = Path(self._scratch.name) / f"map_{index}.png"
             cairosvg.svg2png(bytestring=svg.encode(), write_to=str(out),
                              output_width=720, output_height=540)
-            return Image.open(out).convert("RGB")
+            # Through the same downscale as a photograph. The map used to go
+            # out at 720x540 -- roughly 400 tokens against a photograph's 80 --
+            # because it was rendered rather than loaded and never met _fit. It
+            # survives the resize: at 320 px the route line, the position dot,
+            # the destination and the compass are all legible, and only the
+            # street labels are lost, which is deliberate.
+            return self._fit(Image.open(out).convert("RGB"))
         except Exception:  # noqa: BLE001
             return None

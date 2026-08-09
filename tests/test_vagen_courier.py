@@ -110,7 +110,9 @@ class TestTheObservationContract:
         env = CourierGymEnv({**config, "max_images": 1})
         obs, info = run(env.reset(0))
         images = obs["multi_modal_input"][IMAGE_PLACEHOLDER]
-        assert len(images) == 1
+        # One street view plus the phone's map, which is lit from the first
+        # turn now that the direction to walk exists nowhere else.
+        assert len(images) == 2
         assert info["images_dropped"] >= 1
         run(env.close())
 
@@ -493,7 +495,8 @@ class TestALampTravelsWithItsStreet:
         street = re.match(r"\[([^\],]+),\s*([^\]]+)\]", lines[0])
         assert street, lines
         assert lines[1].startswith(f"[light: {street.group(1)}, {street.group(2)}]"), lines
-        assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == 2
+        # street, its lamp, and the phone's map
+        assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == 3
         run(env.close())
 
     def test_a_lamp_is_never_sent_without_its_street(self, config):
@@ -519,7 +522,8 @@ class TestALampTravelsWithItsStreet:
 
         env, (obs, _dropped) = self._signalised_turn(config, 2)
         lines = self._caption(obs)
-        streets = [line for line in lines if not line.startswith("[light")]
+        streets = [line for line in lines
+                   if not line.startswith(("[light", "[map"))]
         assert len(streets) == 2, lines
         run(env.close())
 

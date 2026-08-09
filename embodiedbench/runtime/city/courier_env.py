@@ -1129,6 +1129,7 @@ class CourierEnv:
             if order.issued_at_s is None:
                 order.issued_at_s = self.sim_seconds
                 live += 1
+        self._light_the_screen()
         while self.unbounded and live < self.queue_depth:
             order = self._draw_order(len(self.orders) + 1, self._order_rng)
             if order is None:
@@ -1136,6 +1137,35 @@ class CourierEnv:
             order.issued_at_s = self.sim_seconds
             self.orders.append(order)
             live += 1
+        self._light_the_screen()
+
+    def _light_the_screen(self) -> None:
+        """Put the job in hand on the phone's map, without being asked.
+
+        The direction to walk lives only on the map now -- nothing in any
+        sentence the environment speaks says which way to go. That made the map
+        load-bearing and left it behind a tool call: the courier had to spend a
+        turn on navigate() before it had any direction at all, and on 40
+        held-out episodes 25 never called it. Those 25 walked the whole shift
+        with no source of direction whatsoever, which is not a hard task, it is
+        an unanswerable one.
+
+        A courier who has just been given a job is looking at it on their
+        phone. So the screen starts lit, on the job in hand, and navigate()
+        goes back to being what it is for: re-centring the route after the
+        courier has moved, or pointing the phone at some other address.
+        """
+        if self.condition in (Condition.NO_PHONE, Condition.VISUAL):
+            return
+        # Read straight off the list rather than through active_order(), which
+        # goes back through live_orders() and _issue() -- and this is called
+        # from _issue. The first version recursed until the stack ran out.
+        order = next((o for o in self.orders if o.live), None)
+        if order is None or order.target is self.screen_target:
+            return
+        if order.target.kerb_node:
+            # Computing the drawing is what stores the route on the screen.
+            self.map_drawing(order.target)
 
     def live_orders(self) -> list[Order]:
         """The jobs in hand right now, oldest first.
