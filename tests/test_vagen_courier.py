@@ -490,13 +490,18 @@ class TestALampTravelsWithItsStreet:
             pytest.skip("albums not mounted")
         import re
 
-        env, (obs, _dropped) = self._signalised_turn(config, 1)
+        env, (obs, _dropped) = self._signalised_turn(config, 2)
         lines = self._caption(obs)
-        street = re.match(r"\[([^\],]+),\s*([^\]]+)\]", lines[0])
-        assert street, lines
-        assert lines[1].startswith(f"[light: {street.group(1)}, {street.group(2)}]"), lines
-        # street, its lamp, and the phone's map
-        assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == 3
+        # Whichever street carries the lamp, the lamp comes directly after it.
+        # Not necessarily the first street: a junction shows one lamp now, and
+        # it belongs to whichever approach reads it best, not to street one.
+        lamp = next(i for i, line in enumerate(lines) if line.startswith("[light:"))
+        assert lamp > 0, lines
+        governs = re.match(r"\[light:\s*([^\],]+),\s*([^\]]+)\]", lines[lamp])
+        assert governs, lines
+        assert lines[lamp - 1].startswith(
+            f"[{governs.group(1)}, {governs.group(2)}]"), lines
+        assert len(obs["multi_modal_input"][IMAGE_PLACEHOLDER]) == len(lines)
         run(env.close())
 
     def test_a_lamp_is_never_sent_without_its_street(self, config):

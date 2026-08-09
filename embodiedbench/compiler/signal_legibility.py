@@ -604,6 +604,16 @@ class AlbumLegibility:
                 r.key: [min(r.red_lamp.px, r.green_lamp.px), r.width, r.height]
                 for r in legible
             },
+            # Where the lamp sits in the frame. The map has no lamp objects --
+            # signalised junctions are derived from degree and one light mesh
+            # is baked per junction -- so a junction with four approaches has
+            # four frames of THE SAME LAMP from the same camera. Publishing the
+            # box lets the runtime notice that and stop treating one lamp as
+            # four independent ones.
+            "lamp_box": {
+                r.key: list(r.red_lamp.box) if r.red_lamp.box else None
+                for r in legible
+            },
         }
 
 

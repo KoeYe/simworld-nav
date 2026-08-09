@@ -834,7 +834,82 @@ class CourierEnv:
         except (OSError, ValueError):
             return None
         legible = {str(k) for k in data.get("legible", [])}
-        return legible & self._readable_at_served_size(data, legible)
+        legible &= self._readable_at_served_size(data, legible)
+        return self._one_lamp_per_lamp(data, legible)
+
+    def _one_lamp_per_lamp(self, data: dict, legible: set[str]) -> set[str]:
+        """Stop charging one lamp several times over.
+
+        The map has no lamp objects. Signalised junctions are derived from
+        node degree and the bake puts one light mesh at each of them, so a
+        junction with four ways out has four photographs of THE SAME LAMP,
+        from the same camera, differing only in which phase is lit. The
+        environment then gave each approach its own phase from its own bearing
+        and charged each one separately -- one lamp treated as four.
+
+        What that did to the courier is worse than the double-counting. Told
+        "the lamp for Rue de la Paix" and "the lamp for Rue Cujas", it was
+        handed two pictures with identical backgrounds and no way to tell
+        which was which; the caption was the only thing distinguishing them.
+        Measured on this album: 34 junctions show one lamp to three
+        approaches, three show one to four, two show one to five, and only a
+        single junction in the map has two genuinely different lamps. Of 130
+        charged approaches about 61 were the same lamp counted again.
+
+        So each group of approaches sharing a lamp keeps exactly one -- the
+        view where the lamp is largest, which is the one a courier could
+        actually read -- and the rest are treated as having no visible lamp at
+        all: no frame, no charge. That is the same rule the visibility gate
+        already applies, said about a lamp rather than about an album.
+        """
+        # An album that gives every approach its own lamp says so, and must
+        # not be folded back together: composited lamps sit at the same place
+        # in every frame, so their boxes coincide although the lamps are
+        # genuinely separate. The rendered album's boxes coincide for the
+        # opposite reason -- one lamp photographed repeatedly -- and only the
+        # album knows which case it is.
+        if data.get("lamps_are_per_approach"):
+            return legible
+        boxes = data.get("lamp_box")
+        sizes = data.get("lamp_px")
+        if not isinstance(boxes, dict):
+            return legible
+
+        def overlap(a: list, b: list) -> float:
+            ax0, ay0, ax1, ay1 = a
+            bx0, by0, bx1, by1 = b
+            wide = max(0, min(ax1, bx1) - max(ax0, bx0))
+            tall = max(0, min(ay1, by1) - max(ay0, by0))
+            inter = wide * tall
+            union = (ax1 - ax0) * (ay1 - ay0) + (bx1 - bx0) * (by1 - by0) - inter
+            return inter / union if union > 0 else 0.0
+
+        def lamp_pixels(key: str) -> int:
+            row = (sizes or {}).get(key)
+            return int(row[0]) if row else 0
+
+        by_node: dict[str, list[str]] = {}
+        for key in legible:
+            by_node.setdefault(key.split("|")[0], []).append(key)
+
+        kept: set[str] = set()
+        for node, keys in by_node.items():
+            groups: list[list[str]] = []
+            for key in sorted(keys):
+                box = boxes.get(key)
+                if not box:
+                    groups.append([key])
+                    continue
+                for group in groups:
+                    other = boxes.get(group[0])
+                    if other and overlap(box, other) > 0.5:
+                        group.append(key)
+                        break
+                else:
+                    groups.append([key])
+            for group in groups:
+                kept.add(max(group, key=lambda k: (lamp_pixels(k), k)))
+        return kept
 
     # A 2x2 patch after the resize -- the album's own floor, restated here so
     # the runtime is not silently more permissive than the measurement was.

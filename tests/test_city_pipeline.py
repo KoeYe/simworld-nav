@@ -1233,3 +1233,69 @@ class TestTheNumbersOnTheDoorsAreTheNumbersItPrints:
         env = self.env()
         singles = [env.house_numbers_near(n) for n in env.network.nodes]
         assert any(t.isdigit() for t in singles if t)
+
+
+class TestOneLampIsChargedOnce:
+    """The map has no lamp objects, so the bake put one at each junction.
+
+    Signalised junctions are derived from node degree and one light mesh is
+    baked at each, so a junction with four ways out has four photographs of
+    the same lamp from the same camera, differing only in which phase is lit.
+    The environment gave each approach its own phase from its own bearing and
+    charged each separately -- one lamp treated as four.
+
+    Worse than the double charge: told "the lamp for Rue de la Paix" and "the
+    lamp for Rue Cujas", the courier held two pictures with identical
+    backgrounds and nothing but the caption to tell them apart. On this album
+    34 junctions showed one lamp to three approaches, three showed one to
+    four, two showed one to five, and exactly one junction has two genuinely
+    different lamps.
+    """
+
+    def sidecar(self, tmp, entries):
+        (tmp / "signal_visibility.json").write_text(json.dumps(entries))
+        return CourierEnv(build_road_network(PARIS, map_name="citycore-paris"),
+                          seed=0, order_count=1, signal_album_root=tmp)
+
+    def test_approaches_sharing_a_lamp_keep_exactly_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self.sidecar(Path(tmp), {
+                "legible": ["n|a", "n|b", "n|c"],
+                "lamp_px": {"n|a": [400, 1280, 960], "n|b": [900, 1280, 960],
+                            "n|c": [500, 1280, 960]},
+                # All three boxes are the same lamp.
+                "lamp_box": {"n|a": [600, 300, 640, 360],
+                             "n|b": [601, 301, 641, 361],
+                             "n|c": [599, 299, 639, 359]},
+            })
+            # The largest lamp wins: it is the view a courier could read.
+            assert env.visible_signals == {"n|b"}
+
+    def test_two_real_lamps_at_one_junction_both_survive(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self.sidecar(Path(tmp), {
+                "legible": ["n|a", "n|b"],
+                "lamp_px": {"n|a": [400, 1280, 960], "n|b": [400, 1280, 960]},
+                "lamp_box": {"n|a": [100, 300, 140, 360],
+                             "n|b": [900, 300, 940, 360]},
+            })
+            assert env.visible_signals == {"n|a", "n|b"}
+
+    def test_junctions_do_not_borrow_each_others_lamps(self):
+        """Two junctions can have a lamp in the same part of the frame without
+        it being the same lamp."""
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self.sidecar(Path(tmp), {
+                "legible": ["m|a", "n|a"],
+                "lamp_px": {"m|a": [400, 1280, 960], "n|a": [400, 1280, 960]},
+                "lamp_box": {"m|a": [600, 300, 640, 360],
+                             "n|a": [600, 300, 640, 360]},
+            })
+            assert env.visible_signals == {"m|a", "n|a"}
+
+    def test_an_album_without_boxes_is_left_alone(self):
+        """Older sidecars do not carry lamp_box; narrowing them on no evidence
+        would silently switch the mechanic off."""
+        with tempfile.TemporaryDirectory() as tmp:
+            env = self.sidecar(Path(tmp), {"legible": ["n|a", "n|b"]})
+            assert env.visible_signals == {"n|a", "n|b"}
