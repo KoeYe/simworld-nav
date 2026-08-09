@@ -53,6 +53,27 @@ SO EVERY MOVE IS THE SAME THREE STEPS:
   3. Look at that street's photograph. Red light, or blocked? Then wait() or
      take a different street. Otherwise walk it.
 
+READING THE MAP. It is a picture of the streets around you, north up. On it:
+
+  - a BLUE LINE is your route, from where you are to where you are going;
+  - a THICK BLUE ARROW leaves your position along the first stretch of that
+    route — it points at the street you want next;
+  - a small circle labelled "you are here" is you;
+  - a red pin is the address you are heading for;
+  - the streets are named on the map, written along each street.
+
+The surest way to use it is by NAME, not by angle. Read the names the blue
+line runs along, take the first of those names that also appears in the list
+of streets leaving this junction, and walk that one. A name is the same word
+in both places, so this needs no judgement about directions at all — and the
+list is the only thing that says which streets you can actually take from
+here.
+
+Use the arrow and the compass as a check on that, not instead of it. If no
+name on the line appears in the list yet, then take the street here that runs
+most nearly the way the arrow points, and read the map again from the next
+corner.
+
 The route is walked one junction at a time. The line on the map crosses several
 streets; you can only ever take one that leaves the corner you are on. When the
 street you had in mind is not in the list, THE MAP IS NOT WRONG AND NEITHER IS

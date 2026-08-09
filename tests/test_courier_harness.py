@@ -1242,3 +1242,36 @@ class TestALampThatNeverArrivedIsNotCharged:
         env.show_only_these_signals(set())
         env.reset()
         assert env.signals_shown is None
+
+
+class TestTheMapSectionTeachesTheReadableRoute:
+    """The map is the only place direction exists, and it was never explained.
+
+    It also has to be explained the right way round. Measured on Qwen3-VL-4B:
+    asked which way a large red pin lies from a blue dot -- one object against
+    another, no route, no arrow -- it answers within 45 degrees 17-29% of the
+    time, against 50% for guessing and 81% on a black arrow on a white field.
+    Instructions about angles are therefore instructions about the thing it
+    cannot do. Street names, now legible at the served size, are the thing it
+    can, so the section leads with matching names and keeps the compass as a
+    fallback.
+    """
+
+    def test_it_names_what_is_drawn(self):
+        prompt = build_system_prompt(city="Paris",
+                                     tools=available_tools(PARIS_ACTIONS))
+        assert "READING THE MAP" in prompt
+        low = prompt.lower()
+        for mark in ("blue line", "arrow", "you are here", "red pin", "north up"):
+            assert mark in low, mark
+
+    def test_it_leads_with_names_rather_than_angles(self):
+        prompt = build_system_prompt(city="Paris",
+                                     tools=available_tools(PARIS_ACTIONS))
+        section = prompt.split("READING THE MAP", 1)[1]
+        by_name = section.lower().index("by name")
+        by_angle = section.lower().index("arrow and the compass")
+        assert by_name < by_angle, (
+            "the compass advice must come after the name advice: reading "
+            "angles is the thing the model measurably cannot do"
+        )
