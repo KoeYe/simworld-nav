@@ -742,6 +742,9 @@ class CourierEnv:
         self.earnings: float = 0.0
         self.finished = False
         self.red_crossings: int = 0
+        # Which lamps the sender managed to put in front of the model this
+        # turn. None means "no one is limiting them".
+        self.signals_shown: set[str] | None = None
         self.waits_at_red: int = 0
         # Long-horizon is measured in both currencies: a policy can be cheap in
         # turns and slow on the clock, or the reverse, and only reporting one
@@ -944,10 +947,31 @@ class CourierEnv:
         return readable
 
     def signal_is_visible(self, node_id: str, toward: str) -> bool:
-        """Can the courier standing at ``node_id`` see the lamp for this crossing?"""
+        """Can the courier standing at ``node_id`` see the lamp for this crossing?
+
+        Two gates, and the second exists because the first is not enough. The
+        album says which crossings *have* a lamp it can show. The harness then
+        decides how many pictures fit in one turn, and when it runs out it drops
+        street views and their lamps together -- so a crossing the album can
+        show is not necessarily a crossing the courier was shown. Charging on
+        the album alone penalises a policy for a lamp that never arrived, which
+        is the same defect the album gate was added to prevent, arriving one
+        layer further out.
+
+        ``signals_shown`` is set by whatever is doing the sending, each turn.
+        Left as None it means "everything the album has", which is right for the
+        evaluation harness that sends them all.
+        """
+        key = f"{node_id}|{toward}"
+        if self.signals_shown is not None and key not in self.signals_shown:
+            return False
         if self.visible_signals is None:
             return bool(SIGNAL_FRAMES_AVAILABLE)
-        return f"{node_id}|{toward}" in self.visible_signals
+        return key in self.visible_signals
+
+    def show_only_these_signals(self, keys: "set[str] | None") -> None:
+        """Declare which lamps actually reached the model this turn."""
+        self.signals_shown = None if keys is None else set(keys)
 
     # ── lifecycle ────────────────────────────────────────────────────────────
 
@@ -967,6 +991,7 @@ class CourierEnv:
         self.stamina = float(self.embodiment.stamina or 0.0)
         self.rests = 0
         self.red_crossings = 0
+        self.signals_shown = None
         self.waits_at_red = 0
         self.walked_cm = 0.0
         self.rejected_actions = 0

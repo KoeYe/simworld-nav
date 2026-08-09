@@ -125,6 +125,7 @@ class CourierSession:
         # The junction a walk started from, so it can be credited with the way
         # out that was taken rather than the one arrived at.
         self._leaving: str | None = None
+        self.lamp_legs: dict[str, str] = {}
         self.feedback = ""
         self.allowed = list(env.allowed_tool_names())
         self.tools = [TOOLS_BY_NAME[name] for name in self.allowed]
@@ -223,6 +224,14 @@ class CourierSession:
                   self.frames_seen.alias(row["image"]))
             for row in rows if row.get("image")
         ]
+        # The caption key a lamp frame is found by, and the leg it governs.
+        # A sender that drops frames needs this to tell the environment which
+        # lamps actually arrived; without it the environment charges for a
+        # light the model was never shown.
+        self.lamp_legs = {
+            f"{row['street']}, {row['heading']}": f"{self.env.node_id}|{row['node']}"
+            for row in rows if row.get("signal_image")
+        }
         frames += [
             Frame(f"[light: {row['street']}, {row['heading']}] the pedestrian "
                   "light for that crossing",

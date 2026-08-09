@@ -1162,3 +1162,52 @@ class TestATruncatedReplyIsNotAFormatError:
         assert session.spend.truncated_replies == 4
         assert session.spend.consecutive_format_errors == 0
         assert not session.finished
+
+
+class TestALampThatNeverArrivedIsNotCharged:
+    """The album gate says which crossings have a lamp it can show. The image
+    budget then decides how many pictures fit in a turn, and drops street views
+    with their lamps. A crossing the album can show is therefore not always a
+    crossing the courier was shown, and charging on the album alone penalises a
+    policy for a light that never reached it -- the same defect the album gate
+    exists to prevent, one layer further out.
+    """
+
+    def env(self, paris):
+        env = CourierEnv(paris, seed=0, order_count=1, enforce_signals=True)
+        env.reset()
+        env.visible_signals = {f"{n}|{m}" for n in env.signalised
+                               for m in paris.nodes[n].neighbours}
+        return env
+
+    def test_unlimited_by_default(self, paris):
+        """Nobody limiting the pictures means the album's answer stands, which
+        is what the evaluation harness needs -- it sends them all."""
+        env = self.env(paris)
+        node = next(iter(env.signalised))
+        toward = sorted(paris.nodes[node].neighbours)[0]
+        assert env.signal_is_visible(node, toward)
+
+    def test_a_lamp_left_out_of_the_turn_cannot_be_charged(self, paris):
+        env = self.env(paris)
+        node = next(iter(env.signalised))
+        legs = sorted(paris.nodes[node].neighbours)
+        env.show_only_these_signals({f"{node}|{legs[0]}"})
+        assert env.signal_is_visible(node, legs[0])
+        for other in legs[1:]:
+            assert not env.signal_is_visible(node, other), \
+                "charged for a lamp the model was never sent"
+
+    def test_sending_nothing_charges_nothing(self, paris):
+        env = self.env(paris)
+        node = next(iter(env.signalised))
+        env.show_only_these_signals(set())
+        for toward in paris.nodes[node].neighbours:
+            assert not env.signal_is_visible(node, toward)
+
+    def test_a_reset_forgets_who_was_limiting(self, paris):
+        """Otherwise one episode's image budget silently gates the next."""
+        env = self.env(paris)
+        env.show_only_these_signals(set())
+        env.reset()
+        assert env.signals_shown is None

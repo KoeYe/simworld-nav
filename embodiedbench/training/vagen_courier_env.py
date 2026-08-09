@@ -368,6 +368,16 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         """
         observation = self._session.observe()
         images, dropped, labels = self._load_images(observation)
+        # Tell the environment which lamps survived the image budget. It gates
+        # the red-light charge on what the album can show; this narrows that to
+        # what was actually sent, because at max_images the pair for a dropped
+        # street goes with it and the courier would otherwise be penalised for
+        # a light that never reached it.
+        legs = getattr(self._session, "lamp_legs", {}) or {}
+        sent = {legs[key] for label in labels
+                for key in [self._lamp_key(label)]
+                if key is not None and key in legs}
+        self._env.show_only_these_signals(sent if legs else None)
         text = observation.text
         # Always, not only when something was dropped. This adapter sends the
         # frames interleaved -- street, its lamp, next street, its lamp -- while
@@ -384,6 +394,12 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         if images:
             obs["multi_modal_input"] = {IMAGE_PLACEHOLDER: images}
         return obs, dropped
+
+    @staticmethod
+    def _lamp_key(label: str) -> str | None:
+        """The ``street, bearing`` a lamp caption names, or None if not a lamp."""
+        match = re.match(r"\[light:\s*([^\]]+)\]", label)
+        return match.group(1).strip() if match else None
 
     def _load_images(self, observation: Any) -> tuple[list[Any], int, list[str]]:
         """The pictures for one turn, and the captions that describe exactly them.
