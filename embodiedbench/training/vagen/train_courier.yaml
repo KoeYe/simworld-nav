@@ -60,6 +60,8 @@ envs:
       # mrope crash when a truncated prompt left multi_modal_data listing
       # images the tokens no longer covered. The frames are 320px now, at
       # roughly 80 tokens, and clip_ratio has been 0.0 throughout.
+      # "320px now" is this key; it must match val_courier.yaml.
+      image_max_side: 320
       album_root: /data/murray/paris_streets_v2/citycore-paris
       # ^ uncomment for the sighted task. Without it the episode is text-only,
       #   which is the blind control, not the benchmark.
