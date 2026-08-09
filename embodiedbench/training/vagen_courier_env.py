@@ -262,7 +262,8 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
 
         # The turn's pay, as a delta, so the episode's rewards sum to what the
         # shift earned. The harness's own step reward is the alternative basis.
-        earned_now = float(self._env.summary().get("earnings") or 0.0)
+        # Hard key: a renamed key must raise, not silently zero the reward.
+        earned_now = float(self._env.summary()["earnings"])
         earned_this_turn = earned_now - self._last_earnings
         self._last_earnings = earned_now
         reward = (earned_this_turn if self.reward_basis == "earnings"
@@ -495,7 +496,15 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         try:
             import cairosvg
             from PIL import Image
-
+        except ImportError as exc:
+            # A missing library is a machine configuration error, not a bad
+            # frame's luck; swallowed per frame it removes every map silently.
+            raise RuntimeError(
+                "the phone map cannot render: cairosvg/PIL is not installed "
+                "in this environment. Install cairosvg or run a condition "
+                "without the phone."
+            ) from exc
+        try:
             if self._scratch is None:
                 self._scratch = tempfile.TemporaryDirectory(prefix="courier-map-")
             out = Path(self._scratch.name) / f"map_{index}.png"
@@ -509,4 +518,5 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             # street labels are lost, which is deliberate.
             return self._fit(Image.open(out).convert("RGB"))
         except Exception:  # noqa: BLE001
+            # A genuinely bad SVG stays a per-frame miss, counted in dropped.
             return None

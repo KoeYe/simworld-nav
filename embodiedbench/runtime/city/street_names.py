@@ -32,13 +32,29 @@ import unicodedata
 COMPASS: dict[str, tuple[str, ...]] = {
     "north": ("n", "north", "northward", "northwards", "up"),
     "north-east": ("ne", "northeast", "north east", "north-east"),
-    "east": ("e", "east", "eastward", "eastwards", "right"),
+    "east": ("e", "east", "eastward", "eastwards"),
     "south-east": ("se", "southeast", "south east", "south-east"),
     "south": ("s", "south", "southward", "southwards", "down"),
     "south-west": ("sw", "southwest", "south west", "south-west"),
-    "west": ("w", "west", "westward", "westwards", "left"),
+    "west": ("w", "west", "westward", "westwards"),
     "north-west": ("nw", "northwest", "north west", "north-west"),
 }
+
+_ORDERED = ("north", "north-east", "east", "south-east",
+            "south", "south-west", "west", "north-west")
+# "left"/"right" are relative to facing, not points of the compass.
+_RELATIVE_TURN = {"left": -90.0, "right": 90.0}
+
+
+def resolve_relative(heading: str | None, facing: float | None) -> str | None:
+    """Turn "left"/"right" into a compass heading against ``facing``; anything
+    else passes through unchanged."""
+    if not heading:
+        return heading
+    turn = _RELATIVE_TURN.get(heading.strip().lower())
+    if turn is None or facing is None:
+        return heading
+    return _ORDERED[int(((facing + turn) % 360.0) / 45.0 + 0.5) % 8]
 
 _ALIAS = {alias: heading for heading, aliases in COMPASS.items() for alias in aliases}
 

@@ -170,18 +170,32 @@ def main() -> int:
     client = ModelClient(endpoint, args.model, max_tokens=args.max_tokens)
 
     rows = []
+    infra_draws = 0
     for seed in range(args.seeds):
         draws = [one_rollout(paris, seed, args, client, None, args.temperature)
                  for _ in range(args.k)]
-        earned = [d["earnings"] for d in draws]
+        # Server downtime is not a zero-earning shift; keep it out of every
+        # denominator, the way run_vlm.py already does.
+        ok = [d for d in draws if not d.get("infra_error")]
+        infra_draws += len(draws) - len(ok)
+        if not ok:
+            print(f"seed {seed}: all {args.k} draws hit infra errors, seed skipped",
+                  flush=True)
+            continue
+        earned = [d["earnings"] for d in ok]
         rows.append({"seed": seed, "draws": draws,
                      "any_earned": any(e > 0 for e in earned),
                      "best": max(earned), "mean": statistics.mean(earned)})
-        print(f"seed {seed}: {sum(1 for e in earned if e > 0)}/{args.k} draws earned, "
-              f"best {max(earned):.2f}, mean {statistics.mean(earned):.2f}", flush=True)
+        note = f" ({len(draws) - len(ok)} infra draw(s) excluded)" if len(ok) < len(draws) else ""
+        print(f"seed {seed}: {sum(1 for e in earned if e > 0)}/{len(ok)} draws earned, "
+              f"best {max(earned):.2f}, mean {statistics.mean(earned):.2f}{note}", flush=True)
 
-    total_draws = sum(len(r["draws"]) for r in rows)
-    paying_draws = sum(1 for r in rows for d in r["draws"] if d["earnings"] > 0)
+    if not rows:
+        print("every draw hit infra errors; nothing to report")
+        return 1
+    total_draws = sum(1 for r in rows for d in r["draws"] if not d.get("infra_error"))
+    paying_draws = sum(1 for r in rows for d in r["draws"]
+                       if not d.get("infra_error") and d["earnings"] > 0)
     pass_at_1 = paying_draws / total_draws
     pass_at_k = sum(1 for r in rows if r["any_earned"]) / len(rows)
 
@@ -208,6 +222,8 @@ def main() -> int:
     print("  -- reachability --")
     print(f"  pass@1 (per draw)            : {pass_at_1:.3f}")
     print(f"  pass@{args.k} (per seed)          : {pass_at_k:.3f}")
+    if infra_draws:
+        print(f"  infra draws excluded         : {infra_draws}")
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps({
