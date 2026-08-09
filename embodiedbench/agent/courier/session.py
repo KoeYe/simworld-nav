@@ -193,9 +193,10 @@ class CourierSession:
         # the prompt that has to be cross-referenced against a menu.
         here = self.env.node_id
         for row in rows:
-            row["seen"] = self.memory.has_taken(
-                here, row.get("street", ""),
-                row.get("reach_heading") or row.get("heading", ""))
+            street = row.get("street", "")
+            heading = row.get("reach_heading") or row.get("heading", "")
+            row["seen"] = self.memory.has_taken(here, street, heading)
+            row["refused"] = self.memory.refusal_at(here, street, heading)
         text = build_observation(
             memory=self.memory.render(),
             location=self.env.location_text(),
@@ -336,6 +337,13 @@ class CourierSession:
         turn.memory = self.memory.to_dict()
         self.run.turns.append(turn)
 
+        if not outcome.ok and self._leaving is not None and action.args:
+            # Against the junction it was refused at, so the marker appears on
+            # the very line that will be offered again next turn.
+            self.memory.refused(
+                self._leaving, str(action.args[0]),
+                str(action.args[1]) if len(action.args) > 1 else "",
+                outcome.code or "refused")
         if not outcome.ok and turn.action == self._last_refused:
             self._repeats += 1
         else:

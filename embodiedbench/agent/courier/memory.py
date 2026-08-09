@@ -65,6 +65,8 @@ class CourierMemory:
     dead_ends: set[str] = field(default_factory=set)
     # junction -> the (street, heading) pairs already walked out of it
     taken: dict[str, set] = field(default_factory=dict)
+    # junction -> {(street, heading): why it was refused}
+    turned_down: dict[str, dict] = field(default_factory=dict)
     notebook: list[str] = field(default_factory=list)
     goal: str = ""
     goal_kind: str = ""
@@ -105,6 +107,21 @@ class CourierMemory:
 
     def has_taken(self, node_id: str, street: str, heading: str) -> bool:
         return (street, heading) in self.taken.get(node_id, set())
+
+    def refused(self, node_id: str, street: str, heading: str, why: str) -> None:
+        """Record a call this junction turned down, so it is never offered blind.
+
+        Nothing about the world changes between a refusal and the next turn, so
+        the same call is refused for the same reason -- and it was made again
+        immediately in 63 of 128 attempts. The courier is told that in the
+        prompt and does not act on it. Being told is not the same as being
+        shown: the fact belongs on the line the courier is choosing from.
+        """
+        self.turned_down.setdefault(node_id, {})[(street, heading)] = why
+
+    def refusal_at(self, node_id: str, street: str, heading: str) -> str:
+        here = self.turned_down.get(node_id, {})
+        return here.get((street, heading)) or here.get((street, "")) or ""
 
     def write(self, text: str) -> None:
         line = " ".join(str(text).split())[:160]
@@ -232,6 +249,8 @@ class CourierMemory:
             "streets_seen": dict(self.streets_seen),
             "dead_ends": sorted(self.dead_ends),
             "taken": {node: sorted(ways) for node, ways in self.taken.items()},
+            "turned_down": {node: {f"{k[0]}|{k[1]}": v for k, v in ways.items()}
+                            for node, ways in self.turned_down.items()},
             "notebook": list(self.notebook),
             "looping": self.is_looping(),
         }

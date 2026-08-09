@@ -1275,3 +1275,50 @@ class TestTheMapSectionTeachesTheReadableRoute:
             "the compass advice must come after the name advice: reading "
             "angles is the thing the model measurably cannot do"
         )
+
+
+class TestARefusalIsShownWhereTheChoiceIsMade:
+    """Telling the courier that a repeat will be refused did not stop it.
+
+    Measured over 12 shifts: 63 of 128 attempts were the identical call made
+    again immediately, with the prompt already saying that nothing changes
+    between a refusal and the next turn. Prose is the wrong place for it. The
+    fact belongs on the candidate line the courier is choosing from, which is
+    the only text it demonstrably acts on.
+    """
+
+    def test_the_line_carries_the_refusal(self):
+        from embodiedbench.agent.courier.prompts import render_candidates
+
+        rows = [{"street": "Rue de Grenelle", "heading": "east",
+                 "refused": "way_blocked"}]
+        assert "REFUSED ALREADY" in render_candidates(rows)
+
+    def test_memory_keys_a_refusal_to_its_junction(self):
+        from embodiedbench.agent.courier.memory import CourierMemory
+
+        memory = CourierMemory()
+        memory.refused("n1", "Rue de Grenelle", "east", "way_blocked")
+        assert memory.refusal_at("n1", "Rue de Grenelle", "east") == "way_blocked"
+        # Not somewhere else: the same street can be walkable from the next
+        # corner, and marking it everywhere would hide a legal move.
+        assert memory.refusal_at("n2", "Rue de Grenelle", "east") == ""
+
+
+class TestTheMapAdviceCannotBeHalfFollowed:
+    """The first version of this advice caused the failure it was meant to fix.
+
+    It said to read names off the map and take one that also appears in the
+    list. The model did the first half and skipped the second: no_such_street
+    went from 16 to 29 over the same twelve seeds, because only 38% of the
+    names it reads off a map are takeable from where it stands.
+    """
+
+    def test_the_list_is_named_before_the_walk(self):
+        prompt = build_system_prompt(city="Paris",
+                                     tools=available_tools(PARIS_ACTIONS))
+        section = prompt.split("READING THE MAP", 1)[1].lower()
+        assert "also in the list" in section
+        assert "do not type a name off the map that is not in the list" in section
+        # The numbered order has to put finding it in the list before walking.
+        assert section.index("find one of those") < section.index("walk that one")

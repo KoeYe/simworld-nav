@@ -62,17 +62,22 @@ READING THE MAP. It is a picture of the streets around you, north up. On it:
   - a red pin is the address you are heading for;
   - the streets are named on the map, written along each street.
 
-The surest way to use it is by NAME, not by angle. Read the names the blue
-line runs along, take the first of those names that also appears in the list
-of streets leaving this junction, and walk that one. A name is the same word
-in both places, so this needs no judgement about directions at all — and the
-list is the only thing that says which streets you can actually take from
-here.
+The surest way to use it is by NAME, not by angle — but only ever a name that
+is ALSO IN THE LIST above. Do it in this order:
 
-Use the arrow and the compass as a check on that, not instead of it. If no
-name on the line appears in the list yet, then take the street here that runs
-most nearly the way the arrow points, and read the map again from the next
-corner.
+  1. read the names the blue line runs along;
+  2. go down the list of streets leaving this junction and find one of those
+     names in it;
+  3. walk that one, spelling it exactly as THE LIST spells it.
+
+If none of the names on the line is in the list, you have not reached any of
+them yet. Do not type a name off the map that is not in the list: it will be
+refused, the turn is gone and nothing has moved. Take the street in the list
+that runs most nearly the way the arrow points instead, and read the map again
+from the next corner.
+
+Use the arrow and the compass as a check on the name you picked, not instead
+of it.
 
 The route is walked one junction at a time. The line on the map crosses several
 streets; you can only ever take one that leaves the corner you are on. When the
@@ -350,6 +355,11 @@ def render_candidates(rows: list[dict]) -> str:
             # the menu after a refusal is byte-identical to the menu before,
             # and a policy re-picks the barrier -- 52 of 93 times, measured.
             parts.append("(BLOCKED — you tried this and could not get past)")
+        if row.get("refused"):
+            # The strongest place to put a refusal is the line being chosen
+            # from. Told only in prose, it was ignored: the identical call was
+            # made again immediately in 63 of 128 attempts.
+            parts.append(f"(REFUSED ALREADY — {row['refused']})")
         if row.get("seen"):
             parts.append("(you have walked this before)")
         lines.append(" — ".join(parts))
