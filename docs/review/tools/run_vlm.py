@@ -41,6 +41,9 @@ OBSTACLES = Path("/data/murray/paris_obstacles/citycore-paris")
 PAVEMENT_OBSTACLES = Path("/data/murray/paris_obstacles_pavement/citycore-paris")
 
 ENDPOINT = "http://127.0.0.1:8200/v1/chat/completions"
+# The prompt every episode of one run is given. Collected rather than assumed
+# so the artefact records what was actually sent.
+SYSTEM_PROMPT_SEEN: list[str] = []
 # Overridden by --port so two models can be evaluated side by side.
 
 
@@ -114,6 +117,7 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
     env.reset()
     session = CourierSession(env, city="Paris")
     system = session.system_prompt()
+    SYSTEM_PROMPT_SEEN.append(system)
 
     transcript = []
     history: list[dict] = []
@@ -281,6 +285,13 @@ def main() -> int:
         "turns": total,
         "format_error_rate": round(fmt / max(total, 1), 3),
         "rejected_rate": round(rej / max(total, 1), 3),
+        # The prompt the model was actually given, stored with the run. Without
+        # it any report built from this file has to re-render the prompt from
+        # whatever the code says today, and will cheerfully show a reply beside
+        # a prompt its author never saw -- which is what happened the first time
+        # the system prompt changed between a run and its write-up.
+        "system_prompt": SYSTEM_PROMPT_SEEN[0] if SYSTEM_PROMPT_SEEN else "",
+        "system_prompt_chars": len(SYSTEM_PROMPT_SEEN[0]) if SYSTEM_PROMPT_SEEN else 0,
         "runs": runs,
     }
     # An hour of GPU time should not be lost to a missing directory: the first

@@ -236,16 +236,24 @@ def main() -> None:
         print(f"seed {row['seed']}: {len(turns)} turns replayed, "
               f"earned {env.summary().get('earnings')}")
 
-    system = None
-    from embodiedbench.agent.courier.session import CourierSession
-    from embodiedbench.compiler.road_network import build_road_network
-    from embodiedbench.runtime.city.courier_env import CourierEnv
-    paris = build_road_network(
-        REPO / "vendor/vagen/vagen/envs/deliverybench/maps/citycore-paris",
-        map_name="citycore-paris")
-    env = CourierEnv(paris, seed=0, difficulty="solo", stride="block")
-    env.reset()
-    system = CourierSession(env, city="Paris").system_prompt()
+    # The prompt as it was when the run happened, taken from the artefact.
+    # Re-rendering it from today's code would put a reply next to a prompt its
+    # author never saw: the tool menu became a manual between one run and its
+    # write-up, and the report would have shown the model answering 4451
+    # tokens of instructions it was never given.
+    system = data.get("system_prompt")
+    if not system:
+        from embodiedbench.agent.courier.session import CourierSession
+        from embodiedbench.compiler.road_network import build_road_network
+        from embodiedbench.runtime.city.courier_env import CourierEnv
+        paris = build_road_network(
+            REPO / "vendor/vagen/vagen/envs/deliverybench/maps/citycore-paris",
+            map_name="citycore-paris")
+        env = CourierEnv(paris, seed=0, difficulty="solo", stride="block")
+        env.reset()
+        system = CourierSession(env, city="Paris").system_prompt()
+        print("WARNING: this run predates prompt recording; the prompt shown "
+              "is today's, which may not be the one the model answered")
 
     OUT.write_text(TEMPLATE.format(
         system=esc(system), system_chars=len(system),
