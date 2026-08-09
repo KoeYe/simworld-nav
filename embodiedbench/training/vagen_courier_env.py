@@ -369,8 +369,15 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         observation = self._session.observe()
         images, dropped, labels = self._load_images(observation)
         text = observation.text
-        if dropped:
-            text = _replace_photo_caption(text, labels)
+        # Always, not only when something was dropped. This adapter sends the
+        # frames interleaved -- street, its lamp, next street, its lamp -- while
+        # the harness's own caption lists every street view first and then every
+        # lamp. When nothing is dropped the harness text survived and disagreed
+        # with the order of the images beside it: at max_images=5 the second
+        # image is street 1's lamp and the caption calls it the view down
+        # street 2. Latent at max_images=1 and live at this adapter's own
+        # default, which is exactly where raising the image budget would land.
+        text = _replace_photo_caption(text, labels)
         if images:
             text = f"{text}\n\n{' '.join([IMAGE_PLACEHOLDER] * len(images))}"
         obs: dict[str, Any] = {"obs_str": text}

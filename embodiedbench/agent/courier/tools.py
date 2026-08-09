@@ -215,7 +215,7 @@ LOOK = Tool(
     # courier is not standing on, which is the gradient that finds a door when no
     # phone will. So that is all it says now, and the summary promises only that.
     summary=(
-        "Read the door numbers running away down street k, without walking it. "
+        "Read the door numbers running away down a street, without walking it. "
         "The numbers tell you which way they climb."
     ),
     params=(

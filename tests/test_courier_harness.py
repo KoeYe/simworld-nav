@@ -927,7 +927,7 @@ class TestPromptDoesNotLeak:
         Only the [light k] frame tracks the phase, and the courier has to be told
         which of the two pictures it is being scored against."""
         prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
-        assert "[light k]" in prompt
+        assert "[light: street name, bearing]" in prompt
         assert "not any light in the street views" in prompt
 
     def test_the_prompt_states_the_reply_format_unambiguously(self):
@@ -954,14 +954,30 @@ class TestPromptDoesNotLeak:
         26 of 41 moves. None of that is a missing runbook; it is not knowing
         which of them applies.
 
-        The ceiling still binds, and it is not free: at roughly 380 tokens for a
-        640x480 frame, 800 tokens of prompt is two photographs the turn cannot
-        carry. Anything added here has to beat a picture.
+        Raised again, from 2400 to 3000, and the exchange rate is not what it
+        was. The frames were 640x480 at roughly 380 tokens each when this
+        ceiling was set; the harness now serves 320x240 at roughly 80, so the
+        same prompt tokens cost more pictures than they used to and the test
+        should have been retuned when the frames shrank rather than left to
+        drift.
+
+        What the extra 600 buys was measured, not guessed. With the route drawn
+        rather than dictated, nothing in the prompt said how to turn a line on a
+        map into a street at a corner, and 40 held-out episodes produced 130
+        no_such_street refusals and 24 episodes ending stuck -- the model
+        writing the name of a street further along its route, being told that
+        street is not here, and concluding in its own words that "the map must
+        be wrong". The addition states where each fact comes from, that the
+        route is walked one junction at a time, and that a repeated refusal will
+        be refused again.
+
+        The ceiling still binds, and it is not free: anything added here has to
+        beat a picture.
         """
         prompt = build_system_prompt(city="Paris", tools=available_tools(PARIS_ACTIONS))
         # ~4 characters a token for English prose; the exact tokeniser does not
         # matter for a ceiling this loose.
-        assert len(prompt) / 4 < 2400, "system prompt has grown past its budget"
+        assert len(prompt) / 4 < 3000, "system prompt has grown past its budget"
 
     def test_taking_the_phone_away_takes_its_runbook_away_too(self):
         """Guidance that names a tool the environment will refuse is the same

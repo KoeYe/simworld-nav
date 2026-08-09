@@ -104,7 +104,7 @@ DECIDE = Procedure(
         "not turn off onto a different street: leaving the right street is the "
         "most expensive mistake available to you.",
         Step("If you cannot tell which way the numbers run, look(k) reads them "
-             "down street k without walking it, and answers it outright.",
+             "down a street without walking it, and answers it outright.",
              requires=("look",)),
         Step("Not on the slip's street? Then you are travelling: navigate() once, "
              "take the street its first instruction names, and do not ask again "
@@ -121,7 +121,7 @@ FIND_ADDRESS = Procedure(
     when="you know the address but not where it is",
     steps=(
         "navigate() for the route: which street, which turn, how far.",
-        "Match the first instruction to the numbered streets here and take that one.",
+        "Read which way the line leaves you, then take the street here whose bearing is nearest it. The route runs through streets you cannot reach yet; only the ones listed here can be walked.",
         Step("If the route says to stay on that street for several junctions, "
              "follow_street(k, n) does them in one turn.",
              requires=("follow_street",)),
@@ -227,9 +227,9 @@ CROSSINGS = Procedure(
     name="Crossing at a light",
     when="a photograph of a pedestrian light is shown for the street you want",
     steps=(
-        "Read the lamp in the [light k] photograph, not one in a street view.",
+        "Read the lamp in the [light: street, bearing] photograph, not one in a street view.",
         "Red — wait(). One wait sees the phase out, so one is always enough.",
-        "Green, or no [light k] photograph for that street — walk on.",
+        "Green, or no lamp photograph for that street — walk on.",
     ),
     requires=("wait", "walk_to"),
 )

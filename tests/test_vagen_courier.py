@@ -91,7 +91,17 @@ class TestTheObservationContract:
         assert run(env.system_prompt())["obs_str"] == env._session.system_prompt()
         # and the per-turn text, placeholders aside
         obs, _ = env._observation()
-        assert env._session.observe().text in obs["obs_str"]
+        # Everything but the photographs block, which the adapter rewrites to
+        # name the frames it actually sent and in the order it sends them --
+        # interleaved street/lamp, where the harness lists all streets then all
+        # lamps. See TestTrainingSeesTheSameWorldAsEvaluation.
+        import re as _re
+
+        def body(text):
+            return _re.sub(r"### photographs\n.*?(?=\n###|\Z)", "", text,
+                           flags=_re.S).replace(IMAGE_PLACEHOLDER, "").strip()
+
+        assert body(env._session.observe().text) == body(obs["obs_str"])
         run(env.close())
 
     def test_the_image_cap_is_reported_not_hidden(self, config):
