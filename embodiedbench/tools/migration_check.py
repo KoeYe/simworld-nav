@@ -60,7 +60,7 @@ def check(maps: Path, albums: Path) -> tuple[list[str], dict[str, Any]]:
 
     roots = {
         "streets": albums / "paris_streets_v2" / "citycore-paris",
-        "signals": albums / "paris_signals_kerb" / "citycore-paris",
+        "signals": albums / "paris_lamps_real" / "citycore-paris",
         "obstacles": albums / "paris_obstacles" / "citycore-paris",
     }
     for name, root in roots.items():

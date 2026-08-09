@@ -14,7 +14,7 @@ tar -C "$(dirname "$MAPS")" -czf "$OUT/maps.tar.gz" maps
 
 echo "albums (~2 GB) ..."
 tar -C /data/murray -czf "$OUT/albums.tar.gz" \
-    paris_streets_v2 paris_signals_kerb paris_obstacles
+    paris_streets_v2 paris_lamps_real paris_obstacles
 
 echo "measurements and recorded runs ..."
 tar -C /data/murray -czf "$OUT/records.tar.gz" \

@@ -469,12 +469,18 @@ class TestALampTravelsWithItsStreet:
         run(env.reset(0))
         for node in sorted(env._env.signalised):
             env._env.node_id = node
-            frames = env._session.observe().frames
-            if any(f.label.startswith("[light") for f in frames
-                   if f.kind == "photograph" and f.path):
-                return env, env._observation()
+            # Ask the observation, not the frame list. A junction can have a
+            # lamp frame that does not survive ``max_images`` -- the lamp rides
+            # with its street, and if that street is third in a two-street turn
+            # both are dropped. Checking the raw frames found such a junction
+            # and handed back a turn with no lamp caption in it at all, which
+            # read as a pairing bug in the tests below rather than as this
+            # helper picking the wrong junction.
+            obs = env._observation()
+            if any(line.startswith("[light:") for line in self._caption(obs[0])):
+                return env, obs
         run(env.close())
-        pytest.skip("no signalised junction with a visible lamp in this bake")
+        pytest.skip("no signalised junction whose lamp survives this image budget")
 
     def _caption(self, obs):
         import re  # noqa: F811 - the module-level import is inside another test
@@ -577,6 +583,24 @@ class TestTrainingSeesTheSameWorldAsEvaluation:
         narrow = small._env.visible_signals
         wide = big._env.visible_signals
         assert narrow <= wide
-        assert len(narrow) < len(wide), "320 px should cost some approaches"
+
+        # It used to assert that 320 px *costs* approaches, which was true of
+        # the kerb album: its camera looked down the street, the lamp was 43
+        # model pixels, and 34 of 130 approaches fell under the floor. The
+        # lamps read out of the scene are framed from 2.5 to 7 m away and
+        # centred, so they survive the downscale and none are lost. Asserting
+        # the old album's loss would be asserting the old album's defect.
+        #
+        # What must hold is that the gate is wired and monotone: shrink the
+        # frame far enough and it has to bite, or the field it reads is being
+        # ignored -- which is exactly what happened when the new sidecar was
+        # first written without lamp_px.
+        tiny = CourierGymEnv({**config, "image_max_side": 24})
+        run(tiny.reset(0))
+        assert tiny._env.visible_signals < wide, (
+            "the resolution gate reads lamp_px; if nothing is lost at 24 px "
+            "the album is not reporting lamp sizes and the gate is inert"
+        )
+        run(tiny.close())
         run(small.close())
         run(big.close())

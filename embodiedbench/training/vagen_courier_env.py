@@ -134,7 +134,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         self.pavement_album_root = _album(
             "pavement_album_root", f"/data/murray/paris_streets_pavement/{name}")
         self.signal_album_root = _album(
-            "signal_album_root", f"/data/murray/paris_signals_kerb/{name}")
+            "signal_album_root", f"/data/murray/paris_lamps_real/{name}")
         self.obstacle_album_root = _album(
             "obstacle_album_root", f"/data/murray/paris_obstacles/{name}")
         self.pavement_obstacle_album_root = _album(

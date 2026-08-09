@@ -31,7 +31,12 @@ sys.path.insert(0, str(REPO))
 MAPS = REPO / "vendor/vagen/vagen/envs/deliverybench/maps/citycore-paris"
 STREETS = Path("/data/murray/paris_streets_v2/citycore-paris")
 PAVEMENT = Path("/data/murray/paris_streets_pavement/citycore-paris")
-SIGNALS = Path("/data/murray/paris_signals_kerb/citycore-paris")
+# The lamps read out of the scene and verified frame by frame, replacing the
+# kerb bake. That album derived its signalised junctions from node degree and
+# was right about 34 of the 105 it charged; this one has 49 crossings, each of
+# which was rendered in both phases and measured at served size before being
+# listed.
+SIGNALS = Path("/data/murray/paris_lamps_real/citycore-paris")
 OBSTACLES = Path("/data/murray/paris_obstacles/citycore-paris")
 PAVEMENT_OBSTACLES = Path("/data/murray/paris_obstacles_pavement/citycore-paris")
 

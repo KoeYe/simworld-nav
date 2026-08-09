@@ -31,6 +31,9 @@ FOV_DEG = 40.0
 # The harness serves frames at this width; legibility is judged there, not at
 # render size, because that is what the model is given.
 SERVED_LONG_EDGE = 320
+# What the frames were rendered at, which is the frame ``lamp_px`` is expressed
+# in so the runtime can scale it to whatever it serves.
+RENDER_LONG_EDGE = 1280
 # Half the lit aperture, in centimetres, measured off the rendered lamps. The
 # check looks at this and nothing else: a sign on the same pole is outside it.
 LENS_HALF_W_CM = 12.0
@@ -206,6 +209,25 @@ def verified_sidecar(sidecar: dict, rows: list[dict]) -> dict:
     """
     keep = {row["key"] for row in rows if row["pass"]}
     dropped = {row["key"]: row["why"] for row in rows if not row["pass"]}
+    # The lit area of each lamp at render size, as [pixels, width, height], so
+    # the runtime can re-decide legibility for whatever size it actually
+    # serves. Area falls with the square of the resize, so a lamp checked at
+    # 320 px can be under a 2x2 patch at 160. Without this the runtime's
+    # resolution gate has nothing to read and silently passes everything --
+    # which is what the previous sidecar's absence of the field did.
+    lamp_px = {}
+    for row in rows:
+        if not row["pass"]:
+            continue
+        box = row["red"]["box_px"]
+        served = row["red"]["served_size"]
+        # Back out to render size: the box was measured on the served frame.
+        factor = RENDER_LONG_EDGE / max(served)
+        lamp_px[row["key"]] = [
+            round(box[0] * factor * box[1] * factor),
+            RENDER_LONG_EDGE,
+            round(RENDER_LONG_EDGE * min(served) / max(served)),
+        ]
     return {
         **sidecar,
         "method": sidecar["method"] + (
@@ -219,6 +241,7 @@ def verified_sidecar(sidecar: dict, rows: list[dict]) -> dict:
         "legible": sorted(keep),
         "legible_count": len(keep),
         "lamp_pose": {k: v for k, v in sidecar["lamp_pose"].items() if k in keep},
+        "lamp_px": lamp_px,
         "rejected": dropped,
     }
 
