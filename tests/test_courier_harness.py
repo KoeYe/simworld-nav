@@ -1424,3 +1424,75 @@ class TestNoSettingContradictsItself:
                                      narration="all")
         assert "RED" in prompt and "wait()" in prompt
         assert "BLOCKED" in prompt
+
+
+class TestTheMapPointsTheRightWay:
+    """Orientation is the one thing on this map that must never be wrong.
+
+    Two conventions meet here and they have different zeros: screen angles
+    measure from east with y growing downwards, while the banner's arrow glyph
+    is drawn pointing north. Comparing one against the other shows a constant
+    90 degree error that is not an error, which is exactly the trap a check
+    written by eye falls into. Each is tested against the geometry it is
+    supposed to represent, not against the other.
+    """
+
+    HEADING_ON_SCREEN = {"north": -90, "north-east": -45, "east": 0,
+                         "south-east": 45, "south": 90, "south-west": 135,
+                         "west": 180, "north-west": -135}
+
+    def _first_leg(self, env):
+        from embodiedbench.runtime.city.courier_env import (
+            bearing_deg, compass_of)
+
+        order = next((o for o in env.orders if o.live), None)
+        route = env.route_nodes(env.node_id, order.pickup.kerb_node) or []
+        if len(route) < 2:
+            return None
+        return compass_of(bearing_deg(env.position(),
+                                      env.position(route[1])))
+
+    def test_the_position_marker_faces_the_way_the_route_goes(self, paris):
+        import re
+
+        for seed in range(8):
+            env = CourierEnv(paris, seed=seed, order_count=1,
+                             difficulty="solo", stride="block")
+            env.reset()
+            word = self._first_leg(env)
+            if word is None:
+                continue
+            svg = env.map_drawing().svg
+            match = re.search(
+                r'class="puck"[^>]*/><g transform="translate\([^)]*\) '
+                r'rotate\((-?[\d.]+)\)', svg)
+            assert match, f"seed {seed}: no heading chevron on the marker"
+            drawn = float(match.group(1))
+            want = self.HEADING_ON_SCREEN[word]
+            gap = abs((drawn - want + 180) % 360 - 180)
+            assert gap <= 30, (
+                f"seed {seed}: route leaves {word} (screen {want}) but the "
+                f"marker points {drawn}"
+            )
+
+    def test_the_banner_names_the_direction_it_draws(self, paris):
+        import re
+
+        for seed in range(8):
+            env = CourierEnv(paris, seed=seed, order_count=1,
+                             difficulty="solo", stride="block")
+            env.reset()
+            word = self._first_leg(env)
+            if word is None:
+                continue
+            svg = env.map_drawing().svg
+            assert f"head {word}" in svg, f"seed {seed}: banner omits {word}"
+            # The glyph is drawn pointing north, so its rotation is the
+            # compass bearing itself rather than a screen angle.
+            north_up = {"north": 0, "north-east": 45, "east": 90,
+                        "south-east": 135, "south": 180, "south-west": 225,
+                        "west": 270, "north-west": 315}[word]
+            assert f"rotate({north_up})" in svg, (
+                f"seed {seed}: banner says {word} but its arrow does not turn "
+                f"to {north_up}"
+            )

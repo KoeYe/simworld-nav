@@ -2670,7 +2670,19 @@ class CourierEnv:
         """
         route: list[tuple[float, float]] = []
         if target is None:
-            target, route = self.screen_target, list(self.screen_route)
+            # Re-snapped to where the courier is standing, the way a navigation
+            # app does every second. It used to redraw the route exactly as it
+            # was when navigate() was last called, so the line stayed put while
+            # the courier walked along it -- harmless while the picture was
+            # only a line, and wrong the moment a banner started naming the
+            # next street off it: after one step it named the street behind.
+            target = self.screen_target
+            if target is not None and target.kerb_node:
+                path = self.route_nodes(self.node_id, target.kerb_node) or []
+                route = [self.position(node) for node in path]
+                self.screen_route = list(route)
+            else:
+                route = list(self.screen_route)
         elif target.kerb_node:
             path = self.route_nodes(self.node_id, target.kerb_node) or []
             route = [self.position(node) for node in path]
@@ -2688,6 +2700,8 @@ class CourierEnv:
             # hardest thing on the screen; measured here, a model reads a
             # street name off this map 100% of the time and a direction 25%.
             next_street=self._next_route_street(route),
+            next_heading=(compass_of(bearing_deg(self.position(), route[1]))
+                          if len(route) > 1 else ""),
         )
 
     def _next_route_street(self, route: list[tuple[float, float]]) -> str:

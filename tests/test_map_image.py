@@ -264,3 +264,49 @@ class TestTheMapReachesTheCourier:
                          condition=Condition.NO_PHONE)
         env.reset()
         assert "navigate" not in env.allowed_tool_names()
+
+
+class TestTheCourierIsAlwaysOnTheScreen:
+    """The one thing this picture must always show is where you are.
+
+    Framing on the route alone put the marker above the top edge whenever the
+    route ran that way, so on 13 frames in 100 the courier was off screen or
+    hidden under the instruction banner. The first fix moved it the wrong way:
+    screen y runs opposite to map x, so pushing the marker down the screen
+    raises the window's x centre rather than lowering it.
+    """
+
+    def test_the_marker_clears_the_banner_and_the_edges(self):
+        from pathlib import Path
+
+        from embodiedbench.compiler.road_network import build_road_network
+        from embodiedbench.runtime.city.courier_env import CourierEnv
+        from embodiedbench.runtime.city.map_image import (
+            BAR_H, HEIGHT_PX, WIDTH_PX)
+
+        maps = (Path(__file__).resolve().parents[1] / "vendor" / "vagen"
+                / "vagen" / "envs" / "deliverybench" / "maps" / "citycore-paris")
+        if not maps.exists():
+            pytest.skip("maps not mounted")
+        network = build_road_network(maps, map_name="citycore-paris")
+        for seed in range(6):
+            env = CourierEnv(network, seed=seed, order_count=1,
+                             difficulty="solo", stride="block")
+            env.reset()
+            order = next((o for o in env.orders if o.live), None)
+            if order is None:
+                continue
+            env.navigate(order.pickup.text)
+            for _ in range(4):
+                view = env.map_drawing().view
+                x, y = view.to_px(env.position())
+                assert 40 < x < WIDTH_PX - 40, f"seed {seed}: marker off the side"
+                assert BAR_H + 30 < y < HEIGHT_PX - 60, (
+                    f"seed {seed}: marker at y={y:.0f} is under the banner or "
+                    f"off the foot"
+                )
+                rows = env.candidates()
+                if not rows:
+                    break
+                env.walk_to(rows[0]["street"],
+                            rows[0].get("reach_heading") or rows[0]["heading"])

@@ -35,7 +35,10 @@ MIN_SPAN_CM = 12000.0     # never zoom in past ~120 m across: context matters
 MAX_SPAN_CM = 90000.0     # never zoom out past ~900 m: the line must stay readable
 # Drawing size. 4:3 to match the photographs, so a model resizing both sees them
 # at the same scale.
-WIDTH_PX, HEIGHT_PX = 720, 540
+# Portrait, because it is a phone. It was 4:3 landscape to match the
+# photographs, which made the two the same shape and neither the shape
+# either thing really is.
+WIDTH_PX, HEIGHT_PX = 560, 940
 # Streets near the route are drawn; the rest of the city is not, or a dense map
 # reads as noise. Measured in multiples of the framed span.
 CONTEXT_PAD = 0.25
@@ -116,8 +119,50 @@ def frame_view(points: Iterable[tuple[float, float]], *,
     span = max(MIN_SPAN_CM, min(MAX_SPAN_CM, span * (1.0 + 2 * MARGIN_FRACTION)))
     half_y = span / 2.0
     half_x = span / 2.0 * height_px / width_px
+    # The clamp above bounds one axis; on a portrait frame the other is longer
+    # by the aspect ratio and slipped past it, so a long route zoomed out to
+    # 151 km across against a 90 km cap. Bound whichever axis ends up longer.
+    widest = 2.0 * max(half_x, half_y)
+    if widest > MAX_SPAN_CM:
+        shrink = MAX_SPAN_CM / widest
+        half_x, half_y = half_x * shrink, half_y * shrink
+    narrowest = 2.0 * min(half_x, half_y)
+    if narrowest < MIN_SPAN_CM:
+        grow = MIN_SPAN_CM / narrowest
+        half_x, half_y = half_x * grow, half_y * grow
     return MapView(centre_x - half_x, centre_y - half_y,
                    centre_x + half_x, centre_y + half_y, width_px, height_px)
+
+
+def _keep_marker_visible(view: MapView, here: tuple[float, float],
+                         width_px: int, height_px: int) -> MapView:
+    """Slide the window until the courier sits clear of the banner and edges."""
+    top, bottom = BAR_H + 70.0, height_px - 90.0
+    side = 70.0
+    for _ in range(4):
+        x, y = view.to_px(here)
+        scale = view.scale_px_per_cm()
+        shift_x = shift_y = 0.0
+        # Screen y runs opposite to map x -- y_screen = H/2 - (x - cx)*scale --
+        # so pushing the marker down the screen means raising the window's x
+        # centre, not lowering it. The sign was the other way and the fix moved
+        # thirteen frames in a hundred further off the edge.
+        if y < top:
+            shift_y = (top - y) / scale
+        elif y > bottom:
+            shift_y = (bottom - y) / scale
+        if x < side:
+            shift_x = (x - side) / scale
+        elif x > width_px - side:
+            shift_x = (x - (width_px - side)) / scale
+        if not shift_x and not shift_y:
+            break
+        # y on screen decreases as map x grows, so a downward shift of the
+        # marker is a decrease of the window's x centre.
+        view = MapView(view.min_x + shift_y, view.min_y + shift_x,
+                       view.max_x + shift_y, view.max_y + shift_x,
+                       width_px, height_px)
+    return view
 
 
 @dataclass
@@ -162,7 +207,7 @@ def _halo_text(x: float, y: float, text: str, cls: str = "ui",
             f'<text class="{cls}" {common}>{body}</text>')
 
 
-BAR_H = 76.0
+BAR_H = 96.0
 
 
 def _text_box(x: float, y: float, half_w: float, half_h: float,
@@ -186,7 +231,11 @@ def _crosses_route(box, route_px) -> bool:
         for i in range(steps + 1):
             t = i / steps
             px, py = ax + (bx - ax) * t, ay + (by - ay) * t
-            if box[0] - 6 < px < box[2] + 6 and box[1] - 6 < py < box[3] + 6:
+            # Wider than the route's own stroke. At 6 px a label could sit
+            # eight pixels off the centreline, pass the test, and still have
+            # its halo -- a 7 px stroke in the background colour -- eat a bite
+            # out of an 11 px line. The route came out broken.
+            if box[0] - 16 < px < box[2] + 16 and box[1] - 16 < py < box[3] + 16:
                 return True
     return False
 
@@ -207,8 +256,8 @@ def _edge_safe_text(x: float, y: float, text: str, width_px: float) -> str:
     anchor: hard against the left margin near the left edge, against the right
     near the right, centred in between.
     """
-    half = len(text) * 9.5 / 2.0
-    margin = 12.0
+    half = len(text) * 10.5 / 2.0
+    margin = 14.0
     if x - half < margin:
         return _halo_text(margin, y, text, anchor="start")
     if x + half > width_px - margin:
@@ -247,6 +296,7 @@ def render_map(
     destination_label: str = "",
     here_label: str = "you are here",
     next_street: str = "",
+    next_heading: str = "",
     blocked: list[tuple[tuple[float, float], tuple[float, float]]] | None = None,
     width_px: int = WIDTH_PX,
     height_px: int = HEIGHT_PX,
@@ -267,6 +317,11 @@ def render_map(
     if destination is not None:
         interest.append(destination)
     view = frame_view(interest, width_px=width_px, height_px=height_px)
+    # The courier must be on the screen, and not under the banner. Framing on
+    # the route alone put the marker above the top edge whenever the route ran
+    # off that way, so the one thing the picture must always show -- where you
+    # are -- was the thing missing from it.
+    view = _keep_marker_visible(view, here, width_px, height_px)
     pad = view.span_cm * CONTEXT_PAD
 
     parts: list[str] = [
@@ -293,9 +348,9 @@ def render_map(
         '.halo{stroke:#141d29;stroke-width:7;stroke-linejoin:round;fill:none}'
         '.go{fill:#4c9bff;stroke:#0d1720;stroke-width:3;stroke-linejoin:round}'
         # The instruction banner, and the bar that carries the distance.
-        '.band{fill:#12603f}'
-        '.bandtext{font:700 30px ui-sans-serif,sans-serif;fill:#ffffff}'
-        '.bandsub{font:600 20px ui-sans-serif,sans-serif;fill:#a9e2c6}'
+        '.band{fill:#0f7a4a;stroke:#4fd39a;stroke-width:3}'
+        '.bandtext{font:800 38px ui-sans-serif,sans-serif;fill:#ffffff}'
+        '.bandsub{font:700 23px ui-sans-serif,sans-serif;fill:#bff0d8}'
         '.bar{fill:#0d1720}'
         '.bartext{font:700 26px ui-sans-serif,sans-serif;fill:#ffffff}'
         '.barsub{font:500 19px ui-sans-serif,sans-serif;fill:#8fa4bd}'
@@ -405,6 +460,7 @@ def render_map(
 
     # ── the route ────────────────────────────────────────────────────────────
     metres = 0.0
+    route_svg = ""
     first_leg_px: tuple[float, float] | None = None
     if len(route) >= 2:
         metres = sum(math.dist(a, b) for a, b in zip(route, route[1:])) / 100.0
@@ -414,8 +470,13 @@ def render_map(
         first_leg_px = (pixels[1][0] - pixels[0][0], pixels[1][1] - pixels[0][1])
         path = " ".join(f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}"
                         for i, (x, y) in enumerate(pixels))
-        parts.append(f'<path class="rtc" d="{path}"/>')
-        parts.append(f'<path class="rt" d="{path}"/>')
+        # Held back and appended after the street names below. Drawn before
+        # them, a halo could bite through it; the route is the one mark on
+        # this picture that nothing is allowed to interrupt.
+        route_svg = (f'<path class="rtc" d="{path}"/>'
+                     f'<path class="rt" d="{path}"/>')
+
+    parts.append(route_svg)
 
     # ── the destination ──────────────────────────────────────────────────────
     if destination is not None:
@@ -468,34 +529,15 @@ def render_map(
         f'<circle class="puck" cx="{x:.1f}" cy="{y:.1f}" r="19"/>'
         f'<g transform="translate({x:.1f},{y:.1f}) rotate({heading:.1f})">'
         f'<path d="M12,0 L-7,-9 L-3,0 L-7,9 Z" fill="#ffffff"/></g>')
-    label_offset = 22.0
-    if first_leg_px is not None:
-        dx, dy = first_leg_px
-        length = math.hypot(dx, dy)
-        if length > 1e-6:
-            angle = math.degrees(math.atan2(dy, dx))
-            # Sized against the frame, not in fixed pixels. The map is drawn
-            # 720 wide and served at 320, so a 34 px arrow arrives as 15 px --
-            # present, and no more readable than the polyline it replaced. At
-            # an eighth of the frame it arrives at about 40 px, which is the
-            # scale the control arrow was read at.
-            # Started clear of the puck rather than from its centre, so the
-            # marker and the direction are two marks rather than one blob.
-            start = 20.0
-            reach = start + width_px * 0.125
-            head = (reach - start) * 0.42
-            half = (reach - start) * 0.13
-            flare = (reach - start) * 0.32
-            parts.append(
-                f'<g transform="translate({x:.1f},{y:.1f}) rotate({angle:.1f})">'
-                f'<path class="go" d="M{start:.1f},{-half:.1f} '
-                f'L{reach - head:.1f},{-half:.1f} '
-                f'L{reach - head:.1f},{-flare:.1f} L{reach:.1f},0 '
-                f'L{reach - head:.1f},{flare:.1f} L{reach - head:.1f},{half:.1f} '
-                f'L{start:.1f},{half:.1f} Z"/></g>')
-            # Keep the caption off the arrow: below it when the arrow runs
-            # across or downwards, above it when the arrow points down the page.
-            label_offset = -24.0 if dy > 0 else 30.0
+    # A single direction mark. There used to be a second one -- a large arrow
+    # beside the puck along the same bearing -- and two arrows saying the same
+    # thing at slightly different sizes read as two different claims. The
+    # reference this is drawn from has one: the puck, with a chevron in it.
+    label_offset = 30.0
+    if first_leg_px is not None and first_leg_px[1] > 0:
+        # Caption above the marker when the route heads down the page, so the
+        # words never sit on the way ahead.
+        label_offset = -30.0
     if here_label:
         # Offset clear of the marker, because the street name it sits on is
         # drawn along the street and the two collided.
@@ -530,13 +572,21 @@ def render_map(
     if next_street:
         parts.append(f'<rect class="band" x="10" y="10" rx="12" '
                      f'width="{width_px - 20}" height="{BAR_H}"/>')
+        # The glyph turns with the instruction. It was a fixed up-arrow over
+        # the words "head down", which is a phrase about the page rather than
+        # about the city and was the same on every frame whichever way the
+        # route went.
+        turn = {"north": 0, "north-east": 45, "east": 90, "south-east": 135,
+                "south": 180, "south-west": 225, "west": 270,
+                "north-west": 315}.get(next_heading, 0)
         parts.append(
-            f'<g transform="translate(44,{10 + BAR_H / 2})">'
-            f'<path d="M0,-18 L13,2 L5,2 L5,18 L-5,18 L-5,2 L-13,2 Z" '
+            f'<g transform="translate(52,{10 + BAR_H / 2}) rotate({turn})">'
+            f'<path d="M0,-24 L17,3 L7,3 L7,24 L-7,24 L-7,3 L-17,3 Z" '
             f'fill="#ffffff"/></g>')
-        parts.append(f'<text class="bandsub" x="72" y="{10 + BAR_H / 2 - 6}">'
-                     f'head down</text>')
-        parts.append(f'<text class="bandtext" x="72" y="{10 + BAR_H / 2 + 22}">'
+        said = f"head {next_heading}" if next_heading else "take"
+        parts.append(f'<text class="bandsub" x="76" y="{10 + BAR_H / 2 - 6}">'
+                     f'{_esc(said)} on</text>')
+        parts.append(f'<text class="bandtext" x="76" y="{10 + BAR_H / 2 + 22}">'
                      f'{_esc(next_street)}</text>')
     # The distance, on a bar of its own at the foot, as an app does.
     foot = 46.0
