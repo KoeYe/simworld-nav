@@ -207,7 +207,7 @@ def _halo_text(x: float, y: float, text: str, cls: str = "ui",
             f'<text class="{cls}" {common}>{body}</text>')
 
 
-BAR_H = 104.0
+BAR_H = 126.0
 
 
 def _text_box(x: float, y: float, half_w: float, half_h: float,
