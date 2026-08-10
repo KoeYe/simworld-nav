@@ -65,7 +65,7 @@ from typing import Any, Coroutine
 
 from embodiedbench.training.vagen_courier_env import CourierGymEnv
 
-from .pool import RenderPool
+from .pool import RenderPool, shared_pool
 
 
 class LiveCourierGymEnv(CourierGymEnv):
@@ -155,7 +155,9 @@ class LiveCourierGymEnv(CourierGymEnv):
         objects before rollout starts, and the endpoints file is written by
         the fleet, which may still be launching at that moment."""
         if self._render_pool is None:
-            self._render_pool = RenderPool(self.ue_endpoints)
+            # Shared per endpoints file: exclusive Track B leases only
+            # serialize if every env in this process consults one pool.
+            self._render_pool = shared_pool(self.ue_endpoints)
         return self._render_pool
 
     # ── the async boundary ───────────────────────────────────────────────────
@@ -365,7 +367,9 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         """Lazy for the same reason as the live adapter: the endpoints file
         is written by the fleet, which may still be launching."""
         if self._render_pool is None:
-            self._render_pool = RenderPool(self.ue_endpoints)
+            # Shared per endpoints file: exclusive Track B leases only
+            # serialize if every env in this process consults one pool.
+            self._render_pool = shared_pool(self.ue_endpoints)
         return self._render_pool
 
     # ── the async boundary (same offload as LiveCourierGymEnv) ───────────────

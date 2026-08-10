@@ -62,6 +62,7 @@ from __future__ import annotations
 
 import logging
 import math
+import time
 from pathlib import Path
 from typing import Any
 
@@ -146,6 +147,8 @@ class EmbodiedCourierEnv(CourierEnv):
         self.max_walk_seconds = float(max_walk_seconds)
         self.tick_chunk = int(tick_chunk)
         self.return_mode = return_mode
+        #: How long reset() waits for a busy instance before giving up.
+        self.episode_busy_timeout_s = 600.0
         # Lease plumbing: a pool is leased lazily (the fleet may still be
         # launching when the env object is built); a bare client is used as
         # given and never "released".
@@ -197,7 +200,7 @@ class EmbodiedCourierEnv(CourierEnv):
         self.embodied_log = []
         self.live_degraded = False
         node = self.network.nodes[self.node_id]
-        response = self._ue().episode(EpisodeRequest(
+        request = EpisodeRequest(
             episode_id=self.episode_id,
             map_name=self.network.map_name,
             agent=AgentSpec(
@@ -211,10 +214,34 @@ class EmbodiedCourierEnv(CourierEnv):
             # the pawn agree from the first frame.
             spawn=Pose(x_cm=node.x_cm, y_cm=node.y_cm,
                        z_cm=self.spawn_z_cm, yaw_deg=0.0),
-        ))
+        )
+        response = self._episode_when_free(request)
         self.fixed_dt = response.fixed_dt
         self.ue_pose = response.pose
         self._episode_open = True
+
+    def _episode_when_free(self, request: EpisodeRequest) -> Any:
+        """Open the episode, waiting out a busy instance.
+
+        ``busy`` is transient by contract (spec §3): another episode still
+        holds this instance. Leases serialize episodes inside one process,
+        but a trainer with several worker processes holds several lease
+        views -- ds-serv6 measured exactly that, four concurrent GRPO
+        episodes against one Paris instance, and ServiceBusy ended the run
+        at the first rollout. Wait our turn instead.
+        """
+        deadline = time.monotonic() + self.episode_busy_timeout_s
+        delay = 1.0
+        while True:
+            try:
+                return self._ue().episode(request)
+            except ServiceBusy:
+                if time.monotonic() >= deadline:
+                    raise
+                logger.info("instance busy for episode %s; retrying in %.0fs",
+                            self.episode_id, delay)
+                time.sleep(delay)
+                delay = min(delay * 1.5, 15.0)
 
     def close(self) -> None:
         """End the embodied episode and give the instance back.

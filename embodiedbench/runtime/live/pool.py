@@ -34,6 +34,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -102,6 +103,30 @@ class _Member:
                 "leased_to": self.leased_to}
 
 
+_SHARED_POOLS: dict[str, "RenderPool"] = {}
+_SHARED_LOCK = threading.Lock()
+
+
+def shared_pool(endpoints_path: str | Path | None = None, **kwargs: Any) -> "RenderPool":
+    """One pool per endpoints file per process.
+
+    Track B leases are exclusive per instance, and the bookkeeping that makes
+    them exclusive lives in the pool object. A trainer that builds a fresh
+    pool per environment therefore has as many private views of the fleet as
+    it has environments, and two of them will hand the same instance to two
+    episodes -- which the service answers with 503 busy. Measured on ds-serv6:
+    four concurrent GRPO episodes, one Paris instance, ServiceBusy killed the
+    run at the first rollout.
+    """
+    key = str(endpoints_path or os.environ.get(ENDPOINTS_ENV) or "")
+    with _SHARED_LOCK:
+        pool = _SHARED_POOLS.get(key)
+        if pool is None:
+            pool = RenderPool(endpoints_path, **kwargs)
+            _SHARED_POOLS[key] = pool
+        return pool
+
+
 class RenderPool:
     """Loads endpoints.json, dispatches batches, quarantines the dying."""
 
@@ -119,6 +144,10 @@ class RenderPool:
         #: more concurrent episodes than instances parks here by design.
         self.lease_timeout_s = float(lease_timeout_s)
         self.lease_poll_s = float(lease_poll_s)
+        #: Leases are handed out from several env threads in one trainer
+        #: process; pick-and-mark must be atomic or two episodes take the
+        #: same instance and the second meets 503 busy.
+        self._lease_lock = threading.Lock()
         raw = endpoints_path or os.environ.get(ENDPOINTS_ENV)
         if not raw:
             raise EndpointsError(
@@ -255,12 +284,18 @@ class RenderPool:
         """
         deadline = time.monotonic() + self.lease_timeout_s
         while True:
-            member = self._pick(set())
+            with self._lease_lock:
+                member = self._pick(set())
+                if member is not None:
+                    member.leased_to = episode_id
             if member is None:
                 # Same last resort as render: probe the quarantined before
                 # declaring the fleet dead.
-                self._readmit_one(set())
-                member = self._pick(set())
+                with self._lease_lock:
+                    self._readmit_one(set())
+                    member = self._pick(set())
+                    if member is not None:
+                        member.leased_to = episode_id
             if member is not None:
                 break
             leased = sum(m.leased_to is not None for m in self.members)
@@ -276,7 +311,6 @@ class RenderPool:
                     f"{sum(m.quarantined for m in self.members)} quarantined, "
                     f"{leased} leased)")
             time.sleep(self.lease_poll_s)
-        member.leased_to = episode_id
         try:
             yield member.client
         finally:
