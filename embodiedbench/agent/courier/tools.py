@@ -323,7 +323,7 @@ LOOK = Tool(
         "outright, and it answers it for the price of one turn instead of a "
         "walk in the wrong direction"
     ),
-    not_for="seeing a red light or a barrier -- those are in the photographs",
+    not_for="seeing a red light or a barrier",
 )
 
 # ``read_sign`` was here, and it is gone. It answered "The sign says Quai

@@ -247,9 +247,25 @@ PROCEDURES: tuple[Procedure, ...] = (
 )
 
 
+# Runbooks whose steps are about reading a photograph. Under narration="all"
+# the same facts arrive in the text, so these would send the courier looking
+# for something it has already been told -- the prompt telling it twice, in
+# two places, to do two different things.
+PHOTOGRAPH_KEYED = ("When the way is shut", "Crossing at a light")
+
+NARRATED_HAZARDS = """  Crossing at a light — the street's line says the pedestrian light is RED
+    1. wait(). One wait sees the phase out, so one is always enough.
+    2. When no colour is stated for a street, there is no light on it: walk on.
+  When the way is shut — the street's line says BLOCKED
+    1. That street cannot be walked at all. Do not try it to make sure.
+    2. Take another street; the route marker will move to whichever way is
+       open, so there is always something to follow."""
+
+
 def render_procedures(
     procedures: tuple[Procedure, ...] = PROCEDURES,
     available: set[str] | None = None,
+    narration: str = "none",
 ) -> str:
     """Render only the runbooks whose tools this environment can execute."""
     chosen = [
@@ -259,6 +275,10 @@ def render_procedures(
             and not any(tool in available for tool in p.excluded_by)
         )
     ]
+    if narration == "all":
+        chosen = [p for p in chosen if p.name not in PHOTOGRAPH_KEYED]
+        return "\n".join([p.render(available) for p in chosen]
+                         + [NARRATED_HAZARDS])
     return "\n".join(p.render(available) for p in chosen)
 
 

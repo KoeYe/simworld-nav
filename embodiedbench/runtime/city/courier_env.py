@@ -979,6 +979,20 @@ class CourierEnv:
                 readable.add(key)
         return readable
 
+    def _blocked_along(self, row: dict[str, Any]) -> bool:
+        """Is anything shut on the stretch this call would actually walk?
+
+        At block stride ``walk_to`` runs the whole block, so asking only about
+        the first 18 m of it says "clear" and then stops at a barrier six
+        junctions along -- 3.4% of rows did exactly that. The narrated setting
+        has no photograph to catch it, so the sentence has to cover the same
+        ground the call does.
+        """
+        if self.stride != Stride.BLOCK:
+            return self.obstacles.blocks(self.node_id, row["node"])
+        return any(self.obstacles.blocks(a, b)
+                   for a, b in self.block_chain(self.node_id, row["node"]))
+
     def _is_route_step(self, toward: str) -> bool:
         """Is walking to ``toward`` the next step of the shortest route?
 
@@ -989,8 +1003,18 @@ class CourierEnv:
         order = next((o for o in self.orders if o.live), None)
         if order is None:
             return False
-        target = (order.dropoff if order.picked_up else order.pickup).nearest_node
-        route = self.route_nodes(self.node_id, target)
+        # kerb_node, not nearest_node. Everything else that decides where a
+        # stop *is* -- the drawn map, collect, hand_over, arrival, the optimal
+        # route -- uses the kerb. They differ on 14% of addresses and by more
+        # than the arrival tolerance on most of those, so a marker aimed at the
+        # nearest node vanishes at a junction where hand_over still refuses,
+        # leaving the courier on the doorstep with nothing left to read.
+        target = (order.dropoff if order.picked_up else order.pickup).kerb_node
+        # Obstacle-aware, deliberately unlike the drawn route. Under narration
+        # the words are the only source of direction, so they must never point
+        # through a barrier; the map is allowed to, because the photograph is
+        # there to contradict it.
+        route = self.route_nodes(self.node_id, target, obstacles=True)
         return bool(route and len(route) > 1 and route[1] == toward)
 
     def signal_is_visible(self, node_id: str, toward: str) -> bool:
@@ -1426,7 +1450,8 @@ class CourierEnv:
                     heapq.heappush(queue, (step, neighbour))
         return None
 
-    def route_nodes(self, start: str, goal: str) -> list[str] | None:
+    def route_nodes(self, start: str, goal: str, *,
+                    obstacles: bool = False) -> list[str] | None:
         """The shortest walk from ``start`` to ``goal``, as the nodes along it.
 
         Same search as ``route_length_cm``, keeping the predecessors. Privileged
@@ -1457,6 +1482,13 @@ class CourierEnv:
             seen.add(node)
             here = self.position(node)
             for neighbour in self.network.nodes[node].neighbours:
+                if obstacles and self.obstacles.blocks(node, neighbour):
+                    # A route that walks through a barrier is not a route. The
+                    # drawn map may show one -- a map has never seen the skip --
+                    # but a route stated in words has no picture to correct it,
+                    # so the courier would be told to walk into a wall and told
+                    # nothing else.
+                    continue
                 if neighbour in seen:
                     continue
                 step = cost + math.dist(here, self.position(neighbour))
@@ -1640,7 +1672,7 @@ class CourierEnv:
                 # be enough on its own, or the setting measures nothing.
                 row["on_route"] = self._is_route_step(row["node"])
             if self.narration == "all":
-                row["told_blocked"] = self.obstacles.blocks(self.node_id, row["node"])
+                row["told_blocked"] = self._blocked_along(row)
                 row["told_signal"] = (
                     signal_state(self.node_id, row["bearing"], self.sim_seconds)
                     if (self.enforce_signals and self.node_id in self.signalised

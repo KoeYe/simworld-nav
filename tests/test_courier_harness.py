@@ -1379,3 +1379,48 @@ class TestTheThreeVisionSettings:
                                     with_images=False).system_prompt()
             assert must in prompt, narration
             assert must_not not in prompt, narration
+
+
+class TestNoSettingContradictsItself:
+    """Swapping one paragraph is not enough, and the first guard missed it.
+
+    The narrated prompt said "you are not required to read anything out of
+    them" and then told the courier six more times, in the steps, the hazard
+    rules, the tool manual and two whole runbooks, that the colour of a light
+    is in no text. A prompt that contradicts itself teaches nothing, and it
+    costs turns: the courier goes looking for a fact the words already gave
+    it. This scans the entire prompt rather than the part that was swapped.
+    """
+
+    VISUAL_ONLY_CLAIMS = (
+        "will never tell you the colour",
+        "no order slip and no route",
+        "Those are in the pictures and nowhere else",
+        "a photograph shows a barrier",
+        "Read the lamp in the [light:",
+        "those are in the photographs",
+    )
+
+    def test_the_all_setting_never_claims_a_fact_is_visual_only(self):
+        prompt = build_system_prompt(city="Paris",
+                                     tools=available_tools(PARIS_ACTIONS),
+                                     narration="all")
+        found = [c for c in self.VISUAL_ONLY_CLAIMS if c in prompt]
+        assert not found, f"narration=all still says: {found}"
+
+    def test_the_visual_settings_keep_the_warning(self):
+        """The mirror image: dropping it everywhere would remove the only
+        thing telling a visual courier the pictures are load-bearing."""
+        for narration in ("none", "route"):
+            prompt = build_system_prompt(city="Paris",
+                                         tools=available_tools(PARIS_ACTIONS),
+                                         narration=narration)
+            assert "will never tell you the colour" in prompt, narration
+
+    def test_all_still_says_what_to_do_about_lights_and_barriers(self):
+        """Removing the photograph runbooks must not remove the rules."""
+        prompt = build_system_prompt(city="Paris",
+                                     tools=available_tools(PARIS_ACTIONS),
+                                     narration="all")
+        assert "RED" in prompt and "wait()" in prompt
+        assert "BLOCKED" in prompt

@@ -28,14 +28,7 @@ building opposite — a view that does not reach, not an empty street.
 
 {sources}
 
-SO EVERY MOVE IS THE SAME THREE STEPS:
-  1. Look at the map. Which way does the line leave you — which compass point?
-  2. Look at the list of streets here. Which one goes that way? Take the one
-     whose bearing is nearest the line, even if its name is not one you were
-     expecting; street names change from junction to junction and the route
-     runs through several of them.
-  3. Look at that street's photograph. Red light, or blocked? Then wait() or
-     take a different street. Otherwise walk it.
+{steps}
 
 READING THE MAP. It is a picture of the streets around you, north up. On it:
 
@@ -73,22 +66,7 @@ Repeating a call that was just refused will be refused again for the same
 reason. Nothing about the world changed in between. Read what the refusal
 listed, and choose from that.
 
-LOOK AT THE PHOTOGRAPHS BEFORE YOU ACT. The text will never tell you the colour
-of a pedestrian light, what is standing in your way, or what a shopfront says.
-Those are in the pictures and nowhere else. Where a crossing has a pedestrian
-light you can see, a separate photograph of it is shown, captioned
-[light: street name, bearing], and that lamp — not any light in the street views,
-which are older photographs — is the one governing your crossing.
-Crossing while it is red costs you time and counts against you; wait() sees the
-phase out.
-
-Streets get blocked and streets get congested. Roadworks, a barrier or a skip
-can shut a street completely — you cannot walk it at all, and finding that out
-by trying costs you a turn and about three quarters of a minute before you are
-back where you started. Furniture crowding the pavement does not stop you but
-slows you down by about the same. Which streets, and where, changes from shift
-to shift, and is written in no list, no order slip and no route: look down each
-street's photograph before you take it.{blocked_advice}
+{hazards}
 
 {tool_menu}
 
@@ -128,6 +106,32 @@ THOUGHT: one line saying what you read and what you concluded.
   - A tool with no arguments still needs its brackets: {no_arg_example}
   - Keep the THOUGHT to one line. A reply that runs too long is cut off before
     it reaches the action, and a cut-off reply loses the turn."""
+
+THREE_STEPS = """SO EVERY MOVE IS THE SAME THREE STEPS:
+  1. Look at the map. Which way does the line leave you — which compass point?
+  2. Look at the list of streets here. Which one goes that way? Take the one
+     whose bearing is nearest the line, even if its name is not one you were
+     expecting; street names change from junction to junction and the route
+     runs through several of them.
+  3. Look at that street's photograph. Red light, or blocked? Then wait() or
+     take a different street. Otherwise walk it."""
+
+HAZARD_RULES = """LOOK AT THE PHOTOGRAPHS BEFORE YOU ACT. The text will never tell you the colour
+of a pedestrian light, what is standing in your way, or what a shopfront says.
+Those are in the pictures and nowhere else. Where a crossing has a pedestrian
+light you can see, a separate photograph of it is shown, captioned
+[light: street name, bearing], and that lamp — not any light in the street views,
+which are older photographs — is the one governing your crossing.
+Crossing while it is red costs you time and counts against you; wait() sees the
+phase out.
+
+Streets get blocked and streets get congested. Roadworks, a barrier or a skip
+can shut a street completely — you cannot walk it at all, and finding that out
+by trying costs you a turn and about three quarters of a minute before you are
+back where you started. Furniture crowding the pavement does not stop you but
+slows you down by about the same. Which streets, and where, changes from shift
+to shift, and is written in no list, no order slip and no route: look down each
+street's photograph before you take it.{blocked_advice}"""
 
 OBSERVATION_TEMPLATE = """{memory}
 
@@ -294,11 +298,44 @@ def build_system_prompt(*, city: str, tools: list[Tool],
             "pedestrian light is\n  red, whether a barrier is across the road, "
             "whether the pavement is choked:\n  none of that is in any text, "
             "here or anywhere.")
+    # The three steps and the hazard rules were written for the visual world
+    # and stayed put when only {sources} was swapped, so the narrated prompt
+    # said "you are not required to read anything out of them" and then told
+    # the courier six more times that the colour is in no text. A prompt that
+    # contradicts itself teaches nothing; worse, it teaches the courier to
+    # spend turns looking for a fact the words already gave it.
+    if narration == "all":
+        steps = (
+            "SO EVERY MOVE IS THE SAME TWO STEPS:\n"
+            "  1. Find the street in the list marked *** THE ROUTE GOES THIS "
+            "WAY ***.\n"
+            "  2. If its line says the pedestrian light is RED, wait(). If its "
+            "line says\n     BLOCKED, that street is shut — take another and "
+            "the marker will move.\n     Otherwise walk it.")
+        hazards = (
+            "Streets get blocked and streets get congested, and the line for "
+            "that street\nsays so: BLOCKED means you cannot walk it at all. A "
+            "crowded pavement is not\ncalled out and only costs you a little "
+            "time. Crossing on a stated RED costs you\ntime and counts against "
+            "you; wait() sees the phase out, and one wait is enough.")
+    elif narration == "route":
+        steps = (
+            "SO EVERY MOVE IS THE SAME TWO STEPS:\n"
+            "  1. Find the street in the list marked *** THE ROUTE GOES THIS "
+            "WAY ***.\n"
+            "  2. Look at that street's photograph. Red light, or blocked? Then "
+            "wait() or\n     take a different street. Otherwise walk it.")
+        hazards = HAZARD_RULES.format(blocked_advice=blocked_advice)
+    else:
+        steps = THREE_STEPS
+        hazards = HAZARD_RULES.format(blocked_advice=blocked_advice)
     return SYSTEM_TEMPLATE.format(
         city=city,
         sources=sources,
+        steps=steps,
+        hazards=hazards,
         tool_menu=render_tool_menu(tools),
-        procedures=render_procedures(available=names),
+        procedures=render_procedures(available=names, narration=narration),
         blocked_advice=blocked_advice,
         number_example=number_example,
         no_arg_example=no_arg_example,
