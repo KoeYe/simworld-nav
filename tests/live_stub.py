@@ -232,6 +232,7 @@ class FakeTrackBService(FakeRenderService):
         self.episodes: list[dict[str, Any]] = []
         self.walks: list[dict[str, Any]] = []
         self.observes: list[dict[str, Any]] = []
+        self._observe_seq = 0
         self.episode_ends: list[str] = []
 
     # ── routing ──────────────────────────────────────────────────────────────
@@ -320,9 +321,11 @@ class FakeTrackBService(FakeRenderService):
                  f"@yaw{agent['yaw']:.1f}")
         png = draw_frame(label, int(camera["width"]), int(camera["height"]))
         digest = hashlib.sha256(png).hexdigest()
-        # The /render-item result shape, key "" (the caller owns naming),
-        # plus the pose echo.
-        result = {"key": "", "status": "ok", "path": None, "png_base64": None,
+        # The /render-item result shape with a service-assigned key (the
+        # caller still owns album naming and ignores it), plus the pose echo.
+        self._observe_seq += 1
+        result = {"key": f"observe/{self._observe_seq:06d}",
+                  "status": "ok", "path": None, "png_base64": None,
                   "sha256": digest,
                   "width": int(camera["width"]), "height": int(camera["height"]),
                   "pose": self._pose()}

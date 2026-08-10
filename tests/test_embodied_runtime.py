@@ -168,7 +168,7 @@ class TestTheTrackBGoldenBytes:
 
     def test_a_pose_round_trips_through_a_result(self):
         result = RenderResult(
-            key="", status="ok", path="/tmp/f.png", sha256="00",
+            key="observe/000001", status="ok", path="/tmp/f.png", sha256="00",
             width=640, height=480,
             pose=Pose(x_cm=1.5, y_cm=-2.5, z_cm=100.0, yaw_deg=90.0))
         assert RenderResult.from_dict(result.to_dict()) == result
@@ -222,7 +222,7 @@ class TestTheClientSpeaksTrackB:
         client.episode(episode_request(spawn=Pose(5.0, 6.0, 100.0, 0.0)))
         result = client.observe(ObserveRequest(
             episode_id=EPISODE, camera=CAMERA, yaw_deg=90.0))
-        assert result.ok and result.key == ""
+        assert result.ok and result.key.startswith("observe/")
         assert result.pose is not None
         assert (result.pose.x_cm, result.pose.y_cm) == (5.0, 6.0)
         assert result.pose.yaw_deg == 90.0
