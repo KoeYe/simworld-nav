@@ -48,7 +48,11 @@ the gitignored vendor/ checkout changes):
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 import tempfile
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -89,6 +93,17 @@ class LiveCourierGymEnv(CourierGymEnv):
         else:
             self._cache_scratch = tempfile.TemporaryDirectory(prefix="courier-live-")
             self.live_cache_root = Path(self._cache_scratch.name)
+        # The cache directory is PRIVATE to this adapter instance: a
+        # per-process, per-instance unique subdirectory of the configured
+        # root. Same-seed resets of this instance reuse it -- that keeps
+        # idempotency, and a GRPO group multiplied within one worker reuses
+        # its frames -- but nothing else shares it. Cross-worker sharing was
+        # considered and rejected: it invites write races and config
+        # cross-contamination for zero training benefit (frames are simply
+        # re-rendered per worker, and renders are cheap next to rollouts).
+        self.live_instance_dir = (
+            self.live_cache_root / f"{os.getpid()}-{uuid.uuid4().hex[:8]}")
+        self.live_instance_dir.mkdir(parents=True, exist_ok=True)
         def _sidecar_root(key: str) -> Path | None:
             raw = config.get(key)
             root = Path(raw) if raw else None
@@ -102,11 +117,30 @@ class LiveCourierGymEnv(CourierGymEnv):
 
         self.obstacle_sidecar_root = _sidecar_root("obstacle_sidecar_root")
         self.signal_sidecar_root = _sidecar_root("signal_sidecar_root")
+        # Every config axis that changes pixels or keys, folded into a short
+        # digest the episode id carries. Seed alone was not an identity:
+        # embodiment moves the camera (kerb offset), difficulty/stride change
+        # which frames a turn asks for, hazards and the sidecar roots decide
+        # which claims exist -- two runs differing on any of these must never
+        # share an album directory.
+        axes = {
+            "difficulty": self.difficulty,
+            "stride": self.stride,
+            "embodiment": self.embodiment,
+            "hazards": self.hazards,
+            "obstacle_sidecar_root": (str(self.obstacle_sidecar_root)
+                                      if self.obstacle_sidecar_root else None),
+            "signal_sidecar_root": (str(self.signal_sidecar_root)
+                                    if self.signal_sidecar_root else None),
+        }
+        self._cfg8 = hashlib.blake2b(
+            json.dumps(axes, sort_keys=True).encode("utf-8"),
+            digest_size=4).hexdigest()
         # The inherited ``_load_images`` sends the phone map only when
         # ``album_root`` is truthy -- its gate for "this is a sighted
         # condition". Live is sighted, so the gate opens; evaluation sends the
         # map and training must see the same world.
-        self.album_root = self.live_cache_root
+        self.album_root = self.live_instance_dir
         self._render_pool: RenderPool | None = None
 
     def _pool(self) -> RenderPool:
@@ -140,15 +174,18 @@ class LiveCourierGymEnv(CourierGymEnv):
             # where the lamp survives the downscale the policy actually gets.
             kwargs["served_long_edge"] = float(self.image_max_side)
 
-        # The episode id names the album directory, and carrying the seed in
-        # it is what makes "same (episode, key) renders once" an idempotency
-        # rule across resets of the same seed rather than per reset.
-        episode_id = f"courier-{self.map_dir.name}-s{int(seed)}"
+        # The episode id names the album directory inside this instance's
+        # private cache dir. The seed makes same-seed resets of this instance
+        # one album (idempotency across resets, not merely within one); the
+        # cfg8 digest makes runs that differ on any pixel- or key-changing
+        # axis different albums, so a rider's centreline frames can never be
+        # served to a walker that happens to share the seed.
+        episode_id = f"courier-{self.map_dir.name}-s{int(seed)}-{self._cfg8}"
         self._env = LiveCourierEnv(
             self._network,
             self._pool(),
             episode_id=episode_id,
-            cache_root=self.live_cache_root,
+            cache_root=self.live_instance_dir,
             # hazards=false drops the visibility claims instead of the album
             # kwargs, which is the same lever the stock adapter pulls: no
             # claim, no charge, and the frames stay clean street views. (A

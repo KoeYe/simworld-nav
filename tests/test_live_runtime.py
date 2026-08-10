@@ -645,6 +645,45 @@ class TestTheLiveTrainingAdapter:
         assert max(service.render_counts.values()) == 1
         run(env.close())
 
+    def test_each_adapter_instance_gets_a_private_cache_dir(self, config):
+        """Two instances over one live_cache_root never share a directory:
+        the private per-(pid, instance) dir is what makes cross-worker write
+        races impossible by construction rather than merely unlikely. Frames
+        are re-rendered per worker, which is fine -- renders are cheap next
+        to the races they buy off."""
+        first = _AdapterUnderTest(config)
+        second = _AdapterUnderTest(config)
+        assert first.live_instance_dir != second.live_instance_dir
+        assert first.live_instance_dir.parent == first.live_cache_root
+        assert second.live_instance_dir.parent == second.live_cache_root
+        assert first.live_instance_dir.is_dir()
+        assert second.live_instance_dir.is_dir()
+
+    def test_the_episode_id_carries_the_config_not_just_the_seed(
+            self, config, service):
+        """Same seed, different embodiment: different episode ids, different
+        album directories, no shared frames. Embodiment moves the camera (the
+        kerb offset), so a rider's centreline frames served to a walker would
+        be exactly the cross-viewpoint contamination the stock
+        pavement-pairing validation exists to prevent."""
+        walker = _AdapterUnderTest({**config, "embodiment": "human_on_foot"})
+        rider = _AdapterUnderTest({**config, "embodiment": "human_on_scooter"})
+        _, walker_info = run(walker.reset(0))
+        _, rider_info = run(rider.reset(0))
+        assert walker_info["episode_id"] != rider_info["episode_id"]
+
+        walker_frames = {p.name for p in
+                         walker._env.live_album.images.rglob("*.png")}
+        rider_root = rider._env.live_album.root
+        walker_root = walker._env.live_album.root
+        assert walker_root != rider_root
+        assert walker_frames, "the walker rendered nothing at all"
+        # No path under one album resolves inside the other.
+        assert not str(walker_root).startswith(str(rider_root))
+        assert not str(rider_root).startswith(str(walker_root))
+        run(walker.close())
+        run(rider.close())
+
     def test_an_album_root_config_is_refused(self):
         """Two sources of truth about one directory is how training and
         evaluation drift; the config that asks for both dies at construction."""
