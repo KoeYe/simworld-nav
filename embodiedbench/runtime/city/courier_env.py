@@ -2683,7 +2683,25 @@ class CourierEnv:
             destination=(target.kerb if target is not None else None),
             destination_label=(target.text if target is not None else ""),
             here_label="you are here",
+            # The banner names the street the route takes next. A navigation
+            # app puts it there because a bearing read off a drawn line is the
+            # hardest thing on the screen; measured here, a model reads a
+            # street name off this map 100% of the time and a direction 25%.
+            next_street=self._next_route_street(route),
         )
+
+    def _next_route_street(self, route: list[tuple[float, float]]) -> str:
+        """The name of the street the route leaves this junction by."""
+        if len(route) < 2:
+            return ""
+        here = self.position()
+        for row in self._raw_candidates():
+            if math.dist(self.position(row["node"]), route[1]) < 1.0:
+                return str(row["street"])
+        nearest = min(
+            self.network.nodes,
+            key=lambda n: math.dist(self.position(n), route[1]))
+        return self.street_of(nearest) or ""
 
     def _find_address(self, text: str) -> Address | None:
         wanted = " ".join(str(text).split()).lower()

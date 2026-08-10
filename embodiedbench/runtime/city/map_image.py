@@ -162,6 +162,60 @@ def _halo_text(x: float, y: float, text: str, cls: str = "ui",
             f'<text class="{cls}" {common}>{body}</text>')
 
 
+BAR_H = 76.0
+
+
+def _text_box(x: float, y: float, half_w: float, half_h: float,
+              angle_deg: float) -> tuple[float, float, float, float]:
+    """The axis-aligned box a rotated label occupies, generously."""
+    a = math.radians(angle_deg)
+    dx = abs(half_w * math.cos(a)) + abs(half_h * math.sin(a))
+    dy = abs(half_w * math.sin(a)) + abs(half_h * math.cos(a))
+    return (x - dx, y - dy, x + dx, y + dy)
+
+
+def _overlaps(box, placed) -> bool:
+    return any(not (box[2] < b[0] or box[0] > b[2]
+                    or box[3] < b[1] or box[1] > b[3]) for b in placed)
+
+
+def _crosses_route(box, route_px) -> bool:
+    """Does this label's box sit on the drawn route?"""
+    for (ax, ay), (bx, by) in zip(route_px, route_px[1:]):
+        steps = max(2, int(math.dist((ax, ay), (bx, by)) / 12))
+        for i in range(steps + 1):
+            t = i / steps
+            px, py = ax + (bx - ax) * t, ay + (by - ay) * t
+            if box[0] - 6 < px < box[2] + 6 and box[1] - 6 < py < box[3] + 6:
+                return True
+    return False
+
+
+def _near_puck(box, puck, radius: float = 42.0) -> bool:
+    """Keep names off the courier's own marker, which must stay findable."""
+    px, py = puck
+    return (box[0] - radius < px < box[2] + radius
+            and box[1] - radius < py < box[3] + radius)
+
+
+def _edge_safe_text(x: float, y: float, text: str, width_px: float) -> str:
+    """A caption that never runs off the side, whatever it is anchored to.
+
+    Centred text overhangs by half its width, so a marker near an edge lost
+    the start or the end of its label -- "11 Rue Mouffetard" arrived as "1 Rue
+    Mouffetard". Rather than clamp the centre and hope, this switches the
+    anchor: hard against the left margin near the left edge, against the right
+    near the right, centred in between.
+    """
+    half = len(text) * 9.5 / 2.0
+    margin = 12.0
+    if x - half < margin:
+        return _halo_text(margin, y, text, anchor="start")
+    if x + half > width_px - margin:
+        return _halo_text(width_px - margin, y, text, anchor="end")
+    return _halo_text(x, y, text)
+
+
 def _label_anchor(polyline: list[tuple[float, float]]) -> tuple[float, float, float]:
     """Where to write a street's name, and at what angle, in drawing pixels.
 
@@ -192,6 +246,7 @@ def render_map(
     destination: tuple[float, float] | None = None,
     destination_label: str = "",
     here_label: str = "you are here",
+    next_street: str = "",
     blocked: list[tuple[tuple[float, float], tuple[float, float]]] | None = None,
     width_px: int = WIDTH_PX,
     height_px: int = HEIGHT_PX,
@@ -219,28 +274,33 @@ def render_map(
         f'width="{width_px}" height="{height_px}" role="img" '
         f'aria-label="map of the streets around the courier">',
         '<defs><style>'
-        '.bg{fill:#e8e5dd}.blk{fill:#d8d4c9;stroke:#cfcabd;stroke-width:.6}'
-        '.st{stroke:#ffffff;stroke-linecap:round;stroke-linejoin:round;fill:none}'
-        # Sized for the frame the harness serves, not for the frame this is
-        # drawn in. The map is 720 wide and arrives at 320, so a 9 px street
-        # name lands at 4 px and is not a label, it is texture. These are set
-        # so the smallest text on the served image is around 9 px, which is
-        # what a name has to be to be read at all.
-        '.nm{font:600 20px ui-sans-serif,sans-serif;fill:#6b6656}'
-        '.rt{stroke:#2f6ee0;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none;opacity:.92}'
-        '.rtc{stroke:#ffffff;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;fill:none}'
-        '.shut{stroke:#c8342f;stroke-width:4;stroke-linecap:round;fill:none}'
-        '.ui{font:700 23px ui-sans-serif,sans-serif;fill:#2b2822}'
-        '.pin{fill:#c8342f}.me{fill:#2f6ee0}'
-        '.halo{stroke:#e8e5dd;stroke-width:6;stroke-linejoin:round;fill:none}'
-        # The first leg, drawn as an arrow rather than left to be inferred.
-        # Measured: asked which way the route leaves the dot, Qwen3-VL-4B was
-        # right 25% of the time at every size from 320 to 1024 px -- worse than
-        # guessing -- while on a plain black arrow it was right 81% with a
-        # median error of zero. The direction was always in the picture; what
-        # was missing was a way to read it in one step instead of separating a
-        # polyline from a dozen white streets and finding its near end.
-        '.go{fill:#1b57c9;stroke:#ffffff;stroke-width:3;stroke-linejoin:round}'
+        # A navigation app's palette, and for the same reasons it uses one: the
+        # route has to be the brightest thing on the screen, the streets have to
+        # read as a network without competing with it, and the labels have to
+        # sit on a ground dark enough that a halo actually separates them. The
+        # old light-grey-on-cream did none of that -- the route was one blue
+        # line among a dozen white ones, and every label fought the buildings.
+        '.bg{fill:#1b2735}.blk{fill:#22303f;stroke:#26364a;stroke-width:.8}'
+        '.st{stroke:#4a5f78;stroke-linecap:round;stroke-linejoin:round;fill:none}'
+        '.nm{font:600 20px ui-sans-serif,sans-serif;fill:#c3d0e0}'
+        '.rtc{stroke:#0d1720;stroke-width:17;stroke-linecap:round;'
+        'stroke-linejoin:round;fill:none}'
+        '.rt{stroke:#4c9bff;stroke-width:11;stroke-linecap:round;'
+        'stroke-linejoin:round;fill:none}'
+        '.shut{stroke:#ff5a4d;stroke-width:6;stroke-linecap:round;fill:none}'
+        '.ui{font:700 23px ui-sans-serif,sans-serif;fill:#eef3fa}'
+        '.pin{fill:#ff5d4e}.me{fill:#4c9bff}'
+        '.halo{stroke:#141d29;stroke-width:7;stroke-linejoin:round;fill:none}'
+        '.go{fill:#4c9bff;stroke:#0d1720;stroke-width:3;stroke-linejoin:round}'
+        # The instruction banner, and the bar that carries the distance.
+        '.band{fill:#12603f}'
+        '.bandtext{font:700 30px ui-sans-serif,sans-serif;fill:#ffffff}'
+        '.bandsub{font:600 20px ui-sans-serif,sans-serif;fill:#a9e2c6}'
+        '.bar{fill:#0d1720}'
+        '.bartext{font:700 26px ui-sans-serif,sans-serif;fill:#ffffff}'
+        '.barsub{font:500 19px ui-sans-serif,sans-serif;fill:#8fa4bd}'
+        '.puck{fill:#4c9bff;stroke:#ffffff;stroke-width:4}'
+        '.puckring{fill:#4c9bff;opacity:.22}'
         '</style></defs>',
         f'<rect class="bg" width="{width_px}" height="{height_px}"/>',
     ]
@@ -265,9 +325,12 @@ def render_map(
 
     # ── the streets ──────────────────────────────────────────────────────────
     drawn = 0
+    # Computed before the streets are labelled, because a name may not be
+    # printed across the route and the route is drawn after them.
+    route_px = [view.to_px(q) for q in (route or [])]
     labelled: set[str] = set()
     # Where a name has already been written, so the next one can keep clear.
-    placed: list[tuple[float, float, float]] = []
+    placed: list[tuple[float, float, float, float]] = []
     labels: list[str] = []
     for street in getattr(network, "streets", []):
         # Kept or dropped whole, by whether the street's extent touches the
@@ -307,14 +370,25 @@ def render_map(
             # anchor, so two anchors 100 px apart can still overprint when the
             # names are long. Clearance is measured against the pair's own
             # widths rather than a constant.
+            # A box, not a distance. A rotated name reaches half its length
+            # either side of its anchor, so two anchors far enough apart to
+            # pass a radius test still overprint when both are long and nearly
+            # parallel -- which is most of a street grid. This projects each
+            # name onto its own direction and rejects an overlap of the boxes.
             half_w = len(street.name) * 5.6
-            inset = 16.0
-            fits = (inset + half_w * 0.4 < x < width_px - inset - half_w * 0.4
-                    and inset + 16 < y < height_px - inset - 16)
-            clear = all(math.hypot(x - px, y - py) > 0.62 * (half_w + pw)
-                        for px, py, pw in placed)
+            angle = math.radians(angle_deg := angle)
+            box = _text_box(x, y, half_w, 13.0, angle_deg)
+            inset = 18.0
+            fits = (box[0] > inset and box[2] < width_px - inset
+                    and box[1] > BAR_H + 24
+                    and box[3] < height_px - 46 - 8)
+            # And off the route itself: a name printed across the blue line
+            # hides the one mark the picture exists to show.
+            clear = (not _overlaps(box, placed)
+                     and not _near_puck(box, view.to_px(here))
+                     and not _crosses_route(box, route_px))
             if fits and clear:
-                placed.append((x, y, half_w))
+                placed.append(box)
                 labelled.add(street.name)
                 labels.append(street.name)
                 parts.append(_halo_text(x, y, street.name, cls="nm", rotate=angle))
@@ -353,9 +427,12 @@ def render_map(
             # Clamped inside the frame: a caption that names the destination
             # is worth nothing with its first characters off the edge, and at
             # this size it overhangs easily.
-            cap_w = len(destination_label) * 6.4
-            cx = min(max(x, cap_w * 0.5 + 8), width_px - cap_w * 0.5 - 8)
-            parts.append(_halo_text(cx, max(y - 34, 30), destination_label))
+            # 23 px bold runs about 12 px a character, and the label is
+            # centred on its anchor, so half of it hangs either side. Clamped
+            # on that, not on a guess: "Rue Mouffetard" was losing its R off
+            # the left edge and "you are here" its last letter off the right.
+            parts.append(_edge_safe_text(x, max(y - 34, BAR_H + 26),
+                                         destination_label, width_px))
 
     # ── the courier ──────────────────────────────────────────────────────────
     x, y = view.to_px(here)
@@ -378,6 +455,19 @@ def render_map(
     # to be read at a glance at the size the harness serves: a thick blue arrow
     # from the dot, along the first leg, outlined in white so it stands off
     # both the pale streets and the blocks between them.
+    # The courier, drawn the way a navigation app draws it: a solid disc with
+    # a white collar and a faint halo, so it is the most findable thing on the
+    # map. It was a 12 px circle under an arrow, and in a frame full of white
+    # streets and black labels it was not findable at all -- which made "where
+    # am I" the hardest question the picture answered.
+    heading = (math.degrees(math.atan2(first_leg_px[1], first_leg_px[0]))
+               if first_leg_px else (facing_deg - 90.0 if facing_deg is not None
+                                     else -90.0))
+    parts.append(
+        f'<circle class="puckring" cx="{x:.1f}" cy="{y:.1f}" r="34"/>'
+        f'<circle class="puck" cx="{x:.1f}" cy="{y:.1f}" r="19"/>'
+        f'<g transform="translate({x:.1f},{y:.1f}) rotate({heading:.1f})">'
+        f'<path d="M12,0 L-7,-9 L-3,0 L-7,9 Z" fill="#ffffff"/></g>')
     label_offset = 22.0
     if first_leg_px is not None:
         dx, dy = first_leg_px
@@ -389,26 +479,28 @@ def render_map(
             # present, and no more readable than the polyline it replaced. At
             # an eighth of the frame it arrives at about 40 px, which is the
             # scale the control arrow was read at.
-            reach = width_px * 0.125
-            head = reach * 0.42
-            half = reach * 0.10
-            flare = reach * 0.26
+            # Started clear of the puck rather than from its centre, so the
+            # marker and the direction are two marks rather than one blob.
+            start = 20.0
+            reach = start + width_px * 0.125
+            head = (reach - start) * 0.42
+            half = (reach - start) * 0.13
+            flare = (reach - start) * 0.32
             parts.append(
                 f'<g transform="translate({x:.1f},{y:.1f}) rotate({angle:.1f})">'
-                f'<path class="go" d="M0,{-half:.1f} L{reach - head:.1f},{-half:.1f} '
+                f'<path class="go" d="M{start:.1f},{-half:.1f} '
+                f'L{reach - head:.1f},{-half:.1f} '
                 f'L{reach - head:.1f},{-flare:.1f} L{reach:.1f},0 '
                 f'L{reach - head:.1f},{flare:.1f} L{reach - head:.1f},{half:.1f} '
-                f'L0,{half:.1f} Z"/></g>')
+                f'L{start:.1f},{half:.1f} Z"/></g>')
             # Keep the caption off the arrow: below it when the arrow runs
             # across or downwards, above it when the arrow points down the page.
             label_offset = -24.0 if dy > 0 else 30.0
     if here_label:
         # Offset clear of the marker, because the street name it sits on is
         # drawn along the street and the two collided.
-        cap_w = len(here_label) * 6.4
-        cx = min(max(x, cap_w * 0.5 + 8), width_px - cap_w * 0.5 - 8)
-        cy = min(max(y + label_offset, 30.0), height_px - 16.0)
-        parts.append(_halo_text(cx, cy, here_label))
+        cy = min(max(y + label_offset, BAR_H + 26.0), height_px - 18.0)
+        parts.append(_edge_safe_text(x, cy, here_label, width_px))
 
     # ── scale bar and north ──────────────────────────────────────────────────
     bar_cm, bar_text = _round_scale(view.span_cm)
@@ -425,8 +517,38 @@ def render_map(
     parts.append(f'<g transform="translate({nx},{ny})">'
                  f'<path d="M0,-11 L5,7 L0,3 L-5,7 Z" fill="#3a3730"/>'
                  + _halo_text(0, 20, "N") + '</g>')
+    # The bar, drawn last so nothing can overprint it. A navigation app keeps
+    # the distance and the destination out of the map; here they used to be
+    # written into the top-left corner where a street name also wanted to go,
+    # and the two collided on most frames.
+    # The instruction banner. This is the single most useful mark on a
+    # navigation screen and the one this map never had: it names the street to
+    # take, in words, where a bearing had to be inferred from the geometry.
+    # Measured on this model: a street name is read off this map correctly ~100%
+    # of the time and a direction 25%, so the banner turns the task's hardest
+    # perceptual step into its easiest.
+    if next_street:
+        parts.append(f'<rect class="band" x="10" y="10" rx="12" '
+                     f'width="{width_px - 20}" height="{BAR_H}"/>')
+        parts.append(
+            f'<g transform="translate(44,{10 + BAR_H / 2})">'
+            f'<path d="M0,-18 L13,2 L5,2 L5,18 L-5,18 L-5,2 L-13,2 Z" '
+            f'fill="#ffffff"/></g>')
+        parts.append(f'<text class="bandsub" x="72" y="{10 + BAR_H / 2 - 6}">'
+                     f'head down</text>')
+        parts.append(f'<text class="bandtext" x="72" y="{10 + BAR_H / 2 + 22}">'
+                     f'{_esc(next_street)}</text>')
+    # The distance, on a bar of its own at the foot, as an app does.
+    foot = 46.0
+    parts.append(f'<rect class="bar" y="{height_px - foot}" '
+                 f'width="{width_px}" height="{foot}"/>')
     if metres:
-        parts.append(_halo_text(14, 22, f"route {metres:.0f} m", anchor="start"))
+        parts.append(f'<text class="bartext" x="18" y="{height_px - 14}">'
+                     f'{metres:.0f} m</text>')
+    if destination_label:
+        parts.append(f'<text class="barsub" x="{width_px - 18}" '
+                     f'y="{height_px - 16}" text-anchor="end">'
+                     f'to {_esc(destination_label)}</text>')
     parts.append("</svg>")
 
     return MapDrawing(svg="".join(parts), view=view, streets_drawn=drawn,
