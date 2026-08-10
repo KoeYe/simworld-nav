@@ -1,12 +1,13 @@
 """The nav-render/v0 wire protocol, as data.
 
-One dataclass per JSON shape in docs/LIVE_UE_SPEC.md section 3, and one
-serialisation convention for all of them: two-space indent, sorted keys, one
-trailing newline. The convention is not a taste -- the same fixtures live in
-this repo and in SimWorld2, and "byte-exact against the golden files" is the
-only definition of compatibility that a test can enforce. ``dumps`` here is
-the single place the convention is written down; everything that says "these
-bytes are the protocol" goes through it.
+One dataclass per JSON shape in docs/LIVE_UE_SPEC.md section 3 (Track A,
+stateless renders) and section 3b (Track B, stateful embodied episodes), and
+one serialisation convention for all of them: two-space indent, sorted keys,
+one trailing newline. The convention is not a taste -- the same fixtures live
+in this repo and in SimWorld2, and "byte-exact against the golden files" is
+the only definition of compatibility that a test can enforce. ``dumps`` here
+is the single place the convention is written down; everything that says
+"these bytes are the protocol" goes through it.
 
 Optional fields follow the spec's own examples exactly:
 
@@ -245,9 +246,41 @@ class RenderBatch:
 
 
 @dataclass(frozen=True)
+class Pose:
+    """Where the embodied agent stands: UE world cm plus a yaw.
+
+    The one shape every Track B response shares. Spelled out as its own
+    dataclass rather than four loose floats because "pose echo" appears in
+    three different messages and they must not be allowed to drift apart.
+    """
+
+    x_cm: float
+    y_cm: float
+    z_cm: float
+    yaw_deg: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"x_cm": float(self.x_cm), "y_cm": float(self.y_cm),
+                "z_cm": float(self.z_cm), "yaw_deg": float(self.yaw_deg)}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "Pose":
+        return cls(x_cm=float(_require(data, "x_cm", "pose")),
+                   y_cm=float(_require(data, "y_cm", "pose")),
+                   z_cm=float(_require(data, "z_cm", "pose")),
+                   yaw_deg=float(_require(data, "yaw_deg", "pose")))
+
+
+@dataclass(frozen=True)
 class RenderResult:
     """One frame's outcome. The batch never half-dies: a bad item is a
-    ``failed`` result in an otherwise ok response."""
+    ``failed`` result in an otherwise ok response.
+
+    ``pose`` is Track B's addition -- /observe echoes the agent's actual pose
+    beside the frame -- and it is serialised only when present, for the same
+    reason ``pitch_deg`` is only serialised when nonzero: the Track A golden
+    fixtures predate the field and must stay byte-identical.
+    """
 
     key: str
     status: str
@@ -257,6 +290,7 @@ class RenderResult:
     width: int | None = None
     height: int | None = None
     error: str | None = None
+    pose: Pose | None = None
 
     @property
     def ok(self) -> bool:
@@ -268,13 +302,17 @@ class RenderResult:
                     "error": self.error or ""}
         # Both transport keys present, one null -- the spec's own example. The
         # receiver reads the mode off which one is set.
-        return {"key": self.key, "status": self.status,
-                "path": self.path, "png_base64": self.png_base64,
-                "sha256": self.sha256,
-                "width": self.width, "height": self.height}
+        out = {"key": self.key, "status": self.status,
+               "path": self.path, "png_base64": self.png_base64,
+               "sha256": self.sha256,
+               "width": self.width, "height": self.height}
+        if self.pose is not None:
+            out["pose"] = self.pose.to_dict()
+        return out
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "RenderResult":
+        pose = data.get("pose")
         return cls(
             key=str(_require(data, "key", "render result")),
             status=str(_require(data, "status", "render result")),
@@ -284,6 +322,7 @@ class RenderResult:
             width=(None if data.get("width") is None else int(data["width"])),
             height=(None if data.get("height") is None else int(data["height"])),
             error=data.get("error"),
+            pose=Pose.from_dict(pose) if pose is not None else None,
         )
 
 
@@ -352,3 +391,239 @@ class WireError:
         body = _require(data, "error", "error response")
         return cls(code=str(_require(body, "code", "error body")),
                    message=str(_require(body, "message", "error body")))
+
+
+# ── Track B: embodied episodes (spec section 3b, stateful) ───────────────────
+#
+# Track B gives UE ownership of locomotion and locomotion time. These
+# endpoints are stateful -- one active embodied episode per instance -- so
+# they exist beside the stateless render messages, not instead of them. The
+# defaults below are the spec's own example values; a caller that wants
+# different numbers says so on the wire.
+
+DEFAULT_ARRIVE_CM = 50.0
+DEFAULT_MAX_WALK_SIM_SECONDS = 120.0
+DEFAULT_TICK_CHUNK = 10
+
+
+@dataclass(frozen=True)
+class AgentSpec:
+    """The embodiment as the service needs it: speed, eye height, camera."""
+
+    speed_cm_s: float
+    eye_z_cm: float
+    camera: CameraSpec
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"speed_cm_s": float(self.speed_cm_s),
+                "eye_z_cm": float(self.eye_z_cm),
+                "camera": self.camera.to_dict()}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "AgentSpec":
+        return cls(
+            speed_cm_s=float(_require(data, "speed_cm_s", "agent")),
+            eye_z_cm=float(_require(data, "eye_z_cm", "agent")),
+            camera=CameraSpec.from_dict(_require(data, "camera", "agent")),
+        )
+
+
+@dataclass(frozen=True)
+class EpisodeRequest:
+    """POST /episode: spawn (or re-spawn) the agent. Idempotent per
+    episode_id; a new episode_id tears down the previous episode's agent."""
+
+    episode_id: str
+    map_name: str
+    agent: AgentSpec
+    spawn: Pose
+    protocol: str = PROTOCOL
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"protocol": self.protocol,
+                "episode_id": self.episode_id,
+                "map_name": self.map_name,
+                "agent": self.agent.to_dict(),
+                "spawn": self.spawn.to_dict()}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "EpisodeRequest":
+        protocol = str(_require(data, "protocol", "episode request"))
+        if protocol != PROTOCOL:
+            raise ProtocolViolation(
+                f"episode request speaks {protocol!r}, not {PROTOCOL!r}")
+        return cls(
+            episode_id=str(_require(data, "episode_id", "episode request")),
+            map_name=str(_require(data, "map_name", "episode request")),
+            agent=AgentSpec.from_dict(_require(data, "agent", "episode request")),
+            spawn=Pose.from_dict(_require(data, "spawn", "episode request")),
+            protocol=protocol,
+        )
+
+
+@dataclass(frozen=True)
+class EpisodeResponse:
+    """The service's answer: where the agent actually stands, and the fixed
+    dt every subsequent ``sim_seconds`` is a multiple of."""
+
+    episode_id: str
+    pose: Pose
+    fixed_dt: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"episode_id": self.episode_id,
+                "pose": self.pose.to_dict(),
+                "fixed_dt": float(self.fixed_dt)}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "EpisodeResponse":
+        return cls(
+            episode_id=str(_require(data, "episode_id", "episode response")),
+            pose=Pose.from_dict(_require(data, "pose", "episode response")),
+            fixed_dt=float(_require(data, "fixed_dt", "episode response")),
+        )
+
+
+@dataclass(frozen=True)
+class WalkRequest:
+    """POST /walk: MoveTo(target) under lockstep ticks until arrival within
+    ``arrive_cm``, no progress (stuck), or ``max_sim_seconds`` of sim time."""
+
+    episode_id: str
+    target_x_cm: float
+    target_y_cm: float
+    arrive_cm: float = DEFAULT_ARRIVE_CM
+    max_sim_seconds: float = DEFAULT_MAX_WALK_SIM_SECONDS
+    tick_chunk: int = DEFAULT_TICK_CHUNK
+    protocol: str = PROTOCOL
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"protocol": self.protocol,
+                "episode_id": self.episode_id,
+                "target": {"x_cm": float(self.target_x_cm),
+                           "y_cm": float(self.target_y_cm)},
+                "arrive_cm": float(self.arrive_cm),
+                "max_sim_seconds": float(self.max_sim_seconds),
+                "tick_chunk": int(self.tick_chunk)}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "WalkRequest":
+        protocol = str(_require(data, "protocol", "walk request"))
+        if protocol != PROTOCOL:
+            raise ProtocolViolation(
+                f"walk request speaks {protocol!r}, not {PROTOCOL!r}")
+        target = _require(data, "target", "walk request")
+        return cls(
+            episode_id=str(_require(data, "episode_id", "walk request")),
+            target_x_cm=float(_require(target, "x_cm", "walk target")),
+            target_y_cm=float(_require(target, "y_cm", "walk target")),
+            arrive_cm=float(data.get("arrive_cm", DEFAULT_ARRIVE_CM)),
+            max_sim_seconds=float(data.get("max_sim_seconds",
+                                           DEFAULT_MAX_WALK_SIM_SECONDS)),
+            tick_chunk=int(data.get("tick_chunk", DEFAULT_TICK_CHUNK)),
+            protocol=protocol,
+        )
+
+
+@dataclass(frozen=True)
+class WalkResponse:
+    """What the walk did. ``sim_seconds`` is ticks * fixed_dt and is the
+    authoritative walking time -- the caller adds it to the env clock instead
+    of the declared distance/speed arithmetic."""
+
+    arrived: bool
+    stuck: bool
+    timeout: bool
+    ticks: int
+    sim_seconds: float
+    pose: Pose
+    walked_cm: float
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"arrived": bool(self.arrived), "stuck": bool(self.stuck),
+                "timeout": bool(self.timeout),
+                "ticks": int(self.ticks),
+                "sim_seconds": float(self.sim_seconds),
+                "pose": self.pose.to_dict(),
+                "walked_cm": float(self.walked_cm)}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "WalkResponse":
+        return cls(
+            arrived=bool(_require(data, "arrived", "walk response")),
+            stuck=bool(_require(data, "stuck", "walk response")),
+            timeout=bool(_require(data, "timeout", "walk response")),
+            ticks=int(_require(data, "ticks", "walk response")),
+            sim_seconds=float(_require(data, "sim_seconds", "walk response")),
+            pose=Pose.from_dict(_require(data, "pose", "walk response")),
+            walked_cm=float(_require(data, "walked_cm", "walk response")),
+        )
+
+
+@dataclass(frozen=True)
+class ObserveRequest:
+    """POST /observe: the agent's first-person view at its CURRENT pose,
+    optionally yawing to ``yaw_deg`` first (one tick to settle).
+
+    ``yaw_deg`` is serialised even when null because the spec's own example
+    carries ``"yaw_deg": null`` -- null means "as the agent stands". The
+    response is a /render-item-shaped ``RenderResult`` whose ``pose`` echoes
+    where the frame was really taken.
+    """
+
+    episode_id: str
+    camera: CameraSpec
+    yaw_deg: float | None = None
+    return_mode: str = RETURN_MODE_PATH
+    protocol: str = PROTOCOL
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"protocol": self.protocol,
+                "episode_id": self.episode_id,
+                "camera": self.camera.to_dict(),
+                "yaw_deg": (None if self.yaw_deg is None
+                            else float(self.yaw_deg)),
+                "return_mode": self.return_mode}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "ObserveRequest":
+        protocol = str(_require(data, "protocol", "observe request"))
+        if protocol != PROTOCOL:
+            raise ProtocolViolation(
+                f"observe request speaks {protocol!r}, not {PROTOCOL!r}")
+        return_mode = str(_require(data, "return_mode", "observe request"))
+        if return_mode not in RETURN_MODES:
+            raise ProtocolViolation(
+                f"return_mode {return_mode!r}; expected one of {RETURN_MODES}")
+        yaw = _require(data, "yaw_deg", "observe request")
+        return cls(
+            episode_id=str(_require(data, "episode_id", "observe request")),
+            camera=CameraSpec.from_dict(_require(data, "camera", "observe request")),
+            yaw_deg=None if yaw is None else float(yaw),
+            return_mode=return_mode,
+            protocol=protocol,
+        )
+
+
+@dataclass(frozen=True)
+class EpisodeEndRequest:
+    """POST /episode_end: despawn the agent, keep PIE alive for the next
+    episode. The response is ``{"ok": true}`` and carries nothing worth a
+    dataclass."""
+
+    episode_id: str
+    protocol: str = PROTOCOL
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"protocol": self.protocol, "episode_id": self.episode_id}
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "EpisodeEndRequest":
+        protocol = str(_require(data, "protocol", "episode_end request"))
+        if protocol != PROTOCOL:
+            raise ProtocolViolation(
+                f"episode_end request speaks {protocol!r}, not {PROTOCOL!r}")
+        return cls(
+            episode_id=str(_require(data, "episode_id", "episode_end request")),
+            protocol=protocol,
+        )
