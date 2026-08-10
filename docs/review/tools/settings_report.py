@@ -69,6 +69,46 @@ def summarise(run: dict) -> dict:
     }
 
 
+def replay(setting: str, seed: int, replies: list[str], limit: int):
+    """Re-run the shift to recover what the model was actually sent.
+
+    The artefact keeps every reply and no prompt, so the only honest way to
+    show the input is to put the recorded replies back through the same world
+    and read the observation the harness builds. The system prompt is taken
+    from the artefact where it was recorded, never re-rendered.
+    """
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from embodiedbench.agent.courier.session import CourierSession
+    from embodiedbench.compiler.road_network import build_road_network
+    from embodiedbench.runtime.city.courier_env import CourierEnv
+
+    repo = Path(__file__).resolve().parents[3]
+    net = build_road_network(
+        repo / "vendor/vagen/vagen/envs/deliverybench/maps/citycore-paris",
+        map_name="citycore-paris")
+    env = CourierEnv(
+        net, seed=seed, order_count=1, difficulty="solo", stride="block",
+        narration=setting, enforce_signals=True,
+        album_root=Path("/data/murray/paris_streets_v2/citycore-paris"),
+        signal_album_root=Path("/data/murray/paris_lamps_real/citycore-paris"))
+    env.reset()
+    session = CourierSession(env, with_images=False)
+    turns = []
+    for reply in replies[:limit]:
+        observation = session.observe()
+        images = [f.label for f in session._frames(env.candidates())]
+        turn = session.step(reply or "")
+        turns.append({
+            "n": turn.step, "prompt": observation.text, "images": images,
+            "reply": reply or "", "action": turn.action or "—",
+            "status": turn.status, "error": turn.error or "",
+        })
+        if session.finished:
+            break
+    return turns, session.system_prompt()
+
+
 def _turn_rows(episode: dict, limit: int) -> str:
     out = []
     for turn in episode["transcript"][:limit]:
@@ -103,11 +143,17 @@ def build(directory: Path, out: Path, models: list[str], seed: int,
             episode = next((e for e in run["runs"] if e["seed"] == seed),
                            run["runs"][0] if run["runs"] else None)
             if episode is not None and model == models[0]:
+                replayed, system = replay(
+                    setting, episode["seed"],
+                    [t.get("reply") or "" for t in episode["transcript"]], turns)
                 shifts.append({
                     "setting": setting, "seed": episode["seed"],
                     "delivered": episode["summary"]["delivered"],
                     "termination": episode["termination"] or "out_of_turns",
                     "rows": _turn_rows(episode, turns),
+                    "turns": replayed,
+                    "system": run.get("system_prompt") or system,
+                    "system_recorded": bool(run.get("system_prompt")),
                 })
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(_html(table, shifts, models, seed, missing))
@@ -143,6 +189,36 @@ def _html(table, shifts, models, seed, missing) -> str:
     <thead><tr><th>#</th><th>action</th><th>its reasoning</th><th>outcome</th></tr></thead>
     <tbody>{shift['rows']}</tbody>
   </table>
+</section>""")
+
+    full = []
+    for shift in shifts:
+        note = ("" if shift["system_recorded"] else
+                '<p class="warn">This run predates prompt recording; the '
+                'system prompt below is today\'s.</p>')
+        turns_html = []
+        for turn in shift["turns"]:
+            pictures = "".join(f"<li>{html.escape(x)}</li>"
+                               for x in turn["images"]) or "<li>(none)</li>"
+            turns_html.append(f"""
+<details class="turn">
+  <summary>turn {turn['n']} &middot; <code>{html.escape(turn['action'])}</code>
+    &middot; {html.escape(turn['error'] or turn['status'])}</summary>
+  <h5>what the model was sent</h5>
+  <ul class="pics">{pictures}</ul>
+  <pre class="prompt">{html.escape(turn['prompt'])}</pre>
+  <h5>what it replied</h5>
+  <pre class="reply">{html.escape(turn['reply'])}</pre>
+</details>""")
+        full.append(f"""
+<section class="full">
+  <h3>{shift['setting']} <span class="sub">{LABEL[shift['setting']]}</span></h3>
+  {note}
+  <details class="turn">
+    <summary>system prompt &middot; {len(shift['system']) // 4} tokens</summary>
+    <pre class="prompt">{html.escape(shift['system'])}</pre>
+  </details>
+  {''.join(turns_html)}
 </section>""")
 
     warn = ""
@@ -196,6 +272,16 @@ td.thought{{color:var(--ink2);max-width:22ch}}
 td.n{{color:var(--ink3);font:500 11px var(--mono)}}
 tr.rejected td.out{{color:var(--warn);font-weight:600}}
 .warn{{color:var(--warn)}}
+details.turn{{background:var(--card);border:1px solid var(--line);
+  border-radius:8px;padding:8px 12px;margin:0 0 8px}}
+details.turn summary{{cursor:pointer;font:600 13px var(--mono)}}
+details.turn h5{{margin:12px 0 4px;font-size:12px;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.05em}}
+pre.prompt,pre.reply{{white-space:pre-wrap;word-break:break-word;font:12px/1.5 var(--mono);
+  background:var(--ground);border:1px solid var(--line);border-radius:6px;
+  padding:10px;max-height:460px;overflow:auto;margin:0}}
+ul.pics{{margin:4px 0;padding-left:20px;font:12px var(--mono);color:var(--ink2)}}
+section.full{{margin:0 0 26px}}
 .note{{border-left:3px solid var(--accent);padding:2px 0 2px 14px;
   color:var(--ink2);max-width:66ch;margin:0 0 26px}}
 </style>
@@ -225,6 +311,12 @@ the agent task, not at seeing.</p>
 <p class="lede">Seed {seed}, {html.escape(models[0])}. Same city, same order,
 same streets — only the amount the words say differs.</p>
 <div class="shifts">{''.join(panels)}</div>
+
+<h2>Everything the model was sent, and everything it said</h2>
+<p class="lede">The full observation for each turn, recovered by putting the
+recorded replies back through the same world, with the image captions the
+harness attached and the system prompt each setting was given.</p>
+{''.join(full)}
 </main>"""
 
 
