@@ -598,6 +598,32 @@ def walk_reply(env) -> str:
     return f'THOUGHT: go\n```\nwalk_to("{street}", "{heading}")\n```'
 
 
+class TestTheAsyncBoundary:
+    """The offload machinery itself, without a map: ``_drive`` must return a
+    sync body's value, and must fail LOUDLY -- not hang, not return None --
+    the day a stock adapter method grows a real await."""
+
+    def test_drive_returns_the_sync_bodied_value(self):
+        async def sync_bodied():
+            return 42
+
+        assert LiveCourierGymEnv._drive(sync_bodied()) == 42
+
+    def test_drive_propagates_the_sync_bodied_exception(self):
+        async def raises():
+            raise KeyError("boom")
+
+        with pytest.raises(KeyError, match="boom"):
+            LiveCourierGymEnv._drive(raises())
+
+    def test_drive_fails_loudly_on_a_real_await(self):
+        async def suspends():
+            await asyncio.sleep(0)
+
+        with pytest.raises(RuntimeError, match="thread offload"):
+            LiveCourierGymEnv._drive(suspends())
+
+
 @needs_maps
 class TestTheLiveTrainingAdapter:
     @pytest.fixture()
@@ -643,6 +669,40 @@ class TestTheLiveTrainingAdapter:
         run(env.reset(0))
         assert dict(service.render_counts) == before
         assert max(service.render_counts.values()) == 1
+        run(env.close())
+
+    def test_a_slow_render_does_not_freeze_the_event_loop(self, config, service):
+        """The F2 scenario, inverted: with a deliberately slow service, a
+        concurrent task on the same loop must keep ticking while ``step``'s
+        renders are in flight, because the blocking urllib call now runs on a
+        worker thread. Under the old in-loop blocking, the heartbeat could
+        not run at all until the render finished (expected ticks: 0)."""
+        env = _AdapterUnderTest(config)
+
+        async def main() -> int:
+            await env.reset(0)
+            service.delay_s = 0.25  # every render batch now takes a while
+            ticks = 0
+
+            async def heartbeat() -> None:
+                nonlocal ticks
+                while True:
+                    await asyncio.sleep(0.02)
+                    ticks += 1
+
+            pulse = asyncio.create_task(heartbeat())
+            try:
+                await env.step(walk_reply(env))
+            finally:
+                pulse.cancel()
+            return ticks
+
+        ticks = asyncio.run(main())
+        # The step's renders take >= 0.25 s; a responsive loop ticks every
+        # 20 ms, so even a heavily loaded CI machine clears five. A frozen
+        # loop scores zero.
+        assert ticks >= 5, f"event loop starved during renders (ticks={ticks})"
+        service.delay_s = 0.0
         run(env.close())
 
     def test_each_adapter_instance_gets_a_private_cache_dir(self, config):

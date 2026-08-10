@@ -13,6 +13,12 @@ construction seam. Copying its bookkeeping (session, counters, first
 observation) is eight lines; threading a factory hook through the stock class
 would be an edit to a file this branch is trying not to touch.
 
+``reset``/``step``/``close`` run their (synchronous) bodies on a worker
+thread via ``asyncio.to_thread``: verl shares one event loop across every
+sample in an AgentLoopWorker, and a blocking HTTP render inside an async
+method would freeze all of them for up to the render timeout. See "the async
+boundary" below.
+
 Config keys, on top of the inherited ones (``difficulty``, ``stride``,
 ``embodiment``, ``hazards``, ``max_images``, ``max_turns``, ``city``,
 ``reward_basis``, ``progress_weight``, ``image_max_side``, ``map_dir``):
@@ -48,13 +54,14 @@ the gitignored vendor/ checkout changes):
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import os
 import tempfile
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Coroutine
 
 from embodiedbench.training.vagen_courier_env import CourierGymEnv
 
@@ -151,9 +158,54 @@ class LiveCourierGymEnv(CourierGymEnv):
             self._render_pool = RenderPool(self.ue_endpoints)
         return self._render_pool
 
-    # ── VAGEN interface ──────────────────────────────────────────────────────
+    # ── the async boundary ───────────────────────────────────────────────────
+    #
+    # verl runs one asyncio loop per AgentLoopWorker with one task per batch
+    # sample; every await in every sample shares that loop. The stock adapter
+    # bodies are synchronous code in async clothing -- they never actually
+    # await -- which was tolerable while the blocking work was a local PIL
+    # open (~ms) and becomes a worker-wide freeze when it is an HTTP render
+    # with a 120 s timeout. So the sync bodies are driven to completion on a
+    # worker thread: the loop stays free to run every other sample's env
+    # interaction and generation awaits while this env waits on the wire.
+    #
+    # Thread safety is not at issue: verl drives one env instance strictly
+    # sequentially (reset, then step, then step...), so the env object is
+    # only ever touched by one thread at a time.
+
+    @staticmethod
+    def _drive(coro: Coroutine[Any, Any, Any]) -> Any:
+        """Run a sync-bodied coroutine to completion (stock adapter methods
+        never actually await). Loud failure if that assumption ever breaks.
+
+        ``coro.close()`` in the ``finally`` is a no-op after StopIteration
+        (the coroutine already finished) and a proper cleanup when the body
+        yielded; the placement matters -- a ``finally`` must not swallow the
+        returned value, and this one does not.
+        """
+        try:
+            coro.send(None)
+        except StopIteration as stop:
+            return stop.value
+        finally:
+            coro.close()
+        raise RuntimeError(
+            "stock adapter awaited mid-body; thread offload assumption broken")
 
     async def reset(self, seed: int) -> tuple[dict[str, Any], dict[str, Any]]:
+        return await asyncio.to_thread(self._drive, self._reset_impl(seed))
+
+    async def step(self, action_str: str) -> tuple[dict[str, Any], float, bool, dict[str, Any]]:
+        return await asyncio.to_thread(self._drive, super().step(action_str))
+
+    async def close(self) -> None:
+        # Off-thread too: cleanup deletes the instance's rendered frames,
+        # which is real I/O on a big cache.
+        return await asyncio.to_thread(self._drive, self._close_impl())
+
+    # ── VAGEN interface ──────────────────────────────────────────────────────
+
+    async def _reset_impl(self, seed: int) -> tuple[dict[str, Any], dict[str, Any]]:
         from embodiedbench.agent.courier.session import CourierSession
         from embodiedbench.compiler.road_network import build_road_network
 
@@ -209,7 +261,9 @@ class LiveCourierGymEnv(CourierGymEnv):
                      "embodiment": self.embodiment,
                      "backend": "live", "episode_id": episode_id}
 
-    async def close(self) -> None:
+    async def _close_impl(self) -> None:
+        # Awaiting the parent's sync-bodied coroutine does not suspend, so
+        # this whole body still drives to completion in one send.
         await super().close()
         if self._cache_scratch is not None:
             self._cache_scratch.cleanup()
