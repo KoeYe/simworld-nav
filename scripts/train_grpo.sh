@@ -40,7 +40,13 @@ if [ "$_DEV" = "NONE" ]; then
   exit 1
 fi
 export CUDA_VISIBLE_DEVICES=$_DEV
-export ROLLOUT_MEM=$_MEM
+# Computed from live free memory, unless the caller has already said what it
+# wants. It used to overwrite an explicit setting without a word, which on a
+# shared host is exactly when someone is overriding it: the computed fraction
+# asked for more than another user had left free, the rollout engine refused
+# to start, and the trainer stayed alive and produced no steps -- a run that
+# reads as slow rather than as broken.
+export ROLLOUT_MEM=${ROLLOUT_MEM:-$_MEM}
 export N_GPUS=$_N
 export SP=$_SP
 echo "PICKED devices=$_DEV vllm_mem=$_MEM gpus=$_N sp=$_SP"
