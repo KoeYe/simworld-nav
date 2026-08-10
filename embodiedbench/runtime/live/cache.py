@@ -17,13 +17,25 @@ Two properties are load-bearing:
   atomic write after, and a replay of the episode reads the file instead of
   asking the GPU to agree with itself.
 
-* **The sidecars come from the bake, not from the renderer.** Visibility is a
-  property of scene + camera geometry; identical poses give identical
-  visibility, so the measured sidecars of the baked albums stay valid for
-  live renders of the same poses. Absent a source, the album stays silent and
-  the mechanics stay off -- the same "silence is not consent" default as a
-  bare album, and ``summary()`` reports the enforce flags so the silence is
-  visible.
+* **The sidecars come from a bake, never from the renderer -- and only where
+  the bake's certification actually transfers.** Visibility is a property of
+  scene + camera geometry, so a measured claim carries over exactly when the
+  live camera stands where the bake's did. Street and obstacle frames do:
+  the live env renders them from the same street camera pose the obstacle
+  bake photographed, so ``obstacle_visibility.json`` transfers from
+  ``obstacle_sidecar_root``. Lamp close-ups do NOT: the bake certified
+  lens-aimed shots (camera between lamp and junction, pitched at the head)
+  and the v0 renderer stands at the node with pitch 0, so
+  ``signal_visibility.json`` is copied only on the explicit -- and loudly
+  warned -- ``signal_sidecar_root`` opt-in. Absent a source, the album stays
+  silent and the mechanic stays off, the same "silence is not consent"
+  default as a bare album; the live env's summary() reports the backend
+  state so the silence stays visible.
+
+* **The sidecars match the constructor, not history.** A reused episode
+  directory has its sidecars rewritten from the current sources and stripped
+  of any file the current config did not ask for, so a hazards=False run
+  cannot inherit a hazards=True run's claims.
 
 The frame filenames keep the album's leaky names (``_road_block``, ``_red``)
 *inside the cache* on purpose: the existing ``FrameAliases`` layer already
@@ -34,6 +46,7 @@ second implementation of a solved problem.
 from __future__ import annotations
 
 import base64
+import logging
 import os
 import shutil
 import tempfile
@@ -42,19 +55,38 @@ from pathlib import Path
 
 from .protocol import RenderResult
 
-# The two sidecars an album may carry, and this cache copies verbatim.
-SIDECAR_FILES = ("signal_visibility.json", "obstacle_visibility.json")
+logger = logging.getLogger(__name__)
 
 
 class LiveAlbum:
-    """A lazily-materialised album directory for one episode."""
+    """A lazily-materialised album directory for one episode.
+
+    ``obstacle_sidecar_root`` names the directory holding the baked
+    ``obstacle_visibility.json`` (the stock obstacle album); its claims
+    transfer because obstacle frames are rendered from the same street camera
+    pose the bake photographed.
+
+    ``signal_sidecar_root`` is an EXPLICIT OPT-IN, invalid for scored runs:
+    the bake certified lens-aimed close-ups (camera between lamp and
+    junction, pitched at the head), while the v0 live renderer stands at the
+    node with pitch 0, so the copied certification does not transfer and
+    red-light charges can attach to frames that do not show the lamp. Do not
+    use it for scored runs until a lamp_pose export lands and ``_lamp_item``
+    sends the aimed pose with ``pitch_deg``. Passing it logs a WARNING.
+
+    The two roots are separate because they are separate in the stock layout
+    too: signal_visibility.json lives in the real-lamp album and
+    obstacle_visibility.json in the (viewpoint-matched) obstacle album -- two
+    different trees no single source directory could express.
+    """
 
     def __init__(
         self,
         cache_root: str | Path,
         episode_id: str,
         *,
-        sidecar_source_root: str | Path | None = None,
+        obstacle_sidecar_root: str | Path | None = None,
+        signal_sidecar_root: str | Path | None = None,
     ):
         if not episode_id or "/" in episode_id or episode_id in (".", ".."):
             # The episode id becomes a directory name; a slash in it would
@@ -65,9 +97,11 @@ class LiveAlbum:
         self.root = Path(cache_root) / episode_id
         self.images = self.root / "images"
         self.images.mkdir(parents=True, exist_ok=True)
-        self.sidecar_source_root = (
-            Path(sidecar_source_root) if sidecar_source_root else None)
-        self._copy_sidecars()
+        self.obstacle_sidecar_root = (
+            Path(obstacle_sidecar_root) if obstacle_sidecar_root else None)
+        self.signal_sidecar_root = (
+            Path(signal_sidecar_root) if signal_sidecar_root else None)
+        self._sync_sidecars()
         # One writer at a time *within this instance*. The courier env is
         # single-threaded, but the training adapter runs under an async loop
         # and the cheap lock removes in-process double-writes. Across
@@ -75,22 +109,36 @@ class LiveAlbum:
         # from ``store``'s unique temp names and idempotent atomic publish.
         self._lock = threading.Lock()
 
-    def _copy_sidecars(self) -> None:
-        """Copy the visibility sidecars once, at creation.
+    def _sync_sidecars(self) -> None:
+        """Make the album's sidecars match this constructor's params, exactly.
 
-        Only the files the source actually has: a source with signal
-        visibility and no obstacle visibility produces an album with exactly
-        that shape, and the env's own gates then do what they do for any album
-        with that shape. Copying is idempotent -- an existing sidecar is left
-        alone, so a re-opened episode keeps the claims it started with.
+        Copied per source, split by validity (spec section 4): obstacle claims
+        from ``obstacle_sidecar_root``, signal claims -- opt-in only -- from
+        ``signal_sidecar_root``. A sidecar the current config did not ask for
+        is *removed*: the episode directory is deliberately reusable across
+        same-seed resets, and a stale file left by a differently-configured
+        run would silently switch on a mechanic -- hazards=False inheriting a
+        hazards=True run's claims was exactly that bug.
         """
-        if self.sidecar_source_root is None:
-            return
-        for name in SIDECAR_FILES:
-            source = self.sidecar_source_root / name
+        if self.signal_sidecar_root is not None:
+            logger.warning(
+                "signal_sidecar_root is set for episode %s: the signal bake "
+                "certified lens-aimed close-ups (camera between lamp and "
+                "junction, pitched at the head), but the v0 live renderer "
+                "stands at the node with pitch 0, so the copied certification "
+                "does not transfer and red-light charges can attach to frames "
+                "that do not show the lamp. Do not use for scored runs until "
+                "a lamp_pose export lands and _lamp_item sends the aimed pose "
+                "with pitch_deg.", self.episode_id)
+        for name, source_root in (
+                ("obstacle_visibility.json", self.obstacle_sidecar_root),
+                ("signal_visibility.json", self.signal_sidecar_root)):
             target = self.root / name
-            if source.exists() and not target.exists():
+            source = None if source_root is None else source_root / name
+            if source is not None and source.exists():
                 shutil.copyfile(source, target)
+            else:
+                target.unlink(missing_ok=True)
 
     # ── keys and paths ───────────────────────────────────────────────────────
 

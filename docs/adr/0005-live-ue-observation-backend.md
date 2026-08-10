@@ -52,8 +52,11 @@ same files.
 The visibility sidecars are **copied from a baked album, never invented**:
 visibility is a property of scene and camera geometry, so identical poses give
 identical visibility, and the measured claims stay valid for live renders of
-the same poses. Absent a sidecar source, the mechanics are silently off --
-the same "silence is not consent" default as a bare album.
+the same poses. *(Superseded in part -- see the addendum: the poses are
+identical for street/obstacle frames only, so the copy is split by validity
+and the signal sidecar is a warned opt-in.)* Absent a sidecar source, the
+mechanics are silently off -- the same "silence is not consent" default as a
+bare album.
 
 `LiveCourierGymEnv` (`embodiedbench/runtime/live/gym_adapter.py`) is the
 training adapter: a `CourierGymEnv` subclass that overrides only `reset` (the
@@ -129,3 +132,39 @@ dispatch over N stateless instances is the whole answer to it.
 - The SimWorld2 branch owns the service, the fleet and the track-B substrate
   (spec sections 6). Changes to the wire protocol are made in the spec copy
   and golden fixtures of **both** repos or not at all.
+
+## Addendum (2026-08-09): sidecar transfer is split by validity
+
+The decision text above argued the sidecar copy from "identical poses give
+identical visibility" and, three bullets later, admitted the v0 lamp-aiming
+simplification -- without ever connecting the two. The connection is the
+whole point: the premise holds only where the live camera stands where the
+bake's camera stood.
+
+- **Street and obstacle frames: the premise holds.** The live env renders
+  them from the same street camera pose the obstacle bake photographed, so
+  `obstacle_visibility.json` transfers and is copied from
+  `obstacle_sidecar_root`.
+- **Lamp close-ups: it does not.** `bake_real_lamps.py` stands the camera on
+  the lamp-junction line, yawed at the *lens* and pitched at the head -- its
+  own analysis notes that the 24 cm bracket offset alone is five degrees of
+  aim at 3 m, and that aiming at the pole base photographs the pavement. The
+  v0 live renderer stands at the node with pitch 0 (until this branch the
+  wire protocol could not even express pitch). The bake's legible set and
+  `lamp_px` measurements therefore certify frames the live env never
+  produces, and copying them can attach red-light charges to frames that do
+  not show the lamp -- the exact defect the visibility gate exists to
+  prevent.
+
+Consequently the single `sidecar_source_root` is replaced by
+`obstacle_sidecar_root` (valid transfer; obstacles chargeable whenever it is
+given) and `signal_sidecar_root` (an explicit opt-in that logs a WARNING and
+is documented as invalid for scored runs until a lamp_pose export lands and
+`_lamp_item` sends the bake's aimed pose with the protocol's new
+`pitch_deg`). The default live env therefore runs with obstacles chargeable
+and signals off. The split also matches the stock album layout -- the two
+sidecars live in *different* albums (real-lamp vs viewpoint-matched
+obstacle), which one source directory could never express. Finally, LiveAlbum
+now re-syncs the sidecars to its constructor's parameters whenever an episode
+directory is reused, so a stale file left by a differently-configured run
+cannot switch on a mechanic the current config did not ask for.

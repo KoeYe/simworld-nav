@@ -105,10 +105,15 @@ def sidecars(tmp_path, paris):
     return root
 
 
-def live_env(paris, renderer, tmp_path, *, sidecars=None, seed=3, **kwargs):
+def live_env(paris, renderer, tmp_path, *, sidecars=None, obstacle_sidecars=None,
+             signal_sidecars=None, seed=3, **kwargs):
+    """``sidecars`` points BOTH roots at one directory (the tests' generated
+    claims live together); the split params exercise the split itself."""
     env = LiveCourierEnv(
         paris, renderer, episode_id=EPISODE, cache_root=tmp_path / "cache",
-        sidecar_source_root=sidecars, seed=seed, **kwargs)
+        obstacle_sidecar_root=obstacle_sidecars or sidecars,
+        signal_sidecar_root=signal_sidecars or sidecars,
+        seed=seed, **kwargs)
     env.reset()
     return env
 
@@ -387,6 +392,77 @@ class TestSidecarsDecideTheCharges:
         assert env.red_crossings == 1
         assert env.sim_seconds - before >= RED_CROSSING_PENALTY_S
 
+    def test_signals_stay_off_without_the_explicit_opt_in(
+            self, paris, service, tmp_path, sidecars):
+        """The default live config: obstacle claims transfer (same street
+        camera pose as the bake), signal claims do not (the bake aimed at the
+        lens, the live camera stands at the node). With only
+        obstacle_sidecar_root set, obstacles charge and signals are OFF -- no
+        lamp frames, no red-light charge -- because a charge whose picture
+        may not show the lamp is the defect the gate exists to prevent."""
+        env = live_env(paris, UERenderClient(service.base_url), tmp_path,
+                       obstacle_sidecars=sidecars)
+        assert env.obstacles.visible, "obstacle claims should have transferred"
+        assert env.visible_signals is None, "signal claims must not transfer"
+        assert not (env.live_album.root / "signal_visibility.json").exists()
+
+        node = sorted(env.signalised)[0]
+        stand_at(env, node)
+        rows = env.candidates()
+        for row in rows:
+            assert row["signal_image"] is None
+        row = rows[0]
+        if signal_state(node, row["bearing"], env.sim_seconds) == "green":
+            env.sim_seconds += 60.0
+        outcome = env._step_to(row["k"])
+        assert outcome.ok and env.red_crossings == 0
+
+    def test_the_signal_opt_in_charges_and_warns(
+            self, paris, service, tmp_path, sidecars, caplog):
+        """signal_sidecar_root is usable -- but only past a WARNING that says
+        plainly the certification does not transfer in v0. With it set, the
+        stock red-crossing charge fires (that is what opting in means)."""
+        import logging
+
+        with caplog.at_level(logging.WARNING,
+                             logger="embodiedbench.runtime.live.cache"):
+            env = live_env(paris, UERenderClient(service.base_url), tmp_path,
+                           obstacle_sidecars=sidecars, signal_sidecars=sidecars)
+        assert any("does not transfer" in record.message
+                   for record in caplog.records), (
+            "opting in to the untransferable signal claims must warn")
+        assert env.visible_signals
+
+        node = sorted(env.signalised)[0]
+        stand_at(env, node)
+        rows = env.candidates()
+        row = rows[0]
+        if signal_state(node, row["bearing"], env.sim_seconds) == "green":
+            env.sim_seconds += 60.0
+        outcome = env._step_to(row["k"])
+        assert outcome.ok and outcome.reward == -RED_CROSSING_PENALTY
+        assert env.red_crossings == 1
+
+    def test_a_reused_dir_drops_sidecars_the_config_did_not_ask_for(
+            self, paris, service, tmp_path, sidecars):
+        """The cache dir is reusable across same-seed resets, so the sidecars
+        must match the *current* constructor, not history: an episode dir
+        populated by a both-sidecars run, reopened by an obstacle-only config,
+        loses the signal file and the signal mechanics with it."""
+        first = live_env(paris, UERenderClient(service.base_url), tmp_path,
+                         obstacle_sidecars=sidecars, signal_sidecars=sidecars)
+        assert (first.live_album.root / "signal_visibility.json").exists()
+
+        second = live_env(paris, UERenderClient(service.base_url), tmp_path,
+                          obstacle_sidecars=sidecars)
+        assert not (second.live_album.root / "signal_visibility.json").exists()
+        assert second.visible_signals is None
+        assert second.obstacles.visible
+
+        third = live_env(paris, UERenderClient(service.base_url), tmp_path)
+        assert not (third.live_album.root / "obstacle_visibility.json").exists()
+        assert third.obstacles.visible is None
+
     def test_without_sidecars_the_mechanics_are_silently_off(
             self, paris, service, tmp_path):
         """No claim, no charge -- byte for byte the bare-album default. The
@@ -530,7 +606,7 @@ class TestTheLiveTrainingAdapter:
         return {"backend": "live",
                 "ue_endpoints": str(endpoints),
                 "live_cache_root": str(tmp_path / "cache"),
-                "sidecar_source_root": str(sidecars),
+                "obstacle_sidecar_root": str(sidecars),
                 "difficulty": "solo", "stride": "block",
                 "max_turns": 3, "max_images": 2}
 
@@ -579,13 +655,23 @@ class TestTheLiveTrainingAdapter:
         with pytest.raises(ValueError, match="backend"):
             LiveCourierGymEnv({"backend": "album"})
 
-    def test_a_missing_sidecar_source_is_refused_not_skipped(self, tmp_path):
+    @pytest.mark.parametrize("key", ["obstacle_sidecar_root",
+                                     "signal_sidecar_root"])
+    def test_a_missing_sidecar_source_is_refused_not_skipped(self, tmp_path, key):
         """The same refusal the stock adapter makes for a missing album, for
         the same reason: a path that silently degrades to mechanics-off is a
         drift nobody decided on."""
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(FileNotFoundError, match=key):
             LiveCourierGymEnv({"backend": "live",
-                               "sidecar_source_root": str(tmp_path / "absent")})
+                               key: str(tmp_path / "absent")})
+
+    def test_the_retired_sidecar_source_root_key_is_refused(self):
+        """The old single-root key cannot express the split-by-validity rule;
+        a config still carrying it must fail loudly, not silently drop a
+        sidecar."""
+        with pytest.raises(ValueError, match="sidecar_source_root"):
+            LiveCourierGymEnv({"backend": "live",
+                               "sidecar_source_root": "/data/somewhere"})
 
     def test_the_registry_launch_line_names_a_real_class(self):
         """The launch line registers the adapter by dotted path

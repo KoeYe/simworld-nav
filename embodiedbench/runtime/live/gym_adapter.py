@@ -17,17 +17,25 @@ Config keys, on top of the inherited ones (``difficulty``, ``stride``,
 ``embodiment``, ``hazards``, ``max_images``, ``max_turns``, ``city``,
 ``reward_basis``, ``progress_weight``, ``image_max_side``, ``map_dir``):
 
-======================  ====================================================
-``backend``             must be ``"live"``; the key exists so a config that
-                        reaches the wrong class fails loudly
-``ue_endpoints``        path to endpoints.json (default: $EB_UE_ENDPOINTS)
-``live_cache_root``     where per-episode albums land; unset, a temporary
-                        directory that lives as long as this env object
-``sidecar_source_root`` a baked album directory whose visibility sidecars
-                        are copied into each episode's album; unset, the
-                        perceptual mechanics are silently off, exactly as
-                        for a bare album
-======================  ====================================================
+=========================  =================================================
+``backend``                must be ``"live"``; the key exists so a config
+                           that reaches the wrong class fails loudly
+``ue_endpoints``           path to endpoints.json (default: $EB_UE_ENDPOINTS)
+``live_cache_root``        parent under which this instance creates its own
+                           private cache directory; unset, a temporary
+                           directory that lives as long as this env object
+``obstacle_sidecar_root``  the baked obstacle album directory whose
+                           obstacle_visibility.json is copied into each
+                           episode's album -- a valid transfer, because
+                           obstacle frames use the same street camera pose
+                           as the bake; unset, obstacles are silently off,
+                           exactly as for a bare album
+``signal_sidecar_root``    EXPLICIT OPT-IN, invalid for scored runs: the
+                           signal bake certified lens-aimed close-ups the
+                           v0 renderer cannot reproduce, so copying its
+                           claims can charge red crossings on frames that
+                           do not show the lamp. Logs a WARNING when set.
+=========================  =================================================
 
 ``album_root`` is refused: the live backend renders its own frames, and a
 config carrying both would be two sources of truth about one directory.
@@ -63,7 +71,14 @@ class LiveCourierGymEnv(CourierGymEnv):
             raise ValueError(
                 "album_root has no meaning on the live backend -- frames are "
                 "rendered, not read. To reuse a baked album's visibility "
-                "claims, pass sidecar_source_root.")
+                "claims, pass obstacle_sidecar_root (and, opt-in, "
+                "signal_sidecar_root).")
+        if config.get("sidecar_source_root"):
+            raise ValueError(
+                "sidecar_source_root no longer exists: sidecar transfer is "
+                "split by validity. Pass obstacle_sidecar_root for the "
+                "obstacle claims (they transfer); signal_sidecar_root is a "
+                "separate, warned opt-in whose claims do NOT transfer in v0.")
         super().__init__(config)
 
         self.ue_endpoints = config.get("ue_endpoints")  # None -> $EB_UE_ENDPOINTS
@@ -74,14 +89,19 @@ class LiveCourierGymEnv(CourierGymEnv):
         else:
             self._cache_scratch = tempfile.TemporaryDirectory(prefix="courier-live-")
             self.live_cache_root = Path(self._cache_scratch.name)
-        raw_sidecar = config.get("sidecar_source_root")
-        self.sidecar_source_root = Path(raw_sidecar) if raw_sidecar else None
-        if self.sidecar_source_root is not None and not self.sidecar_source_root.exists():
-            # The same refusal the stock adapter makes for a missing album: a
-            # path that silently degrades to "mechanics off" is how training
-            # and evaluation drift apart without anyone deciding they should.
-            raise FileNotFoundError(
-                f"sidecar_source_root does not exist: {self.sidecar_source_root}")
+        def _sidecar_root(key: str) -> Path | None:
+            raw = config.get(key)
+            root = Path(raw) if raw else None
+            if root is not None and not root.exists():
+                # The same refusal the stock adapter makes for a missing
+                # album: a path that silently degrades to "mechanics off" is
+                # how training and evaluation drift apart without anyone
+                # deciding they should.
+                raise FileNotFoundError(f"{key} does not exist: {root}")
+            return root
+
+        self.obstacle_sidecar_root = _sidecar_root("obstacle_sidecar_root")
+        self.signal_sidecar_root = _sidecar_root("signal_sidecar_root")
         # The inherited ``_load_images`` sends the phone map only when
         # ``album_root`` is truthy -- its gate for "this is a sighted
         # condition". Live is sighted, so the gate opens; evaluation sends the
@@ -131,8 +151,13 @@ class LiveCourierGymEnv(CourierGymEnv):
             cache_root=self.live_cache_root,
             # hazards=false drops the visibility claims instead of the album
             # kwargs, which is the same lever the stock adapter pulls: no
-            # claim, no charge, and the frames stay clean street views.
-            sidecar_source_root=(self.sidecar_source_root if self.hazards else None),
+            # claim, no charge, and the frames stay clean street views. (A
+            # reused episode dir cannot smuggle stale claims back in either:
+            # LiveAlbum re-syncs the sidecars to these params on open.)
+            obstacle_sidecar_root=(self.obstacle_sidecar_root
+                                   if self.hazards else None),
+            signal_sidecar_root=(self.signal_sidecar_root
+                                 if self.hazards else None),
             **kwargs,
         )
         self._env.reset()

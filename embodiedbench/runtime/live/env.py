@@ -92,17 +92,27 @@ class LiveCourierEnv(CourierEnv):
         *,
         episode_id: str,
         cache_root: str | Path,
-        sidecar_source_root: str | Path | None = None,
+        obstacle_sidecar_root: str | Path | None = None,
+        signal_sidecar_root: str | Path | None = None,
         return_mode: str = RETURN_MODE_PATH,
         **courier_kwargs: Any,
     ):
+        # Sidecar transfer is split by validity (spec section 4):
+        # obstacle_sidecar_root's claims transfer because obstacle frames use
+        # the same street camera pose as the bake; signal_sidecar_root is an
+        # explicit opt-in that does NOT transfer in v0 (the bake aimed at the
+        # lens with pitch, this env stands at the node with pitch 0) and
+        # LiveAlbum warns loudly when it is set. Default: obstacles
+        # chargeable when a root is given, signals off.
         clash = sorted(set(_OWNED_ROOTS) & set(courier_kwargs))
         if clash:
             raise ValueError(
                 f"LiveCourierEnv owns the album roots; got {clash}. To reuse a "
-                "baked album's visibility claims, pass sidecar_source_root.")
+                "baked album's visibility claims, pass obstacle_sidecar_root "
+                "(and, opt-in, signal_sidecar_root).")
         self.live_album = LiveAlbum(cache_root, episode_id,
-                                    sidecar_source_root=sidecar_source_root)
+                                    obstacle_sidecar_root=obstacle_sidecar_root,
+                                    signal_sidecar_root=signal_sidecar_root)
         self.renderer = renderer
         self.return_mode = return_mode
         # Sticky for the episode once the backend dies, so a dead fleet costs
@@ -241,8 +251,11 @@ class LiveCourierEnv(CourierEnv):
         # its analysis produced. The live env has no lamp_pose export, so v0
         # stands at the node, eye 165 cm, yawed along the crossing -- same
         # close-up camera, aimed down the approach rather than at the lens.
-        # When a lamp_pose export lands, this method is the one place to
-        # refine; the service contract does not change.
+        # This is why the bake's signal_visibility.json does NOT certify these
+        # frames and signal_sidecar_root is a warned opt-in. When a lamp_pose
+        # export lands, this method is the one place to refine: stand on the
+        # lamp-junction line and send the computed pitch through the
+        # protocol's pitch_deg, which exists for exactly that day.
         node = self.network.nodes[node_id]
         return RenderItem(
             key=key, x_cm=node.x_cm, y_cm=node.y_cm, z_cm=LAMP_EYE_CM,
