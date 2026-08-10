@@ -2,9 +2,12 @@
 
 The multiplexing decision comes from the spec (section 3): renders are
 self-contained and the service restores the level between requests, so there
-is nothing to lease per episode. A batch goes to whichever healthy instance
-has the least in flight, ties broken round-robin, and more envs than
-instances is the normal case, not a degraded one.
+is nothing to lease per *render* episode. A batch goes to whichever healthy
+instance has the least in flight, ties broken round-robin, and more envs than
+instances is the normal case, not a degraded one. The one exception is
+Track B (spec 3b): an *embodied* episode is stateful on its instance, so
+``lease_embodied`` takes an instance out of render dispatch exclusively for
+the episode's duration.
 
 Failure handling is the spec's two-strikes rule (section 5): an instance
 failing health twice in a row is quarantined and readmitted on a successful
@@ -28,12 +31,13 @@ nothing until then, and file locks held across NFS are their own incident.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Iterator
 
 from .client import (
     RenderServiceError,
@@ -84,11 +88,18 @@ class _Member:
     in_flight: int = 0
     dispatched: int = 0     # lifetime batches, the round-robin tiebreak
     quarantined_at: float = 0.0
+    # The embodied episode holding this instance exclusively, or None. Track B
+    # endpoints are stateful -- one active embodied episode per instance -- so
+    # a leased member is withdrawn from /render dispatch entirely. In-process
+    # state only: the lease dies with the process that took it, and a fleet
+    # restart clears the service side anyway.
+    leased_to: str | None = None
 
     def state(self) -> dict[str, Any]:
         return {"id": self.id, "base_url": self.base_url,
                 "quarantined": self.quarantined, "strikes": self.strikes,
-                "in_flight": self.in_flight, "dispatched": self.dispatched}
+                "in_flight": self.in_flight, "dispatched": self.dispatched,
+                "leased_to": self.leased_to}
 
 
 class RenderPool:
@@ -209,10 +220,50 @@ class RenderPool:
 
     def _pick(self, exclude: set[str]) -> _Member | None:
         candidates = [m for m in self.members
-                      if not m.quarantined and m.id not in exclude]
+                      if not m.quarantined and m.leased_to is None
+                      and m.id not in exclude]
         if not candidates:
             return None
         return min(candidates, key=lambda m: (m.in_flight, m.dispatched, m.id))
+
+    # ── embodied leases (Track B) ────────────────────────────────────────────
+
+    @contextlib.contextmanager
+    def lease_embodied(self, episode_id: str) -> Iterator[UERenderClient]:
+        """One instance, exclusively, for one embodied episode.
+
+        Track B endpoints are stateful (spec 3b): one active embodied episode
+        per instance, ``busy`` otherwise. So an embodied episode does not
+        multiplex at request granularity the way renders do -- it takes the
+        least-loaded healthy instance out of /render dispatch for its whole
+        duration and gives it back on episode end or error, which the
+        ``with`` block guarantees.
+
+        The lease yields the member's *client*: the episode speaks to its one
+        instance directly, and the pool's job shrinks to bookkeeping. A
+        ``busy`` from an embodied endpoint follows the same no-strike rule as
+        a busy render -- it reaches the caller as ``ServiceBusy`` without
+        passing through the pool, so it cannot be counted against the
+        instance's health by construction.
+        """
+        member = self._pick(set())
+        if member is None:
+            # Same last resort as render: probe the quarantined before
+            # declaring the fleet dead.
+            self._readmit_one(set())
+            member = self._pick(set())
+        if member is None:
+            leased = sum(m.leased_to is not None for m in self.members)
+            raise NoHealthyInstance(
+                f"no instance free to lease for embodied episode {episode_id} "
+                f"({len(self.members)} configured, "
+                f"{sum(m.quarantined for m in self.members)} quarantined, "
+                f"{leased} leased)")
+        member.leased_to = episode_id
+        try:
+            yield member.client
+        finally:
+            member.leased_to = None
 
     # ── health ───────────────────────────────────────────────────────────────
 

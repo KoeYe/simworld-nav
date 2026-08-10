@@ -29,11 +29,17 @@ from typing import Any
 
 from .protocol import (
     PROTOCOL,
+    EpisodeEndRequest,
+    EpisodeRequest,
+    EpisodeResponse,
     Healthz,
+    ObserveRequest,
     ProtocolViolation,
     RenderBatch,
     RenderResponse,
     RenderResult,
+    WalkRequest,
+    WalkResponse,
     WireError,
 )
 
@@ -133,7 +139,7 @@ class UERenderClient:
         self.render_timeout_s = float(render_timeout_s)
         self.health_timeout_s = float(health_timeout_s)
 
-    # ── the two endpoints ────────────────────────────────────────────────────
+    # ── the Track A endpoints ────────────────────────────────────────────────
 
     def healthz(self) -> Healthz:
         data = self._request("GET", "/healthz", timeout_s=self.health_timeout_s)
@@ -143,6 +149,36 @@ class UERenderClient:
         data = self._request("POST", "/render", body=batch.to_dict(),
                              timeout_s=self.render_timeout_s)
         return RenderResponse.from_dict(data).results
+
+    # ── the Track B endpoints (spec 3b, stateful) ────────────────────────────
+    #
+    # Same taxonomy, same plumbing: a stateful endpoint that answers busy --
+    # someone else's episode holds the instance -- raises the same ServiceBusy
+    # a saturated /render does, and the caller decides what an episode does
+    # about it. The walk timeout on the wire is *sim* time; the HTTP timeout
+    # here stays the render timeout, because a lockstep engine faster than
+    # wall clock finishes a 120 s walk well inside it and a hung engine should
+    # be a failure, not a stall.
+
+    def episode(self, request: EpisodeRequest) -> EpisodeResponse:
+        data = self._request("POST", "/episode", body=request.to_dict(),
+                             timeout_s=self.render_timeout_s)
+        return EpisodeResponse.from_dict(data)
+
+    def walk(self, request: WalkRequest) -> WalkResponse:
+        data = self._request("POST", "/walk", body=request.to_dict(),
+                             timeout_s=self.render_timeout_s)
+        return WalkResponse.from_dict(data)
+
+    def observe(self, request: ObserveRequest) -> RenderResult:
+        data = self._request("POST", "/observe", body=request.to_dict(),
+                             timeout_s=self.render_timeout_s)
+        return RenderResult.from_dict(data)
+
+    def episode_end(self, request: EpisodeEndRequest) -> bool:
+        data = self._request("POST", "/episode_end", body=request.to_dict(),
+                             timeout_s=self.render_timeout_s)
+        return bool(data.get("ok"))
 
     # ── plumbing ─────────────────────────────────────────────────────────────
 
