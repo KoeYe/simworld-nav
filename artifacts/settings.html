@@ -1,0 +1,355 @@
+<title>Three vision settings, compared</title>
+<style>
+:root {
+  --ink:#17191d; --ink2:#4b515a; --ink3:#7b828d; --ground:#f7f6f3;
+  --card:#fffefc; --line:#e2dfd8; --accent:#1f5fa8; --warn:#a8501f;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink:#eceef2; --ink2:#a9b1bc; --ink3:#7a828e; --ground:#131417;
+    --card:#1b1d21; --line:#2c2f35; --accent:#7cb0f0; --warn:#e8a06a; }
+}
+:root[data-theme="dark"] { --ink:#eceef2; --ink2:#a9b1bc; --ink3:#7a828e;
+  --ground:#131417; --card:#1b1d21; --line:#2c2f35; --accent:#7cb0f0; --warn:#e8a06a; }
+:root[data-theme="light"] { --ink:#17191d; --ink2:#4b515a; --ink3:#7b828d;
+  --ground:#f7f6f3; --card:#fffefc; --line:#e2dfd8; --accent:#1f5fa8; --warn:#a8501f; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:40px 22px 80px}
+h1{font-size:30px;margin:0 0 6px;letter-spacing:-.015em;text-wrap:balance}
+h2{font-size:20px;margin:38px 0 10px}
+h3{font:600 16px/1.3 var(--mono);margin:0 0 2px}
+.lede{color:var(--ink2);max-width:64ch;margin:0 0 24px}
+.sub{display:block;font-size:12px;color:var(--ink3);font-weight:400;
+  letter-spacing:.02em}
+table{width:100%;border-collapse:collapse;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);
+  vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--ink3);font-weight:600}
+td.num{font:500 14px var(--mono);font-variant-numeric:tabular-nums}
+td.big{font-size:17px;font-weight:600}
+tr:last-child td{border-bottom:none}
+.shifts{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:900px){.shifts{grid-template-columns:repeat(3,1fr)}}
+.shift{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:14px 14px 4px;overflow-x:auto}
+.meta{color:var(--ink3);font-size:12.5px;margin:0 0 10px}
+table.turns th,table.turns td{padding:5px 7px;font-size:12.5px}
+table.turns{border:none;border-radius:0}
+td.act code{font:600 12px var(--mono);color:var(--accent)}
+td.thought{color:var(--ink2);max-width:22ch}
+td.n{color:var(--ink3);font:500 11px var(--mono)}
+tr.rejected td.out{color:var(--warn);font-weight:600}
+.warn{color:var(--warn)}
+.note{border-left:3px solid var(--accent);padding:2px 0 2px 14px;
+  color:var(--ink2);max-width:66ch;margin:0 0 26px}
+</style>
+<main>
+<h1>Three vision settings, compared</h1>
+<p class="lede">One world, three tellings. The tools are identical in all
+three; what changes is which facts the words are allowed to state outright.</p>
+<p class="note"><b>none</b> — direction, pedestrian lights and barriers exist
+only in the pictures.<br>
+<b>route</b> — the street the route takes is marked in the list; lights and
+barriers stay visual.<br>
+<b>all</b> — all three are in the text. A scripted text-only policy delivers
+20 of 20 here, so this is the floor: a model that cannot do it is failing at
+the agent task, not at seeing.</p>
+
+<h2>Results</h2>
+<table>
+<thead><tr>
+  <th>model</th><th>setting</th><th>delivered</th><th>turns</th>
+  <th>named a street not here</th><th>walked into a barrier</th>
+  <th>crossed red / waited</th><th>look()</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td>4b</td>
+  <td><b>none</b><span class="sub">everything visual</span></td>
+  <td class="num big">3/20<span class="sub">15%</span></td>
+  <td class="num">403</td>
+  <td class="num">31</td>
+  <td class="num">3</td>
+  <td class="num">10 / 9</td>
+  <td class="num">3</td>
+</tr>
+<tr>
+  <td>4b</td>
+  <td><b>route</b><span class="sub">direction told, hazards visual</span></td>
+  <td class="num big">12/20<span class="sub">60%</span></td>
+  <td class="num">391</td>
+  <td class="num">25</td>
+  <td class="num">0</td>
+  <td class="num">10 / 19</td>
+  <td class="num">0</td>
+</tr>
+<tr>
+  <td>4b</td>
+  <td><b>all</b><span class="sub">nothing needs vision</span></td>
+  <td class="num big">10/20<span class="sub">50%</span></td>
+  <td class="num">371</td>
+  <td class="num">16</td>
+  <td class="num">1</td>
+  <td class="num">3 / 13</td>
+  <td class="num">0</td>
+</tr></tbody>
+</table>
+
+<h2>The same shift, told three ways</h2>
+<p class="lede">Seed 0, 4b. Same city, same order,
+same streets — only the amount the words say differs.</p>
+<div class="shifts">
+<section class="shift">
+  <h3>none <span class="sub">everything visual</span></h3>
+  <p class="meta">seed 0 · delivered 0 ·
+     ended out_of_turns</p>
+  <table class="turns">
+    <thead><tr><th>#</th><th>action</th><th>its reasoning</th><th>outcome</th></tr></thead>
+    <tbody>
+<tr class="infra_error">
+  <td class="n">1</td>
+  <td class="act"><code>—</code></td>
+  <td class="thought"></td>
+  <td class="out">RuntimeError: HTTP 400: {&quot;error&quot;:{&quot;message&quot;:&quot;cannot identify image file &lt;_io.BytesIO object at 0x7e6c5e9557b0&gt; cannot identify image file &lt;_io.BytesIO object at 0x7e6c5e9557b0&gt;&quot;,&quot;type&quot;:&quot;BadRequestError&quot;,&quot;param&quot;:null,&quot;code&quot;:400}}</td>
+</tr></tbody>
+  </table>
+</section>
+<section class="shift">
+  <h3>route <span class="sub">direction told, hazards visual</span></h3>
+  <p class="meta">seed 0 · delivered 0 ·
+     ended out_of_turns</p>
+  <table class="turns">
+    <thead><tr><th>#</th><th>action</th><th>its reasoning</th><th>outcome</th></tr></thead>
+    <tbody>
+<tr class="accepted">
+  <td class="n">1</td>
+  <td class="act"><code>walk_to(&quot;Quai Beaubourg&quot;, &quot;south-west&quot;)</code></td>
+  <td class="thought">The route indicates going south-west along Quai Beaubourg, which matches the listed street and bearing. I must walk this street to proceed toward Rue Saint-Antoine.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">2</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;north-west&quot;)</code></td>
+  <td class="thought">The route now indicates going north-west along Rue Saint-Antoine, which matches the listed street and bearing. I must walk this street to proceed toward the pickup address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">3</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;north-west&quot;)</code></td>
+  <td class="thought">The route indicates going north-west along Rue Saint-Antoine, which matches the listed street and bearing. I must walk this street to proceed toward the pickup address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">4</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;north-west&quot;)</code></td>
+  <td class="thought">The route continues along Rue Saint-Antoine north-west, and the photograph confirms the street is clear. I must proceed to reach the pickup at 9 Rue Saint-Antoine.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">5</td>
+  <td class="act"><code>collect()</code></td>
+  <td class="thought">I am at the correct pickup address, Rue Saint-Antoine, outside number 9, as per the slip. I must now collect the parcel.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">6</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route indicates going south-east along Rue Saint-Antoine, which matches the listed street and bearing. I must walk this street to proceed toward Rue Oberkampf.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">7</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue Saint-Antoine south-east, and the photograph confirms the street is clear with a green pedestrian light. I must proceed to reach Rue Oberkampf.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">8</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;south&quot;)</code></td>
+  <td class="thought">The route now indicates going south along Rue de Sévigné, which matches the listed street and bearing. I must walk this street to proceed toward Rue Oberkampf.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">9</td>
+  <td class="act"><code>wait()</code></td>
+  <td class="thought">The route indicates going north-east along Rue de Sévigné, which matches the listed street and bearing. The photograph shows a red pedestrian light for this crossing, so I must wait before proceeding.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">10</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The pedestrian light for Rue de Sévigné north-east is now green, and the route continues along this street. I must proceed to reach Rue Oberkampf.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">11</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue de Sévigné north-east, and the photograph confirms the street is clear. I must proceed to reach Rue Oberkampf.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">12</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue de Sévigné north-east, and the map confirms the direction. I must proceed to reach Rue Oberkampf.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">13</td>
+  <td class="act"><code>walk_to(&quot;Rue de la Roquette&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The route now indicates going north-east along Rue de la Roquette, which matches the listed street and bearing. I must walk this street to proceed toward Rue Oberkampf.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">14</td>
+  <td class="act"><code>walk_to(&quot;Rue de Flandre&quot;, &quot;north&quot;)</code></td>
+  <td class="thought">The route indicates going north along Rue de Flandre, and the photograph shows a green pedestrian light, so I can proceed.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">15</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route now indicates going south-east along Rue Oberkampf, which matches the listed street and bearing. The photograph confirms the street is clear, and I must proceed to reach the drop-off address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">16</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue Oberkampf south-east, and the photograph confirms the street is clear. I must proceed to reach number 25.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">17</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue Oberkampf south-east, and the map confirms the direction. I must proceed to reach number 25.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">18</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue Oberkampf south-east, and the map confirms the direction. I must proceed to reach number 25.</td>
+  <td class="out">accepted</td>
+</tr></tbody>
+  </table>
+</section>
+<section class="shift">
+  <h3>all <span class="sub">nothing needs vision</span></h3>
+  <p class="meta">seed 0 · delivered 0 ·
+     ended out_of_turns</p>
+  <table class="turns">
+    <thead><tr><th>#</th><th>action</th><th>its reasoning</th><th>outcome</th></tr></thead>
+    <tbody>
+<tr class="accepted">
+  <td class="n">1</td>
+  <td class="act"><code>walk_to(&quot;Quai Beaubourg&quot;, &quot;south-west&quot;)</code></td>
+  <td class="thought">The route shows the next street is Rue Saint-Antoine, and the arrow points south-west, matching the listed bearing. I must walk to &quot;Quai Beaubourg&quot; going south-west as per the route.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">2</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;north-west&quot;)</code></td>
+  <td class="thought">The route now points to Rue Saint-Antoine, and the arrow indicates north-west, matching the listed bearing. I must walk to &quot;Rue Saint-Antoine&quot; going north-west as per the route.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">3</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;north-west&quot;)</code></td>
+  <td class="thought">The route indicates continuing along Rue Saint-Antoine north-west, which matches the bearing listed. I must walk this street to reach the pickup address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">4</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;north-west&quot;)</code></td>
+  <td class="thought">The route still indicates continuing along Rue Saint-Antoine north-west, and the bearing matches the listed direction. I must proceed along this street to reach the pickup address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">5</td>
+  <td class="act"><code>collect()</code></td>
+  <td class="thought">I am at the correct pickup address, Rue Saint-Antoine, outside number 9, as per the slip. I must now collect the parcel.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">6</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route now indicates heading south-east along Rue Saint-Antoine, which matches the bearing listed. I must walk this street to continue toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">7</td>
+  <td class="act"><code>walk_to(&quot;Rue Saint-Antoine&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue Saint-Antoine south-east, matching the bearing listed. I must proceed along this street to reach the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">8</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;south&quot;)</code></td>
+  <td class="thought">The route now indicates turning onto Rue de Sévigné going south, which matches the bearing listed. I must walk this street to continue toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">9</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The route indicates continuing along Rue de Sévigné north-east, matching the bearing listed. I must walk this street to proceed toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">10</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue de Sévigné north-east, matching the bearing listed. I must walk this street to proceed toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">11</td>
+  <td class="act"><code>walk_to(&quot;Rue de S\u00e9vign\u00e9&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The route indicates continuing along Rue de Sévigné north-east, matching the bearing listed. I must walk this street to proceed toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">12</td>
+  <td class="act"><code>walk_to(&quot;Rue de la Roquette&quot;, &quot;north-east&quot;)</code></td>
+  <td class="thought">The route now indicates turning onto Rue de la Roquette going north-east, matching the bearing listed. I must walk this street to proceed toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">13</td>
+  <td class="act"><code>walk_to(&quot;Rue de Flandre&quot;, &quot;north&quot;)</code></td>
+  <td class="thought">The route indicates turning onto Rue de Flandre going north, matching the bearing listed, and the pedestrian light is green. I must walk this street to proceed toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">14</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route now indicates turning onto Rue Oberkampf going south-east, matching the bearing listed. I must walk this street to proceed toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">15</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route indicates continuing along Rue Oberkampf south-east, matching the bearing listed. I must walk this street to reach the delivery address at number 25.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">16</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue Oberkampf south-east, matching the bearing listed. I must walk this street to reach the delivery address at number 25.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">17</td>
+  <td class="act"><code>walk_to(&quot;Rue Oberkampf&quot;, &quot;south-east&quot;)</code></td>
+  <td class="thought">The route continues along Rue Oberkampf south-east, matching the bearing listed. I must walk this street to reach the delivery address at number 25.</td>
+  <td class="out">accepted</td>
+</tr>
+<tr class="accepted">
+  <td class="n">18</td>
+  <td class="act"><code>walk_to(&quot;Avenue des Rosiers&quot;, &quot;west&quot;)</code></td>
+  <td class="thought">The route indicates turning onto Avenue des Rosiers going west, as the south-east path is blocked. I must walk this street to proceed toward the delivery address.</td>
+  <td class="out">accepted</td>
+</tr></tbody>
+  </table>
+</section></div>
+</main>
