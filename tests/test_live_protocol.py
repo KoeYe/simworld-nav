@@ -116,6 +116,23 @@ class TestTheGoldenBytes:
         assert obstacle.obstacle.kind == "road_block"
         assert obstacle.obstacle.viewpoint == "carriageway"
 
+    def test_pitch_deg_zero_is_omitted_so_the_golden_bytes_cannot_move(self):
+        """The field postdates the fixtures. Serialised-only-when-nonzero is
+        what lets both repos gain it without either set of golden bytes
+        changing -- an item parsed from the fixture must carry pitch 0.0 and
+        serialise without the key."""
+        batch = RenderBatch.from_dict(
+            json.loads((GOLDEN / "render_request.json").read_text()))
+        assert all(item.pitch_deg == 0.0 for item in batch.requests)
+        assert all("pitch_deg" not in item.to_dict() for item in batch.requests)
+
+    def test_a_nonzero_pitch_deg_round_trips(self):
+        item = RenderItem(key="n0/toward_n1", x_cm=1.0, y_cm=2.0, z_cm=165.0,
+                          yaw_deg=48.1, render_kind="lamp", pitch_deg=12.5)
+        data = item.to_dict()
+        assert data["pitch_deg"] == 12.5
+        assert RenderItem.from_dict(data) == item
+
     def test_a_wrong_protocol_string_is_refused_not_guessed_at(self):
         data = json.loads((GOLDEN / "render_request.json").read_text())
         data["protocol"] = "nav-render/v1"

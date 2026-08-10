@@ -67,6 +67,13 @@ process speaking SPEAR RPC to its instance). All requests carry
     "uptime_s": float}`
 `map_name` uses simworld-nav naming: `"citycore-paris"`.
 
+`busy` semantics (normative): a 503/`busy` means "instance saturated, try
+again" — it is TRANSIENT. Callers must not count it as a health strike, must
+not quarantine on it, and must not degrade an episode because of it; the
+correct client behavior is failover to another instance and bounded backoff,
+then skip the batch (the cache miss remains, so the next lookup retries).
+Only connectivity failures and `engine_down` are death signals.
+
 ### Statelessness rule (the multiplexing decision)
 
 Renders are **self-contained**: every request carries its full camera spec
@@ -107,6 +114,10 @@ Request:
   these; north=+x, east=+y, yaw as baked). Top-level `camera` is the default;
   a per-request `camera` overrides it (lamp close-ups: 1280 px, FOV 40°,
   eye 165 cm per the bake).
+- `pitch_deg` (optional, default 0, omitted when 0) — camera pitch in UE
+  degrees. Exists so an aimed lamp close-up (camera between lamp and
+  junction, aimed at the lens with computed pitch — the bake's geometry)
+  becomes expressible the day a lamp_pose export lands; v0 callers send 0.
 - `signal` non-null ⇒ before capture the service flips the LED material for
   that approach's lamp to `state` using the measured recipe
   (`embodiedbench/compiler/ue_materials.py`: component override token
@@ -153,11 +164,26 @@ Rules:
   aliasing, PIL open in the training adapter) must not be able to tell a
   live album from a baked one. The cache dir *is* an album that fills
   lazily.
-- Sidecars are copied at reset from `sidecar_source_root` (the existing
-  baked albums): visibility is a property of scene + camera geometry, not of
-  the renderer, so identical poses ⇒ identical visibility. Absent sidecar
-  source ⇒ same silent-off semantics as today (documented, and summary()
-  must report it).
+- The cache dir is **private to one env instance** (a per-process,
+  per-instance unique directory under the configured cache root). Same-seed
+  resets of that instance reuse it (idempotency); nothing else shares it —
+  cross-worker sharing invites write races and config cross-contamination
+  for zero training benefit.
+- The episode_id must encode every env-config axis that changes pixels or
+  keys (map, seed, and a short digest of difficulty/stride/embodiment/
+  hazards), not the seed alone.
+- Sidecar transfer is split by validity: `obstacle_visibility.json` is
+  copied from `obstacle_sidecar_root` — obstacle frames use the *same street
+  camera pose* as the bake, so the certification transfers. The signal
+  sidecar does NOT transfer in v0: the bake certified lens-aimed close-ups
+  (camera between lamp and junction, pitched at the head), which the v0
+  protocol/renderer cannot reproduce — so copying it would attach red-light
+  charges to frames that may not show the lamp. `signal_sidecar_root` exists
+  but is an explicit opt-in documented as invalid until a lamp_pose export
+  lands and `pitch_deg`-aimed renders replace the node-standing
+  simplification. Default live env: obstacles chargeable, signals off.
+  Absent sidecar ⇒ same silent-off semantics as a bare album, and summary()
+  must report the live backend state.
 - Same (episode_id, key) renders exactly once per process (idempotent cache
   hit) — required for within-runtime replay determinism
   (`observation_media_hash`).

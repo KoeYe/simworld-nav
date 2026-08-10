@@ -11,7 +11,9 @@ bytes are the protocol" goes through it.
 Optional fields follow the spec's own examples exactly:
 
 * a request item *omits* ``signal``/``obstacle``/``camera`` when unset (the
-  street-view example carries none of the three);
+  street-view example carries none of the three), and omits ``pitch_deg``
+  when it is zero -- the fixtures predate the field, and "omitted when
+  default" is what keeps them byte-identical;
 * an ok result *carries* both ``path`` and ``png_base64``, one of them null,
   because the example does -- the receiver learns the return mode from which
   one is set, not from which key exists;
@@ -158,6 +160,12 @@ class RenderItem:
     z_cm: float
     yaw_deg: float
     render_kind: str
+    # Camera pitch in UE degrees. Exists so an aimed lamp close-up (camera
+    # between lamp and junction, aimed at the lens with computed pitch -- the
+    # bake's geometry) becomes expressible the day a lamp_pose export lands;
+    # v0 callers send 0. Serialised only when nonzero, so the golden fixtures
+    # -- which predate the field -- stay byte-identical.
+    pitch_deg: float = 0.0
     signal: SignalSpec | None = None
     obstacle: ObstacleSpec | None = None
     camera: CameraSpec | None = None    # overrides the batch default
@@ -169,6 +177,8 @@ class RenderItem:
             "z_cm": float(self.z_cm), "yaw_deg": float(self.yaw_deg),
             "render_kind": self.render_kind,
         }
+        if self.pitch_deg:
+            out["pitch_deg"] = float(self.pitch_deg)
         if self.signal is not None:
             out["signal"] = self.signal.to_dict()
         if self.obstacle is not None:
@@ -189,6 +199,7 @@ class RenderItem:
             z_cm=float(_require(data, "z_cm", "render item")),
             yaw_deg=float(_require(data, "yaw_deg", "render item")),
             render_kind=str(_require(data, "render_kind", "render item")),
+            pitch_deg=float(data.get("pitch_deg", 0.0)),
             signal=SignalSpec.from_dict(signal) if signal is not None else None,
             obstacle=ObstacleSpec.from_dict(obstacle) if obstacle is not None else None,
             camera=CameraSpec.from_dict(camera) if camera is not None else None,
