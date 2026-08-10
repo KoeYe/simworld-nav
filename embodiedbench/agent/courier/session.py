@@ -182,7 +182,13 @@ class CourierSession:
     # ── what the courier is shown ────────────────────────────────────────────
 
     def system_prompt(self) -> str:
-        return build_system_prompt(city=self.city, tools=self.tools)
+        # Taken from the environment, never configured separately. A prompt that
+        # promises narrated lights to a courier whose lights are only in the
+        # pictures is teaching a rule that does not hold, and the two would
+        # drift apart the first time either was changed alone.
+        return build_system_prompt(
+            city=self.city, tools=self.tools,
+            narration=getattr(self.env, "narration", "none"))
 
     def observe(self) -> Observation:
         rows = self.env.candidates()

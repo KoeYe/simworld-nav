@@ -26,23 +26,7 @@ this junction by name and bearing, and a photograph looking down them. Where the
 next junction is metres off, or the street turns, the photograph is mostly the
 building opposite — a view that does not reach, not an empty street.
 
-WHERE EACH THING YOU NEED COMES FROM. Three sources, and no one of them is
-enough to reach a door.
-
-  The map on your phone tells you WHICH WAY. It draws a line from where you are
-  to where you are going. It does not tell you the name of the street to take,
-  and the names printed on it are too small to read — do not try. What you read
-  off the map is a DIRECTION: the line leaves you heading roughly north-east, or
-  south, or west.
-
-  The junction you are standing at tells you WHAT THE STREETS ARE CALLED. Only
-  the streets in that list exist for you this turn. A street anywhere else in
-  the city — including one further along your route — cannot be walked from
-  here, however clearly the line passes through it.
-
-  The photographs tell you WHETHER YOU CAN GO. Whether the pedestrian light is
-  red, whether a barrier is across the road, whether the pavement is choked:
-  none of that is in any text, here or anywhere.
+{sources}
 
 SO EVERY MOVE IS THE SAME THREE STEPS:
   1. Look at the map. Which way does the line leave you — which compass point?
@@ -240,7 +224,8 @@ REQUIRED_FIELDS = {
 }
 
 
-def build_system_prompt(*, city: str, tools: list[Tool]) -> str:
+def build_system_prompt(*, city: str, tools: list[Tool],
+                        narration: str = "none") -> str:
     """Compose the system prompt from the tools this environment really has."""
     # Macros are described in skills.py but no executor dispatches them, and
     # parse_reply rightly rejects a name it cannot run -- three of those in a row
@@ -273,8 +258,45 @@ def build_system_prompt(*, city: str, tools: list[Tool]) -> str:
     # takes away, so that condition's prompt demonstrated a tool it had removed.
     no_arg = next((t.name for t in tools if not t.params), "")
     no_arg_example = f"{no_arg}()" if no_arg else "a call with empty brackets"
+    # Each setting is told the truth about itself and nothing else. A prompt
+    # that keeps telling a narrated courier the colour is only in the picture
+    # is teaching a rule that does not hold, and one that leaves the sentence
+    # out of the visual setting removes the only warning that it does.
+    if narration == "all":
+        sources = (
+            "EVERYTHING YOU NEED IS IN THE WORDS. The list of streets below\n"
+            "carries all of it: which street the route takes, marked *** THE ROUTE\n"
+            "GOES THIS WAY ***; whether a pedestrian light is red or green; and\n"
+            "whether a street is blocked. The photographs are there to look at and\n"
+            "you are not required to read anything out of them.")
+    elif narration == "route":
+        sources = (
+            "WHERE EACH THING COMES FROM. Two sources, and you need both.\n\n"
+            "  - THE LIST OF STREETS tells you which way to go. The street the\n"
+            "    route takes is marked *** THE ROUTE GOES THIS WAY ***. You do not\n"
+            "    have to work the direction out of the map.\n"
+            "  - THE PHOTOGRAPHS are the only place a red light or a barrier\n"
+            "    appears. Nothing in the words will ever tell you the colour of a\n"
+            "    light or that a street is shut. Look before you commit.")
+    else:
+        sources = (
+            "WHERE EACH THING YOU NEED COMES FROM. Three sources, and no one of "
+            "them is\nenough to reach a door.\n\n"
+            "  The map on your phone tells you WHICH WAY. It draws a line from "
+            "where you are\n  to where you are going, and the streets are named "
+            "on it.\n\n"
+            "  The junction you are standing at tells you WHAT THE STREETS ARE "
+            "CALLED. Only\n  the streets in that list exist for you this turn. A "
+            "street anywhere else in\n  the city — including one further along "
+            "your route — cannot be walked from\n  here, however clearly the "
+            "line passes through it.\n\n"
+            "  The photographs tell you WHETHER YOU CAN GO. Whether the "
+            "pedestrian light is\n  red, whether a barrier is across the road, "
+            "whether the pavement is choked:\n  none of that is in any text, "
+            "here or anywhere.")
     return SYSTEM_TEMPLATE.format(
         city=city,
+        sources=sources,
         tool_menu=render_tool_menu(tools),
         procedures=render_procedures(available=names),
         blocked_advice=blocked_advice,
@@ -355,6 +377,16 @@ def render_candidates(rows: list[dict]) -> str:
             # the menu after a refusal is byte-identical to the menu before,
             # and a policy re-picks the barrier -- 52 of 93 times, measured.
             parts.append("(BLOCKED — you tried this and could not get past)")
+        if row.get("on_route"):
+            # Under the narrated settings this is the whole of the direction
+            # information, so it is stated plainly rather than hinted at.
+            parts.append("*** THE ROUTE GOES THIS WAY ***")
+        if row.get("told_signal") == "red":
+            parts.append("pedestrian light: RED")
+        elif row.get("told_signal") == "green":
+            parts.append("pedestrian light: green")
+        if row.get("told_blocked"):
+            parts.append("BLOCKED — there is a barrier across it")
         if row.get("refused"):
             # The strongest place to put a refusal is the line being chosen
             # from. Told only in prose, it was ignored: the identical call was

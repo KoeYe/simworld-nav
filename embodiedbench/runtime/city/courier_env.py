@@ -626,6 +626,7 @@ class CourierEnv:
         shift_seconds: float | None = None,
         condition: str = Condition.FULL,
         enforce_signals: bool | None = None,
+        narration: str = "none",
         enforce_obstacles: bool | None = None,
         difficulty: str | None = None,
         queue_depth: int | None = None,
@@ -672,6 +673,23 @@ class CourierEnv:
         # signal album is the evidence; without one the penalty would punish
         # information the environment withholds, which is what made the score
         # anti-correlated with delivery before this existed.
+        # Which facts the text is allowed to state outright. An axis of its own,
+        # orthogonal to Condition: that ladder takes tools away, this one moves
+        # information between the pictures and the words while the tools stay
+        # exactly the same.
+        #
+        #   "none"   direction, lights and barriers are in the images only.
+        #            The benchmark as designed.
+        #   "route"  the route's next street is named in the text; lights and
+        #            barriers stay in the pictures. Isolates route-reading --
+        #            the one thing measurement says current models cannot do --
+        #            from the two visual jobs they have never been tested on.
+        #   "all"    every one of the three is stated in the text. A text-only
+        #            policy can solve this, which is the point: it is the
+        #            solvability floor the other two are measured against.
+        if narration not in ("none", "route", "all"):
+            raise ValueError(f"narration is none, route or all, not {narration!r}")
+        self.narration = narration
         if enforce_signals is None:
             enforce_signals = signal_album_root is not None or SIGNAL_FRAMES_AVAILABLE
         self.enforce_signals = bool(enforce_signals)
@@ -960,6 +978,20 @@ class CourierEnv:
             if px * scale * scale >= self.SERVED_MIN_PIXELS:
                 readable.add(key)
         return readable
+
+    def _is_route_step(self, toward: str) -> bool:
+        """Is walking to ``toward`` the next step of the shortest route?
+
+        Uses the same routing the phone draws, so the narrated setting says
+        exactly what the picture would have shown -- otherwise the two settings
+        would be different tasks rather than the same task told two ways.
+        """
+        order = next((o for o in self.orders if o.live), None)
+        if order is None:
+            return False
+        target = (order.dropoff if order.picked_up else order.pickup).nearest_node
+        route = self.route_nodes(self.node_id, target)
+        return bool(route and len(route) > 1 and route[1] == toward)
 
     def signal_is_visible(self, node_id: str, toward: str) -> bool:
         """Can the courier standing at ``node_id`` see the lamp for this crossing?
@@ -1603,6 +1635,17 @@ class CourierEnv:
             row["image"] = self.frame_for(self.node_id, row["node"])
             row["signal_image"] = self.signal_frame_for(self.node_id, row["node"])
             row["blocked_seen"] = (self.node_id, row["node"]) in self.witnessed_blocks
+            if self.narration in ("route", "all"):
+                # Named, not merely hinted: under this setting the text has to
+                # be enough on its own, or the setting measures nothing.
+                row["on_route"] = self._is_route_step(row["node"])
+            if self.narration == "all":
+                row["told_blocked"] = self.obstacles.blocks(self.node_id, row["node"])
+                row["told_signal"] = (
+                    signal_state(self.node_id, row["bearing"], self.sim_seconds)
+                    if (self.enforce_signals and self.node_id in self.signalised
+                        and self.signal_is_visible(self.node_id, row["node"]))
+                    else None)
             if self.stride == Stride.BLOCK:
                 # What one call actually buys, so the courier can budget from the
                 # number it is shown. ``distance_m`` stays as it was -- the step

@@ -113,6 +113,7 @@ def run_episode(paris, args, seed: int, scratch: Path) -> dict:
     else:
         kwargs["obstacle_album_root"] = OBSTACLES
 
+    kwargs["narration"] = args.narration
     env = CourierEnv(paris, **kwargs)
     env.reset()
     session = CourierSession(env, city="Paris")
@@ -223,6 +224,11 @@ def main() -> int:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="qwen3.5-9b")
+    parser.add_argument("--narration", default="none",
+                        choices=("none", "route", "all"),
+                        help="which facts the text may state outright: none "
+                             "(all three visual), route (direction told), "
+                             "all (nothing needs vision)")
     parser.add_argument("--tier", default="solo")
     parser.add_argument("--stride", default="block")
     parser.add_argument("--embodiment", default="human_on_foot")
@@ -277,6 +283,7 @@ def main() -> int:
     total = sum(r["turns"] for r in scored)
     out = {
         "model": args.model, "tier": args.tier, "stride": args.stride,
+        "narration": args.narration,
         "embodiment": args.embodiment, "seeds": args.seeds,
         "scored_episodes": len(scored),
         "aborted_by_infrastructure": len(aborted),

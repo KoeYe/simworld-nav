@@ -1322,3 +1322,60 @@ class TestTheMapAdviceCannotBeHalfFollowed:
         assert "do not type a name off the map that is not in the list" in section
         # The numbered order has to put finding it in the list before walking.
         assert section.index("find one of those") < section.index("walk that one")
+
+
+class TestTheThreeVisionSettings:
+    """Three tasks, one world: which facts the words are allowed to state.
+
+    none   direction, lights and barriers live in the pictures only.
+    route  the route's next street is named in the text; lights and barriers
+           stay visual. Isolates route-reading -- the one thing measurement
+           says current models cannot do -- from the two visual jobs they have
+           never been tested on.
+    all    all three are stated. A text-only policy can solve this, which is
+           the point: it is the floor the other two are measured against.
+
+    What each setting must never do is describe itself wrongly, so the prompt
+    is taken from the environment rather than configured beside it.
+    """
+
+    def env(self, paris, narration):
+        env = CourierEnv(paris, seed=0, order_count=1, narration=narration,
+                         enforce_signals=True)
+        env.reset()
+        return env
+
+    def test_it_refuses_a_setting_it_does_not_have(self, paris):
+        with pytest.raises(ValueError):
+            CourierEnv(paris, seed=0, narration="sometimes")
+
+    def test_only_the_narrated_settings_name_the_route(self, paris):
+        for narration, expected in (("none", False), ("route", True),
+                                    ("all", True)):
+            rows = self.env(paris, narration).candidates()
+            named = any(r.get("on_route") for r in rows)
+            assert named is expected or not expected, narration
+            if not expected:
+                assert not any("on_route" in r for r in rows), narration
+
+    def test_only_all_states_lights_and_barriers(self, paris):
+        for narration in ("none", "route"):
+            rows = self.env(paris, narration).candidates()
+            assert not any("told_signal" in r or "told_blocked" in r
+                           for r in rows), narration
+        rows = self.env(paris, "all").candidates()
+        assert all("told_signal" in r and "told_blocked" in r for r in rows)
+
+    def test_the_prompt_says_what_its_own_world_does(self, paris):
+        from embodiedbench.agent.courier.session import CourierSession
+
+        for narration, must, must_not in (
+            ("none", "none of that is in any text", "THE ROUTE GOES THIS WAY"),
+            ("route", "only place a red light", "you are not required"),
+            ("all", "EVERYTHING YOU NEED IS IN THE WORDS",
+             "none of that is in any text"),
+        ):
+            prompt = CourierSession(self.env(paris, narration),
+                                    with_images=False).system_prompt()
+            assert must in prompt, narration
+            assert must_not not in prompt, narration
