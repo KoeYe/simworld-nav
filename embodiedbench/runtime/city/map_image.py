@@ -207,7 +207,7 @@ def _halo_text(x: float, y: float, text: str, cls: str = "ui",
             f'<text class="{cls}" {common}>{body}</text>')
 
 
-BAR_H = 126.0
+BAR_H = 150.0
 
 
 def _text_box(x: float, y: float, half_w: float, half_h: float,
@@ -499,7 +499,7 @@ def render_map(
             # centred on its anchor, so half of it hangs either side. Clamped
             # on that, not on a guess: "Rue Mouffetard" was losing its R off
             # the left edge and "you are here" its last letter off the right.
-            parts.append(_edge_safe_text(x, max(y - 34, BAR_H + 26),
+            parts.append(_edge_safe_text(x, max(y - 34, BAR_H + 50),
                                          destination_label, width_px))
 
     # ── the courier ──────────────────────────────────────────────────────────
@@ -591,9 +591,9 @@ def render_map(
             f'<path d="M0,-24 L17,3 L7,3 L7,24 L-7,24 L-7,3 L-17,3 Z" '
             f'fill="#ffffff"/></g>')
         said = f"head {next_heading}" if next_heading else "take"
-        parts.append(f'<text class="bandsub" x="76" y="{10 + BAR_H / 2 - 6}">'
+        parts.append(f'<text class="bandsub" x="92" y="{10 + 40}">'
                      f'{_esc(said)} on</text>')
-        parts.append(f'<text class="bandtext" x="76" y="{10 + BAR_H / 2 + 22}">'
+        parts.append(f'<text class="bandtext" x="92" y="{10 + 116}">'
                      f'{_esc(next_street)}</text>')
     # The distance, on a bar of its own at the foot, as an app does.
     foot = 46.0
