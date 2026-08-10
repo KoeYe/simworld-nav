@@ -35,13 +35,23 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from .client import RenderServiceError, ServiceUnreachable, UERenderClient
+from .client import (
+    RenderServiceError,
+    ServiceBusy,
+    ServiceUnreachable,
+    UERenderClient,
+)
 from .protocol import RenderBatch, RenderResult
 
 # The env var the endpoints file is found under when no explicit path is given.
 ENDPOINTS_ENV = "EB_UE_ENDPOINTS"
 # Strikes in a row before an instance stops being offered work.
 QUARANTINE_STRIKES = 2
+# When every admitted instance answers busy, wait this long between retry
+# sweeps -- up to three retries, then the batch is given up as ServiceBusy.
+# Busy is a load signal, not a health verdict (spec section 3, normative): it
+# is never a strike, so a saturated fleet stays fully admitted throughout.
+BUSY_BACKOFF_S = (0.5, 1.0, 2.0)
 
 
 class NoHealthyInstance(RenderServiceError):
@@ -127,6 +137,9 @@ class RenderPool:
         self.statefile = self.endpoints_path.with_name(
             self.endpoints_path.stem + ".quarantine.json")
         self._load_quarantine()
+        # An instance attribute so a test can shrink the waits without
+        # patching a module constant out from under a concurrent test.
+        self.busy_backoff_s: tuple[float, ...] = BUSY_BACKOFF_S
 
     # ── dispatch ─────────────────────────────────────────────────────────────
 
@@ -136,11 +149,33 @@ class RenderPool:
         Per-*item* failures come back in the results untouched -- they are the
         caller's information, not evidence against the instance. Only "no HTTP
         conversation happened" and "the engine is down" are strikes.
+
+        ``busy`` is neither: a saturated instance is healthy, just loaded, so
+        it costs no strike -- the batch fails over to the next healthy
+        instance, and when every one of them is busy the pool sleeps through
+        ``busy_backoff_s`` (0.5 s, 1 s, 2 s) and sweeps again, up to three
+        retries. Still busy after that, the batch is given up as
+        ``ServiceBusy`` for the caller to skip -- its cache miss remains, so
+        the next lookup retries -- rather than mis-reported as fleet death.
         """
         tried: set[str] = set()
+        busy: set[str] = set()
+        backoffs = iter(self.busy_backoff_s)
+        last_busy: ServiceBusy | None = None
         while True:
-            member = self._pick(tried)
+            member = self._pick(tried | busy)
             if member is None:
+                if busy:
+                    delay = next(backoffs, None)
+                    if delay is None:
+                        raise ServiceBusy(
+                            f"every instance busy for batch of "
+                            f"{len(batch.requests)} after "
+                            f"{len(self.busy_backoff_s)} backed-off retries"
+                        ) from last_busy
+                    time.sleep(delay)
+                    busy.clear()
+                    continue
                 if not self._readmit_one(tried):
                     raise NoHealthyInstance(
                         f"no healthy instance for batch of {len(batch.requests)} "
@@ -151,6 +186,12 @@ class RenderPool:
             member.dispatched += 1
             try:
                 results = member.client.render(batch)
+            except ServiceBusy as error:
+                # No strike: strikes are for the dead, and this instance just
+                # answered. Leave its count where it was and move on.
+                last_busy = error
+                busy.add(member.id)
+                continue
             except ServiceUnreachable:
                 self._strike(member)
                 tried.add(member.id)

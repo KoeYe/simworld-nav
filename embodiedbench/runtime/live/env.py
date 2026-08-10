@@ -40,7 +40,7 @@ from embodiedbench.runtime.city.courier_env import CourierEnv, signal_state
 from embodiedbench.runtime.city.embodiment import Viewpoint
 
 from .cache import LiveAlbum
-from .client import RenderServiceError
+from .client import RenderServiceError, ServiceBusy
 from .protocol import (
     RENDER_KIND_LAMP,
     RENDER_KIND_OBSTACLE,
@@ -110,6 +110,8 @@ class LiveCourierEnv(CourierEnv):
         # episode boundary is the natural moment to ask the fleet again.
         self.live_degraded = False
         self.live_render_failures = 0
+        self.live_rendered = 0
+        self.live_busy_skips = 0
         # Every root is the one cache directory. The suffix convention keeps
         # the frame kinds apart within it, and pointing the pavement roots at
         # the same place means the stock viewpoint-selection logic runs
@@ -158,6 +160,17 @@ class LiveCourierEnv(CourierEnv):
         )
         try:
             results = self.renderer.render(batch)
+        except ServiceBusy as error:
+            # Busy is transient by spec: the fleet is loaded, not dead, so the
+            # episode is NOT degraded. The batch is skipped, the cache miss
+            # remains, and the next lookup at these keys simply asks again.
+            self.live_busy_skips += 1
+            self.live_render_failures += 1
+            logger.info(
+                "render backend busy (%s); skipped a batch of %d for episode "
+                "%s -- the next lookup retries", error, len(missing),
+                self.live_album.episode_id)
+            return
         except RenderServiceError as error:
             self.live_degraded = True
             logger.warning(

@@ -233,6 +233,22 @@ class TestTransitionsNeverDependOnTheRenderer:
         bare.reset()
         assert scripted_trace(live, turns=10) == scripted_trace(bare, turns=10)
 
+    def test_a_busy_backend_skips_the_batch_and_the_next_look_retries(
+            self, paris, service, tmp_path):
+        """Busy is transient by spec: the episode is NOT degraded, the miss
+        stays a miss, and the very next lookup at the same key renders it.
+        Treating one 503 as fleet death was how a reset storm silently turned
+        whole episodes text-only."""
+        env = live_env(paris, UERenderClient(service.base_url), tmp_path)
+        service.busy_batches = 1
+        env.candidates()
+        assert env.live_busy_skips == 1
+        assert not env.live_degraded, "busy must never degrade the episode"
+        # The skipped keys are still cache misses; the next look renders them.
+        rows = env.candidates()
+        assert all(row["image"] for row in rows)
+        assert not env.live_degraded
+
     def test_a_dead_fleet_changes_pictures_not_physics(self, paris, tmp_path):
         """PLAN.md 7.1's "never required for every RL worker", as a test: with
         the whole fleet unreachable the env degrades to album mode -- no

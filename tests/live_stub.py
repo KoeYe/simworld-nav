@@ -14,7 +14,11 @@ can assert on it.
 
 Failure injection is explicit state, flipped by the test that needs it:
 ``healthz_ok`` (health probes fail), ``fail_keys`` (per-item failures inside
-a 200 response), ``reject_code`` (the whole request dies with a wire error).
+a 200 response), ``reject_code`` (the whole request dies with a wire error;
+``busy`` goes out as HTTP 503, the way the real service sends it),
+``busy_batches`` (the next N render batches answer 503 busy, then service
+resumes -- the transient the busy taxonomy exists for), ``delay_s`` (every
+render sleeps first, so a test can hold a request in flight on purpose).
 """
 
 from __future__ import annotations
@@ -24,6 +28,7 @@ import hashlib
 import io
 import json
 import threading
+import time
 from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -58,6 +63,9 @@ class FakeRenderService:
         self.healthz_ok = True
         self.fail_keys: set[str] = set()
         self.reject_code: str | None = None
+        self.busy_batches = 0
+        self.busy_hits = 0
+        self.delay_s = 0.0
         self.render_counts: Counter[str] = Counter()
         self.batches: list[dict[str, Any]] = []      # raw request bodies
         self.health_probes = 0
@@ -102,11 +110,21 @@ class FakeRenderService:
                     return
                 with service._lock:
                     reject = service.reject_code
+                    if service.busy_batches > 0:
+                        service.busy_batches -= 1
+                        service.busy_hits += 1
+                        reject = reject or "busy"
+                    delay = service.delay_s
                     service.batches.append(body)
                 if reject:
-                    self._send(500, {"error": {"code": reject,
-                                               "message": "injected by test"}})
+                    # busy is 503 on the real service; other injected codes
+                    # keep the generic 500 the earlier tests were written for.
+                    self._send(503 if reject == "busy" else 500,
+                               {"error": {"code": reject,
+                                          "message": "injected by test"}})
                     return
+                if delay:
+                    time.sleep(delay)
                 self._send(200, {"results": [self._result(body, item)
                                              for item in body.get("requests", [])]})
 

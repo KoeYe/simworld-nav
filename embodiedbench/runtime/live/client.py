@@ -80,8 +80,15 @@ class RenderFailedError(RenderServiceError):
     code = "render_failed"
 
 
-class BusyError(RenderServiceError):
-    """The service refused the batch under load. Another instance may not."""
+class ServiceBusy(RenderServiceError):
+    """The service refused the batch under load. Another instance may not.
+
+    Busy is TRANSIENT by spec (section 3, normative): it is a load signal, not
+    a health verdict. Callers must not count it as a quarantine strike and
+    must not degrade an episode over it -- the pool fails over and backs off,
+    and an env that still sees this skips the batch, leaving the cache miss
+    for the next lookup to retry.
+    """
 
     code = "busy"
 
@@ -95,7 +102,7 @@ class ServiceUnreachable(RenderServiceError):
 _BY_CODE: dict[str, type[RenderServiceError]] = {
     cls.code: cls
     for cls in (BadRequestError, EngineDownError, MapMismatchError,
-                RenderFailedError, BusyError)
+                RenderFailedError, ServiceBusy)
 }
 
 
@@ -178,6 +185,15 @@ class UERenderClient:
         try:
             wire = WireError.from_dict(self._parse(error.read()))
         except (ProtocolViolation, OSError):
+            if error.code == 503:
+                # 503 means busy even when the body is not parseable -- a
+                # saturated service (or a proxy in front of it) may not manage
+                # a spec-shaped body, and treating its overload as a generic
+                # failure is exactly the mis-map the busy taxonomy exists to
+                # prevent.
+                return ServiceBusy(
+                    f"{self.instance_id}: HTTP 503 without a {PROTOCOL} error "
+                    "body; treating as busy")
             return RenderServiceError(
                 f"{self.instance_id}: HTTP {error.code} with a body that is "
                 f"not a {PROTOCOL} error")

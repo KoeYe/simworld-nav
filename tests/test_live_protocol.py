@@ -23,8 +23,8 @@ from pathlib import Path
 import pytest
 
 from embodiedbench.runtime.live.client import (
-    BusyError,
     RenderServiceError,
+    ServiceBusy,
     ServiceUnreachable,
     UERenderClient,
 )
@@ -190,8 +190,35 @@ class TestTheClientOverRealHTTP:
         ``bad_request`` must not -- so the mapping is a contract, not a
         convenience."""
         service.reject_code = "busy"
-        with pytest.raises(BusyError):
+        with pytest.raises(ServiceBusy):
             UERenderClient(service.base_url).render(batch_of("n0/toward_n1"))
+
+    def test_a_bare_503_is_busy_even_without_a_protocol_body(self):
+        """A saturated service (or a proxy in front of it) may answer 503
+        with no spec-shaped body; overload must still be reported as busy,
+        not as a generic failure the caller would degrade over."""
+        import http.server
+        import threading
+
+        class Overloaded(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def do_POST(self):
+                self.send_response(503)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Overloaded)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            url = f"http://127.0.0.1:{server.server_address[1]}"
+            with pytest.raises(ServiceBusy):
+                UERenderClient(url).render(batch_of("n0/toward_n1"))
+        finally:
+            server.shutdown()
+            server.server_close()
 
     def test_a_dead_port_is_unreachable_after_one_reconnect(self, tmp_path):
         # Bind and immediately close a socket so the port is real and refused.
@@ -297,6 +324,59 @@ class TestThePool:
         reborn = RenderPool(endpoints)
         with pytest.raises(NoHealthyInstance):
             reborn.render(batch_of("n0/toward_n1"))
+
+    def test_busy_fails_over_to_the_next_instance_without_a_strike(self, tmp_path):
+        """Busy is a load signal, not a health verdict (spec section 3): the
+        batch lands on the other instance immediately, and the saturated one
+        keeps a clean record -- no strike, no quarantine."""
+        loaded = FakeRenderService(tmp_path / "a", instance_id="ue-loaded").start()
+        spare = FakeRenderService(tmp_path / "b", instance_id="ue-spare").start()
+        loaded.busy_batches = 10**6
+        try:
+            pool = RenderPool(write_endpoints(tmp_path / "endpoints.json",
+                                              [loaded, spare]))
+            pool.busy_backoff_s = (0.01, 0.01, 0.01)
+            results = pool.render(batch_of("n0/toward_n1"))
+            assert results[0].ok
+            assert len(spare.batches) == 1
+            by_id = {m.id: m for m in pool.members}
+            assert by_id["ue-loaded"].strikes == 0
+            assert not by_id["ue-loaded"].quarantined
+        finally:
+            loaded.stop()
+            spare.stop()
+
+    def test_an_all_busy_sweep_backs_off_and_retries_before_giving_up(
+            self, tmp_path, service):
+        """One transient busy costs a bounded wait, not the batch: the pool
+        sleeps and sweeps again, and the retry lands on the same -- still
+        healthy -- instance."""
+        service.busy_batches = 1
+        pool = RenderPool(write_endpoints(tmp_path / "endpoints.json", [service]))
+        pool.busy_backoff_s = (0.01, 0.02, 0.04)
+        results = pool.render(batch_of("n0/toward_n1"))
+        assert results[0].ok
+        assert service.busy_hits == 1
+        assert pool.members[0].strikes == 0
+        assert not pool.members[0].quarantined
+
+    def test_a_persistently_busy_fleet_raises_service_busy_not_death(
+            self, tmp_path, service):
+        """After the bounded retries the batch is given up as ServiceBusy --
+        the caller's signal to skip and retry on the next lookup -- and the
+        instance is still admitted: busy never becomes a quarantine."""
+        service.busy_batches = 10**6
+        pool = RenderPool(write_endpoints(tmp_path / "endpoints.json", [service]))
+        pool.busy_backoff_s = (0.01, 0.02, 0.04)
+        with pytest.raises(ServiceBusy):
+            pool.render(batch_of("n0/toward_n1"))
+        # The initial sweep plus one per backoff step, each answered busy.
+        assert service.busy_hits == 1 + len(pool.busy_backoff_s)
+        assert pool.members[0].strikes == 0
+        assert not pool.members[0].quarantined
+        # The fleet drains and the same pool serves the very next batch.
+        service.busy_batches = 0
+        assert pool.render(batch_of("n0/toward_n2"))[0].ok
 
     def test_a_render_transport_death_counts_as_strikes_too(self, tmp_path):
         """A failed batch is the same evidence a probe would have gathered,
