@@ -148,6 +148,76 @@ half-dies. PNG format (byte-stable), never JPEG.
 ### POST /shutdown  → `{"ok": true}` (dev convenience; fleet normally owns
 lifecycle).
 
+## 3b. Track B endpoints — embodied episodes (nav-render/v0.1, stateful)
+
+Track B gives UE ownership of **locomotion and locomotion time**: a
+DeliveryAgent pawn (SpHumanoidAgent) actually walks edges under
+`global_sync` lockstep at fixed dt; the env's other tool costs (collect,
+hand_over, look …) remain declared bookkeeping added on top of the
+UE-derived clock. These endpoints are STATEFUL: one active embodied episode
+per instance at a time (`busy` otherwise), so the nav-side pool leases an
+instance exclusively for the episode's duration in embodied mode.
+
+### POST /episode
+```json
+{"protocol": "nav-render/v0", "episode_id": str, "map_name": str,
+ "agent": {"speed_cm_s": 140.0, "eye_z_cm": 160.0,
+            "camera": {"width": 640, "height": 480, "fov_deg": 90.0}},
+ "spawn": {"x_cm": 0.0, "y_cm": 0.0, "z_cm": 100.0, "yaw_deg": 0.0}}
+```
+Spawns (or re-spawns) the agent, applies the embodiment (SetMaxSpeed,
+camera), enters PIE if not already, teleports to `spawn`. Response:
+`{"episode_id": str, "pose": {"x_cm","y_cm","z_cm","yaw_deg"},
+  "fixed_dt": 0.0333}`. Idempotent per episode_id. A new episode_id tears
+down the previous episode's agent first.
+
+### POST /walk
+```json
+{"protocol": "nav-render/v0", "episode_id": str,
+ "target": {"x_cm": ..., "y_cm": ...},
+ "arrive_cm": 50.0, "max_sim_seconds": 120.0, "tick_chunk": 10}
+```
+Issues Agent_MoveTo(target) and pumps lockstep ticks in chunks of
+`tick_chunk`, checking arrival between chunks, until arrival within
+`arrive_cm`, or the agent stops making progress (stuck), or
+`max_sim_seconds` of sim time elapses. Response:
+```json
+{"arrived": bool, "stuck": bool, "timeout": bool,
+ "ticks": int, "sim_seconds": float,       // ticks * fixed_dt, authoritative
+ "pose": {"x_cm","y_cm","z_cm","yaw_deg"},
+ "walked_cm": float}
+```
+`sim_seconds` is the engine-derived walking time — the caller adds it to the
+env clock instead of the declared distance/speed arithmetic.
+
+### POST /observe
+```json
+{"protocol": "nav-render/v0", "episode_id": str,
+ "camera": {"width": 640, "height": 480, "fov_deg": 90.0},
+ "yaw_deg": null, "return_mode": "path"}
+```
+Captures the agent's first-person view at its CURRENT pose (optionally
+yawing the agent to `yaw_deg` first, one tick to settle). Same result shape
+as a /render item (path|base64 + sha256 + pose echo).
+
+### POST /episode_end
+`{"protocol": "nav-render/v0", "episode_id": str}` → despawns the agent,
+keeps PIE alive for the next episode. `{"ok": true}`.
+
+### Embodied-mode env semantics (nav side)
+- `EmbodiedCourierEnv(CourierEnv)` overrides the single-hop transition: a
+  hop = /walk to the next node's coordinates; `sim_seconds` advances by the
+  response's engine-derived time; `stuck`/no-progress maps to the stock
+  refusal path (`way_blocked` semantics, `BLOCKED_SECONDS` charge);
+  observations come from /observe at the agent's ACTUAL pose, materialized
+  into the same lazy album cache.
+- v1 embodied runs hazards OFF (solo difficulty): no obstacle dressing, no
+  signal charging — locomotion realism is the thing under test. Hazards in
+  embodied mode need the stateful scene dressing reserved above.
+- The episode record must log, per hop: target, ticks, sim_seconds,
+  end-pose error vs the graph node — the I/O evidence that UE-owned motion
+  matches the design (and the measurement that decides arrive_cm).
+
 ## 4. Live-album cache contract (nav side)
 
 `LiveCourierEnv` materializes rendered frames into a per-episode cache dir
