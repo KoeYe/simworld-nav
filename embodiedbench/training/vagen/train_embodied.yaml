@@ -1,0 +1,40 @@
+# Training episodes for the EMBODIED courier (Track B): UE owns locomotion
+# and locomotion time; observations are the pawn's own first-person camera.
+#
+# Modeled on train_courier.yaml and different only where the mode demands it:
+#   - hazards: false is the embodied v1 contract (spec 3b) — no obstacle
+#     dressing, no signal charging; locomotion realism is the thing under
+#     test, and the reward stays the fee the job pays.
+#   - ue_endpoints names the fleet (endpoints.json written by
+#     simworld_nav_service.fleet on the rollout host); the pool leases one
+#     instance exclusively per episode and parks when oversubscribed.
+#   - max_turns is smaller than the offline 40: a solo episode is
+#     collect → walk a few blocks → hand_over, and every wasted turn is a
+#     real engine walk, not a cached photo.
+#
+# The env name must match the registry key on the launch command line
+# (train_grpo_embodied.sh): +env_registry.Embodied=...EmbodiedCourierGymEnv.
+envs:
+  - name: Embodied
+    n_envs: 800
+    data_source: courier_paris_embodied
+    seed: [0, 800, 1]
+    max_turns: 16
+    response_length_per_turn: 1024
+    config:
+      backend: embodied
+      difficulty: solo
+      stride: block
+      embodiment: human_on_foot
+      hazards: false
+      reward_basis: earnings
+      # The courier lesson transfers unchanged: shaping drowned the objective
+      # at 0.2 on the offline env (96.7% of the gradient was "walk closer").
+      progress_weight: 0.0
+      max_images: 3
+      image_max_side: 320
+      # Fleet + cache locations are host facts, rewired per machine the same
+      # way point_at_albums.py rewires album paths for the offline yamls.
+      ue_endpoints: /data/koe/nav_fleet_game/endpoints.json
+      live_cache_root: /data/koe/nav_live_cache
+      spawn_z_cm: 100.0
