@@ -300,6 +300,59 @@ class TestSameKeyRendersExactlyOnce:
         assert dict(service.render_counts) == before
 
 
+class TestConcurrentStoresOfOneKey:
+    def test_two_albums_over_one_directory_race_without_corruption(self, tmp_path):
+        """Two LiveAlbum objects (two env instances) sharing one episode dir
+        must not be able to hurt each other: unique temp names mean nobody
+        truncates a peer's half-written bytes, and losing the publish race is
+        a success because the winner's file is the same frame. The old fixed
+        '.part' name could raise FileNotFoundError from os.replace or publish
+        torn bytes."""
+        import base64
+        import threading
+
+        from PIL import Image
+
+        from embodiedbench.runtime.live.cache import LiveAlbum
+        from embodiedbench.runtime.live.protocol import RenderResult
+        from live_stub import draw_frame
+
+        keys = [f"race/toward_{index}" for index in range(60)]
+        results = {
+            key: RenderResult(
+                key=key, status="ok",
+                png_base64=base64.b64encode(draw_frame(key, 32, 24)).decode())
+            for key in keys
+        }
+        albums = [LiveAlbum(tmp_path, "ep"), LiveAlbum(tmp_path, "ep")]
+        errors: list[Exception] = []
+        barrier = threading.Barrier(2)
+
+        def hammer(album: LiveAlbum) -> None:
+            try:
+                barrier.wait()
+                for key in keys:
+                    album.store(key, results[key])
+            except Exception as error:  # noqa: BLE001 - the assert below reports it
+                errors.append(error)
+
+        threads = [threading.Thread(target=hammer, args=(album,))
+                   for album in albums]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        assert not errors, f"a store raced into an exception: {errors}"
+        for key in keys:
+            path = albums[0].path_for(key)
+            assert path.exists()
+            with Image.open(path) as image:
+                image.load()  # a torn publish would fail to decode
+        assert not list(albums[0].images.rglob(".part-*")), (
+            "a loser's temp file was left behind")
+
+
 @needs_maps
 class TestSidecarsDecideTheCharges:
     def test_with_sidecars_the_mechanics_bite_per_stock_rules(

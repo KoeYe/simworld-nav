@@ -36,6 +36,7 @@ from __future__ import annotations
 import base64
 import os
 import shutil
+import tempfile
 import threading
 from pathlib import Path
 
@@ -67,9 +68,11 @@ class LiveAlbum:
         self.sidecar_source_root = (
             Path(sidecar_source_root) if sidecar_source_root else None)
         self._copy_sidecars()
-        # One writer at a time per key. The courier env is single-threaded,
-        # but the training adapter runs under an async loop and the cheap lock
-        # removes a whole class of "two renders raced into one file" reports.
+        # One writer at a time *within this instance*. The courier env is
+        # single-threaded, but the training adapter runs under an async loop
+        # and the cheap lock removes in-process double-writes. Across
+        # instances the lock is no protection at all -- there, safety comes
+        # from ``store``'s unique temp names and idempotent atomic publish.
         self._lock = threading.Lock()
 
     def _copy_sidecars(self) -> None:
@@ -123,17 +126,41 @@ class LiveAlbum:
             if target.exists():
                 return target
             target.parent.mkdir(parents=True, exist_ok=True)
-            temporary = target.with_name(target.name + ".part")
-            if result.png_base64 is not None:
-                temporary.write_bytes(base64.b64decode(result.png_base64))
-            elif result.path:
-                # return_mode=path: the service is co-located and wrote the
-                # frame to its own cache; copy rather than link so the album
-                # survives the service recycling its scratch space.
-                shutil.copyfile(result.path, temporary)
-            else:
-                return None
-            # Atomic publish: a concurrent reader sees no file or the whole
-            # file, never a partial PNG that PIL half-decodes.
-            os.replace(temporary, target)
+            # A *unique* temp name per writer, in the target's own directory
+            # so os.replace stays a same-filesystem rename. The old fixed
+            # "<name>.part" was a shared name: two albums over one directory
+            # could truncate each other's half-written bytes and the loser's
+            # os.replace raised FileNotFoundError. Unique names make the race
+            # harmless -- each writer publishes a complete file, last replace
+            # wins, and both were renders of the same key.
+            handle = tempfile.NamedTemporaryFile(
+                dir=target.parent, prefix=".part-", delete=False)
+            temporary = Path(handle.name)
+            try:
+                with handle:
+                    if result.png_base64 is not None:
+                        handle.write(base64.b64decode(result.png_base64))
+                    elif result.path:
+                        # return_mode=path: the service is co-located and
+                        # wrote the frame to its own cache; copy rather than
+                        # link so the album survives the service recycling
+                        # its scratch space.
+                        with open(result.path, "rb") as source:
+                            shutil.copyfileobj(source, handle)
+                    else:
+                        return None
+                # Atomic publish: a concurrent reader sees no file or the
+                # whole file, never a partial PNG that PIL half-decodes. No
+                # fsync, deliberately: a torn file cannot survive os.replace,
+                # and crash-consistency is not a requirement for a cache -- a
+                # frame lost to a power cut is re-rendered on the next miss.
+                os.replace(temporary, target)
+            except OSError:
+                # Losing any race whose winner published the frame is a
+                # success: the file this call exists to produce exists.
+                if target.exists():
+                    return target
+                raise
+            finally:
+                temporary.unlink(missing_ok=True)
         return target
