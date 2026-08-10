@@ -19,8 +19,8 @@ envs:
     n_envs: 800
     data_source: courier_paris_embodied
     seed: [0, 800, 1]
-    max_turns: 16
-    response_length_per_turn: 1024
+    max_turns: 4
+    response_length_per_turn: 512
     config:
       backend: embodied
       difficulty: solo
@@ -31,8 +31,8 @@ envs:
       # The courier lesson transfers unchanged: shaping drowned the objective
       # at 0.2 on the offline env (96.7% of the gradient was "walk closer").
       progress_weight: 0.0
-      max_images: 3
-      image_max_side: 320
+      max_images: 2
+      image_max_side: 256
       # Fleet + cache locations are host facts, rewired per machine the same
       # way point_at_albums.py rewires album paths for the offline yamls.
       ue_endpoints: /data/koe/nav_fleet_game/endpoints.json
