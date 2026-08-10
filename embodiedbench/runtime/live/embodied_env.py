@@ -237,6 +237,38 @@ class EmbodiedCourierEnv(CourierEnv):
             self._episode_open = False
             self._release_lease()
 
+    def _respawn_at_current_node(self, *, reason: str) -> None:
+        """Stand the pawn back on the node the graph believes in.
+
+        Same-id /episode is the spec's idempotent re-spawn (despawn + spawn +
+        apply embodiment), so no new wire surface is needed. Failure here is
+        contained: the episode keeps its refusal semantics either way, and a
+        dead backend already has its own degrade path.
+        """
+        node = self.network.nodes[self.node_id]
+        try:
+            self._ue().episode(EpisodeRequest(
+                episode_id=self.episode_id,
+                map_name=self.network.map_name,
+                agent=AgentSpec(
+                    speed_cm_s=float(self.embodiment.speed_cm_s),
+                    eye_z_cm=STREET_EYE_CM,
+                    camera=STREET_CAMERA,
+                ),
+                spawn=Pose(x_cm=node.x_cm, y_cm=node.y_cm,
+                           z_cm=self.spawn_z_cm, yaw_deg=0.0),
+            ))
+            self.embodied_log.append({
+                "recovery": "respawn", "after": reason,
+                "node": self.node_id,
+                "node_xy": (node.x_cm, node.y_cm),
+            })
+        except (RenderServiceError, ProtocolViolation, OSError) as error:
+            logger.warning(
+                "recovery respawn after %s failed for %s (%s: %s); later "
+                "walks start from the pawn's stranded pose",
+                reason, self.episode_id, type(error).__name__, error)
+
     # ── the transition seam ──────────────────────────────────────────────────
 
     def _step_to(self, k: int) -> StepOutcome:
@@ -264,6 +296,14 @@ class EmbodiedCourierEnv(CourierEnv):
             # refusal floor every refused action pays.
             charge = max(walk.sim_seconds, REJECTED_ACTION_SECONDS)
             self._log_hop(row["node"], walk, outcome)
+            # Recovery re-spawn: a failed walk leaves the pawn wherever
+            # physics stopped it while the graph stays at the junction, and
+            # without repair every LATER walk starts from the wrong place —
+            # measured on ds-serv6 as a 160 m pose error cascading through
+            # the episode. /episode with the SAME id is the spec's idempotent
+            # re-spawn, so the pawn is stood back on the node the graph
+            # believes in; the refusal above still stands and still charges.
+            self._respawn_at_current_node(reason=code)
             return self._refuse(StepOutcome(
                 ok=False, code=code,
                 message=(
@@ -400,9 +440,13 @@ class EmbodiedCourierEnv(CourierEnv):
         engine time they took, how far the pawn's landings sit from the graph
         nodes, and how often it got stuck."""
         out = super().summary()
-        hops = self.embodied_log
+        # The log carries two entry shapes: hops (walk outcomes) and
+        # recoveries (re-spawns after a failed walk). Aggregate them apart.
+        hops = [h for h in self.embodied_log if "ticks" in h]
+        recoveries = [h for h in self.embodied_log if "recovery" in h]
         out["embodied"] = {
             "hops": len(hops),
+            "recoveries": len(recoveries),
             "total_ticks": sum(h["ticks"] for h in hops),
             "total_walk_seconds": round(
                 sum(h["sim_seconds"] for h in hops), 6),

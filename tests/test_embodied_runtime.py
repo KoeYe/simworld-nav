@@ -432,7 +432,7 @@ class TestAnEmbodiedEpisodeWalksTheStockGraph:
         env = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
         self.scripted_nodes(env, turns=4)
         block = env.summary()["embodied"]
-        assert set(block) == {"hops", "total_ticks", "total_walk_seconds",
+        assert set(block) == {"hops", "recoveries", "total_ticks", "total_walk_seconds",
                               "max_pose_error_cm", "stuck_count"}
         assert block["hops"] == len(env.embodied_log) > 0
         assert block["total_ticks"] == sum(h["ticks"] for h in env.embodied_log)
@@ -526,7 +526,11 @@ class TestStuckAndTimeoutMapToTheStockRefusal:
         assert outcome.sim_seconds == pytest.approx(burned)
         assert env.sim_seconds - before == pytest.approx(burned)
         assert env.summary()["embodied"]["stuck_count"] == 1
-        assert env.embodied_log[-1]["outcome"] == "stuck"
+        # The failed hop is followed by its recovery re-spawn entry — the
+        # hop is one before the end now, and the recovery names its cause.
+        assert env.embodied_log[-2]["outcome"] == "stuck"
+        assert env.embodied_log[-1]["recovery"] == "respawn"
+        assert env.embodied_log[-1]["after"] == "stuck"
 
     def test_a_cheap_wall_still_pays_the_stock_refusal_floor(
             self, paris, service, tmp_path):
