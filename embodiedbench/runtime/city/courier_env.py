@@ -2699,23 +2699,37 @@ class CourierEnv:
             # app puts it there because a bearing read off a drawn line is the
             # hardest thing on the screen; measured here, a model reads a
             # street name off this map 100% of the time and a direction 25%.
-            next_street=self._next_route_street(route),
-            next_heading=(compass_of(bearing_deg(self.position(), route[1]))
-                          if len(route) > 1 else ""),
+            **self._next_instruction(route),
         )
 
-    def _next_route_street(self, route: list[tuple[float, float]]) -> str:
-        """The name of the street the route leaves this junction by."""
+    def _next_instruction(self, route: list[tuple[float, float]]) -> dict[str, str]:
+        """The banner: the street to take next, and the bearing to take it at.
+
+        Both copied off the candidate line the courier will act on, not
+        derived a second way. Deriving the bearing separately -- as the compass
+        of the step to the route's next node -- disagreed with the list on 6
+        frames in 67, and on one of them it said south-east where the list
+        offered the same street going north-west. At block stride the two are
+        different quantities: the route's next node is the first waypoint,
+        18 m along, while the line quotes the bearing of the whole block. A
+        banner the courier cannot copy verbatim into walk_to is worse than no
+        banner, because it reads as the map contradicting the corner.
+        """
         if len(route) < 2:
-            return ""
-        here = self.position()
-        for row in self._raw_candidates():
+            return {"next_street": "", "next_heading": ""}
+        # candidates(), not _raw_candidates(): reach_heading is added by the
+        # public method, so reading the raw rows silently took the first-hop
+        # bearing again -- the very quantity this was written to stop using.
+        for row in self.candidates():
             if math.dist(self.position(row["node"]), route[1]) < 1.0:
-                return str(row["street"])
-        nearest = min(
-            self.network.nodes,
-            key=lambda n: math.dist(self.position(n), route[1]))
-        return self.street_of(nearest) or ""
+                return {"next_street": str(row["street"]),
+                        "next_heading": str(row.get("reach_heading")
+                                            or row.get("heading") or "")}
+        nearest = min(self.network.nodes,
+                      key=lambda n: math.dist(self.position(n), route[1]))
+        return {"next_street": self.street_of(nearest) or "",
+                "next_heading": compass_of(
+                    bearing_deg(self.position(), route[1]))}
 
     def _find_address(self, text: str) -> Address | None:
         wanted = " ".join(str(text).split()).lower()

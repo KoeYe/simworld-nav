@@ -207,7 +207,7 @@ def _halo_text(x: float, y: float, text: str, cls: str = "ui",
             f'<text class="{cls}" {common}>{body}</text>')
 
 
-BAR_H = 96.0
+BAR_H = 104.0
 
 
 def _text_box(x: float, y: float, half_w: float, half_h: float,
@@ -256,8 +256,15 @@ def _edge_safe_text(x: float, y: float, text: str, width_px: float) -> str:
     anchor: hard against the left margin near the left edge, against the right
     near the right, centred in between.
     """
-    half = len(text) * 10.5 / 2.0
+    half = len(text) * 13.0 / 2.0
     margin = 14.0
+    # A caption wider than the screen cannot be placed, only trimmed. Losing
+    # the tail with an ellipsis says so; losing it to the frame edge looks
+    # like a rendering fault and hides that anything is missing.
+    if 2 * half > width_px - 2 * margin:
+        keep = max(6, int((width_px - 2 * margin) / 13.0) - 1)
+        text = text[:keep] + "\u2026"
+        half = len(text) * 13.0 / 2.0
     if x - half < margin:
         return _halo_text(margin, y, text, anchor="start")
     if x + half > width_px - margin:

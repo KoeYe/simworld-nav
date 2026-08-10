@@ -1496,3 +1496,44 @@ class TestTheMapPointsTheRightWay:
                 f"seed {seed}: banner says {word} but its arrow does not turn "
                 f"to {north_up}"
             )
+
+
+class TestTheBannerIsAnInstructionYouCanObey:
+    """The banner has to name an action the courier can actually take.
+
+    It derived its bearing separately -- the compass of the step to the
+    route's next node -- while the candidate line quotes the bearing of the
+    whole block. At block stride those are different quantities, and they
+    disagreed on 6 frames in 67; on one the banner said south-east where the
+    list offered the same street going north-west. A banner that cannot be
+    copied into walk_to verbatim is worse than none, because it reads as the
+    map contradicting the corner, which is the confusion the whole redesign
+    exists to remove.
+    """
+
+    def test_every_banner_names_a_line_on_the_list(self, paris):
+        import re
+
+        for seed in range(8):
+            env = CourierEnv(paris, seed=seed, order_count=1,
+                             difficulty="solo", stride="block")
+            env.reset()
+            order = next((o for o in env.orders if o.live), None)
+            if order is None:
+                continue
+            env.navigate(order.pickup.text)
+            for _ in range(5):
+                svg = env.map_drawing().svg
+                street = re.search(r'class="bandtext"[^>]*>([^<]+)<', svg)
+                heading = re.search(r"head ([a-z\-]+) on", svg)
+                if not street or not heading:
+                    break
+                offered = {(r["street"],
+                            r.get("reach_heading") or r.get("heading"))
+                           for r in env.candidates()}
+                assert (street.group(1), heading.group(1)) in offered, (
+                    f"seed {seed}: banner says {street.group(1)!r} going "
+                    f"{heading.group(1)!r}, list offers {sorted(offered)}"
+                )
+                if not env.walk_to(street.group(1), heading.group(1)).ok:
+                    break
