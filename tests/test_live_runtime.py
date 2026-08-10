@@ -305,6 +305,76 @@ class TestSameKeyRendersExactlyOnce:
         assert dict(service.render_counts) == before
 
 
+@needs_maps
+class TestFailuresDegradeInsteadOfCrashing:
+    def test_a_protocol_violation_degrades_instead_of_killing_the_turn(
+            self, paris, tmp_path):
+        """A version-skewed service answering 200 in a shape the client
+        refuses is deterministic for the whole episode: one warning and album
+        mode, never an exception into CourierSession.step."""
+        from embodiedbench.runtime.live.protocol import ProtocolViolation
+
+        class SkewedRenderer:
+            def render(self, batch):
+                raise ProtocolViolation("results is missing: ['result']")
+
+        env = live_env(paris, SkewedRenderer(), tmp_path)
+        rows = env.candidates()  # would have raised before the fix
+        assert env.live_degraded
+        assert all(row["image"] is None for row in rows)
+
+    def test_three_all_failed_batches_trip_degraded_mode(self, paris, tmp_path):
+        """Per-item failures are information, not degradation -- until every
+        item of three consecutive batches has failed, which is a broken
+        capture path behind a healthy HTTP front. album_coverage then stops
+        claiming renderable-on-demand health it cannot deliver."""
+        from embodiedbench.runtime.live.protocol import (
+            RenderItem,
+            RenderResult,
+        )
+
+        class BrokenCapture:
+            def render(self, batch):
+                return tuple(
+                    RenderResult(key=item.key, status="failed",
+                                 error="capture path broke")
+                    for item in batch.requests)
+
+        env = live_env(paris, BrokenCapture(), tmp_path)
+
+        def batch(index: int) -> list[RenderItem]:
+            return [RenderItem(key=f"n{index}/toward_x", x_cm=0.0, y_cm=0.0,
+                               z_cm=160.0, yaw_deg=0.0,
+                               render_kind="street_view")]
+
+        env._render(batch(0))
+        env._render(batch(1))
+        assert not env.live_degraded, "two batches are not yet a verdict"
+        env._render(batch(2))
+        assert env.live_degraded
+        assert env.live_render_failures == 3
+        coverage = env.album_coverage()
+        assert coverage["degraded"]
+        assert coverage["render_failures"] == 3
+
+    def test_the_summary_carries_the_live_block(
+            self, paris, service, tmp_path, sidecars):
+        """summary() is what a trainer's reports read; the live block is the
+        one place an episode that ran blind stops being indistinguishable
+        from a healthy one."""
+        env = live_env(paris, UERenderClient(service.base_url), tmp_path,
+                       obstacle_sidecars=sidecars)
+        env.candidates()
+        live = env.summary()["live"]
+        assert live == {
+            "degraded": False,
+            "render_failures": 0,
+            "rendered": env.live_rendered,
+            "busy_skips": 0,
+        }
+        assert live["rendered"] > 0, "the first look should have rendered"
+
+
 class TestConcurrentStoresOfOneKey:
     def test_two_albums_over_one_directory_race_without_corruption(self, tmp_path):
         """Two LiveAlbum objects (two env instances) sharing one episode dir

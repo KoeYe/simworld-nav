@@ -48,6 +48,7 @@ from .protocol import (
     RETURN_MODE_PATH,
     CameraSpec,
     ObstacleSpec,
+    ProtocolViolation,
     RenderBatch,
     RenderItem,
     SignalSpec,
@@ -69,6 +70,12 @@ LAMP_EYE_CM = 165.0
 # How far past the kerbstone the pavement camera stands
 # (tools/ue/bake_pavement_views.py KERB_MARGIN_CM).
 KERB_MARGIN_CM = 60.0
+# Per-item failures are the caller's information -- until every item of this
+# many consecutive batches has failed, at which point "the engine's capture
+# path is broken while HTTP stays healthy" is the only reading left, and the
+# episode is degraded so album_coverage stops reporting renderable-on-demand
+# health it can no longer deliver.
+ALL_FAILED_DEGRADE_BATCHES = 3
 
 # The album roots the live env owns. A caller that passes its own is asking
 # for two sources of truth about one directory.
@@ -122,6 +129,7 @@ class LiveCourierEnv(CourierEnv):
         self.live_render_failures = 0
         self.live_rendered = 0
         self.live_busy_skips = 0
+        self._all_failed_batches = 0
         # Every root is the one cache directory. The suffix convention keeps
         # the frame kinds apart within it, and pointing the pavement roots at
         # the same place means the stock viewpoint-selection logic runs
@@ -146,6 +154,7 @@ class LiveCourierEnv(CourierEnv):
 
     def reset(self) -> None:
         self.live_degraded = False
+        self._all_failed_batches = 0
         super().reset()
 
     # ── the render plumbing ──────────────────────────────────────────────────
@@ -158,6 +167,21 @@ class LiveCourierEnv(CourierEnv):
         exactly what it means for a baked album with a hole in it. Transitions
         cannot be touched from here by construction -- this method only ever
         adds files to a directory.
+
+        The failure taxonomy, spelled out:
+
+        * ``ServiceBusy`` -- transient load, NOT degradation: skip the batch
+          at info level, leave the miss, retry on the next lookup;
+        * ``RenderServiceError`` / ``ProtocolViolation`` / ``OSError`` --
+          dead fleet, version skew, unreadable transport: all deterministic
+          for the rest of the episode, so degrade once and stop asking.
+          Arbitrary ``Exception`` is deliberately NOT caught -- a genuine bug
+          in this code should crash the test that finds it, not hide as one
+          more degraded episode;
+        * per-item ``failed`` results -- the caller's information, counted in
+          ``live_render_failures``, until ``ALL_FAILED_DEGRADE_BATCHES``
+          consecutive batches fail every item, which is an engine whose
+          capture path is broken behind a healthy HTTP front, and degrades.
         """
         missing = [item for item in items if not self.live_album.has(item.key)]
         if not missing or self.live_degraded:
@@ -181,21 +205,50 @@ class LiveCourierEnv(CourierEnv):
                 "%s -- the next lookup retries", error, len(missing),
                 self.live_album.episode_id)
             return
-        except RenderServiceError as error:
+        except (RenderServiceError, ProtocolViolation, OSError) as error:
+            # ProtocolViolation is version skew: deterministic for the whole
+            # episode, so degrading -- one warning, album mode -- is correct,
+            # where letting it escape killed the turn (and, under gather, the
+            # rollout chunk) for a service that answered 200 in a shape this
+            # client refuses.
             self.live_degraded = True
             logger.warning(
-                "live render backend unavailable (%s); episode %s continues in "
+                "live render backend failed (%s: %s); episode %s continues in "
                 "album mode on %d cached frame(s)",
-                error, self.live_album.episode_id,
+                type(error).__name__, error, self.live_album.episode_id,
                 sum(1 for _ in self.live_album.images.rglob("*.png")))
             return
         by_key = {result.key: result for result in results}
+        every_item_failed = True
         for item in missing:
             result = by_key.get(item.key)
             if result is None or not result.ok:
                 self.live_render_failures += 1
                 continue
-            self.live_album.store(item.key, result)
+            every_item_failed = False
+            try:
+                if self.live_album.store(item.key, result) is not None:
+                    self.live_rendered += 1
+            except OSError as error:
+                # A cache directory that cannot be written is as dead as the
+                # fleet, and deterministically so: degrade, do not crash.
+                self.live_degraded = True
+                logger.warning(
+                    "live cache write failed (%s: %s); episode %s continues "
+                    "in album mode", type(error).__name__, error,
+                    self.live_album.episode_id)
+                return
+        if every_item_failed:
+            self._all_failed_batches += 1
+            if self._all_failed_batches >= ALL_FAILED_DEGRADE_BATCHES:
+                self.live_degraded = True
+                logger.warning(
+                    "every item failed in %d consecutive render batches; the "
+                    "engine's capture path is broken behind a healthy HTTP "
+                    "front. Episode %s degrades to album mode.",
+                    self._all_failed_batches, self.live_album.episode_id)
+        else:
+            self._all_failed_batches = 0
 
     def _camera_xy(self, node_id: str, yaw_deg: float) -> tuple[float, float]:
         """Where the street camera stands, honouring the served viewpoint.
@@ -306,6 +359,26 @@ class LiveCourierEnv(CourierEnv):
                 self._render(items)
         return super().obstacle_frame_for(node_id, toward)
 
+    # ── reporting ────────────────────────────────────────────────────────────
+
+    def summary(self) -> dict[str, Any]:
+        """The stock summary plus a ``live`` block.
+
+        Without it, an episode whose every render failed was indistinguishable
+        from a healthy run in every report a trainer reads -- the charges gate
+        on sidecars, not on frames, so the numbers kept moving while the
+        courier ran blind. The block is additive: nothing stock is renamed or
+        removed, so every existing consumer keeps working.
+        """
+        out = super().summary()
+        out["live"] = {
+            "degraded": self.live_degraded,
+            "render_failures": self.live_render_failures,
+            "rendered": self.live_rendered,
+            "busy_skips": self.live_busy_skips,
+        }
+        return out
+
     # ── coverage ─────────────────────────────────────────────────────────────
 
     def album_coverage(self) -> dict[str, Any]:
@@ -339,4 +412,7 @@ class LiveCourierEnv(CourierEnv):
             "backend": "live",
             "rendered": rendered,
             "degraded": self.live_degraded,
+            # Carried so "renderable on demand" can be weighed against how
+            # often rendering has actually been failing.
+            "render_failures": self.live_render_failures,
         }
