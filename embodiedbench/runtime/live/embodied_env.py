@@ -74,7 +74,13 @@ from embodiedbench.runtime.city.courier_env import (
 )
 
 from .cache import LiveAlbum
-from .client import RenderServiceError, ServiceBusy, UERenderClient
+from .client import (
+    BadRequestError,
+    RenderFailedError,
+    RenderServiceError,
+    ServiceBusy,
+    UERenderClient,
+)
 from .env import STREET_CAMERA, STREET_EYE_CM
 from .protocol import (
     DEFAULT_ARRIVE_CM,
@@ -148,7 +154,7 @@ class EmbodiedCourierEnv(CourierEnv):
         self.tick_chunk = int(tick_chunk)
         self.return_mode = return_mode
         #: How long reset() waits for a busy instance before giving up.
-        self.episode_busy_timeout_s = 600.0
+        self.episode_busy_timeout_s = 1800.0
         # Lease plumbing: a pool is leased lazily (the fleet may still be
         # launching when the env object is built); a bare client is used as
         # given and never "released".
@@ -363,17 +369,71 @@ class EmbodiedCourierEnv(CourierEnv):
             ),
         )
 
+    def _episode_is_lost(self, error: Exception) -> bool:
+        """Did this error mean "your episode is no longer on that instance"?
+
+        Two shapes carry it: the service answering ``bad_request`` because the
+        id is not the active one, and the motion backend answering
+        ``render_failed`` because no agent is spawned. Both are recoverable --
+        the env knows the episode it wants and where the courier stands on the
+        graph, so it can re-open rather than take the training run down.
+        """
+        text = str(error).lower()
+        return (
+            isinstance(error, BadRequestError) and "not active" in text
+        ) or (
+            isinstance(error, RenderFailedError) and "no embodied agent" in text
+        )
+
+    def _reopen_episode(self, reason: str) -> None:
+        """Re-establish the episode at the courier's current graph node."""
+        logger.warning("episode %s was lost (%s); re-opening at %s",
+                       self.episode_id, reason, self.node_id)
+        self._episode_open = False
+        node = self.network.nodes[self.node_id]
+        response = self._episode_when_free(EpisodeRequest(
+            episode_id=self.episode_id,
+            map_name=self.network.map_name,
+            agent=AgentSpec(
+                speed_cm_s=float(self.embodiment.speed_cm_s),
+                eye_z_cm=STREET_EYE_CM,
+                camera=STREET_CAMERA,
+            ),
+            spawn=Pose(x_cm=node.x_cm, y_cm=node.y_cm,
+                       z_cm=self.spawn_z_cm, yaw_deg=0.0),
+        ))
+        self.fixed_dt = response.fixed_dt
+        self.ue_pose = response.pose
+        self._episode_open = True
+        self.embodied_log.append({
+            "recovery": "reopen", "after": reason, "node": self.node_id,
+            "node_xy": (node.x_cm, node.y_cm),
+        })
+
     def _walk_hop(self, toward: str) -> WalkResponse:
-        """One /walk to a node's coordinates. Failures propagate: UE owns the
-        physics here, so a dead engine is a dead episode, not a degradation."""
+        """One /walk to a node's coordinates.
+
+        A lost episode is re-opened once and the walk retried: verl runs
+        several env workers in separate processes, so an instance can end up
+        serving them in turn, and a single misplaced episode must not end the
+        training job. Anything else propagates -- UE owns the physics here, so
+        a dead engine really is a dead episode.
+        """
         target = self.network.nodes[toward]
-        walk = self._ue().walk(WalkRequest(
+        request = WalkRequest(
             episode_id=self.episode_id,
             target_x_cm=target.x_cm, target_y_cm=target.y_cm,
             arrive_cm=self.arrive_cm,
             max_sim_seconds=self.max_walk_seconds,
             tick_chunk=self.tick_chunk,
-        ))
+        )
+        try:
+            walk = self._ue().walk(request)
+        except RenderServiceError as error:
+            if not self._episode_is_lost(error):
+                raise
+            self._reopen_episode(f"walk: {type(error).__name__}")
+            walk = self._ue().walk(request)
         self.ue_pose = walk.pose
         return walk
 
@@ -407,13 +467,22 @@ class EmbodiedCourierEnv(CourierEnv):
         key = f"{node_id}/toward_{toward}"
         if not self.live_album.has(key) and not self.live_degraded:
             yaw = bearing_deg(self.position(node_id), self.position(toward))
+            request = ObserveRequest(
+                episode_id=self.episode_id,
+                camera=STREET_CAMERA,
+                yaw_deg=yaw,
+                return_mode=self.return_mode,
+            )
             try:
-                result = self._ue().observe(ObserveRequest(
-                    episode_id=self.episode_id,
-                    camera=STREET_CAMERA,
-                    yaw_deg=yaw,
-                    return_mode=self.return_mode,
-                ))
+                try:
+                    result = self._ue().observe(request)
+                except RenderServiceError as error:
+                    # Same recovery as a walk: a lost episode is re-opened
+                    # once rather than costing the run its frames.
+                    if not self._episode_is_lost(error):
+                        raise
+                    self._reopen_episode(f"observe: {type(error).__name__}")
+                    result = self._ue().observe(request)
                 if result.ok:
                     # The service echoed its own (empty) key; the album key
                     # is the caller's to name.
