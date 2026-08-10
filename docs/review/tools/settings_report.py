@@ -69,6 +69,42 @@ def summarise(run: dict) -> dict:
     }
 
 
+def _encode(frames) -> list[dict]:
+    """The turn's pictures, at the size the harness serves them.
+
+    Rasterised here rather than linked, so the page is one file and shows the
+    same pixels the model was given rather than the originals.
+    """
+    import base64
+    import io
+
+    out = []
+    for frame in frames:
+        try:
+            if getattr(frame, "path", None):
+                from PIL import Image
+
+                image = Image.open(frame.path).convert("RGB")
+                scale = 320 / max(image.size)
+                image = image.resize((round(image.width * scale),
+                                      round(image.height * scale)))
+                buffer = io.BytesIO()
+                image.save(buffer, "JPEG", quality=78)
+                data = base64.b64encode(buffer.getvalue()).decode()
+                out.append({"label": frame.label, "src": f"data:image/jpeg;base64,{data}"})
+            elif getattr(frame, "svg", None):
+                import cairosvg
+
+                png = cairosvg.svg2png(bytestring=frame.svg.encode(),
+                                       output_width=320)
+                data = base64.b64encode(png).decode()
+                out.append({"label": frame.label, "src": f"data:image/png;base64,{data}"})
+        except Exception as error:  # noqa: BLE001 - a missing frame is the album's problem
+            out.append({"label": f"{frame.label} (could not render: {error})",
+                        "src": ""})
+    return out
+
+
 def replay(setting: str, seed: int, replies: list[str], limit: int):
     """Re-run the shift to recover what the model was actually sent.
 
@@ -93,11 +129,15 @@ def replay(setting: str, seed: int, replies: list[str], limit: int):
         album_root=Path("/data/murray/paris_streets_v2/citycore-paris"),
         signal_album_root=Path("/data/murray/paris_lamps_real/citycore-paris"))
     env.reset()
-    session = CourierSession(env, with_images=False)
+    # With images, because the point of the report is to show what the model
+    # was sent and the model was sent pictures. The first version replayed
+    # with_images=False and showed captions only, which reads as if the
+    # visual settings had been run blind.
+    session = CourierSession(env, with_images=True)
     turns = []
     for reply in replies[:limit]:
         observation = session.observe()
-        images = [f.label for f in session._frames(env.candidates())]
+        images = _encode(observation.frames)
         turn = session.step(reply or "")
         turns.append({
             "n": turn.step, "prompt": observation.text, "images": images,
@@ -198,14 +238,16 @@ def _html(table, shifts, models, seed, missing) -> str:
                 'system prompt below is today\'s.</p>')
         turns_html = []
         for turn in shift["turns"]:
-            pictures = "".join(f"<li>{html.escape(x)}</li>"
-                               for x in turn["images"]) or "<li>(none)</li>"
+            pictures = "".join(
+                f'<figure><img src="{i["src"]}" alt="{html.escape(i["label"])}">'
+                f'<figcaption>{html.escape(i["label"])}</figcaption></figure>'
+                for i in turn["images"]) or "<p class='sub'>(no pictures)</p>"
             turns_html.append(f"""
 <details class="turn">
   <summary>turn {turn['n']} &middot; <code>{html.escape(turn['action'])}</code>
     &middot; {html.escape(turn['error'] or turn['status'])}</summary>
   <h5>what the model was sent</h5>
-  <ul class="pics">{pictures}</ul>
+  <div class="pics">{pictures}</div>
   <pre class="prompt">{html.escape(turn['prompt'])}</pre>
   <h5>what it replied</h5>
   <pre class="reply">{html.escape(turn['reply'])}</pre>
@@ -280,7 +322,11 @@ details.turn h5{{margin:12px 0 4px;font-size:12px;color:var(--ink3);
 pre.prompt,pre.reply{{white-space:pre-wrap;word-break:break-word;font:12px/1.5 var(--mono);
   background:var(--ground);border:1px solid var(--line);border-radius:6px;
   padding:10px;max-height:460px;overflow:auto;margin:0}}
-ul.pics{{margin:4px 0;padding-left:20px;font:12px var(--mono);color:var(--ink2)}}
+.pics{{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px}}
+.pics figure{{margin:0;max-width:230px}}
+.pics img{{display:block;width:100%;border-radius:5px;border:1px solid var(--line)}}
+.pics figcaption{{font:11px var(--mono);color:var(--ink3);margin-top:3px;
+  word-break:break-word}}
 section.full{{margin:0 0 26px}}
 .note{{border-left:3px solid var(--accent);padding:2px 0 2px 14px;
   color:var(--ink2);max-width:66ch;margin:0 0 26px}}
