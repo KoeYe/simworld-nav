@@ -677,3 +677,53 @@ class TestTheEmbodiedTrainingAdapter:
         module = importlib.import_module(
             "embodiedbench.runtime.live.gym_adapter")
         assert getattr(module, "EmbodiedCourierGymEnv") is EmbodiedCourierGymEnv
+
+
+class TestAnOversubscribedFleetWaitsItsTurn:
+    """A trainer drives more concurrent episodes than the fleet has
+    instances; the second episode parks until the first ends, rather than
+    failing the reset (NoHealthyInstance used to be immediate)."""
+
+    def test_a_lease_waits_for_the_previous_episode_to_end(self, service, tmp_path):
+        import threading
+        import time as _time
+        from embodiedbench.runtime.live.pool import RenderPool
+
+        endpoints = write_endpoints(tmp_path / "endpoints.json", [service])
+        pool = RenderPool(endpoints, lease_timeout_s=10.0, lease_poll_s=0.05)
+        release = threading.Event()
+        held = threading.Event()
+
+        def first():
+            with pool.lease_embodied("ep-one"):
+                held.set()
+                release.wait(timeout=5.0)
+
+        thread = threading.Thread(target=first)
+        thread.start()
+        assert held.wait(timeout=5.0)
+        t0 = _time.monotonic()
+        threading.Timer(0.3, release.set).start()
+        with pool.lease_embodied("ep-two") as client:
+            waited = _time.monotonic() - t0
+            assert client is not None
+        thread.join(timeout=5.0)
+        assert waited >= 0.25, "second lease should have parked until release"
+
+    def test_a_dead_fleet_still_fails_fast(self, tmp_path):
+        import json as _json
+        from embodiedbench.runtime.live.pool import NoHealthyInstance, RenderPool
+
+        endpoints = tmp_path / "endpoints.json"
+        endpoints.write_text(_json.dumps({"version": 0, "instances": [
+            {"id": "gone", "base_url": "http://127.0.0.1:9", "map_name": "x"}]}))
+        pool = RenderPool(endpoints, lease_timeout_s=30.0, lease_poll_s=0.05)
+        for member in pool.members:
+            member.quarantined = True
+        import pytest as _pytest
+        import time as _time
+        t0 = _time.monotonic()
+        with _pytest.raises(NoHealthyInstance):
+            with pool.lease_embodied("ep-dead"):
+                pass
+        assert _time.monotonic() - t0 < 5.0, "all-dead must not wait out the lease timeout"

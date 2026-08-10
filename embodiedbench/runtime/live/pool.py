@@ -111,7 +111,14 @@ class RenderPool:
         *,
         client_factory: Callable[..., UERenderClient] = UERenderClient,
         render_timeout_s: float | None = None,
+        lease_timeout_s: float = 600.0,
+        lease_poll_s: float = 2.0,
     ):
+        #: How long an embodied episode waits for a free instance before the
+        #: fleet is declared oversubscribed-beyond-patience. A trainer running
+        #: more concurrent episodes than instances parks here by design.
+        self.lease_timeout_s = float(lease_timeout_s)
+        self.lease_poll_s = float(lease_poll_s)
         raw = endpoints_path or os.environ.get(ENDPOINTS_ENV)
         if not raw:
             raise EndpointsError(
@@ -246,19 +253,29 @@ class RenderPool:
         passing through the pool, so it cannot be counted against the
         instance's health by construction.
         """
-        member = self._pick(set())
-        if member is None:
-            # Same last resort as render: probe the quarantined before
-            # declaring the fleet dead.
-            self._readmit_one(set())
+        deadline = time.monotonic() + self.lease_timeout_s
+        while True:
             member = self._pick(set())
-        if member is None:
+            if member is None:
+                # Same last resort as render: probe the quarantined before
+                # declaring the fleet dead.
+                self._readmit_one(set())
+                member = self._pick(set())
+            if member is not None:
+                break
             leased = sum(m.leased_to is not None for m in self.members)
-            raise NoHealthyInstance(
-                f"no instance free to lease for embodied episode {episode_id} "
-                f"({len(self.members)} configured, "
-                f"{sum(m.quarantined for m in self.members)} quarantined, "
-                f"{leased} leased)")
+            # All healthy instances merely LEASED is the normal shape of a
+            # trainer driving more concurrent episodes than the fleet has
+            # instances -- wait for one to free rather than failing the
+            # episode. A fleet with nothing leased and nothing pickable is
+            # actually dead, and waiting would only delay the report.
+            if leased == 0 or time.monotonic() >= deadline:
+                raise NoHealthyInstance(
+                    f"no instance free to lease for embodied episode {episode_id} "
+                    f"({len(self.members)} configured, "
+                    f"{sum(m.quarantined for m in self.members)} quarantined, "
+                    f"{leased} leased)")
+            time.sleep(self.lease_poll_s)
         member.leased_to = episode_id
         try:
             yield member.client
