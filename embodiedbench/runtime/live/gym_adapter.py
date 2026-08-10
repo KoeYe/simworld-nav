@@ -268,3 +268,170 @@ class LiveCourierGymEnv(CourierGymEnv):
         if self._cache_scratch is not None:
             self._cache_scratch.cleanup()
             self._cache_scratch = None
+
+
+class EmbodiedCourierGymEnv(CourierGymEnv):
+    """The Track B backend behind the same training interface.
+
+    Identical adapter shape to ``LiveCourierGymEnv`` -- the same private
+    cache-dir discipline, the same config-digested episode id, the same
+    worker-thread offload for the async methods -- with two differences that
+    are the whole point:
+
+    * the env underneath is ``EmbodiedCourierEnv``, so UE owns locomotion and
+      the clock's movement seconds, and the pool lease it takes is exclusive
+      (spec 3b: one embodied episode per instance);
+    * ``hazards`` must be false. v1 embodied has no obstacle dressing and no
+      signal charging -- locomotion realism is the thing under test -- so a
+      config asking for hazards is asking for a mode that does not exist yet
+      and is refused rather than silently stripped. Unset, it defaults to
+      false here (the stock default is true, which would make every embodied
+      config carry boilerplate for the only value that works).
+
+    Extra config keys beyond the stock set: ``ue_endpoints``,
+    ``live_cache_root`` (both exactly as on the live adapter) and
+    ``spawn_z_cm`` (where the pawn spawns on the z axis, default 100).
+
+    Launch line:
+
+        +env_registry.Courier=embodiedbench.runtime.live.gym_adapter.EmbodiedCourierGymEnv
+    """
+
+    def __init__(self, env_config: dict[str, Any] | None = None):
+        config = dict(env_config or {})
+        backend = config.get("backend", "embodied")
+        if backend != "embodied":
+            raise ValueError(
+                f"EmbodiedCourierGymEnv got backend={backend!r}; a config "
+                "meant for the album or live adapter should name its own "
+                "class, not this one.")
+        if config.get("album_root"):
+            raise ValueError(
+                "album_root has no meaning on the embodied backend -- frames "
+                "come from the pawn's own camera.")
+        for key in ("obstacle_sidecar_root", "signal_sidecar_root",
+                    "sidecar_source_root"):
+            if config.get(key):
+                raise ValueError(
+                    f"{key} has no meaning on the embodied backend: v1 runs "
+                    "hazards off (spec 3b), so there are no visibility "
+                    "claims to transfer.")
+        # False unless the config says otherwise; a config that says
+        # otherwise is refused below, loudly.
+        config.setdefault("hazards", False)
+        super().__init__(config)
+        if self.hazards:
+            raise ValueError(
+                "hazards=true is not available on the embodied backend: v1 "
+                "runs hazards OFF (spec 3b -- obstacle dressing and signal "
+                "charging need stateful scene dressing that is reserved, not "
+                "built). Drop the key or set it false.")
+
+        self.ue_endpoints = config.get("ue_endpoints")  # None -> $EB_UE_ENDPOINTS
+        self.spawn_z_cm = float(config.get("spawn_z_cm", 100.0))
+        raw_cache = config.get("live_cache_root")
+        self._cache_scratch: tempfile.TemporaryDirectory | None = None
+        if raw_cache:
+            self.live_cache_root = Path(raw_cache)
+        else:
+            self._cache_scratch = tempfile.TemporaryDirectory(
+                prefix="courier-embodied-")
+            self.live_cache_root = Path(self._cache_scratch.name)
+        # Private per-(pid, instance) dir, for the same reasons as the live
+        # adapter: idempotent same-seed resets, zero cross-worker sharing.
+        self.live_instance_dir = (
+            self.live_cache_root / f"{os.getpid()}-{uuid.uuid4().hex[:8]}")
+        self.live_instance_dir.mkdir(parents=True, exist_ok=True)
+        # Every axis that changes pixels or keys -- plus the backend itself,
+        # so an embodied album can never collide with a live one that
+        # happens to share every other axis.
+        axes = {
+            "backend": "embodied",
+            "difficulty": self.difficulty,
+            "stride": self.stride,
+            "embodiment": self.embodiment,
+            "spawn_z_cm": self.spawn_z_cm,
+        }
+        self._cfg8 = hashlib.blake2b(
+            json.dumps(axes, sort_keys=True).encode("utf-8"),
+            digest_size=4).hexdigest()
+        # Embodied is sighted: open the stock adapter's phone-map gate.
+        self.album_root = self.live_instance_dir
+        self._render_pool: RenderPool | None = None
+
+    _drive = staticmethod(LiveCourierGymEnv._drive)
+
+    def _pool(self) -> RenderPool:
+        """Lazy for the same reason as the live adapter: the endpoints file
+        is written by the fleet, which may still be launching."""
+        if self._render_pool is None:
+            self._render_pool = RenderPool(self.ue_endpoints)
+        return self._render_pool
+
+    # ── the async boundary (same offload as LiveCourierGymEnv) ───────────────
+
+    async def reset(self, seed: int) -> tuple[dict[str, Any], dict[str, Any]]:
+        return await asyncio.to_thread(self._drive, self._reset_impl(seed))
+
+    async def step(self, action_str: str) -> tuple[dict[str, Any], float, bool, dict[str, Any]]:
+        return await asyncio.to_thread(self._drive, super().step(action_str))
+
+    async def close(self) -> None:
+        return await asyncio.to_thread(self._drive, self._close_impl())
+
+    # ── VAGEN interface ──────────────────────────────────────────────────────
+
+    async def _reset_impl(self, seed: int) -> tuple[dict[str, Any], dict[str, Any]]:
+        from embodiedbench.agent.courier.session import CourierSession
+        from embodiedbench.compiler.road_network import build_road_network
+
+        from .embodied_env import EmbodiedCourierEnv
+
+        if self._network is None:
+            self._network = build_road_network(self.map_dir,
+                                               map_name=self.map_dir.name)
+        # A new reset means a new env object, and the old one holds an
+        # exclusive lease: give it back first or a reset storm starves the
+        # fleet one instance per reset.
+        if self._env is not None:
+            self._env.close()
+
+        kwargs: dict[str, Any] = {
+            "seed": int(seed),
+            "difficulty": self.difficulty,
+            "stride": self.stride,
+            "embodiment": self.embodiment,
+        }
+        if self.image_max_side:
+            kwargs["served_long_edge"] = float(self.image_max_side)
+
+        episode_id = f"courier-{self.map_dir.name}-s{int(seed)}-{self._cfg8}"
+        self._env = EmbodiedCourierEnv(
+            self._network,
+            self._pool(),
+            episode_id=episode_id,
+            cache_root=self.live_instance_dir,
+            spawn_z_cm=self.spawn_z_cm,
+            **kwargs,
+        )
+        self._env.reset()
+        self._session = CourierSession(self._env, city=self.city)
+        self._turns = 0
+        self._progress_cm = 0.0
+        self._last_earnings = 0.0
+
+        obs, dropped = self._observation()
+        return obs, {"seed": int(seed), "images_dropped": dropped,
+                     "difficulty": self.difficulty, "stride": self.stride,
+                     "embodiment": self.embodiment,
+                     "backend": "embodied", "episode_id": episode_id}
+
+    async def _close_impl(self) -> None:
+        # End the embodied episode -- despawn, lease back -- before the stock
+        # cleanup nulls the reference to it.
+        if self._env is not None:
+            self._env.close()
+        await super().close()
+        if self._cache_scratch is not None:
+            self._cache_scratch.cleanup()
+            self._cache_scratch = None

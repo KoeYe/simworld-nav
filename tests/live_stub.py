@@ -27,6 +27,7 @@ import base64
 import hashlib
 import io
 import json
+import math
 import threading
 import time
 from collections import Counter
@@ -98,12 +99,18 @@ class FakeRenderService:
                 })
 
             def do_POST(self) -> None:
-                if self.path != "/render":
-                    self._send(404, {"error": {"code": "bad_request",
-                                               "message": f"no route {self.path}"}})
-                    return
                 body = json.loads(self.rfile.read(
                     int(self.headers.get("Content-Length", "0"))))
+                if self.path != "/render":
+                    # Anything that is not a render is a Track B endpoint --
+                    # answered by the subclass that implements them, 404 here.
+                    answer = service.handle_track_b(self.path, body)
+                    if answer is None:
+                        self._send(404, {"error": {"code": "bad_request",
+                                                   "message": f"no route {self.path}"}})
+                    else:
+                        self._send(*answer)
+                    return
                 if body.get("protocol") != PROTOCOL:
                     self._send(400, {"error": {"code": "bad_request",
                                                "message": "wrong protocol"}})
@@ -162,6 +169,13 @@ class FakeRenderService:
         self._server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
 
+    def handle_track_b(self, path: str, body: dict[str, Any]):
+        """Track B endpoints live in the subclass; the base speaks Track A only.
+
+        Returns ``(status, payload)`` or ``None`` for "no such route".
+        """
+        return None
+
     # ── lifecycle ────────────────────────────────────────────────────────────
 
     def start(self) -> "FakeRenderService":
@@ -179,6 +193,164 @@ class FakeRenderService:
     @property
     def base_url(self) -> str:
         return f"http://127.0.0.1:{self.port}"
+
+
+class FakeTrackBService(FakeRenderService):
+    """The Track A stub plus the four stateful Track B endpoints (spec 3b).
+
+    The walk is a kinematic straight-line integrator at fixed dt: each tick
+    moves the agent ``speed * dt`` toward the target (never past it), and the
+    walk ends the moment the remaining distance is within ``arrive_cm`` -- so
+    tick counts are exact and predictable from geometry alone:
+
+        ticks = ceil((distance - arrive_cm) / (speed * fixed_dt))
+
+    ``sim_seconds`` is always ``ticks * fixed_dt``, which is the property the
+    embodied env's clock assertions rest on.
+
+    Failure injection, all explicit test state:
+
+    * ``wall_after_cm`` -- every walk stops making progress after this many
+      cm and reports ``stuck`` (ticks still count the movement that
+      happened, including the final partial step into the wall);
+    * ``busy_track_b`` -- every Track B request answers 503 busy, the "some
+      other episode holds this instance" signal;
+    * a walk whose ``max_sim_seconds`` runs out reports ``timeout`` with the
+      full tick budget burned, no knob needed.
+    """
+
+    FIXED_DT = 0.0333
+
+    def __init__(self, out_dir: Path, *, instance_id: str = "fake-b0",
+                 map_name: str = "citycore-paris"):
+        super().__init__(out_dir, instance_id=instance_id, map_name=map_name)
+        self.fixed_dt = self.FIXED_DT
+        self.agent: dict[str, Any] | None = None
+        self.wall_after_cm: float | None = None
+        self.busy_track_b = False
+        # Test-visible transcripts, one row per request.
+        self.episodes: list[dict[str, Any]] = []
+        self.walks: list[dict[str, Any]] = []
+        self.observes: list[dict[str, Any]] = []
+        self.episode_ends: list[str] = []
+
+    # ── routing ──────────────────────────────────────────────────────────────
+
+    def handle_track_b(self, path: str, body: dict[str, Any]):
+        routes = {"/episode": self._episode, "/walk": self._walk,
+                  "/observe": self._observe, "/episode_end": self._episode_end}
+        if path not in routes:
+            return None
+        if body.get("protocol") != PROTOCOL:
+            return 400, {"error": {"code": "bad_request",
+                                   "message": "wrong protocol"}}
+        with self._lock:
+            if self.busy_track_b:
+                return 503, {"error": {"code": "busy",
+                                       "message": "another episode holds this instance"}}
+            return routes[path](body)
+
+    # ── the four endpoints (called under the lock) ───────────────────────────
+
+    def _episode(self, body: dict[str, Any]):
+        spawn = body["spawn"]
+        self.agent = {
+            "episode_id": body["episode_id"],
+            "x": float(spawn["x_cm"]), "y": float(spawn["y_cm"]),
+            "z": float(spawn["z_cm"]), "yaw": float(spawn["yaw_deg"]),
+            "speed_cm_s": float(body["agent"]["speed_cm_s"]),
+            "eye_z_cm": float(body["agent"]["eye_z_cm"]),
+            "camera": dict(body["agent"]["camera"]),
+        }
+        self.episodes.append(body)
+        return 200, {"episode_id": body["episode_id"],
+                     "pose": self._pose(), "fixed_dt": self.fixed_dt}
+
+    def _walk(self, body: dict[str, Any]):
+        agent = self._active(body)
+        if agent is None:
+            return 400, {"error": {"code": "bad_request",
+                                   "message": "no such active episode"}}
+        target = body["target"]
+        tx, ty = float(target["x_cm"]), float(target["y_cm"])
+        arrive_cm = float(body.get("arrive_cm", 50.0))
+        max_ticks = int(float(body.get("max_sim_seconds", 120.0)) / self.fixed_dt)
+        step = agent["speed_cm_s"] * self.fixed_dt
+        start = (agent["x"], agent["y"])
+        wall = self.wall_after_cm
+        ticks = 0
+        walked = 0.0
+        arrived = stuck = timeout = False
+        while True:
+            dist = math.hypot(tx - agent["x"], ty - agent["y"])
+            if dist <= max(arrive_cm, 1e-9):
+                arrived = True
+                break
+            if ticks >= max_ticks:
+                timeout = True
+                break
+            move = min(step, dist)
+            if wall is not None:
+                move = min(move, wall - walked)
+            if move <= 0.0:
+                stuck = True
+                break
+            agent["x"] += (tx - agent["x"]) / dist * move
+            agent["y"] += (ty - agent["y"]) / dist * move
+            walked += move
+            ticks += 1
+        if walked > 0.0:
+            agent["yaw"] = math.degrees(math.atan2(ty - start[1], tx - start[0]))
+        response = {"arrived": arrived, "stuck": stuck, "timeout": timeout,
+                    "ticks": ticks, "sim_seconds": ticks * self.fixed_dt,
+                    "pose": self._pose(), "walked_cm": walked}
+        self.walks.append({"start_xy": start, "target_xy": (tx, ty),
+                           "arrive_cm": arrive_cm, **response})
+        return 200, response
+
+    def _observe(self, body: dict[str, Any]):
+        agent = self._active(body)
+        if agent is None:
+            return 400, {"error": {"code": "bad_request",
+                                   "message": "no such active episode"}}
+        if body["yaw_deg"] is not None:
+            agent["yaw"] = float(body["yaw_deg"])
+        camera = body["camera"]
+        label = (f"pose({agent['x']:.0f},{agent['y']:.0f})"
+                 f"@yaw{agent['yaw']:.1f}")
+        png = draw_frame(label, int(camera["width"]), int(camera["height"]))
+        digest = hashlib.sha256(png).hexdigest()
+        # The /render-item result shape, key "" (the caller owns naming),
+        # plus the pose echo.
+        result = {"key": "", "status": "ok", "path": None, "png_base64": None,
+                  "sha256": digest,
+                  "width": int(camera["width"]), "height": int(camera["height"]),
+                  "pose": self._pose()}
+        if body.get("return_mode") == "base64":
+            result["png_base64"] = base64.b64encode(png).decode("ascii")
+        else:
+            target = self.out_dir / f"{digest}.png"
+            if not target.exists():
+                target.write_bytes(png)
+            result["path"] = str(target)
+        self.observes.append(dict(body))
+        return 200, result
+
+    def _episode_end(self, body: dict[str, Any]):
+        self.episode_ends.append(body["episode_id"])
+        self.agent = None
+        return 200, {"ok": True}
+
+    # ── helpers ──────────────────────────────────────────────────────────────
+
+    def _active(self, body: dict[str, Any]) -> dict[str, Any] | None:
+        if self.agent is None or self.agent["episode_id"] != body.get("episode_id"):
+            return None
+        return self.agent
+
+    def _pose(self) -> dict[str, float]:
+        return {"x_cm": self.agent["x"], "y_cm": self.agent["y"],
+                "z_cm": self.agent["z"], "yaw_deg": self.agent["yaw"]}
 
 
 def write_endpoints(path: Path, services: list[Any]) -> Path:
