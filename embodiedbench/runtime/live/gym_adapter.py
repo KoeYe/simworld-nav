@@ -331,6 +331,8 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
 
         self.ue_endpoints = config.get("ue_endpoints")  # None -> $EB_UE_ENDPOINTS
         self.spawn_z_cm = float(config.get("spawn_z_cm", 100.0))
+        #: Increments per reset so no two live episodes share an id.
+        self._episode_seq = 0
         raw_cache = config.get("live_cache_root")
         self._cache_scratch: tempfile.TemporaryDirectory | None = None
         if raw_cache:
@@ -409,7 +411,16 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         if self.image_max_side:
             kwargs["served_long_edge"] = float(self.image_max_side)
 
-        episode_id = f"courier-{self.map_dir.name}-s{int(seed)}-{self._cfg8}"
+        # Unique per EPISODE, not per (seed, config). GRPO's group runs the
+        # same seed n times concurrently -- that is where its advantage comes
+        # from -- so a seed-derived id makes two live episodes collide on one
+        # instance, and the service's idempotent same-id re-spawn then has
+        # them tearing down each other's pawn. Measured on ds-serv6: four
+        # spawns at one position inside 1.1 s, and the wall clock going to
+        # re-spawns instead of walking.
+        self._episode_seq += 1
+        episode_id = (f"courier-{self.map_dir.name}-s{int(seed)}-{self._cfg8}"
+                      f"-{self.live_instance_dir.name}-{self._episode_seq}")
         self._env = EmbodiedCourierEnv(
             self._network,
             self._pool(),

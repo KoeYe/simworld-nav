@@ -606,7 +606,10 @@ class TestTheEmbodiedTrainingAdapter:
         env = _EmbodiedAdapterUnderTest(config)
         obs, info = run(env.reset(0))
         assert info["backend"] == "embodied"
-        assert info["episode_id"].endswith(env._cfg8)
+        # The id carries the config digest AND a per-episode suffix: GRPO
+        # runs one seed n times at once, so ids must not collide.
+        assert env._cfg8 in info["episode_id"]
+        assert info["episode_id"].endswith("-1")
         images = obs["multi_modal_input"]["<image>"]
         assert obs["obs_str"].count("<image>") == len(images)
         assert images and all(isinstance(image, Image.Image) for image in images)
@@ -645,8 +648,13 @@ class TestTheEmbodiedTrainingAdapter:
             "a reset storm must not hold one lease per reset")
         assert len(service.episode_ends) == 1, (
             "the first episode must have been ended, once")
-        assert len(service.observes) == observed, (
-            "same seed, same album: the second reset re-serves cached frames")
+        # Each episode now owns its album, because each episode owns its id:
+        # GRPO runs one seed several times at once, and two live episodes
+        # sharing an id fight over the pawn. Re-rendering is the price, and
+        # for embodied frames it is also the honest answer -- they come from
+        # the pawn's own trajectory, which the next episode does not share.
+        assert len(service.observes) > observed, (
+            "a fresh episode renders its own frames")
         run(env.close())
 
     def test_hazards_true_is_refused_not_stripped(self):
