@@ -1,0 +1,154 @@
+"""The courier benchmark behind VAGEN's interface, observed through live UE.
+
+A subclass of ``CourierGymEnv`` that replaces exactly one thing: where the
+frames come from. The prompt, the observation text, the image budget, the
+lamp-pairing rules, the reward bases and the shaping all stay the inherited
+code, because the entire point of the live backend is that a training run
+cannot tell it from an album run except by the frames being fresh.
+
+``reset`` is overridden whole rather than hooked, and the reason is worth
+recording: the stock ``reset`` builds ``CourierEnv`` inline, entangled with
+the album-path defaulting for ``/data/murray`` bakes, and offers no
+construction seam. Copying its bookkeeping (session, counters, first
+observation) is eight lines; threading a factory hook through the stock class
+would be an edit to a file this branch is trying not to touch.
+
+Config keys, on top of the inherited ones (``difficulty``, ``stride``,
+``embodiment``, ``hazards``, ``max_images``, ``max_turns``, ``city``,
+``reward_basis``, ``progress_weight``, ``image_max_side``, ``map_dir``):
+
+======================  ====================================================
+``backend``             must be ``"live"``; the key exists so a config that
+                        reaches the wrong class fails loudly
+``ue_endpoints``        path to endpoints.json (default: $EB_UE_ENDPOINTS)
+``live_cache_root``     where per-episode albums land; unset, a temporary
+                        directory that lives as long as this env object
+``sidecar_source_root`` a baked album directory whose visibility sidecars
+                        are copied into each episode's album; unset, the
+                        perceptual mechanics are silently off, exactly as
+                        for a bare album
+======================  ====================================================
+
+``album_root`` is refused: the live backend renders its own frames, and a
+config carrying both would be two sources of truth about one directory.
+
+Launch line (the same CLI registration the stock adapter uses, so nothing in
+the gitignored vendor/ checkout changes):
+
+    +env_registry.Courier=embodiedbench.runtime.live.gym_adapter.LiveCourierGymEnv
+"""
+
+from __future__ import annotations
+
+import tempfile
+from pathlib import Path
+from typing import Any
+
+from embodiedbench.training.vagen_courier_env import CourierGymEnv
+
+from .pool import RenderPool
+
+
+class LiveCourierGymEnv(CourierGymEnv):
+    """One live-rendered courier episode, driven through the training harness."""
+
+    def __init__(self, env_config: dict[str, Any] | None = None):
+        config = dict(env_config or {})
+        backend = config.get("backend", "live")
+        if backend != "live":
+            raise ValueError(
+                f"LiveCourierGymEnv got backend={backend!r}; a config meant for "
+                "the album adapter should name CourierGymEnv, not this class.")
+        if config.get("album_root"):
+            raise ValueError(
+                "album_root has no meaning on the live backend -- frames are "
+                "rendered, not read. To reuse a baked album's visibility "
+                "claims, pass sidecar_source_root.")
+        super().__init__(config)
+
+        self.ue_endpoints = config.get("ue_endpoints")  # None -> $EB_UE_ENDPOINTS
+        raw_cache = config.get("live_cache_root")
+        self._cache_scratch: tempfile.TemporaryDirectory | None = None
+        if raw_cache:
+            self.live_cache_root = Path(raw_cache)
+        else:
+            self._cache_scratch = tempfile.TemporaryDirectory(prefix="courier-live-")
+            self.live_cache_root = Path(self._cache_scratch.name)
+        raw_sidecar = config.get("sidecar_source_root")
+        self.sidecar_source_root = Path(raw_sidecar) if raw_sidecar else None
+        if self.sidecar_source_root is not None and not self.sidecar_source_root.exists():
+            # The same refusal the stock adapter makes for a missing album: a
+            # path that silently degrades to "mechanics off" is how training
+            # and evaluation drift apart without anyone deciding they should.
+            raise FileNotFoundError(
+                f"sidecar_source_root does not exist: {self.sidecar_source_root}")
+        # The inherited ``_load_images`` sends the phone map only when
+        # ``album_root`` is truthy -- its gate for "this is a sighted
+        # condition". Live is sighted, so the gate opens; evaluation sends the
+        # map and training must see the same world.
+        self.album_root = self.live_cache_root
+        self._render_pool: RenderPool | None = None
+
+    def _pool(self) -> RenderPool:
+        """Built on first use, not in the constructor: verl instantiates env
+        objects before rollout starts, and the endpoints file is written by
+        the fleet, which may still be launching at that moment."""
+        if self._render_pool is None:
+            self._render_pool = RenderPool(self.ue_endpoints)
+        return self._render_pool
+
+    # ── VAGEN interface ──────────────────────────────────────────────────────
+
+    async def reset(self, seed: int) -> tuple[dict[str, Any], dict[str, Any]]:
+        from embodiedbench.agent.courier.session import CourierSession
+        from embodiedbench.compiler.road_network import build_road_network
+
+        from .env import LiveCourierEnv
+
+        if self._network is None:
+            self._network = build_road_network(self.map_dir,
+                                               map_name=self.map_dir.name)
+
+        kwargs: dict[str, Any] = {
+            "seed": int(seed),
+            "difficulty": self.difficulty,
+            "stride": self.stride,
+            "embodiment": self.embodiment,
+        }
+        if self.image_max_side:
+            # Same reason as the stock adapter: charge for a red light only
+            # where the lamp survives the downscale the policy actually gets.
+            kwargs["served_long_edge"] = float(self.image_max_side)
+
+        # The episode id names the album directory, and carrying the seed in
+        # it is what makes "same (episode, key) renders once" an idempotency
+        # rule across resets of the same seed rather than per reset.
+        episode_id = f"courier-{self.map_dir.name}-s{int(seed)}"
+        self._env = LiveCourierEnv(
+            self._network,
+            self._pool(),
+            episode_id=episode_id,
+            cache_root=self.live_cache_root,
+            # hazards=false drops the visibility claims instead of the album
+            # kwargs, which is the same lever the stock adapter pulls: no
+            # claim, no charge, and the frames stay clean street views.
+            sidecar_source_root=(self.sidecar_source_root if self.hazards else None),
+            **kwargs,
+        )
+        self._env.reset()
+        self._session = CourierSession(self._env, city=self.city)
+        self._turns = 0
+        self._progress_cm = 0.0
+        self._last_earnings = 0.0
+
+        obs, dropped = self._observation()
+        return obs, {"seed": int(seed), "images_dropped": dropped,
+                     "difficulty": self.difficulty, "stride": self.stride,
+                     "embodiment": self.embodiment,
+                     "backend": "live", "episode_id": episode_id}
+
+    async def close(self) -> None:
+        await super().close()
+        if self._cache_scratch is not None:
+            self._cache_scratch.cleanup()
+            self._cache_scratch = None
