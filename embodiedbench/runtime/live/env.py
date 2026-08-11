@@ -96,6 +96,7 @@ class LiveCourierEnv(CourierEnv):
         self,
         network: RoadNetwork,
         renderer: Any,
+        street_camera: Any = None,
         *,
         episode_id: str,
         cache_root: str | Path,
@@ -126,6 +127,8 @@ class LiveCourierEnv(CourierEnv):
         # one warning and zero per-frame timeouts. reset() re-arms it -- an
         # episode boundary is the natural moment to ask the fleet again.
         self.live_degraded = False
+        # The bake's camera unless the caller renders at serving size.
+        self.street_camera = street_camera or STREET_CAMERA
         self.live_render_failures = 0
         self.live_rendered = 0
         self.live_busy_skips = 0
@@ -189,7 +192,7 @@ class LiveCourierEnv(CourierEnv):
         batch = RenderBatch(
             episode_id=self.live_album.episode_id,
             return_mode=self.return_mode,
-            camera=STREET_CAMERA,
+            camera=self.street_camera,
             requests=tuple(missing),
         )
         try:

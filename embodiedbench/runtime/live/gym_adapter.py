@@ -105,6 +105,20 @@ class LiveCourierGymEnv(CourierGymEnv):
         # config naming a setting would have been silently ignored and the
         # run would have been narration="none" wearing another name.
         self.narration = config.get("narration", "none")
+        # Render at the size the policy is actually given, instead of
+        # rendering 640x480 and throwing three quarters of it away.
+        #
+        # Off by default, because it is a real if small change to what the
+        # model sees: STREET_CAMERA's 640x480 is the carriageway bake's
+        # camera, and a frame rendered at 256x192 is not bit-identical to one
+        # rendered at 640x480 and downscaled -- a downscale averages, a direct
+        # render aliases. Measured on ds-serv6: mean absolute difference 2.13,
+        # 2.03% of pixels differing by more than 8. The geometry (4:3, 90 deg
+        # FOV) is untouched, so framing is identical; only sampling changes.
+        #
+        # What it buys, measured on the same instance: 240.8 ms per capture at
+        # 640x480 against 161.2 ms at 256x192, and 486 KB of PNG against 75 KB.
+        self.capture_at_served_size = bool(config.get("capture_at_served_size", False))
         raw_cache = config.get("live_cache_root")
         self._cache_scratch: tempfile.TemporaryDirectory | None = None
         if raw_cache:
@@ -161,6 +175,24 @@ class LiveCourierGymEnv(CourierGymEnv):
         # map and training must see the same world.
         self.album_root = self.live_instance_dir
         self._render_pool: RenderPool | None = None
+
+
+    def _street_camera(self) -> Any:
+        """The capture spec: the bake's camera, or the size actually served.
+
+        Only the sampling density changes -- 4:3 and 90 degrees are kept, so
+        the framing is identical and a frame remains comparable to the bake in
+        everything except how finely it was sampled.
+        """
+        from .env import STREET_CAMERA
+
+        if not self.capture_at_served_size or not self.image_max_side:
+            return STREET_CAMERA
+        long_edge = int(self.image_max_side)
+        short_edge = max(1, round(long_edge * STREET_CAMERA.height
+                                  / STREET_CAMERA.width))
+        return type(STREET_CAMERA)(width=long_edge, height=short_edge,
+                                   fov_deg=STREET_CAMERA.fov_deg)
 
     def _pool(self) -> RenderPool:
         """Built on first use, not in the constructor: verl instantiates env
@@ -251,6 +283,7 @@ class LiveCourierGymEnv(CourierGymEnv):
         self._env = LiveCourierEnv(
             self._network,
             self._pool(),
+            self._street_camera(),
             episode_id=episode_id,
             cache_root=self.live_instance_dir,
             # hazards=false drops the visibility claims instead of the album
@@ -362,6 +395,20 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         # config naming a setting would have been silently ignored and the
         # run would have been narration="none" wearing another name.
         self.narration = config.get("narration", "none")
+        # Render at the size the policy is actually given, instead of
+        # rendering 640x480 and throwing three quarters of it away.
+        #
+        # Off by default, because it is a real if small change to what the
+        # model sees: STREET_CAMERA's 640x480 is the carriageway bake's
+        # camera, and a frame rendered at 256x192 is not bit-identical to one
+        # rendered at 640x480 and downscaled -- a downscale averages, a direct
+        # render aliases. Measured on ds-serv6: mean absolute difference 2.13,
+        # 2.03% of pixels differing by more than 8. The geometry (4:3, 90 deg
+        # FOV) is untouched, so framing is identical; only sampling changes.
+        #
+        # What it buys, measured on the same instance: 240.8 ms per capture at
+        # 640x480 against 161.2 ms at 256x192, and 486 KB of PNG against 75 KB.
+        self.capture_at_served_size = bool(config.get("capture_at_served_size", False))
         self.spawn_z_cm = float(config.get("spawn_z_cm", 100.0))
         self.action_chunk = int(config.get("action_chunk", 1))
         if self.action_chunk < 1:
@@ -414,6 +461,24 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         self._render_pool: RenderPool | None = None
 
     _drive = staticmethod(LiveCourierGymEnv._drive)
+
+
+    def _street_camera(self) -> Any:
+        """The capture spec: the bake's camera, or the size actually served.
+
+        Only the sampling density changes -- 4:3 and 90 degrees are kept, so
+        the framing is identical and a frame remains comparable to the bake in
+        everything except how finely it was sampled.
+        """
+        from .env import STREET_CAMERA
+
+        if not self.capture_at_served_size or not self.image_max_side:
+            return STREET_CAMERA
+        long_edge = int(self.image_max_side)
+        short_edge = max(1, round(long_edge * STREET_CAMERA.height
+                                  / STREET_CAMERA.width))
+        return type(STREET_CAMERA)(width=long_edge, height=short_edge,
+                                   fov_deg=STREET_CAMERA.fov_deg)
 
     def _pool(self) -> RenderPool:
         """Lazy for the same reason as the live adapter: the endpoints file
@@ -521,6 +586,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         self._env = EmbodiedCourierEnv(
             self._network,
             self._pool(),
+            self._street_camera(),
             episode_id=episode_id,
             cache_root=self.live_instance_dir,
             spawn_z_cm=self.spawn_z_cm,

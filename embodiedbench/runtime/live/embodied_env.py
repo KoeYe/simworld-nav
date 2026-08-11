@@ -127,6 +127,7 @@ class EmbodiedCourierEnv(CourierEnv):
         self,
         network: RoadNetwork,
         pool_or_client: Any,
+        street_camera: Any = None,
         *,
         episode_id: str,
         cache_root: str | Path,
@@ -178,6 +179,8 @@ class EmbodiedCourierEnv(CourierEnv):
         # "UE was busy", and only one of those is fixed by buying more dt.
         self.busy_waits = 0
         self.busy_wait_seconds = 0.0
+        # The bake's camera unless the caller renders at serving size.
+        self.street_camera = street_camera or STREET_CAMERA
         # Same containment posture as the live env's observation path: a dead
         # observe degrades frames to album mode, never physics -- but /walk
         # failures PROPAGATE, because in this mode UE owns the physics and
@@ -222,7 +225,7 @@ class EmbodiedCourierEnv(CourierEnv):
                 # (SetMaxSpeed). The tired slowdown does not reach UE in v1.
                 speed_cm_s=float(self.embodiment.speed_cm_s),
                 eye_z_cm=STREET_EYE_CM,
-                camera=STREET_CAMERA,
+                camera=self.street_camera,
             ),
             # Spawn at the reset node's coordinates: the graph position and
             # the pawn agree from the first frame.
@@ -296,7 +299,7 @@ class EmbodiedCourierEnv(CourierEnv):
                 agent=AgentSpec(
                     speed_cm_s=float(self.embodiment.speed_cm_s),
                     eye_z_cm=STREET_EYE_CM,
-                    camera=STREET_CAMERA,
+                    camera=self.street_camera,
                 ),
                 spawn=Pose(x_cm=node.x_cm, y_cm=node.y_cm,
                            z_cm=self.spawn_z_cm, yaw_deg=0.0),
@@ -419,7 +422,7 @@ class EmbodiedCourierEnv(CourierEnv):
             agent=AgentSpec(
                 speed_cm_s=float(self.embodiment.speed_cm_s),
                 eye_z_cm=STREET_EYE_CM,
-                camera=STREET_CAMERA,
+                camera=self.street_camera,
             ),
             spawn=Pose(x_cm=node.x_cm, y_cm=node.y_cm,
                        z_cm=self.spawn_z_cm, yaw_deg=0.0),
@@ -508,7 +511,7 @@ class EmbodiedCourierEnv(CourierEnv):
             yaw = bearing_deg(self.position(node_id), self.position(toward))
             request = ObserveRequest(
                 episode_id=self.episode_id,
-                camera=STREET_CAMERA,
+                camera=self.street_camera,
                 yaw_deg=yaw,
                 return_mode=self.return_mode,
             )
