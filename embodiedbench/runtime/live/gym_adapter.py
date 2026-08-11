@@ -66,6 +66,11 @@ from typing import Any, Coroutine
 from embodiedbench.training.vagen_courier_env import CourierGymEnv
 
 from .pool import RenderPool, shared_pool
+from .protocol import (
+    DEFAULT_ARRIVE_CM,
+    DEFAULT_MAX_WALK_SIM_SECONDS,
+    DEFAULT_TICK_CHUNK,
+)
 
 
 class LiveCourierGymEnv(CourierGymEnv):
@@ -349,6 +354,16 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                 f"at least 1; got {config.get('action_chunk')!r}")
         #: Increments per reset so no two live episodes share an id.
         self._episode_seq = 0
+        # Walk geometry. The arrival radius must not be finer than the
+        # distance the pawn covers between two arrival checks: at
+        # fixed_dt 0.2 and 140 cm/s a tick is 28 cm, so a chunk of 10 moves
+        # 280 cm between looks and a 50 cm radius is invisible -- the courier
+        # sails past its node and the walk reports stuck. Callers that raise
+        # the engine's dt must raise these together, so they are config.
+        self.tick_chunk = int(config.get("tick_chunk", DEFAULT_TICK_CHUNK))
+        self.arrive_cm = float(config.get("arrive_cm", DEFAULT_ARRIVE_CM))
+        self.max_walk_seconds = float(
+            config.get("max_walk_seconds", DEFAULT_MAX_WALK_SIM_SECONDS))
         raw_cache = config.get("live_cache_root")
         self._cache_scratch: tempfile.TemporaryDirectory | None = None
         if raw_cache:
@@ -459,6 +474,9 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             episode_id=episode_id,
             cache_root=self.live_instance_dir,
             spawn_z_cm=self.spawn_z_cm,
+            arrive_cm=self.arrive_cm,
+            tick_chunk=self.tick_chunk,
+            max_walk_seconds=self.max_walk_seconds,
             **kwargs,
         )
         self._env.reset()
