@@ -166,7 +166,17 @@ class UERenderClient:
         return EpisodeResponse.from_dict(data)
 
     def walk(self, request: WalkRequest) -> WalkResponse:
+        # NOT retried. Every other endpoint here is idempotent by contract
+        # -- /render is self-contained, /observe is a read, /episode and
+        # /episode_end are declared idempotent for the same id -- but a walk
+        # MOVES the pawn. A transport timeout on a walk the engine actually
+        # completed, retried, finds the pawn already standing on the target
+        # and answers arrived with ticks=0 and sim_seconds=0.0. The hop then
+        # costs nothing: the courier travelled for free and the clock never
+        # heard about it. Surfacing the transport failure is honest; a silent
+        # free hop is not.
         data = self._request("POST", "/walk", body=request.to_dict(),
+                             retry=False,
                              timeout_s=self.render_timeout_s)
         return WalkResponse.from_dict(data)
 
@@ -183,7 +193,7 @@ class UERenderClient:
     # ── plumbing ─────────────────────────────────────────────────────────────
 
     def _request(self, method: str, path: str, *, body: dict[str, Any] | None = None,
-                 timeout_s: float) -> dict[str, Any]:
+                 timeout_s: float, retry: bool = True) -> dict[str, Any]:
         payload = None if body is None else json.dumps(body).encode("utf-8")
         request = urllib.request.Request(
             self.base_url + path, data=payload, method=method,
@@ -193,7 +203,7 @@ class UERenderClient:
         # Two passes: the original attempt and one reconnect. A service
         # restarting between batches produces exactly one refused connection,
         # and that one is not worth a failover; a second is.
-        for _ in range(2):
+        for _ in range(2 if retry else 1):
             try:
                 with urllib.request.urlopen(request, timeout=timeout_s) as response:
                     return self._parse(response.read())
@@ -204,8 +214,9 @@ class UERenderClient:
             except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as error:
                 last = error
         raise ServiceUnreachable(
-            f"{self.instance_id}: {self.base_url}{path} unreachable after one "
-            f"reconnect attempt ({last})")
+            f"{self.instance_id}: {self.base_url}{path} unreachable"
+            + (f" after one reconnect attempt ({last})" if retry
+               else f" ({last}); not retried -- this endpoint is not idempotent"))
 
     @staticmethod
     def _parse(raw: bytes) -> dict[str, Any]:

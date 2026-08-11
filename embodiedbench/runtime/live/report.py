@@ -57,6 +57,7 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     hops = recoveries = degraded = busy_waits = 0
     busy_seconds = wall_seconds = 0.0
     pose_errors: list[float] = []
+    engine_seconds = graph_seconds = 0.0
     workers: Counter[int] = Counter()
     delivered = 0
 
@@ -75,6 +76,12 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
                 walk_sim_seconds += float(hop["sim_seconds"])
             if "pose_error_cm" in hop:
                 pose_errors.append(float(hop["pose_error_cm"]))
+            # Only arrived hops: a refused hop is charged a floor, not a
+            # travel price, so including them would compare two different
+            # things and flatter the ratio.
+            if hop.get("outcome") == "arrived" and "graph_seconds" in hop:
+                engine_seconds += float(hop.get("sim_seconds", 0.0))
+                graph_seconds += float(hop["graph_seconds"])
         summary = record.get("summary") or {}
         if summary.get("delivered"):
             delivered += int(summary["delivered"])
@@ -116,6 +123,14 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         # too small for this rollout width".
         "busy_share_of_wall": (round(busy_seconds / span, 4)
                                if span > 0 else None),
+        # How much more the engine charges for the same hop than the graph
+        # price every budget in the task is still computed from. 1.0 means the
+        # two agree; above 1.0, the live env is quietly running a harder
+        # version of the benchmark than the offline one.
+        "clock_inflation": (round(engine_seconds / graph_seconds, 4)
+                            if graph_seconds > 0 else None),
+        "engine_seconds_arrived": round(engine_seconds, 1),
+        "graph_seconds_arrived": round(graph_seconds, 1),
         "pose_error_cm": {
             "n": len(pose_errors),
             "max": round(max(pose_errors), 1) if pose_errors else None,
@@ -156,6 +171,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"queueing            {report['busy_waits']} waits, "
           f"{report['busy_wait_seconds']}s "
           f"({report['busy_share_of_wall']} of wall)")
+    print(f"clock inflation     {report['clock_inflation']}x  "
+          f"(engine {report['engine_seconds_arrived']}s vs graph "
+          f"{report['graph_seconds_arrived']}s on arrived hops)")
     print(f"pose error cm       {report['pose_error_cm']}")
     return 0
 

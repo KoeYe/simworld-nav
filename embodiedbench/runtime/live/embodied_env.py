@@ -338,7 +338,7 @@ class EmbodiedCourierEnv(CourierEnv):
             # The engine-measured price of the failed walk, floored at the
             # refusal floor every refused action pays.
             charge = max(walk.sim_seconds, REJECTED_ACTION_SECONDS)
-            self._log_hop(row["node"], walk, outcome)
+            self._log_hop(row, walk, outcome)
             # Recovery re-spawn: a failed walk leaves the pawn wherever
             # physics stopped it while the graph stays at the junction, and
             # without repair every LATER walk starts from the wrong place —
@@ -370,7 +370,7 @@ class EmbodiedCourierEnv(CourierEnv):
         self.sim_seconds += seconds
         self.walked_cm += walk.walked_cm
         self._issue()
-        self._log_hop(row["node"], walk, "arrived")
+        self._log_hop(row, walk, "arrived")
         return StepOutcome(
             ok=True, moved=True, sim_seconds=seconds, walked_m=walked_m,
             message=(
@@ -447,9 +447,26 @@ class EmbodiedCourierEnv(CourierEnv):
         self.ue_pose = walk.pose
         return walk
 
-    def _log_hop(self, toward: str, walk: WalkResponse, outcome: str) -> None:
+    def _log_hop(self, row: dict[str, Any], walk: WalkResponse,
+                 outcome: str) -> None:
+        toward = row["node"]
         target = self.network.nodes[toward]
+        # What the OFFLINE env would have charged for this same hop: the
+        # straight-line graph distance at the courier's current speed. Logged
+        # beside the engine's number because Track B changed how movement time
+        # is PRICED without changing anything it is spent against -- deadlines,
+        # the shift clock, order expiry and the episode budget are all still
+        # computed from graph chords at a fixed walking speed. The engine's
+        # number is >= this one by construction (a navmesh path is never
+        # shorter than the chord it spans), so the gap is a one-directional
+        # bias, and the ratio of these two columns is the size of it. Recorded
+        # rather than corrected: what to do about it is a decision about the
+        # benchmark, not about the plumbing.
+        graph_seconds = (row["distance_m"] * 100.0
+                         / max(self.travel_speed_cm_s(), 1e-6))
         self.embodied_log.append({
+            "graph_seconds": round(graph_seconds, 4),
+            "chord_m": round(float(row["distance_m"]), 3),
             "target_node": toward,
             "target_xy": (target.x_cm, target.y_cm),
             "ticks": walk.ticks,

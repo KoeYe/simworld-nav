@@ -179,6 +179,11 @@ class RenderPool:
                 client=client_factory(base_url, instance_id=member_id, **kwargs),
             ))
 
+        self._index_of = {m.id: i for i, m in enumerate(self.members)}
+        # Deterministic per process, arbitrary across processes -- which is
+        # exactly the property needed: reproducible within a worker, spread
+        # between them.
+        self._rotation = os.getpid() % max(1, len(self.members))
         # Beside the endpoints file, as the spec says, so whoever looks at the
         # fleet's config sees the nav side's opinion of it in the same place.
         self.statefile = self.endpoints_path.with_name(
@@ -260,12 +265,29 @@ class RenderPool:
                       and m.id not in exclude]
         if not candidates:
             return None
-        return min(candidates, key=lambda m: (m.in_flight, m.dispatched, m.id))
+        return min(candidates, key=lambda m: (m.in_flight, m.dispatched,
+                                              self._rotated(m)))
+
+    def _rotated(self, member: _Member) -> int:
+        """Tie-break position, rotated by process.
+
+        Load counters are per-process, and a trainer runs its env workers in
+        separate Ray actor processes. Every one of those pools is therefore
+        COLD -- in_flight and dispatched are zero everywhere -- so a tie-break
+        on ``id`` makes every process independently choose the same instance.
+        Measured consequence with six instances up: one instance takes every
+        episode, the other five never receive one, and the five extra GPUs buy
+        nothing. Rotating the tie-break by pid spreads cold pools across the
+        fleet without any cross-process coordination, which there is none of.
+        """
+        index = self._index_of[member.id]
+        return (index - self._rotation) % len(self.members)
 
     # ── embodied leases (Track B) ────────────────────────────────────────────
 
     @contextlib.contextmanager
-    def lease_embodied(self, episode_id: str) -> Iterator[UERenderClient]:
+    def lease_embodied(self, episode_id: str,
+                       exclude: set[str] | None = None) -> Iterator[UERenderClient]:
         """One instance, exclusively, for one embodied episode.
 
         Track B endpoints are stateful (spec 3b): one active embodied episode
@@ -283,17 +305,21 @@ class RenderPool:
         instance's health by construction.
         """
         deadline = time.monotonic() + self.lease_timeout_s
+        # Instances this episode already found busy: a lease is a local
+        # belief about an instance, and the instance itself is the
+        # authority. Being told 'busy' is how the belief gets corrected.
+        skip = set(exclude or ())
         while True:
             with self._lease_lock:
-                member = self._pick(set())
+                member = self._pick(skip)
                 if member is not None:
                     member.leased_to = episode_id
             if member is None:
                 # Same last resort as render: probe the quarantined before
                 # declaring the fleet dead.
                 with self._lease_lock:
-                    self._readmit_one(set())
-                    member = self._pick(set())
+                    self._readmit_one(skip)
+                    member = self._pick(skip)
                     if member is not None:
                         member.leased_to = episode_id
             if member is not None:
