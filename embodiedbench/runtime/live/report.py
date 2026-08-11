@@ -17,6 +17,14 @@ walk, which is a fact about the map, not about being a good courier.
 
 Everything here is read-only over the JSONL the envs append to. It answers on
 partial runs, because the interesting moment to ask is usually mid-run.
+
+One thing to know before quoting the throughput figure: it covers whatever
+window the directory spans. A directory holding a single rollout burst reports
+how fast the fleet walks; a directory holding several training steps also
+includes the optimizer time between them, when the fleet is idle by design.
+Both are true numbers and they answer different questions -- "how fast is the
+world" versus "how much wall clock does a training step cost". Clear the
+directory when you want the first one.
 """
 
 from __future__ import annotations
