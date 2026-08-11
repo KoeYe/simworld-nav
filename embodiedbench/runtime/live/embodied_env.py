@@ -311,6 +311,18 @@ class EmbodiedCourierEnv(CourierEnv):
                 "recovery respawn after %s failed for %s (%s: %s); later "
                 "walks start from the pawn's stranded pose",
                 reason, self.episode_id, type(error).__name__, error)
+            # Record it, because this is the one branch where the pose error
+            # stops being bounded. Every other path re-anchors the pawn: an
+            # arrived hop lands within arrive_cm of an absolute target, and a
+            # successful respawn puts it back on the node. A FAILED respawn
+            # leaves it stranded, and every subsequent walk starts from the
+            # wrong place. Logging alone made that invisible -- the episode
+            # gained no recovery row, so nothing downstream could count it.
+            self.embodied_log.append({
+                "recovery": "reopen_failed", "after": reason,
+                "node": self.node_id,
+                "error": f"{type(error).__name__}: {error}",
+            })
 
     # ── the transition seam ──────────────────────────────────────────────────
 

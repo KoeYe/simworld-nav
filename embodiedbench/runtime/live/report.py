@@ -54,7 +54,7 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
 
     outcomes: Counter[str] = Counter()
     walk_sim_seconds = 0.0
-    hops = recoveries = degraded = busy_waits = 0
+    hops = recoveries = degraded = busy_waits = stranded = 0
     busy_seconds = wall_seconds = 0.0
     pose_errors: list[float] = []
     engine_seconds = graph_seconds = 0.0
@@ -66,6 +66,8 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         outcomes.update(counters.get("outcomes", {}))
         hops += int(counters.get("hops", 0))
         recoveries += int(counters.get("recoveries", 0))
+        stranded += sum(1 for h in record.get("hops", [])
+                        if h.get("recovery") == "reopen_failed")
         degraded += 1 if counters.get("degraded") else 0
         busy_waits += int(counters.get("busy_waits", 0))
         busy_seconds += float(counters.get("busy_wait_seconds", 0.0))
@@ -122,6 +124,10 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         "sim_failure_rate": (round(sim_failures / total_walks, 4)
                              if total_walks else None),
         "recoveries": recoveries,
+        # The one branch where pose error stops being bounded: a respawn that
+        # failed leaves the pawn where it stalled, and every later walk in
+        # that episode starts from the wrong place. Should be zero.
+        "stranded_after_failed_respawn": stranded,
         "episodes_degraded_to_album": degraded,
         "delivered": delivered,
         "walk_sim_seconds": round(walk_sim_seconds, 1),
@@ -182,6 +188,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"sim failure rate    {report['sim_failure_rate']}   "
           f"(stuck/timeout charged to the policy)")
     print(f"recoveries          {report['recoveries']}   "
+          f"stranded {report['stranded_after_failed_respawn']}   "
           f"degraded episodes {report['episodes_degraded_to_album']}")
     print(f"throughput          {report['sim_seconds_per_wall_second']} "
           f"sim-sec per wall-sec"
