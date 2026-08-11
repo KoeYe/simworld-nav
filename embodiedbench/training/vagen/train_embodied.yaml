@@ -48,3 +48,11 @@ envs:
       # courier would sail past a 50 cm radius and report stuck.
       tick_chunk: 2
       arrive_cm: 120.0
+      # Three tool calls per turn. A solo delivery needs collect, several
+      # walks and hand_over -- more than the four turns the KV budget pays
+      # for at one call each, and raising max_turns does not fit: each turn
+      # injects ~420 tokens of observation, so twelve of them want an 11k
+      # response region against a ~10k total budget. Chunking buys the
+      # twelve actions inside the four turns instead, which is the whole
+      # point of it: fewer prefills, same physics.
+      action_chunk: 3
