@@ -81,3 +81,28 @@ def test_a_torn_final_line_costs_one_episode_not_the_report(tmp_path: Path):
     path.write_text(json.dumps(good) + "\n" + '{"pid": 2, "coun')
     report = summarize(list(load(tmp_path)))
     assert report["episodes"] == 1
+
+
+def test_the_two_throughput_numbers_separate_walking_from_optimising():
+    """One figure would change meaning as the directory fills up.
+
+    Two rollout bursts of ten seconds each, a hundred seconds apart: the
+    fleet walked for twenty seconds of wall clock and the run took a hundred
+    and ten. Reporting only the first makes a training step look four times
+    cheaper than it is; reporting only the second makes the engine look four
+    times slower than it is. Measured on ds-serv6, the same run read 6.25x at
+    eight episodes and 3.45x at twelve with nothing having got slower.
+    """
+    records = [
+        _episode(1, 1010.0, 10.0, [_hop(sim=40.0)]),
+        _episode(2, 1010.0, 10.0, [_hop(sim=40.0)]),   # concurrent with it
+        _episode(1, 1110.0, 10.0, [_hop(sim=40.0)]),
+        _episode(2, 1110.0, 10.0, [_hop(sim=40.0)]),
+    ]
+    report = summarize(records)
+    assert report["wall_span_seconds"] == 110.0
+    # Two overlapping pairs, ten seconds each -- not forty.
+    assert report["rollout_active_seconds"] == 20.0
+    assert report["sim_seconds_per_active_second"] == round(160 / 20, 3)
+    assert report["sim_seconds_per_wall_second"] == round(160 / 110, 3)
+    assert report["idle_share_of_wall"] == round(1 - 20 / 110, 4)

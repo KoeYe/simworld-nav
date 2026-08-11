@@ -18,13 +18,17 @@ walk, which is a fact about the map, not about being a good courier.
 Everything here is read-only over the JSONL the envs append to. It answers on
 partial runs, because the interesting moment to ask is usually mid-run.
 
-One thing to know before quoting the throughput figure: it covers whatever
-window the directory spans. A directory holding a single rollout burst reports
-how fast the fleet walks; a directory holding several training steps also
-includes the optimizer time between them, when the fleet is idle by design.
-Both are true numbers and they answer different questions -- "how fast is the
-world" versus "how much wall clock does a training step cost". Clear the
-directory when you want the first one.
+Throughput is reported TWICE, on purpose. A single figure changes meaning as
+the directory fills up: over one rollout burst it says how fast the world
+walks, and over several training steps it also counts the optimizer time
+between them, when the fleet is idle by design. Measured on ds-serv6 the same
+run read 6.25x at eight episodes and 3.45x at twelve, with nothing having got
+slower -- which is exactly the trap. So:
+
+* ``sim_seconds_per_active_second`` -- how fast the world walks, divided by
+  the wall clock during which some episode was actually open.
+* ``sim_seconds_per_wall_second`` -- what a training step costs end to end,
+  divided by the whole window, with ``idle_share_of_wall`` naming the gap.
 """
 
 from __future__ import annotations
@@ -54,6 +58,29 @@ def load(directory: Path) -> Iterator[dict[str, Any]]:
                     yield json.loads(line)
                 except json.JSONDecodeError:
                     continue
+
+
+def _union_seconds(intervals: list[tuple[float, float]]) -> float:
+    """Total length of the union of half-open intervals.
+
+    Episodes on different instances overlap, so summing their durations
+    overcounts; taking the outer range undercounts the idleness between
+    bursts. The union is the thing that means "the fleet was working".
+    """
+    if not intervals:
+        return 0.0
+    total = 0.0
+    current_start, current_end = None, None
+    for start, end in sorted(intervals):
+        if current_end is None or start > current_end:
+            if current_end is not None:
+                total += current_end - current_start
+            current_start, current_end = start, end
+        else:
+            current_end = max(current_end, end)
+    if current_end is not None:
+        total += current_end - current_start
+    return total
 
 
 def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -108,6 +135,14 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     opens = [r["closed_at"] - r["wall_seconds"] for r in records
              if r.get("closed_at") and r.get("wall_seconds")]
     span_is_exact = len(opens) == len(closes) and bool(opens)
+    # The union of the episode intervals: wall clock during which SOME
+    # episode was open somewhere on the fleet. The difference between this
+    # and the total span is the time no episode was running at all, which in
+    # a training run is the optimizer -- idle by design, not by fault.
+    active = _union_seconds(
+        [(c - w, c) for c, w in
+         ((r.get("closed_at"), r.get("wall_seconds")) for r in records)
+         if c and w]) if span_is_exact else 0.0
     if span_is_exact:
         span = max(closes) - min(opens)
     elif len(closes) > 1:
@@ -150,6 +185,20 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         # to the policy rather than the engine.
         "sim_seconds_per_wall_second": (round(walk_sim_seconds / span, 3)
                                         if span > 0 else None),
+        # Two numbers, both true, answering different questions. The one
+        # above divides by the WHOLE window, so over several training steps
+        # it also counts the optimizer time between rollouts and answers
+        # "what does a training step cost in wall clock". The one below
+        # divides by the time some episode was actually open and answers
+        # "how fast does the world walk". Reporting only one of them makes
+        # the figure change meaning silently as a directory fills up --
+        # measured here, 6.25x over one rollout burst became 3.45x over
+        # three steps of the same run, with nothing having got slower.
+        "rollout_active_seconds": round(active, 1),
+        "sim_seconds_per_active_second": (round(walk_sim_seconds / active, 3)
+                                          if active > 0 else None),
+        "idle_share_of_wall": (round(1.0 - active / span, 4)
+                               if span > 0 and active > 0 else None),
         "busy_waits": busy_waits,
         "busy_wait_seconds": round(busy_seconds, 1),
         # Queueing as a share of the run: the honest measure of "is the fleet
@@ -198,13 +247,16 @@ def main(argv: list[str] | None = None) -> int:
     print(f"recoveries          {report['recoveries']}   "
           f"stranded {report['stranded_after_failed_respawn']}   "
           f"degraded episodes {report['episodes_degraded_to_album']}")
-    print(f"throughput          {report['sim_seconds_per_wall_second']} "
-          f"sim-sec per wall-sec"
+    print(f"world speed         {report['sim_seconds_per_active_second']} "
+          f"sim-sec per wall-sec WHILE ROLLING  "
+          f"({report['walk_sim_seconds']}s walked / "
+          f"{report['rollout_active_seconds']}s with an episode open)")
+    print(f"end-to-end          {report['sim_seconds_per_wall_second']} "
+          f"sim-sec per wall-sec over the whole window"
           f"{'' if report['wall_span_exact'] else '  [UPPER BOUND: some '
            'episodes have no open stamp, so the span covers only the '
            'closing burst]'}  "
-          f"({report['walk_sim_seconds']}s walked / "
-          f"{report['wall_span_seconds']}s wall)")
+          f"  [idle {report['idle_share_of_wall']} of it -- the optimizer]")
     print(f"queueing            {report['busy_waits']} waits, "
           f"{report['busy_wait_seconds']}s "
           f"({report['busy_share_of_wall']} of wall)")
