@@ -1,0 +1,41 @@
+# Smoke-sized held-out set: 8 seeds, same contract as val_embodied.yaml.
+# Exists so a short curve-producing run does not spend half its wall clock
+# validating; the full 32-seed set is the reportable one.
+envs:
+  - name: Embodied
+    n_envs: 2
+    data_source: courier_paris_embodied_val
+    seed: [1000, 1002, 1]
+    max_turns: 4
+    response_length_per_turn: 512
+    config:
+      backend: embodied
+      difficulty: solo
+      stride: block
+      embodiment: human_on_foot
+      hazards: false
+      reward_basis: earnings
+      progress_weight: 0.0
+      max_images: 2
+      image_max_side: 256
+      ue_endpoints: /data/koe/nav_fleet_game/endpoints.json
+      live_cache_root: /data/koe/nav_live_cache
+      spawn_z_cm: 100.0
+      # Sim clock at 16x realtime. Measured on ds-serv6: displacement stays
+      # within 1.0% of speed x dt, 36 hard impacts across three speeds all
+      # stopped at the same wall (swept collision, no tunnelling), and a
+      # capture after a 84 m walk converges FASTER than at 0.0333 (8 settle
+      # frames buy 1.6 sim-seconds of adaptation instead of 0.27).
+      # tick_chunk and arrive_cm must move with it: a tick is 28 cm here, so
+      # checking arrival every 10 ticks would look 280 cm apart and the
+      # courier would sail past a 50 cm radius and report stuck.
+      tick_chunk: 2
+      arrive_cm: 120.0
+      # Three tool calls per turn. A solo delivery needs collect, several
+      # walks and hand_over -- more than the four turns the KV budget pays
+      # for at one call each, and raising max_turns does not fit: each turn
+      # injects ~420 tokens of observation, so twelve of them want an 11k
+      # response region against a ~10k total budget. Chunking buys the
+      # twelve actions inside the four turns instead, which is the whole
+      # point of it: fewer prefills, same physics.
+      action_chunk: 3

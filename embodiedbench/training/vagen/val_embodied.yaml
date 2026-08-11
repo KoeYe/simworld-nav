@@ -1,0 +1,24 @@
+# Held-out embodied episodes. Seeds start at 1000, above the training range,
+# so they are disjoint by construction rather than by whoever edits this next
+# remembering. Reward deliberately UNSHAPED, same rule as val_courier.yaml:
+# val-core/.../reward is the number this run gets reported as.
+envs:
+  - name: Embodied
+    n_envs: 32
+    data_source: courier_paris_embodied_val
+    seed: [1000, 1032, 1]
+    max_turns: 16
+    response_length_per_turn: 1024
+    config:
+      backend: embodied
+      difficulty: solo
+      stride: block
+      embodiment: human_on_foot
+      hazards: false
+      reward_basis: earnings
+      progress_weight: 0.0
+      max_images: 3
+      image_max_side: 320
+      ue_endpoints: /data/koe/nav_fleet_game/endpoints.json
+      live_cache_root: /data/koe/nav_live_cache
+      spawn_z_cm: 100.0

@@ -95,10 +95,10 @@ HOW TO REPLY — exactly this shape, every turn:
 
 THOUGHT: one line saying what you read and what you concluded.
 ```
-{number_example}
+{reply_example}
 ```
 
-  - Exactly one fenced block, containing exactly one call, and nothing after it.
+  - {call_count_rule}
   - The name must be one of the tools listed above.
   - Street names and bearings go in double quotes, spelled as they are written
     in the list: {number_example}.
@@ -132,6 +132,34 @@ back where you started. Furniture crowding the pavement does not stop you but
 slows you down by about the same. Which streets, and where, changes from shift
 to shift, and is written in no list, no order slip and no route: look down each
 street's photograph before you take it.{blocked_advice}"""
+# How many calls a turn may carry. One sentence, held in a constant rather than
+# written into the template, because the chunked session changes this rule and
+# nothing else about the prompt: a second copy of the whole system prompt with
+# one paragraph different is how a training prompt and an evaluation prompt
+# drift apart without anyone deciding they should.
+ONE_CALL_RULE = ("Exactly one fenced block, containing exactly one call, and "
+                 "nothing after it.")
+
+# The multi-call rule, for K > 1. It states the cost as well as the permission:
+# the calls run in order and the run stops at the first refusal, so a chunk is
+# a bet that every call after the first will still make sense. A model told it
+# may issue K calls and not told what a refusal does to the rest will chain
+# optimistically and lose the turn.
+CHUNK_CALL_RULE = """Exactly one fenced block. It may hold UP TO {calls} calls, one per line,
+    and nothing after it. They are carried out IN ORDER, and the turn STOPS at
+    the first one that is refused -- everything you wrote after it is thrown
+    away and never happens. So a wrong early call wastes the whole rest of the
+    turn: chain calls only where you already know each one will be accepted,
+    and write just one when you are not sure. More than {calls} calls is
+    refused outright, and nothing in the reply is carried out."""
+
+# What a chunked turn gets back: every call it made, in order, with what the
+# world said to each. A single summarising sentence would lose exactly the
+# thing the courier needs -- which call it was that stopped the turn.
+CHUNK_FEEDBACK_TEMPLATE = """You made {count} calls. In order, this is what happened:
+
+{lines}
+{tail}"""
 
 OBSERVATION_TEMPLATE = """{memory}
 
@@ -229,8 +257,17 @@ REQUIRED_FIELDS = {
 
 
 def build_system_prompt(*, city: str, tools: list[Tool],
-                        narration: str = "none") -> str:
-    """Compose the system prompt from the tools this environment really has."""
+                        narration: str = "none",
+                        action_chunk: int = 1) -> str:
+    """Compose the system prompt from the tools this environment really has.
+
+    ``action_chunk`` is how many calls one turn may carry. At 1 -- the default,
+    and every condition that existed before chunking -- this renders exactly
+    the bytes it always did; above 1 the reply rule is replaced (never
+    appended to, never duplicated) by the multi-call one, because a prompt that
+    said "exactly one call" *and* "up to three calls" would be a contradiction
+    the policy has to guess its way out of.
+    """
     # Macros are described in skills.py but no executor dispatches them, and
     # parse_reply rightly rejects a name it cannot run -- three of those in a row
     # truncates the episode. Advertising a tool that does not exist is the same
@@ -329,6 +366,17 @@ def build_system_prompt(*, city: str, tools: list[Tool],
     else:
         steps = THREE_STEPS
         hazards = HAZARD_RULES.format(blocked_advice=blocked_advice)
+
+    # The worked example is the rule in miniature, so it has to carry the same
+    # number of calls the rule permits: a chunked prompt whose only example is
+    # a single call teaches the shape it is trying to move away from. The
+    # second line is another walk for the same reason the first one is -- it
+    # comes out of the live tool set, not out of a tool this map may not have.
+    chunk = max(1, int(action_chunk))
+    call_count_rule = (ONE_CALL_RULE if chunk == 1
+                       else CHUNK_CALL_RULE.format(calls=chunk))
+    reply_example = (number_example if chunk == 1 else
+                     f'{number_example}\nwalk_to("Rue du Bac", "north")')
     return SYSTEM_TEMPLATE.format(
         city=city,
         sources=sources,
@@ -339,6 +387,8 @@ def build_system_prompt(*, city: str, tools: list[Tool],
         blocked_advice=blocked_advice,
         number_example=number_example,
         no_arg_example=no_arg_example,
+        call_count_rule=call_count_rule,
+        reply_example=reply_example,
     )
 
 
