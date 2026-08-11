@@ -27,6 +27,16 @@ envs:
       stride: block
       embodiment: human_on_foot
       hazards: false
+      # Which facts the WORDS may state, from courier-environment@a3d8ae8.
+      # "route" marks the route street in the list of streets; red lights and
+      # barriers stay in the photographs. Set on BOTH train and val on
+      # purpose: this is a definition of the task, not a training aid, and a
+      # run that trains on one setting and scores on another is measuring
+      # neither. Untrained, the courier's failure was that it could not tell
+      # which way to go -- it re-walked one street for the whole shift -- so
+      # this is the axis that decides whether the reward can ever be non-zero,
+      # and it is theirs to choose; "route" is the middle of three.
+      narration: route
       reward_basis: earnings
       # The courier lesson transfers unchanged: shaping drowned the objective
       # at 0.2 on the offline env (96.7% of the gradient was "walk closer").
