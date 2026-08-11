@@ -133,39 +133,40 @@ like-for-like on the older single-figure metric, over comparable single-burst
 windows (107 s and 104 s). Rising instance occupancy, 2.36 → 2.78, corroborates
 the direction independently.
 
-**Then the run kept going, and the same figure read 3.45×, then 2.97×.**
-Nothing got slower. A longer window includes the gradient steps between
-rollouts, when the fleet is idle by design, so a single ratio changes meaning
-as the directory fills up. The report now gives both. At 24 episodes and 174
-hops, which is where the numbers settled:
+**Then the run kept going and the same figure read 3.45×, then 2.97×, then
+2.53×.** Nothing got slower. A longer window includes the gradient steps
+between rollouts, when the fleet is idle by design, so a single ratio changes
+meaning as the directory fills up. The report gives both. At **248 episodes
+and 2005 hops** (step 301), which is where everything settled:
 
 | | value | the question it answers |
 |---|---|---|
-| `sim_seconds_per_active_second` | **6.29×** | how fast the world walks — 1975.8 s walked / 314.2 s with an episode open |
-| `sim_seconds_per_wall_second` | **2.97×** | what a training step costs end to end — 1975.8 s / 664 s |
-| `idle_share_of_wall` | **52.7%** | wall clock with no episode open at all: the optimizer |
+| `sim_seconds_per_active_second` | **5.06×** | how fast the world walks — 24444 s walked / 4828 s with an episode open |
+| `sim_seconds_per_wall_second` | **2.53×** | what a training step costs end to end |
+| `idle_share_of_wall` | **50.0%** | wall clock with no episode open at all: the optimizer |
 
-That last row is worth more than either ratio: **an infinitely fast engine only
-recovers about half the wall clock**, and the share grows as more optimizer
-steps land in the window. Past that point the lever is on the training side,
-not this one.
+That last row settled almost exactly on a half, and it is worth more than
+either ratio: **an infinitely fast engine recovers half the wall clock and no
+more.** Past that point the lever is on the training side, not this one.
 
-Two numbers that a smaller sample had reported as clean:
+Two numbers that smaller samples got wrong in both directions, so quote these:
 
-- **`sim_failure_rate` is 2.3%, not zero** — 4 `stuck` in 174 hops. The zero at
-  75 hops was a small-sample artifact. All four were recovered (4 recoveries, 0
-  stranded), and 2.3% is the cost of embodiment on a map whose navmesh is not
-  baked for these routes. Watch it; it is the number that says how much of the
-  gradient is learning the map's defects.
+- **`sim_failure_rate` is 1.05%** — 17 `stuck` and 4 `walk_timeout` in 2005
+  hops. It read 0% at 75 hops and 2.3% at 174; ten times the sample settles it
+  near one percent. **All 21 were recovered — 21 recoveries, 0 stranded.** That
+  is the cost of embodiment on a map whose navmesh is not baked for these
+  routes, and it is the number that says how much of the gradient is learning
+  the map's defects rather than the task.
 - **Pose error has to be read per outcome.** Arrived hops: median 82.3 cm,
-  maximum 120.0 cm, and **zero outside `arrive_cm`** — the contract holding
-  exactly. Stuck hops: 415–1220 cm, because the pawn stands where it stalled,
-  which is by design and is followed by a respawn. Reported together they read
-  as "max 12.2 m", which looks like a breach and is not one; the report now
-  splits them and counts real breaches separately.
+  maximum 120.0 cm, and **zero outside `arrive_cm` across 1984 arrivals** — the
+  invariant holding, now on a sample large enough to mean something. Failed
+  hops run to 233 m, because a timed-out walk leaves the pawn wherever it
+  wandered before the budget ran out; that is by design and a respawn follows.
+  Reported together they read as a breach and are not one.
 
-`clock_inflation` sat at 1.036–1.038× throughout, and no episode ever degraded
-to album frames or waited on a busy instance.
+`clock_inflation` sat at **1.0369×** and has not moved past the third decimal
+across every sample size measured — 1.036, 1.037, 1.0378, 1.0369. No episode
+ever degraded to album frames, and nothing ever waited on a busy instance.
 
 **Where the next throughput comes from, and why it is yours.** Only four of the
 six instances were ever in use, and nothing ever queued — so the fleet is no
