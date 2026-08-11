@@ -133,27 +133,39 @@ like-for-like on the older single-figure metric, over comparable single-burst
 windows (107 s and 104 s). Rising instance occupancy, 2.36 → 2.78, corroborates
 the direction independently.
 
-**Then the run kept going, and the same figure read 3.45×.** Nothing got
-slower. A longer window includes the gradient steps between rollouts, when the
-fleet is idle by design, so a single ratio changes meaning as the directory
-fills up. The report now gives both, over 12 episodes and 75 hops:
+**Then the run kept going, and the same figure read 3.45×, then 2.97×.**
+Nothing got slower. A longer window includes the gradient steps between
+rollouts, when the fleet is idle by design, so a single ratio changes meaning
+as the directory fills up. The report now gives both. At 24 episodes and 174
+hops, which is where the numbers settled:
 
 | | value | the question it answers |
 |---|---|---|
-| `sim_seconds_per_active_second` | **5.75×** | how fast the world walks — 867 s walked / 150.8 s with an episode open |
-| `sim_seconds_per_wall_second` | **3.45×** | what a training step costs end to end — 867 s / 251 s |
-| `idle_share_of_wall` | **39.9%** | wall clock with no episode open at all: the optimizer |
+| `sim_seconds_per_active_second` | **6.29×** | how fast the world walks — 1975.8 s walked / 314.2 s with an episode open |
+| `sim_seconds_per_wall_second` | **2.97×** | what a training step costs end to end — 1975.8 s / 664 s |
+| `idle_share_of_wall` | **52.7%** | wall clock with no episode open at all: the optimizer |
 
 That last row is worth more than either ratio: **an infinitely fast engine only
-recovers 60% of the wall clock.** Past that point the lever is on the training
-side, not this one.
+recovers about half the wall clock**, and the share grows as more optimizer
+steps land in the window. Past that point the lever is on the training side,
+not this one.
 
-Across everything: **75 hops, every one arrived** — no `stuck`, no
-`walk_timeout`, no recoveries, no stranded pawns, no episode degraded to album
-frames, and not one busy wait. `clock_inflation` sat at 1.036–1.037× throughout.
+Two numbers that a smaller sample had reported as clean:
 
-Pose error tracked its contract exactly: median 79–84 cm, maximum 120.0 cm,
-which is `arrive_cm` to the centimetre.
+- **`sim_failure_rate` is 2.3%, not zero** — 4 `stuck` in 174 hops. The zero at
+  75 hops was a small-sample artifact. All four were recovered (4 recoveries, 0
+  stranded), and 2.3% is the cost of embodiment on a map whose navmesh is not
+  baked for these routes. Watch it; it is the number that says how much of the
+  gradient is learning the map's defects.
+- **Pose error has to be read per outcome.** Arrived hops: median 82.3 cm,
+  maximum 120.0 cm, and **zero outside `arrive_cm`** — the contract holding
+  exactly. Stuck hops: 415–1220 cm, because the pawn stands where it stalled,
+  which is by design and is followed by a respawn. Reported together they read
+  as "max 12.2 m", which looks like a breach and is not one; the report now
+  splits them and counts real breaches separately.
+
+`clock_inflation` sat at 1.036–1.038× throughout, and no episode ever degraded
+to album frames or waited on a busy instance.
 
 **Where the next throughput comes from, and why it is yours.** Only four of the
 six instances were ever in use, and nothing ever queued — so the fleet is no
