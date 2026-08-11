@@ -99,6 +99,12 @@ class LiveCourierGymEnv(CourierGymEnv):
         super().__init__(config)
 
         self.ue_endpoints = config.get("ue_endpoints")  # None -> $EB_UE_ENDPOINTS
+        # Which facts the WORDS may state (none/route/all). Read here and
+        # passed to the env, because CourierGymEnv does not thread it: it
+        # reached CourierEnv only from the evaluation tooling, so a training
+        # config naming a setting would have been silently ignored and the
+        # run would have been narration="none" wearing another name.
+        self.narration = config.get("narration", "none")
         raw_cache = config.get("live_cache_root")
         self._cache_scratch: tempfile.TemporaryDirectory | None = None
         if raw_cache:
@@ -228,6 +234,7 @@ class LiveCourierGymEnv(CourierGymEnv):
             "difficulty": self.difficulty,
             "stride": self.stride,
             "embodiment": self.embodiment,
+            "narration": self.narration,
         }
         if self.image_max_side:
             # Same reason as the stock adapter: charge for a red light only
@@ -349,6 +356,12 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                 "built). Drop the key or set it false.")
 
         self.ue_endpoints = config.get("ue_endpoints")  # None -> $EB_UE_ENDPOINTS
+        # Which facts the WORDS may state (none/route/all). Read here and
+        # passed to the env, because CourierGymEnv does not thread it: it
+        # reached CourierEnv only from the evaluation tooling, so a training
+        # config naming a setting would have been silently ignored and the
+        # run would have been narration="none" wearing another name.
+        self.narration = config.get("narration", "none")
         self.spawn_z_cm = float(config.get("spawn_z_cm", 100.0))
         self.action_chunk = int(config.get("action_chunk", 1))
         if self.action_chunk < 1:
@@ -490,6 +503,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             "difficulty": self.difficulty,
             "stride": self.stride,
             "embodiment": self.embodiment,
+            "narration": self.narration,
         }
         if self.image_max_side:
             kwargs["served_long_edge"] = float(self.image_max_side)

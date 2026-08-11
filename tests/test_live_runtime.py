@@ -45,6 +45,7 @@ from embodiedbench.runtime.city.obstacles import (
 )
 from embodiedbench.runtime.live.client import UERenderClient
 from embodiedbench.runtime.live.env import (
+    ALL_FAILED_DEGRADE_BATCHES,
     KERB_MARGIN_CM,
     LAMP_EYE_CM,
     STREET_EYE_CM,
@@ -244,7 +245,12 @@ class TestTransitionsNeverDependOnTheRenderer:
         stays a miss, and the very next lookup at the same key renders it.
         Treating one 503 as fleet death was how a reset storm silently turned
         whole episodes text-only."""
+        # Arm the busy response AFTER construction. Building the env renders
+        # the start node's candidates, so a busy count set beforehand is spent
+        # before the call under test ever runs -- and the test then measures
+        # the constructor rather than the behaviour it names.
         env = live_env(paris, UERenderClient(service.base_url), tmp_path)
+        stand_at(env, sorted(paris.nodes)[0])
         service.busy_batches = 1
         env.candidates()
         assert env.live_busy_skips == 1
@@ -347,15 +353,24 @@ class TestFailuresDegradeInsteadOfCrashing:
                                z_cm=160.0, yaw_deg=0.0,
                                render_kind="street_view")]
 
-        env._render(batch(0))
-        env._render(batch(1))
-        assert not env.live_degraded, "two batches are not yet a verdict"
-        env._render(batch(2))
+        # Reset both halves of the verdict, not just the flag: construction
+        # renders the start node's candidates, and against a broken backend
+        # those already spent the whole three-strike budget. Leaving the
+        # consecutive counter behind makes the very first batch below degrade
+        # again, and the test then measures the fixture rather than the rule.
+        baseline = env.live_render_failures
+        env.live_degraded = False
+        env._all_failed_batches = 0
+        for extra in range(ALL_FAILED_DEGRADE_BATCHES - 1):
+            env._render(batch(extra))
+            assert not env.live_degraded, (
+                f"{extra + 1} batches are not yet a verdict")
+        env._render(batch(ALL_FAILED_DEGRADE_BATCHES - 1))
         assert env.live_degraded
-        assert env.live_render_failures == 3
+        assert env.live_render_failures == baseline + ALL_FAILED_DEGRADE_BATCHES
         coverage = env.album_coverage()
         assert coverage["degraded"]
-        assert coverage["render_failures"] == 3
+        assert coverage["render_failures"] == env.live_render_failures
 
     def test_the_summary_carries_the_live_block(
             self, paris, service, tmp_path, sidecars):
@@ -577,9 +592,13 @@ class TestRenderRequestsCarryTheWorldState:
         bearing = bearing_deg(env.position(node), env.position(toward))
         expected = signal_state(node, bearing, env.sim_seconds)
 
+        # Only the batches THIS call produced. Construction and standing at
+        # the node both render, so "the first lamp request in the service log"
+        # stopped being this one the moment the env asked anything earlier.
+        already = len(service.batches)
         frame = env.signal_frame_for(node, toward)
         assert frame and frame.endswith(f"toward_{toward}_{expected}.png")
-        item = next(item for batch in service.batches
+        item = next(item for batch in service.batches[already:]
                     for item in batch["requests"]
                     if item["render_kind"] == "lamp")
         assert item["signal"] == {"approach": f"{node}|{toward}", "state": expected}
@@ -851,3 +870,19 @@ class TestTheLiveTrainingAdapter:
 
         module = importlib.import_module("embodiedbench.runtime.live.gym_adapter")
         assert getattr(module, "LiveCourierGymEnv") is LiveCourierGymEnv
+
+
+def test_the_live_adapter_carries_narration_to_the_env():
+    """A training config naming a setting must reach the environment.
+
+    CourierGymEnv does not thread ``narration`` -- it reached CourierEnv only
+    from the evaluation tooling -- so a live config naming ``route`` would
+    have been silently ignored and the run would have been ``none`` under
+    another name. Two settings that differ only in a key nobody reads are the
+    same experiment run twice.
+    """
+    for setting in ("none", "route", "all"):
+        env = LiveCourierGymEnv({"backend": "live", "narration": setting})
+        assert env.narration == setting
+    # Unset stays the stock default rather than becoming None.
+    assert LiveCourierGymEnv({"backend": "live"}).narration == "none"
