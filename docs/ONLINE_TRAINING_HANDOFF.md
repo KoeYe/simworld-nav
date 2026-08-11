@@ -56,6 +56,14 @@ impacts at three speeds and three dt all stopped at the same wall, and a frame
 converges *faster* at dt = 0.2 than at real time. The margin that does **not**
 survive a careless dt increase is the arrival check.
 
+There is a second cost to `arrive_cm` worth stating, because it is easy to
+raise the number without noticing it. The observation is shot from wherever
+the pawn stopped, and keyed by the graph node — so the arrival radius is also
+the camera's position error for a cached frame. At 120 cm the measured median
+is 84 cm and the maximum is exactly 120, which is the contract holding. That
+is a metre of slack along a street, which is minor for a street view and would
+not be minor for anything that has to line up with a specific object.
+
 ## What was wrong
 
 Every item below was found in this system, on this hardware, and is fixed in
@@ -105,6 +113,34 @@ while the service log showed the pawn spawning every thirty seconds. Every
 failure rate quotable about that run was unobservable rather than absent.
 There is now one durable JSON line per finished episode, and `live_degraded` /
 `sim_failures` reach `info` on every step.
+
+## What it measures, on ds-serv6, 2026-08-11
+
+Six instances (nvidia-smi 0–4 and 7; the trainer holds 5 and 6), Paris,
+dt = 0.2, `arrive_cm` 120, `tick_chunk` 2, `action_chunk` 3. The only thing
+changed between the two rows is how many AgentLoopWorker processes serve the
+same rollouts — pure parallelism, no RL hyperparameter.
+
+| | episodes | hops | sim-sec per wall-sec | instances busy (mean) | queueing |
+|---|---|---|---|---|---|
+| 2 workers | 6 | 46 | 5.07× | 2.36 | none |
+| **4 workers** | 8 | 55 | **6.25×** | 2.78 | none |
+
+Across both: **101 hops, every one arrived** — no `stuck`, no `walk_timeout`,
+no recoveries, no stranded pawns, no episode degraded to album frames, and not
+one busy wait. `clock_inflation` sat at 1.036–1.037× in both.
+
+Pose error tracked its contract exactly: median 79–84 cm, maximum 120.0 cm,
+which is `arrive_cm` to the centimetre.
+
+**Where the next throughput comes from, and why it is yours.** Only four of the
+six instances were ever in use, and nothing ever queued — so the fleet is no
+longer the constraint; the number of episodes in flight is. `num_workers` has
+to divide the DataProto size (4 here), so **4 is the ceiling at this batch**.
+Going past it means raising `train_batch_size` or `rollout.n`, which are RL
+hyperparameters rather than plumbing. The fleet is ready for it either way:
+extra concurrent episodes queue rather than fail, and the queueing shows up
+directly as `busy_share_of_wall`.
 
 ## What to distrust — open, and yours to decide
 
