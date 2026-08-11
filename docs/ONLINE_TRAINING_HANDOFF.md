@@ -126,9 +126,31 @@ same rollouts — pure parallelism, no RL hyperparameter.
 | 2 workers | 6 | 46 | 5.07× | 2.36 | none |
 | **4 workers** | 8 | 55 | **6.25×** | 2.78 | none |
 
-Across both: **101 hops, every one arrived** — no `stuck`, no `walk_timeout`,
-no recoveries, no stranded pawns, no episode degraded to album frames, and not
-one busy wait. `clock_inflation` sat at 1.036–1.037× in both.
++23% for a setting that is not an RL hyperparameter. One caveat on that
+comparison: the baseline's raw telemetry was cleared when the config changed,
+so it cannot be recomputed under the decomposition below — the two rows are
+like-for-like on the older single-figure metric, over comparable single-burst
+windows (107 s and 104 s). Rising instance occupancy, 2.36 → 2.78, corroborates
+the direction independently.
+
+**Then the run kept going, and the same figure read 3.45×.** Nothing got
+slower. A longer window includes the gradient steps between rollouts, when the
+fleet is idle by design, so a single ratio changes meaning as the directory
+fills up. The report now gives both, over 12 episodes and 75 hops:
+
+| | value | the question it answers |
+|---|---|---|
+| `sim_seconds_per_active_second` | **5.75×** | how fast the world walks — 867 s walked / 150.8 s with an episode open |
+| `sim_seconds_per_wall_second` | **3.45×** | what a training step costs end to end — 867 s / 251 s |
+| `idle_share_of_wall` | **39.9%** | wall clock with no episode open at all: the optimizer |
+
+That last row is worth more than either ratio: **an infinitely fast engine only
+recovers 60% of the wall clock.** Past that point the lever is on the training
+side, not this one.
+
+Across everything: **75 hops, every one arrived** — no `stuck`, no
+`walk_timeout`, no recoveries, no stranded pawns, no episode degraded to album
+frames, and not one busy wait. `clock_inflation` sat at 1.036–1.037× throughout.
 
 Pose error tracked its contract exactly: median 79–84 cm, maximum 120.0 cm,
 which is `arrive_cm` to the centimetre.
