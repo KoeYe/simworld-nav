@@ -516,6 +516,8 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             **kwargs,
         )
         self._env.reset()
+        self._episode_opened_at = time.time()
+        self._last_seed = int(seed)
         # The chunked session only where chunking was asked for: at K=1 it is
         # the stock session by delegation anyway, and building the stock one
         # keeps "chunking off" and "chunking never installed" the same run.
