@@ -545,6 +545,8 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             self._env,
             cache_root=self.live_instance_dir,
             opened_at=self._episode_opened_at,
+            turns=(self._session.run.turns
+                   if self._session is not None else None),
             config={
                 "seed": self._last_seed,
                 "map": self.map_dir.name,

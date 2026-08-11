@@ -54,12 +54,21 @@ def telemetry_dir(cache_root: Path | str | None) -> Path | None:
     return Path(cache_root).parent / "_telemetry"
 
 
+#: Model replies are capped rather than dropped. Whole replies would dominate
+#: the file (the prompt alone carries an observation), and dropping them costs
+#: the only record of what the policy actually SAID -- which is the question
+#: "is the agent even running" reduces to, and it took a manual dig through a
+#: frame cache to answer it once.
+REPLY_CHARS = 1500
+
+
 def record_episode(
     env: Any,
     *,
     cache_root: Path | str | None,
     config: dict[str, Any] | None = None,
     opened_at: float | None = None,
+    turns: Any = None,
 ) -> Path | None:
     """Append one episode's record. Returns the file written, or ``None``.
 
@@ -74,7 +83,8 @@ def record_episode(
         return None
     try:
         directory.mkdir(parents=True, exist_ok=True)
-        record = _build(env, config=config, opened_at=opened_at)
+        record = _build(env, config=config, opened_at=opened_at,
+                        turns=turns)
         path = directory / f"episodes-{os.getpid()}.jsonl"
         line = json.dumps(record, default=str, ensure_ascii=False) + "\n"
         # O_APPEND: concurrent writers in one process cannot interleave a
@@ -95,11 +105,36 @@ def record_episode(
         return None
 
 
+def _turn_rows(turns: Any) -> list[dict[str, Any]]:
+    """What the policy said, and what became of it.
+
+    The prompt is summarised rather than stored: it carries a whole
+    observation and would swamp the record. The reply is kept, capped,
+    because it is the evidence layer nothing else has -- the hops say where
+    the courier went, and only this says whether a model chose it.
+    """
+    rows: list[dict[str, Any]] = []
+    for turn in list(turns or []):
+        reply = str(getattr(turn, "reply", "") or "")
+        rows.append({
+            "step": getattr(turn, "step", None),
+            "status": getattr(turn, "status", None),
+            "error": getattr(turn, "error", None),
+            "prompt_chars": len(str(getattr(turn, "prompt", "") or "")),
+            "images": len(getattr(turn, "image_paths", []) or []),
+            "reply_chars": len(reply),
+            "reply": reply[:REPLY_CHARS],
+            "reply_truncated_in_log": len(reply) > REPLY_CHARS,
+        })
+    return rows
+
+
 def _build(
     env: Any,
     *,
     config: dict[str, Any] | None,
     opened_at: float | None,
+    turns: Any = None,
 ) -> dict[str, Any]:
     now = time.time()
     hops = list(getattr(env, "embodied_log", []) or [])
@@ -134,5 +169,6 @@ def _build(
                 float(getattr(env, "busy_wait_seconds", 0.0)), 3),
         },
         "summary": summary,
+        "turns": _turn_rows(turns),
         "hops": hops,
     }
