@@ -886,3 +886,31 @@ def test_the_live_adapter_carries_narration_to_the_env():
         assert env.narration == setting
     # Unset stays the stock default rather than becoming None.
     assert LiveCourierGymEnv({"backend": "live"}).narration == "none"
+
+
+def test_capture_at_served_size_keeps_the_geometry_and_only_changes_sampling():
+    """Rendering at the size the policy receives must not re-frame the shot.
+
+    The bake's camera is 640x480 at 90 degrees, and a live frame is only
+    comparable to a baked one while the framing matches. Dropping to the
+    served size is a sampling change and nothing else -- same aspect, same
+    field of view -- so the opt-in stays defensible. Off by default, because
+    a direct render is not a downscale: measured difference on ds-serv6 was
+    2.13 mean absolute with 2.03% of pixels over 8.
+    """
+    from embodiedbench.runtime.live.env import STREET_CAMERA
+
+    default = LiveCourierGymEnv({"backend": "live", "image_max_side": 256})
+    assert default._street_camera() == STREET_CAMERA, "must be opt-in"
+
+    served = LiveCourierGymEnv({"backend": "live", "image_max_side": 256,
+                                "capture_at_served_size": True})
+    cam = served._street_camera()
+    assert cam.width == 256
+    assert cam.height == 192, "4:3 must survive"
+    assert cam.fov_deg == STREET_CAMERA.fov_deg, "the shot must not re-frame"
+    assert (cam.width / cam.height) == (STREET_CAMERA.width / STREET_CAMERA.height)
+
+    # Without a served size there is nothing to shrink to.
+    bare = LiveCourierGymEnv({"backend": "live", "capture_at_served_size": True})
+    assert bare._street_camera() == STREET_CAMERA
