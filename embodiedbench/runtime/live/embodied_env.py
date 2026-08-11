@@ -172,6 +172,12 @@ class EmbodiedCourierEnv(CourierEnv):
         self.ue_pose: Pose | None = None
         # The per-hop I/O evidence contract (spec 3b): one dict per /walk.
         self.embodied_log: list[dict[str, Any]] = []
+        # How long this episode spent queueing behind another one on its
+        # instance. Not an error -- it is the fleet being smaller than the
+        # rollout width -- but it is the difference between "UE is slow" and
+        # "UE was busy", and only one of those is fixed by buying more dt.
+        self.busy_waits = 0
+        self.busy_wait_seconds = 0.0
         # Same containment posture as the live env's observation path: a dead
         # observe degrades frames to album mode, never physics -- but /walk
         # failures PROPAGATE, because in this mode UE owns the physics and
@@ -205,6 +211,8 @@ class EmbodiedCourierEnv(CourierEnv):
         super().reset()
         self.embodied_log = []
         self.live_degraded = False
+        self.busy_waits = 0
+        self.busy_wait_seconds = 0.0
         node = self.network.nodes[self.node_id]
         request = EpisodeRequest(
             episode_id=self.episode_id,
@@ -246,6 +254,8 @@ class EmbodiedCourierEnv(CourierEnv):
                     raise
                 logger.info("instance busy for episode %s; retrying in %.0fs",
                             self.episode_id, delay)
+                self.busy_waits += 1
+                self.busy_wait_seconds += delay
                 time.sleep(delay)
                 delay = min(delay * 1.5, 15.0)
 

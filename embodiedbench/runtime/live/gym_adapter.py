@@ -59,6 +59,7 @@ import hashlib
 import json
 import os
 import tempfile
+import time
 import uuid
 from pathlib import Path
 from typing import Any, Coroutine
@@ -257,6 +258,8 @@ class LiveCourierGymEnv(CourierGymEnv):
             **kwargs,
         )
         self._env.reset()
+        self._episode_opened_at = time.time()
+        self._last_seed = int(seed)
         self._session = CourierSession(self._env, city=self.city)
         self._turns = 0
         self._progress_cm = 0.0
@@ -354,6 +357,9 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                 f"at least 1; got {config.get('action_chunk')!r}")
         #: Increments per reset so no two live episodes share an id.
         self._episode_seq = 0
+        # Stamped at reset, read by the telemetry record on the way out.
+        self._episode_opened_at: float | None = None
+        self._last_seed: int | None = None
         # Walk geometry. The arrival radius must not be finer than the
         # distance the pawn covers between two arrival checks: at
         # fixed_dt 0.2 and 140 cm/s a tick is 28 cm, so a chunk of 10 moves
@@ -445,8 +451,11 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                                                map_name=self.map_dir.name)
         # A new reset means a new env object, and the old one holds an
         # exclusive lease: give it back first or a reset storm starves the
-        # fleet one instance per reset.
+        # fleet one instance per reset. Record it on the way out -- this and
+        # _close_impl are the only two places an episode ends, and an episode
+        # that ends unrecorded is one nobody can audit afterwards.
         if self._env is not None:
+            self._flush_telemetry()
             self._env.close()
 
         kwargs: dict[str, Any] = {
@@ -499,10 +508,34 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                      "action_chunk": self.action_chunk,
                      "backend": "embodied", "episode_id": episode_id}
 
+    def _flush_telemetry(self) -> None:
+        """Write the finished episode's record. Never raises."""
+        from .telemetry import record_episode
+
+        record_episode(
+            self._env,
+            cache_root=self.live_instance_dir,
+            opened_at=self._episode_opened_at,
+            config={
+                "seed": self._last_seed,
+                "map": self.map_dir.name,
+                "difficulty": self.difficulty,
+                "stride": self.stride,
+                "embodiment": self.embodiment,
+                "action_chunk": self.action_chunk,
+                "arrive_cm": self.arrive_cm,
+                "tick_chunk": self.tick_chunk,
+                "max_walk_seconds": self.max_walk_seconds,
+                "image_max_side": self.image_max_side,
+                "backend": "embodied",
+            },
+        )
+
     async def _close_impl(self) -> None:
         # End the embodied episode -- despawn, lease back -- before the stock
         # cleanup nulls the reference to it.
         if self._env is not None:
+            self._flush_telemetry()
             self._env.close()
         await super().close()
         if self._cache_scratch is not None:
