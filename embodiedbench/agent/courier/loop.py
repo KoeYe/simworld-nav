@@ -304,7 +304,28 @@ def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
             f"Found {len(calls)} calls in one block: "
             f"{', '.join(c[0] for c in calls)}. Give exactly one."
         )
-    name, raw_args = calls[0]
+    called, raw_args = calls[0]
+    name, args, kwargs = build_call(called, raw_args, allowed)
+
+    thought = ""
+    head = text.split("```")[0].strip()
+    if head:
+        thought = head[-600:]
+    return ParsedAction(tool=name, args=args, kwargs=kwargs, thought=thought,
+                        raw=blocks[0].strip(), unfenced=unfenced)
+
+
+def build_call(
+    name: str, raw_args: str, allowed: set[str]
+) -> tuple[str, list[Any], dict[str, Any]]:
+    """One scanned ``name(raw_args)``, held to the tool set and to the types.
+
+    Lifted out of ``parse_reply`` unchanged -- same wording, same order of
+    checks -- so that the chunked parser in ``chunk.py`` can hold each call of
+    a multi-call block to exactly the rules a single-call block is held to.
+    Written twice it would be two grammars, and the difference between them
+    would be found by a policy rather than by a test.
+    """
     name = name.lower()
     if name not in allowed:
         raise FormatError(
@@ -324,13 +345,7 @@ def parse_reply(reply: str, allowed: set[str]) -> ParsedAction:
             args.append(_coerce(piece.strip()))
 
     _check_argument_types(name, args, kwargs)
-
-    thought = ""
-    head = text.split("```")[0].strip()
-    if head:
-        thought = head[-600:]
-    return ParsedAction(tool=name, args=args, kwargs=kwargs, thought=thought,
-                        raw=blocks[0].strip(), unfenced=unfenced)
+    return name, args, kwargs
 
 
 def _check_argument_types(name: str, args: list[Any], kwargs: dict[str, Any]) -> None:

@@ -1,5 +1,12 @@
 """The delivery-courier harness: tools, skills, memory and the turn loop."""
 
+from embodiedbench.agent.courier.chunk import (
+    ChunkedCourierSession,
+    ChunkTooLong,
+    ChunkTurnLog,
+    chunk_info,
+    parse_chunk,
+)
 from embodiedbench.agent.courier.loop import (
     Budgets,
     CourierRun,
@@ -32,10 +39,11 @@ from embodiedbench.agent.courier.tools import (
 )
 
 __all__ = [
-    "ALL_TOOLS", "Budgets", "CourierMemory", "CourierRun", "CourierSession",
+    "ALL_TOOLS", "Budgets", "ChunkTooLong", "ChunkTurnLog",
+    "ChunkedCourierSession", "CourierMemory", "CourierRun", "CourierSession",
     "FormatError", "Frame", "MACROS", "MACROS_BY_NAME", "Macro", "Observation",
     "ParsedAction", "PROCEDURES", "Procedure", "RejectedAction", "Spend",
     "TOOLS_BY_NAME", "Tool", "ToolKind", "TurnLog", "Visit", "available_tools",
-    "budget_exceeded", "parse_reply", "render_macros", "render_procedures",
-    "render_tool_menu",
+    "budget_exceeded", "chunk_info", "parse_chunk", "parse_reply",
+    "render_macros", "render_procedures", "render_tool_menu",
 ]

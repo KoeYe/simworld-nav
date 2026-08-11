@@ -291,8 +291,19 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
       config carry boilerplate for the only value that works).
 
     Extra config keys beyond the stock set: ``ue_endpoints``,
-    ``live_cache_root`` (both exactly as on the live adapter) and
-    ``spawn_z_cm`` (where the pawn spawns on the z axis, default 100).
+    ``live_cache_root`` (both exactly as on the live adapter),
+    ``spawn_z_cm`` (where the pawn spawns on the z axis, default 100) and
+    ``action_chunk`` (how many calls one turn may carry, default 1).
+
+    **On ``action_chunk``.** This is the backend chunking is *for*: a turn
+    here costs 25-105 s of engine time for the walk and a few seconds of
+    generation, so the round trip -- and above all the ~5k-token multimodal
+    prefill in front of it -- is what the schedule is made of, not the
+    inference. Above 1, the episode runs on ``ChunkedCourierSession``: one
+    prompt buys up to K actions, they execute in order, and the turn stops at
+    the first refusal. The obs/info contract is unchanged; ``chunk_len`` and
+    ``chunk_executed`` are added to ``info`` at every K, including 1, so a
+    log parser does not have to know which session ran.
 
     Launch line:
 
@@ -331,6 +342,11 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
 
         self.ue_endpoints = config.get("ue_endpoints")  # None -> $EB_UE_ENDPOINTS
         self.spawn_z_cm = float(config.get("spawn_z_cm", 100.0))
+        self.action_chunk = int(config.get("action_chunk", 1))
+        if self.action_chunk < 1:
+            raise ValueError(
+                "action_chunk is how many calls one turn may carry, so it is "
+                f"at least 1; got {config.get('action_chunk')!r}")
         #: Increments per reset so no two live episodes share an id.
         self._episode_seq = 0
         raw_cache = config.get("live_cache_root")
@@ -380,14 +396,30 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         return await asyncio.to_thread(self._drive, self._reset_impl(seed))
 
     async def step(self, action_str: str) -> tuple[dict[str, Any], float, bool, dict[str, Any]]:
-        return await asyncio.to_thread(self._drive, super().step(action_str))
+        return await asyncio.to_thread(self._drive, self._step_impl(action_str))
 
     async def close(self) -> None:
         return await asyncio.to_thread(self._drive, self._close_impl())
 
     # ── VAGEN interface ──────────────────────────────────────────────────────
 
+    async def _step_impl(self, action_str: str) -> tuple[dict[str, Any], float, bool, dict[str, Any]]:
+        """The stock turn, plus what the chunk did with it.
+
+        Two keys, added and never substituted: the contract a trainer reads is
+        the inherited one, and a run that cannot tell how many of its calls
+        actually happened cannot tell a policy that chains well from one that
+        chains hopefully and loses the tail of every turn.
+        """
+        from embodiedbench.agent.courier.chunk import chunk_info
+
+        obs, reward, done, info = await super().step(action_str)
+        turns = self._session.run.turns if self._session is not None else []
+        info.update(chunk_info(turns[-1] if turns else None))
+        return obs, reward, done, info
+
     async def _reset_impl(self, seed: int) -> tuple[dict[str, Any], dict[str, Any]]:
+        from embodiedbench.agent.courier.chunk import ChunkedCourierSession
         from embodiedbench.agent.courier.session import CourierSession
         from embodiedbench.compiler.road_network import build_road_network
 
@@ -430,7 +462,14 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             **kwargs,
         )
         self._env.reset()
-        self._session = CourierSession(self._env, city=self.city)
+        # The chunked session only where chunking was asked for: at K=1 it is
+        # the stock session by delegation anyway, and building the stock one
+        # keeps "chunking off" and "chunking never installed" the same run.
+        self._session = (
+            ChunkedCourierSession(self._env, city=self.city,
+                                  action_chunk=self.action_chunk)
+            if self.action_chunk > 1 else
+            CourierSession(self._env, city=self.city))
         self._turns = 0
         self._progress_cm = 0.0
         self._last_earnings = 0.0
@@ -439,6 +478,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         return obs, {"seed": int(seed), "images_dropped": dropped,
                      "difficulty": self.difficulty, "stride": self.stride,
                      "embodiment": self.embodiment,
+                     "action_chunk": self.action_chunk,
                      "backend": "embodied", "episode_id": episode_id}
 
     async def _close_impl(self) -> None:
