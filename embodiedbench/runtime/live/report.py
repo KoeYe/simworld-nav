@@ -86,11 +86,26 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         if summary.get("delivered"):
             delivered += int(summary["delivered"])
 
-    # The wall clock the fleet was actually alive, not the sum of episode
-    # durations: episodes on different instances overlap, and summing them
-    # would report an acceleration the run never had.
-    stamps = [r["closed_at"] for r in records if r.get("closed_at")]
-    span = (max(stamps) - min(stamps)) if len(stamps) > 1 else 0.0
+    # The wall clock the fleet was actually alive: earliest OPEN to latest
+    # close. Not the sum of episode durations -- episodes on different
+    # instances overlap, and summing them would report an acceleration the
+    # run never had. And emphatically not the range of CLOSING times, which
+    # was the first thing tried here and is wrong in the same direction:
+    # concurrent episodes finish in a burst, so that range is a fraction of
+    # the time they took and it inflated the headline number by roughly an
+    # order of magnitude.
+    closes = [r["closed_at"] for r in records if r.get("closed_at")]
+    opens = [r["closed_at"] - r["wall_seconds"] for r in records
+             if r.get("closed_at") and r.get("wall_seconds")]
+    span_is_exact = len(opens) == len(closes) and bool(opens)
+    if span_is_exact:
+        span = max(closes) - min(opens)
+    elif len(closes) > 1:
+        # Older records predate the open stamp. Report the number, and say
+        # what it is: an upper bound, not a measurement.
+        span = max(closes) - min(closes)
+    else:
+        span = 0.0
 
     total_walks = sum(outcomes.values())
     sim_failures = outcomes.get("stuck", 0) + outcomes.get("timeout", 0) \
@@ -111,6 +126,10 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         "delivered": delivered,
         "walk_sim_seconds": round(walk_sim_seconds, 1),
         "wall_span_seconds": round(span, 1),
+        # False when some episode lacks an open stamp: the span then covers
+        # only the closing burst, so every rate derived from it is an upper
+        # bound rather than a measurement.
+        "wall_span_exact": span_is_exact,
         # THE throughput number: sim seconds walked per wall second, across
         # the whole fleet. Above 1.0 means the world moved faster than the
         # clock on the wall; it is bounded by how much of the wall clock goes
@@ -165,7 +184,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"recoveries          {report['recoveries']}   "
           f"degraded episodes {report['episodes_degraded_to_album']}")
     print(f"throughput          {report['sim_seconds_per_wall_second']} "
-          f"sim-sec per wall-sec  "
+          f"sim-sec per wall-sec"
+          f"{'' if report['wall_span_exact'] else '  [UPPER BOUND: some '
+           'episodes have no open stamp, so the span covers only the '
+           'closing burst]'}  "
           f"({report['walk_sim_seconds']}s walked / "
           f"{report['wall_span_seconds']}s wall)")
     print(f"queueing            {report['busy_waits']} waits, "
