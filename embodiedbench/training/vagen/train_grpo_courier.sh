@@ -41,6 +41,13 @@ export NCCL_SHM_DISABLE=${NCCL_SHM_DISABLE:-1}
 # The failure surfaces as "Engine core initialization failed" during
 # load_model, which reads as not enough memory for the weights and sends you
 # tuning gpu_memory_utilization instead. Shorten the sequence instead.
+#
+# And "the sequence" means the rollout's own context, not the data lengths.
+# Without max_model_len the engine takes the model's default -- 40960 for this
+# one -- and reserves KV cache for it, so it refuses to start whatever
+# gpu_memory_utilization is set to. Seven launches were spent moving that
+# fraction between 0.30 and 0.91 before the number in the error message was
+# read: it says 40960, not the 12288 the data lengths imply.
 export WANDB_MODE=${WANDB_MODE:-offline}
 # The adapter lives in this repo, not in VAGEN, so both must be importable.
 export PYTHONPATH=${REPO}:${VAGEN}:${PYTHONPATH}
@@ -128,6 +135,7 @@ PYTHONUNBUFFERED=1 python3 -m vagen.main_ppo \
     actor_rollout_ref.rollout.tensor_model_parallel_size=1 \
     actor_rollout_ref.rollout.gpu_memory_utilization=${ROLLOUT_MEM:-0.4} \
     actor_rollout_ref.rollout.enforce_eager=True \
+    actor_rollout_ref.rollout.max_model_len=${ROLLOUT_CTX:-12288} \
     actor_rollout_ref.rollout.max_num_seqs=${ROLLOUT_SEQS:-32} \
     actor_rollout_ref.rollout.max_num_batched_tokens=${ROLLOUT_TOKENS:-32768} \
     actor_rollout_ref.rollout.free_cache_engine=True \

@@ -39,7 +39,11 @@ if [ "$_DEV" = "NONE" ]; then
   nvidia-smi --query-gpu=index,memory.free --format=csv >&2
   exit 1
 fi
-export CUDA_VISIBLE_DEVICES=$_DEV
+# Honoured if the caller named the cards, for the same reason ROLLOUT_MEM is:
+# the picker ranks by free memory at this instant, and on a shared host the
+# instant is not the run. It chose two cards with another user's 3 GB still on
+# them over four that were completely empty.
+export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-$_DEV}
 # Computed from live free memory, unless the caller has already said what it
 # wants. It used to overwrite an explicit setting without a word, which on a
 # shared host is exactly when someone is overriding it: the computed fraction

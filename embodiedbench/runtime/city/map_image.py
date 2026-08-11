@@ -35,10 +35,18 @@ MIN_SPAN_CM = 12000.0     # never zoom in past ~120 m across: context matters
 MAX_SPAN_CM = 90000.0     # never zoom out past ~900 m: the line must stay readable
 # Drawing size. 4:3 to match the photographs, so a model resizing both sees them
 # at the same scale.
-# Portrait, because it is a phone. It was 4:3 landscape to match the
-# photographs, which made the two the same shape and neither the shape
-# either thing really is.
-WIDTH_PX, HEIGHT_PX = 560, 940
+# Back to the photographs' 4:3, and not for looks. Portrait crashed training:
+# verl's get_rope_index for Qwen3-VL raised "shape mismatch: value tensor of
+# shape [3, 6013] cannot be broadcast to indexing result of shape [3, 5939]",
+# and the gap varied per turn -- the token count the vision grid produces
+# disagreeing with the count the position-id code expects when one image in
+# the batch is a different shape from the others. Evaluation never saw it
+# because that path lets vLLM's server do the preprocessing; only training
+# runs this function.
+#
+# Everything else about the redesign stays: the banner, the heading puck, the
+# dark ground, the label placement.
+WIDTH_PX, HEIGHT_PX = 720, 540
 # Streets near the route are drawn; the rest of the city is not, or a dense map
 # reads as noise. Measured in multiples of the framed span.
 CONTEXT_PAD = 0.25
@@ -207,7 +215,10 @@ def _halo_text(x: float, y: float, text: str, cls: str = "ui",
             f'<text class="{cls}" {common}>{body}</text>')
 
 
-BAR_H = 150.0
+# Sized for the frame it sits on. 150 was chosen against a 940 px portrait;
+# on the 540 px frame it plus the foot bar left so little room that the label
+# rules rejected every street name and the map came out unlabelled.
+BAR_H = 96.0
 
 
 def _text_box(x: float, y: float, half_w: float, half_h: float,
@@ -356,8 +367,8 @@ def render_map(
         '.go{fill:#4c9bff;stroke:#0d1720;stroke-width:3;stroke-linejoin:round}'
         # The instruction banner, and the bar that carries the distance.
         '.band{fill:#0f7a4a;stroke:#4fd39a;stroke-width:3}'
-        '.bandtext{font:800 38px ui-sans-serif,sans-serif;fill:#ffffff}'
-        '.bandsub{font:700 23px ui-sans-serif,sans-serif;fill:#bff0d8}'
+        '.bandtext{font:800 32px ui-sans-serif,sans-serif;fill:#ffffff}'
+        '.bandsub{font:700 19px ui-sans-serif,sans-serif;fill:#bff0d8}'
         '.bar{fill:#0d1720}'
         '.bartext{font:700 26px ui-sans-serif,sans-serif;fill:#ffffff}'
         '.barsub{font:500 19px ui-sans-serif,sans-serif;fill:#8fa4bd}'
@@ -442,7 +453,7 @@ def render_map(
             box = _text_box(x, y, half_w, 13.0, angle_deg)
             inset = 18.0
             fits = (box[0] > inset and box[2] < width_px - inset
-                    and box[1] > BAR_H + 24
+                    and box[1] > BAR_H + 16
                     and box[3] < height_px - 46 - 8)
             # And off the route itself: a name printed across the blue line
             # hides the one mark the picture exists to show.
@@ -593,7 +604,7 @@ def render_map(
         said = f"head {next_heading}" if next_heading else "take"
         parts.append(f'<text class="bandsub" x="92" y="{10 + 40}">'
                      f'{_esc(said)} on</text>')
-        parts.append(f'<text class="bandtext" x="92" y="{10 + 116}">'
+        parts.append(f'<text class="bandtext" x="92" y="{10 + 78}">'
                      f'{_esc(next_street)}</text>')
     # The distance, on a bar of its own at the foot, as an app does.
     foot = 46.0
