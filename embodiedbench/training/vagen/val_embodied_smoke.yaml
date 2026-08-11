@@ -21,3 +21,13 @@ envs:
       ue_endpoints: /data/koe/nav_fleet_game/endpoints.json
       live_cache_root: /data/koe/nav_live_cache
       spawn_z_cm: 100.0
+      # Sim clock at 16x realtime. Measured on ds-serv6: displacement stays
+      # within 1.0% of speed x dt, 36 hard impacts across three speeds all
+      # stopped at the same wall (swept collision, no tunnelling), and a
+      # capture after a 84 m walk converges FASTER than at 0.0333 (8 settle
+      # frames buy 1.6 sim-seconds of adaptation instead of 0.27).
+      # tick_chunk and arrive_cm must move with it: a tick is 28 cm here, so
+      # checking arrival every 10 ticks would look 280 cm apart and the
+      # courier would sail past a 50 cm radius and report stuck.
+      tick_chunk: 2
+      arrive_cm: 120.0
