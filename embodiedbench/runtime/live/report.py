@@ -60,6 +60,15 @@ def load(directory: Path) -> Iterator[dict[str, Any]]:
                     continue
 
 
+def _spread(values: list[float]) -> dict[str, Any]:
+    if not values:
+        return {"n": 0, "p50": None, "max": None}
+    ordered = sorted(values)
+    return {"n": len(ordered),
+            "p50": round(ordered[len(ordered) // 2], 1),
+            "max": round(ordered[-1], 1)}
+
+
 def _union_seconds(intervals: list[tuple[float, float]]) -> float:
     """Total length of the union of half-open intervals.
 
@@ -91,13 +100,17 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     walk_sim_seconds = 0.0
     hops = recoveries = degraded = busy_waits = stranded = 0
     busy_seconds = wall_seconds = 0.0
-    pose_errors: list[float] = []
+    pose_errors: dict[str, list[float]] = {"arrived": [], "failed": []}
+    breaches = 0
     engine_seconds = graph_seconds = 0.0
     workers: Counter[int] = Counter()
     delivered = 0
 
     for record in records:
         counters = record.get("counters", {})
+        # Per record, not a constant: arrive_cm is a config axis and a
+        # directory can hold episodes from more than one setting.
+        arrive_cm = float((record.get("config") or {}).get("arrive_cm") or 0.0)
         outcomes.update(counters.get("outcomes", {}))
         hops += int(counters.get("hops", 0))
         recoveries += int(counters.get("recoveries", 0))
@@ -112,7 +125,21 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
             if "sim_seconds" in hop:
                 walk_sim_seconds += float(hop["sim_seconds"])
             if "pose_error_cm" in hop:
-                pose_errors.append(float(hop["pose_error_cm"]))
+                # Split by outcome, because mixing them raises false alarms.
+                # An arrived hop must land inside arrive_cm -- that is the
+                # contract, and a breach is a real defect. A stuck hop leaves
+                # the pawn wherever it stalled, which is by DESIGN and is
+                # followed by a respawn. Reported together, four stuck hops
+                # turn a clean "max 120.0 cm, exactly the contract" into
+                # "max 12.2 m", which reads like the contract broke.
+                error_cm = float(hop["pose_error_cm"])
+                arrived = hop.get("outcome") == "arrived"
+                pose_errors["arrived" if arrived else "failed"].append(error_cm)
+                # A rounding-width tolerance, no more: the service declares
+                # arrival at a chunk boundary INSIDE the radius, so a landing
+                # outside it is not a near miss, it is the invariant failing.
+                if arrived and arrive_cm and error_cm > arrive_cm + 0.5:
+                    breaches += 1
             # Only arrived hops: a refused hop is charged a floor, not a
             # travel price, so including them would compare two different
             # things and flatter the ratio.
@@ -214,11 +241,11 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         "engine_seconds_arrived": round(engine_seconds, 1),
         "graph_seconds_arrived": round(graph_seconds, 1),
         "pose_error_cm": {
-            "n": len(pose_errors),
-            "max": round(max(pose_errors), 1) if pose_errors else None,
-            "p50": round(sorted(pose_errors)[len(pose_errors) // 2], 1)
-            if pose_errors else None,
+            outcome: _spread(values) for outcome, values in pose_errors.items()
         },
+        # Any arrived hop outside arrive_cm is a contract breach, not a
+        # tolerance. Should always be zero.
+        "arrivals_outside_contract": breaches,
     }
 
 
@@ -263,7 +290,16 @@ def main(argv: list[str] | None = None) -> int:
     print(f"clock inflation     {report['clock_inflation']}x  "
           f"(engine {report['engine_seconds_arrived']}s vs graph "
           f"{report['graph_seconds_arrived']}s on arrived hops)")
-    print(f"pose error cm       {report['pose_error_cm']}")
+    arrived_pose = report["pose_error_cm"]["arrived"]
+    failed_pose = report["pose_error_cm"]["failed"]
+    breach = report["arrivals_outside_contract"]
+    print(f"pose error cm       arrived p50 {arrived_pose['p50']} "
+          f"max {arrived_pose['max']}"
+          f"{'' if not breach else f'  ** {breach} OUTSIDE arrive_cm **'}")
+    if failed_pose["n"]:
+        print(f"                    failed  p50 {failed_pose['p50']} "
+              f"max {failed_pose['max']}  "
+              f"(stalled where it stopped, by design; respawned after)")
     return 0
 
 

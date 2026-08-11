@@ -106,3 +106,34 @@ def test_the_two_throughput_numbers_separate_walking_from_optimising():
     assert report["sim_seconds_per_active_second"] == round(160 / 20, 3)
     assert report["sim_seconds_per_wall_second"] == round(160 / 110, 3)
     assert report["idle_share_of_wall"] == round(1 - 20 / 110, 4)
+
+
+def test_pose_error_is_split_by_outcome_so_a_stall_is_not_a_breach():
+    """Mixing them turns a clean contract into a false alarm.
+
+    An arrived hop must land inside arrive_cm — a breach there is a real
+    defect. A stuck hop leaves the pawn where it stalled, by design, and a
+    respawn follows. Measured on ds-serv6: 170 arrived hops maxed at exactly
+    120.0 cm with zero outside the radius, while four stuck hops sat between
+    415 and 1220 cm. Reported together that is "max 12.2 m", which reads like
+    the contract broke when it held perfectly.
+    """
+    record = _episode(1, 1000.0, 10.0, [
+        _hop("arrived"), _hop("arrived"), _hop("stuck"),
+    ])
+    record["config"] = {"arrive_cm": 120.0}
+    record["hops"][0]["pose_error_cm"] = 83.0
+    record["hops"][1]["pose_error_cm"] = 120.0
+    record["hops"][2]["pose_error_cm"] = 1219.8
+    report = summarize([record])
+    assert report["pose_error_cm"]["arrived"] == {"n": 2, "p50": 120.0, "max": 120.0}
+    assert report["pose_error_cm"]["failed"]["max"] == 1219.8
+    assert report["arrivals_outside_contract"] == 0
+
+
+def test_an_arrival_outside_the_radius_is_counted_as_a_breach():
+    """The one case where a big pose error IS the invariant failing."""
+    record = _episode(1, 1000.0, 10.0, [_hop("arrived")])
+    record["config"] = {"arrive_cm": 120.0}
+    record["hops"][0]["pose_error_cm"] = 400.0
+    assert summarize([record])["arrivals_outside_contract"] == 1
