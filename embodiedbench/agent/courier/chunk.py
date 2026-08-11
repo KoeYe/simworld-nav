@@ -238,8 +238,17 @@ class ChunkedCourierSession(CourierSession):
     # ── what the courier is shown ────────────────────────────────────────────
 
     def system_prompt(self) -> str:
-        return build_system_prompt(city=self.city, tools=self.tools,
-                                   action_chunk=self.action_chunk)
+        # narration is read off the environment, exactly as the stock session
+        # reads it, and for the reason its comment gives: a prompt that
+        # promises narrated lights to a courier whose lights are only in the
+        # pictures teaches a rule that does not hold. Overriding this method
+        # without carrying that argument silently pinned every chunked run to
+        # narration="none" -- the two settings would then differ by whether
+        # chunking happened to be on, which is not a difference anybody chose.
+        return build_system_prompt(
+            city=self.city, tools=self.tools,
+            narration=getattr(self.env, "narration", "none"),
+            action_chunk=self.action_chunk)
 
     # ── one turn ─────────────────────────────────────────────────────────────
 

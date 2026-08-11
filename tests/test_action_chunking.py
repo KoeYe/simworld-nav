@@ -542,3 +542,41 @@ def _call_args(call: str) -> tuple[str, str]:
     import re
 
     return tuple(re.findall(r'"([^"]*)"', call))  # type: ignore[return-value]
+
+
+def test_a_chunked_session_still_obeys_the_environment_narration():
+    """Chunking and narration are independent axes and must stay that way.
+
+    ChunkedCourierSession overrides system_prompt, and the first version of
+    that override dropped the narration argument -- so every chunked run was
+    pinned to narration="none" however the environment was configured. Two
+    settings would then have differed by whether chunking happened to be on,
+    which is not a difference anybody chose.
+    """
+    from embodiedbench.agent.courier.chunk import ChunkedCourierSession
+    from embodiedbench.agent.courier.tools import available_tools
+
+    actions = ["VIEW_ORDERS", "ACCEPT_ORDER", "PICKUP", "DROP_OFF",
+               "WAIT", "MOVE_TO", "NAVIGATE"]
+
+    class _Env:
+        narration = "all"
+        allowed_actions = ("walk_to", "wait")
+
+        def candidates(self):
+            return []
+
+        def summary(self):
+            return {}
+
+    for chunk in (1, 3):
+        session = ChunkedCourierSession.__new__(ChunkedCourierSession)
+        session.env = _Env()
+        session.city = "Paris"
+        session.action_chunk = chunk
+        session.tools = available_tools(actions)
+        prompt = session.system_prompt()
+        assert "EVERYTHING YOU NEED IS IN THE WORDS" in prompt, (
+            f"narration=all was dropped at action_chunk={chunk}")
+        multi = "UP TO 3 calls" in prompt
+        assert multi is (chunk == 3), "the two axes are leaking into each other"
