@@ -437,7 +437,34 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         obs, reward, done, info = await super().step(action_str)
         turns = self._session.run.turns if self._session is not None else []
         info.update(chunk_info(turns[-1] if turns else None))
+        info.update(self._live_health())
         return obs, reward, done, info
+
+    def _live_health(self) -> dict[str, Any]:
+        """What the SIMULATOR did to this turn, in the trainer's own dict.
+
+        Both of these already existed inside the env and neither reached a
+        consumer. ``degraded`` means the episode stopped receiving live
+        frames and fell back to whatever the album held -- a change of
+        observation distribution mid-rollout that ``images_dropped`` does not
+        report, because from its point of view the world simply offered fewer
+        photographs. ``sim_failures`` counts hops that ended in stuck or
+        timeout: at block stride those are absorbed into the macro's prose
+        and the turn arrives as accepted with error None, so this is the only
+        channel that distinguishes "the policy chose badly" from "the navmesh
+        could not walk there". A run that cannot separate those two is
+        training on the map's defects.
+        """
+        env = self._env
+        if env is None:
+            return {}
+        hops = [h for h in getattr(env, "embodied_log", []) if "ticks" in h]
+        return {
+            "live_degraded": bool(getattr(env, "live_degraded", False)),
+            "sim_failures": sum(
+                1 for h in hops if h.get("outcome") in ("stuck", "timeout")),
+            "sim_hops": len(hops),
+        }
 
     async def _reset_impl(self, seed: int) -> tuple[dict[str, Any], dict[str, Any]]:
         from embodiedbench.agent.courier.chunk import ChunkedCourierSession

@@ -576,5 +576,14 @@ class EmbodiedCourierEnv(CourierEnv):
             "max_pose_error_cm": round(
                 max((h["pose_error_cm"] for h in hops), default=0.0), 2),
             "stuck_count": sum(1 for h in hops if h["outcome"] == "stuck"),
+            "walk_timeout_count": sum(
+                1 for h in hops if h["outcome"] == "timeout"),
+            # Whether this episode stopped seeing live frames partway
+            # through. It lived only in album_coverage(), which nothing on
+            # the training path calls -- so an episode could switch its
+            # observation distribution mid-rollout and say so nowhere a
+            # trainer looks.
+            "degraded": self.live_degraded,
+            "busy_waits": self.busy_waits,
         }
         return out

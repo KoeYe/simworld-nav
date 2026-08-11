@@ -432,16 +432,28 @@ class TestAnEmbodiedEpisodeWalksTheStockGraph:
         env = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
         self.scripted_nodes(env, turns=4)
         block = env.summary()["embodied"]
-        assert set(block) == {"hops", "recoveries", "total_ticks", "total_walk_seconds",
-                              "max_pose_error_cm", "stuck_count"}
+        # The evidence contract, pinned exactly. The last three were added
+        # after an audit found that an episode could degrade to album frames
+        # or queue for minutes behind another episode and report neither
+        # anywhere a training run looks.
+        assert set(block) == {"hops", "recoveries", "total_ticks",
+                              "total_walk_seconds", "max_pose_error_cm",
+                              "stuck_count", "walk_timeout_count",
+                              "degraded", "busy_waits"}
+        assert block["degraded"] is False
+        assert block["walk_timeout_count"] == 0
         assert block["hops"] == len(env.embodied_log) > 0
         assert block["total_ticks"] == sum(h["ticks"] for h in env.embodied_log)
         assert block["total_walk_seconds"] == pytest.approx(
             block["total_ticks"] * FIXED_DT)
         assert block["stuck_count"] == 0
+        # graph_seconds/chord_m are what the OFFLINE env would have charged
+        # for the same hop. They are recorded on every hop so the gap between
+        # engine-priced movement and the graph-priced budgets it is spent
+        # against stays measurable instead of being an argument.
         log_keys = {"target_node", "target_xy", "ticks", "sim_seconds",
                     "walked_cm", "end_pose", "node_xy", "pose_error_cm",
-                    "outcome"}
+                    "outcome", "graph_seconds", "chord_m"}
         assert all(set(hop) == log_keys for hop in env.embodied_log)
 
     def test_close_ends_the_episode_on_the_service(
