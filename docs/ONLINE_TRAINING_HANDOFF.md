@@ -177,6 +177,105 @@ hyperparameters rather than plumbing. The fleet is ready for it either way:
 extra concurrent episodes queue rather than fail, and the queueing shows up
 directly as `busy_share_of_wall`.
 
+## The engine-side work, and what it cost to get right
+
+This section is the 2026-08-11 optimisation pass. It is separated from the
+sections above because those describe a system that ran; this one describes
+one that got roughly four times cheaper per agent and took four wrong pictures
+to get there.
+
+### Where a training second actually goes
+
+Measured over 47 episodes, 270 hops, 188 turns:
+
+| | share |
+|---|---|
+| engine walking | 25.7% |
+| capture | 4.0% |
+| **policy inference** | **70.3%** |
+
+That single table reorders every optimisation. Making the engine free buys
+1.35×; the lever that matters is the 9.19 s of non-engine time each turn
+costs, which is what action chunking and async overlap divide.
+
+Two things measured on the way that contradict the obvious guess:
+
+- **Under `global_sync`, every RPC read costs one engine tick.** Ten
+  `get_pose` calls advanced the sim clock by exactly as much as ten explicit
+  ticks (2.2 s each). A pose poll is not overhead *around* the walk; the pawn
+  walks through it. So **`tick_chunk` is not a throughput lever** — measured
+  wall time per hop at chunk 2/4/8/16 was 2.44/2.45/2.58/2.73 s, slightly
+  *worse* as the chunk grows, because checking less often overshoots and costs
+  extra ticks.
+- **A world carries agents almost for free.** 96 pawns ticked at 1.01× the
+  cost of one (36.1 ms), and all 96 walked simultaneously. Per-agent effective
+  tick cost falls from 36 ms to 0.4 ms.
+
+### The camera was the thing that did not scale
+
+`SpHumanoidAgent` created its SceneCapture with `bCaptureEveryFrame = true`,
+so every live camera re-rendered the whole scene on every engine tick whether
+or not anyone read it:
+
+| cameras | ms/tick before | after |
+|---|---|---|
+| 0 | 34.9 | 53.7 |
+| 1 | 62.2 | 52.8 |
+| 4 | 149.2 | 52.4 |
+| 8 | 252.7 | 52.2 |
+| 16 | 457.8 | **51.9** |
+
+A courier walking an 18 m hop ticks 65 times and is photographed once, so 64
+of those renders were discarded — and a second courier doubled the waste
+rather than sharing it. That is what made one agent per instance look like a
+law of nature. `SpCameraCapturePool` in the same project had already set the
+flag the other way.
+
+After: per-agent cost of one hop falls from 3.74 s at one agent to 0.27 s at
+32, with the tick flat (51.9 → 54.1 ms).
+
+### Four wrong pictures, and the check that caught each
+
+Rendering on demand removes an implicit guarantee: everything temporal in the
+renderer was being maintained *by* the 65 renders a hop. Each failure below
+produced a plausible-looking image, and each was caught by the same three
+assertions — the frame is not black, it does not change while the courier
+stands still, and it **does** change when the courier walks.
+
+1. **Frame never changed** (0.00 difference over 12.88 m). There are two
+   copies of `SpSceneCaptureComponent2D.cpp` on this host: 673 lines under
+   `SimWorld_SPEAR/Plugins/spear` (what the project compiles) and 1143 under
+   `spear-sim-spear` (what the Python side imports). The `CaptureScene()` call
+   went into the one that is not compiled. **Check which copy builds before
+   editing either.**
+2. **Frame updated, and was black.** `bAlwaysPersistRenderingState` was the
+   guess; the ramp did not move.
+3. **Auto-exposure.** Adaptation advances one step per RENDER: 1.24, 1.23,
+   52.6, 77.6 … 120.2. `AutoExposureSpeedUp/Down` barely helped (adaptation
+   advances per frame interval and an on-demand render has none); clamping
+   min == max only pinned where adaptation was *headed*. `AEM_Manual` bypasses
+   it — first photograph 102.8 against a converged 98.8 — and the calibration
+   is confirmed twice over: the clamp sweep put the target at EV 10, and the
+   manual defaults (ISO 100, 1/60 s, f/4) give EV100 = 9.9.
+4. **A cold instance renders black.** An instance that has never rendered
+   reads 1.22, 1.21, 1.27, 2.03, 6.38, 9.80 over its first six captures. Once
+   it has, a brand new agent's first photograph at the same spot reads 93.0
+   against a fully warmed 106.8 and reaches 99 within five. **The warm-up
+   belongs to the instance, not the agent** — 50 captures once at attach, then
+   3 per spawn.
+
+   An earlier reading said the opposite, that every agent had to pay, and it
+   was wrong: the warmed agent was photographed at (0,0) and the fresh one at
+   (4000,2000), and those places are simply lit differently. Position has to
+   be held fixed to compare convergence at all.
+
+### Exposure is per map, and calibrated rather than chosen
+
+The camera is manual now, so the value is a property of the map's lighting
+rather than of how long the camera has been running. Paris calibrates to
+EV ≈ 10, carried as `agent_exposure_bias` in the fleet config. A new map needs
+one calibration run against a converged reference, not a code change.
+
 ## What to distrust — open, and yours to decide
 
 ### 1. The clock is engine-priced; every budget it is spent against is not
