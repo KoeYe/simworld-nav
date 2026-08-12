@@ -101,7 +101,8 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
     ``max_images``      per-turn image cap (default 5)
     ``max_turns``       episode length cap; 0 means the harness's own budget
     ``city``            name used in the prompt (default ``Paris``)
-    ``reward_basis``    ``earnings`` (the job's own measure) or ``env_return``
+    ``reward_basis``    ``earnings_per_hour`` (the job's own measure),
+                        ``earnings`` or ``env_return``
     ``progress_weight`` dense reward for closing on the target (default 0.0)
     ``image_max_side``  downscale frames to this long side (0 = leave alone)
     ==================  =======================================================
@@ -162,7 +163,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         # potential-based, so it cannot change which policy is optimal: the
         # optimum under ``earnings`` remains the best-earning courier.
         self.reward_basis = str(config.get("reward_basis", "env_return"))
-        if self.reward_basis not in ("earnings", "env_return"):
+        if self.reward_basis not in ("earnings_per_hour", "earnings", "env_return"):
             raise ValueError(f"unknown reward_basis {self.reward_basis!r}")
         self._last_earnings = 0.0
         # Turns are what this task needs and images are what crowds them out.
@@ -267,6 +268,7 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
         earned_this_turn = earned_now - self._last_earnings
         self._last_earnings = earned_now
         reward = (earned_this_turn if self.reward_basis == "earnings"
+                  else 0.0 if self.reward_basis == "earnings_per_hour"
                   else float(log.reward or 0.0))
 
         # Potential-based shaping, per turn rather than end-to-end. Collecting a
@@ -288,6 +290,27 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
 
         obs, dropped = ({"obs_str": ""}, 0) if done else self._observation()
         summary = self._env.summary()
+
+        # Paid at the end, because a rate is not a sum of per-turn deltas.
+        #
+        # Under ``earnings`` a group of four samples of the same order scored
+        # identically whenever they all delivered -- the fee is 3.00 plus a
+        # cent a metre of the ORDER, so it pays the same for a ten-turn run and
+        # a twenty-one-turn one -- and identically at 0.0 whenever none did.
+        # GRPO normalises within the group, so every advantage was 0.0 and the
+        # first real training step logged pg_loss 0.0 and grad_norm 0.0 against
+        # scores that ranged 0.0 to 5.43 across the batch. The variance was all
+        # between orders, where GRPO cannot see it.
+        #
+        # Per hour, the same delivery pays differently for taking longer, and
+        # walking time is what a route choice actually costs: sim_seconds
+        # accrues per street walked, per wait at a red, and per red crossed.
+        # It is also the courier's own measure of a shift rather than a
+        # constant chosen here, and it stays 0.0 for a shift that delivered
+        # nothing, so it does not pay a policy to give up early -- which an
+        # additive charge for time would.
+        if done and self.reward_basis == "earnings_per_hour":
+            reward += float(summary.get("earnings_per_hour") or 0.0)
         info = {
             "status": log.status,          # accepted / rejected / format_error
             "action": log.action,

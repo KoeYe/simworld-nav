@@ -64,4 +64,15 @@ export ACTOR_LR="${ACTOR_LR:-1e-6}"
 export KL_COEF="${KL_COEF:-0.005}"
 export TEST_FREQ="${TEST_FREQ:-10}"
 
+# vendor/ is gitignored, so the fixes VAGEN and verl need live in
+# embodiedbench/training/vagen/patches/ and are re-applied here. Each is
+# idempotent and refuses rather than guesses if upstream has moved, so a run
+# stops with a readable message instead of training on a checkout that is only
+# partly patched.
+for patch in agent_loop_qwen3vl_rope \
+             agent_loop_image_safe_truncation \
+             multiturn_image_safe_truncation; do
+    python -m "embodiedbench.training.vagen.patches.${patch}" || exit 1
+done
+
 exec bash "$REPO/embodiedbench/training/vagen/train_grpo_courier.sh"

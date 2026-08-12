@@ -604,3 +604,54 @@ class TestTrainingSeesTheSameWorldAsEvaluation:
         run(tiny.close())
         run(small.close())
         run(big.close())
+
+
+class TestPayingByTheHourGivesGRPOSomethingToPushOn:
+    """The first real training step scored 4.075 with within-group variance of
+    exactly 0.0, and so pg_loss 0.0 and grad_norm 0.0, while scores across the
+    batch ranged 0.0 to 5.43. The fee is 3.00 plus a cent a metre of the order,
+    so four samples of one order either all delivered for the identical fee or
+    none did for 0.0: all the variance was between orders, where GRPO -- which
+    normalises inside the group -- cannot use it."""
+
+    def test_the_rate_is_paid_once_at_the_end(self, config):
+        """A rate is not a sum of per-turn deltas, so every turn but the last
+        pays nothing."""
+        env = CourierGymEnv({**config, "reward_basis": "earnings_per_hour",
+                             "max_turns": 3})
+        run(env.reset(0))
+        rewards = []
+        for _ in range(3):
+            _, reward, done, _ = run(env.step(walk(env)))
+            rewards.append(reward)
+            if done:
+                break
+        assert all(r == pytest.approx(0.0) for r in rewards[:-1]), (
+            "an unfinished turn paid something; the rate is a terminal reward")
+        run(env.close())
+
+    def test_a_shift_that_delivered_nothing_pays_nothing(self, config):
+        """Otherwise a charge for time would pay a policy to give up early."""
+        env = CourierGymEnv({**config, "reward_basis": "earnings_per_hour",
+                             "max_turns": 2})
+        run(env.reset(0))
+        total = 0.0
+        for _ in range(2):
+            _, reward, done, info = run(env.step(walk(env)))
+            total += reward
+            if done:
+                break
+        assert not info["delivered"], "this seed delivers in two turns; pick another"
+        assert total == pytest.approx(0.0)
+        run(env.close())
+
+    def test_it_is_a_basis_the_env_admits(self, config):
+        env = CourierGymEnv({**config, "reward_basis": "earnings_per_hour"})
+        run(env.reset(0))
+        _, _, _, info = run(env.step(walk(env)))
+        assert info["reward_basis"] == "earnings_per_hour"
+        run(env.close())
+
+    def test_an_unknown_basis_is_refused_rather_than_silently_zeroed(self, config):
+        with pytest.raises(ValueError, match="unknown reward_basis"):
+            CourierGymEnv({**config, "reward_basis": "per_parcel"})

@@ -25,7 +25,22 @@ envs:
       # chosen in this repository. Punctuality and job size are inside the
       # number already -- full fee on time, a fraction late, 3.00 plus a cent
       # a metre -- so a policy that maximises it is a courier that earns.
-      reward_basis: earnings
+      # Per hour, not per job. The fee is 3.00 plus a cent a metre of the
+      # ORDER, so it pays the same however the shift went: the first real
+      # training step scored 4.075 with within-group variance of exactly 0.0
+      # and so pg_loss 0.0 and grad_norm 0.0, while scores across the batch
+      # ranged 0.0 to 5.43. Four samples of one order either all delivered,
+      # for the identical fee, or none did, for 0.0. All the variance was
+      # between orders, which is where GRPO cannot use it.
+      #
+      # A rate separates a ten-turn delivery from a twenty-one-turn one, and
+      # walking time is what a route choice costs -- sim_seconds accrues per
+      # street walked, per wait at a red and per red crossed. It stays 0.0 for
+      # a shift that delivered nothing, so unlike a straight charge for time
+      # it never pays to give up early. Validation stays on `earnings` so the
+      # held-out number remains money and stays comparable with every run
+      # measured so far.
+      reward_basis: earnings_per_hour
       # Dense term: metres closed on the target, potential-based, never in
       # env_return. Without it GRPO's first step logged reward_variance 0.0
       # and grad_norm 0.0 -- a 3B never delivers, so every sample in the
