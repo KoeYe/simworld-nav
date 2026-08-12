@@ -2717,14 +2717,23 @@ class CourierEnv:
         """
         if len(route) < 2:
             return {"next_street": "", "next_heading": ""}
-        # candidates(), not _raw_candidates(): reach_heading is added by the
-        # public method, so reading the raw rows silently took the first-hop
-        # bearing again -- the very quantity this was written to stop using.
-        for row in self.candidates():
+        # The bearing has to be the one the candidate line quotes -- at block
+        # stride that is the whole block's, not the first hop's -- but it must
+        # be computed here rather than read off candidates(). candidates()
+        # looks up a street view and a lamp for every way out, and under the
+        # live renderer a lookup is a render request: drawing the map, which is
+        # a survey drawing that has never seen the street, was issuing a batch
+        # of renders. Three live tests caught it; the cost is real either way.
+        for row in self._raw_candidates():
             if math.dist(self.position(row["node"]), route[1]) < 1.0:
+                heading = row.get("heading") or ""
+                if self.stride == Stride.BLOCK:
+                    _, _, end = self._block_preview(row["node"])
+                    if end != self.node_id:
+                        heading = compass_of(
+                            bearing_deg(self.position(), self.position(end)))
                 return {"next_street": str(row["street"]),
-                        "next_heading": str(row.get("reach_heading")
-                                            or row.get("heading") or "")}
+                        "next_heading": str(heading)}
         nearest = min(self.network.nodes,
                       key=lambda n: math.dist(self.position(n), route[1]))
         return {"next_street": self.street_of(nearest) or "",

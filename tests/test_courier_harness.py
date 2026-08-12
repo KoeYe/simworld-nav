@@ -1537,3 +1537,37 @@ class TestTheBannerIsAnInstructionYouCanObey:
                 )
                 if not env.walk_to(street.group(1), heading.group(1)).ok:
                     break
+
+
+class TestDrawingTheMapCostsNothing:
+    """The map is a survey drawing. It must not ask the world for pictures.
+
+    The instruction banner recomputes the next street every turn, and it read
+    that off candidates() -- which looks up a street view and a lamp for every
+    way out. Under the album that is a path lookup; under the live renderer it
+    is a render request, so drawing the map issued a batch of renders. Three
+    live tests caught it as a symptom (a busy backend skipped, a degrade
+    verdict early, a lamp request with the wrong phase) and none of them named
+    the cause, which is why this test exists at the level the cause lives on.
+    """
+
+    def test_the_map_does_not_look_up_a_single_frame(self, paris):
+        env = CourierEnv(paris, seed=0, order_count=1, difficulty="solo",
+                         stride="block")
+        env.reset()
+        order = next((o for o in env.orders if o.live), None)
+        if order is not None:
+            env.navigate(order.pickup.text)
+
+        looked: list[tuple[str, str]] = []
+        real_frame, real_signal = env.frame_for, env.signal_frame_for
+        env.frame_for = lambda n, t: (looked.append((n, t)), real_frame(n, t))[1]
+        env.signal_frame_for = lambda n, t: (looked.append((n, t)),
+                                             real_signal(n, t))[1]
+        try:
+            env.map_drawing()
+        finally:
+            env.frame_for, env.signal_frame_for = real_frame, real_signal
+        assert not looked, (
+            f"drawing the map asked for {len(looked)} frames: {looked[:3]}"
+        )
