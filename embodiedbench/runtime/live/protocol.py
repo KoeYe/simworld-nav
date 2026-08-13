@@ -538,14 +538,33 @@ class WalkResponse:
     sim_seconds: float
     pose: Pose
     walked_cm: float
+    #: Where the walk began, as the service read it at entry.
+    #:
+    #: Added because ``walked_cm`` could not be checked against anything. It is
+    #: a sum of per-chunk displacements and it came back 0.00 on thirteen
+    #: consecutive walks whose start and end poses differed by half a metre to
+    #: five -- but the only start pose available was the CALLER's idea of where
+    #: the pawn was, which ``/observe`` overwrites and other couriers' ticks
+    #: move. Twice I called the count impossible against a baseline that was
+    #: not the walk's own, and twice that was my error rather than the count's.
+    #: With both ends from the same response, path length versus displacement
+    #: is an arithmetic identity anyone can check: a path is never shorter than
+    #: the line it spans.
+    #:
+    #: Optional on the wire, and omitted when absent, so every Track B golden
+    #: fixture and every service that predates it round-trips unchanged.
+    start_pose: Pose | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {"arrived": bool(self.arrived), "stuck": bool(self.stuck),
-                "timeout": bool(self.timeout),
-                "ticks": int(self.ticks),
-                "sim_seconds": float(self.sim_seconds),
-                "pose": self.pose.to_dict(),
-                "walked_cm": float(self.walked_cm)}
+        out = {"arrived": bool(self.arrived), "stuck": bool(self.stuck),
+               "timeout": bool(self.timeout),
+               "ticks": int(self.ticks),
+               "sim_seconds": float(self.sim_seconds),
+               "pose": self.pose.to_dict(),
+               "walked_cm": float(self.walked_cm)}
+        if self.start_pose is not None:
+            out["start_pose"] = self.start_pose.to_dict()
+        return out
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "WalkResponse":
@@ -557,6 +576,8 @@ class WalkResponse:
             sim_seconds=float(_require(data, "sim_seconds", "walk response")),
             pose=Pose.from_dict(_require(data, "pose", "walk response")),
             walked_cm=float(_require(data, "walked_cm", "walk response")),
+            start_pose=(Pose.from_dict(data["start_pose"])
+                        if data.get("start_pose") is not None else None),
         )
 
 

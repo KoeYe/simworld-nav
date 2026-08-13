@@ -377,6 +377,24 @@ class RenderPool:
             time.sleep(self.lease_poll_s)
         try:
             yield member.client
+        except (ServiceUnreachable, RenderServiceError) as error:
+            # The pool learns from a LEASED episode too.
+            #
+            # /render strikes an instance the moment it is unreachable, but a
+            # lease hands the caller the member's client and shrinks the pool
+            # to bookkeeping -- so an instance that died under an embodied
+            # episode was struck nowhere, and the next lease picked it again.
+            # Twice today a training run ended on `ServiceUnreachable: ue-0
+            # /walk unreachable`, with the pool still holding the corpse as
+            # its healthiest member.
+            #
+            # Only for the shapes that mean "this instance is gone". A busy is
+            # not one (it just answered), and neither is a bad_request about
+            # an episode id -- that is a live service disagreeing with us.
+            if isinstance(error, ServiceUnreachable) or getattr(
+                    error, "code", None) in ("engine_down", "render_failed"):
+                self._strike(member)
+            raise
         finally:
             with self._lease_lock:
                 member.leases.discard(episode_id)

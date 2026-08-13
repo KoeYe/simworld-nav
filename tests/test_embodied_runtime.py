@@ -1425,3 +1425,146 @@ class TestTheTraceRecordsWhatTheCourierSaw:
         assert all(f is not None for f in froms)
         assert froms[0] != froms[1] != froms[2]
         assert all(c["feedback"] for c in calls)
+
+
+@needs_maps
+class TestADeadInstanceDoesNotEndTheRun:
+    """Twice in one day a training job ended on `ServiceUnreachable: ue-0
+    /walk unreachable`. A lease hands the env one instance and the env had
+    nowhere else to go, while the pool -- which strikes an unreachable
+    instance instantly on the /render path -- never learned, because a leased
+    episode talks to the client directly."""
+
+    def test_the_pool_strikes_an_instance_that_dies_under_a_lease(self, tmp_path):
+        from embodiedbench.runtime.live.client import ServiceUnreachable
+
+        pool = RenderPool(write_endpoints(tmp_path / "e.json",
+                                          [("ue-a", "http://127.0.0.1:1")], seats=2),
+                          lease_timeout_s=1.0, lease_poll_s=0.05)
+        assert pool.members[0].strikes == 0
+        with contextlib.suppress(ServiceUnreachable):
+            with pool.lease_embodied("ep"):
+                raise ServiceUnreachable("ue-a: /walk unreachable")
+        assert pool.members[0].strikes >= 1, "the corpse stayed the healthiest member"
+        # ...and a busy does not count: it just answered.
+        pool.members[0].strikes = 0
+        with contextlib.suppress(ServiceBusy):
+            with pool.lease_embodied("ep2"):
+                raise ServiceBusy("another episode holds this instance")
+        assert pool.members[0].strikes == 0
+
+    def test_a_walk_onto_a_dead_instance_is_a_refusal_not_a_crash(
+            self, paris, service, tmp_path):
+        """The walk is not re-issued -- /walk is the one non-idempotent
+        endpoint and an unreachable service may or may not have moved the pawn
+        -- so the call is refused and the episode carries on from the node."""
+        from embodiedbench.runtime.live.embodied_env import EmbodiedCourierEnv
+
+        endpoints = write_endpoints(tmp_path / "e.json", [service], seats=4)
+        pool = RenderPool(endpoints, lease_timeout_s=2.0, lease_poll_s=0.05)
+        env = EmbodiedCourierEnv(paris, pool, episode_id=EPISODE,
+                                 cache_root=tmp_path / "cache", seed=5,
+                                 action_space="coordinate", max_step_m=10.0,
+                                 arrive_cm=100.0, tick_chunk=2)
+        env.reset()
+        here = env._here_cm()
+        node_before = env.node_id
+
+        # The instance goes away mid-walk.
+        from embodiedbench.runtime.live.client import ServiceUnreachable
+        real_walk = env._ue().walk
+        calls = {"n": 0}
+
+        def dies_once(request):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise ServiceUnreachable("ue-0: /walk unreachable (timed out)")
+            return real_walk(request)
+
+        env._ue().walk = dies_once
+        out = env.walk_to_xy(here[0] / 100.0 + 6.0, here[1] / 100.0)
+
+        assert not out.ok and out.code == "instance_moved"
+        assert env.node_id == node_before, "it stands where the graph believes"
+        moved = [h for h in env.embodied_log if h.get("recovery") == "moved_instance"]
+        assert moved, env.embodied_log
+        # ...and the episode is usable afterwards.
+        env._ue().walk = real_walk
+        again = env.walk_to_xy(*[v / 100.0 + 5.0 for v in env._here_cm()])
+        assert again.ok, again.message
+
+
+class TestTheWalkReportsWhereItStarted:
+    """`walked_cm` came back 0.00 on thirteen consecutive walks whose start
+    and end poses differed by half a metre to five -- and could not be called
+    wrong, because the only start pose available was the CALLER's, which
+    /observe overwrites and other couriers' ticks move. Twice I called the
+    count impossible against a baseline that was not the walk's own.
+
+    With both ends in one response it is an arithmetic identity: a path is
+    never shorter than the line it spans."""
+
+    def test_the_field_is_optional_and_the_golden_bytes_do_not_move(self):
+        golden = (GOLDEN / "track_b_walk_response.json").read_text()
+        message = WalkResponse.from_dict(json.loads(golden))
+        assert message.start_pose is None, "the fixture predates the field"
+        assert dumps(message.to_dict()) == golden, "omitted when absent"
+
+    def test_a_start_pose_round_trips(self):
+        message = WalkResponse(
+            arrived=True, stuck=False, timeout=False, ticks=7,
+            sim_seconds=1.4, pose=Pose(10.0, 20.0, 100.0, 90.0),
+            walked_cm=33.0, start_pose=Pose(0.0, 0.0, 100.0, 0.0))
+        again = WalkResponse.from_dict(message.to_dict())
+        assert again == message
+        assert again.start_pose is not None
+        assert "start_pose" in message.to_dict()
+
+    @needs_maps
+    def test_the_env_records_path_against_displacement(
+            self, paris, service, tmp_path):
+        env = embodied_env(paris, UERenderClient(service.base_url), tmp_path,
+                           action_space="coordinate", max_step_m=10.0,
+                           arrive_cm=100.0, tick_chunk=2)
+        here = env._here_cm()
+        env.walk_to_xy(here[0] / 100.0 + 6.0, here[1] / 100.0)
+        hop = env.embodied_log[-1]
+        assert "service_walked_cm" in hop and "service_displacement_cm" in hop
+        # The identity, on a service that reports both ends.
+        if hop["service_displacement_cm"] is not None:
+            assert hop["service_walked_cm"] >= hop["service_displacement_cm"] - 0.5
+    def test_a_fleet_of_one_re_seats_on_itself(self, paris, service, tmp_path):
+        """The fleet we actually run has one instance, and "move to another"
+        has nowhere to go there -- which is how a run kept dying with the move
+        already written. `unreachable` is a timed-out or reset socket, not a
+        death certificate: the engine behind it had been up for hours every
+        time this was measured."""
+        from embodiedbench.runtime.live.client import ServiceUnreachable
+        from embodiedbench.runtime.live.embodied_env import EmbodiedCourierEnv
+
+        endpoints = write_endpoints(tmp_path / "e.json", [service], seats=4)
+        pool = RenderPool(endpoints, lease_timeout_s=2.0, lease_poll_s=0.05)
+        env = EmbodiedCourierEnv(paris, pool, episode_id=EPISODE,
+                                 cache_root=tmp_path / "cache", seed=5,
+                                 action_space="coordinate", max_step_m=10.0,
+                                 arrive_cm=100.0, tick_chunk=2)
+        env.reset()
+        env.reseat_pause_s = 0.01
+        assert len(pool.members) == 1, "the case under test is a fleet of one"
+
+        real = env._ue().walk
+        fired = {"n": 0}
+
+        def dies_once(request):
+            fired["n"] += 1
+            if fired["n"] == 1:
+                raise ServiceUnreachable("ue-0: /walk unreachable (timed out)")
+            return real(request)
+
+        env._ue().walk = dies_once
+        here = env._here_cm()
+        out = env.walk_to_xy(here[0] / 100.0 + 6.0, here[1] / 100.0)
+
+        assert not out.ok and out.code == "instance_moved"
+        env._ue().walk = real
+        assert env.walk_to_xy(*[v / 100.0 + 5.0 for v in env._here_cm()]).ok

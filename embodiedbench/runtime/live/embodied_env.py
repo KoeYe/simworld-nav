@@ -80,6 +80,7 @@ from .client import (
     RenderFailedError,
     RenderServiceError,
     ServiceBusy,
+    ServiceUnreachable,
     UERenderClient,
 )
 from .env import STREET_CAMERA, STREET_EYE_CM
@@ -100,6 +101,15 @@ from .protocol import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class InstanceMoved(Exception):
+    """The instance died and the episode has been re-opened on another.
+
+    Raised out of the walk path so the caller charges the call as a refusal
+    rather than crediting a walk nobody can say happened. Not a
+    ``RenderServiceError``: nothing about the service is wrong any more.
+    """
 
 # Where the pawn spawns on the z axis, in cm. The capsule needs clearance
 # above the road surface; 100 is the spec's own example and what the SimWorld2
@@ -306,6 +316,9 @@ class EmbodiedCourierEnv(CourierEnv):
         self.frame_yaws: dict[str, float] = {}
         #: How long reset() waits for a busy instance before giving up.
         self.episode_busy_timeout_s = 1800.0
+        #: How long to leave an instance alone after it stopped answering,
+        #: before asking the pool for a seat again.
+        self.reseat_pause_s = 5.0
         # Lease plumbing: a pool is leased lazily (the fleet may still be
         # launching when the env object is built); a bare client is used as
         # given and never "released".
@@ -516,7 +529,15 @@ class EmbodiedCourierEnv(CourierEnv):
             # coaching). No walk was attempted, so nothing embodied applies.
             return super()._step_to(k)
         row = rows[k]
-        walk = self._walk_hop(row["node"])
+        try:
+            walk = self._walk_hop(row["node"])
+        except InstanceMoved:
+            return self._refuse(StepOutcome(
+                ok=False, code="instance_moved",
+                message=("Something went wrong out of your sight and you are "
+                         "back at the last junction. Nothing you did caused "
+                         "it. Read where you are and go on from there."),
+            ))
         if not walk.arrived:
             outcome = "stuck" if walk.stuck else "timeout"
             if walk.stuck:
@@ -753,7 +774,19 @@ class EmbodiedCourierEnv(CourierEnv):
             ))
         target = asked
         self.coordinate_walks += 1
-        walk = self._walk_to_point(*target)
+        try:
+            walk = self._walk_to_point(*target)
+        except InstanceMoved as error:
+            # The instance died under this call and the episode is now open on
+            # another one, standing at the node the graph believes in. The
+            # call itself did not happen.
+            self._log_refused_point(asked, here, "instance_moved")
+            return self._refuse(StepOutcome(
+                ok=False, code="instance_moved",
+                message=("Something went wrong out of your sight and you are "
+                         "back at the last junction. Nothing you did caused "
+                         "it. Read where you are and go on from there."),
+            ))
         # The distance covered is measured between two poses this env holds,
         # not taken from the service's own count.
         #
@@ -878,6 +911,18 @@ class EmbodiedCourierEnv(CourierEnv):
             # What the service counted, beside what the poses say. They
             # disagree, and the disagreement is the evidence.
             "service_walked_cm": walk.walked_cm,
+            # The identity that makes the disagreement checkable, once the
+            # service reports both ends of its own walk: a path is never
+            # shorter than the line it spans, so `service_walked_cm` below
+            # `service_displacement_cm` is the count being wrong and not the
+            # baseline being badly chosen. Absent from a service that predates
+            # the field, which is why it is written as None rather than
+            # computed from something else.
+            "service_displacement_cm": (
+                round(math.dist(
+                    (walk.start_pose.x_cm, walk.start_pose.y_cm),
+                    (walk.pose.x_cm, walk.pose.y_cm)), 2)
+                if walk.start_pose is not None else None),
             "end_pose": walk.pose.to_dict(),
             "pose_error_cm": math.dist(
                 (walk.pose.x_cm, walk.pose.y_cm), target),
@@ -891,6 +936,67 @@ class EmbodiedCourierEnv(CourierEnv):
             "outcome": ("arrived" if walk.arrived else
                         "stuck" if walk.stuck else "timeout"),
         })
+
+    def _instance_is_gone(self, error: Exception) -> bool:
+        """Did this error mean "that instance is not there any more"?
+
+        Different from ``_episode_is_lost``, which is a LIVE service saying it
+        does not hold this episode. This is no service at all -- and until now
+        it ended the training job, because a lease hands the env one instance
+        and the env had nowhere else to go. Twice today: forty minutes in,
+        ``ServiceUnreachable: ue-0 /walk unreachable (timed out)``, run over.
+        """
+        return isinstance(error, ServiceUnreachable) or (
+            isinstance(error, RenderServiceError)
+            and getattr(error, "code", None) == "engine_down")
+
+    def _move_instance(self, reason: str) -> bool:
+        """Give the dead instance back and take a seat on a healthy one.
+
+        Only possible when the env was handed a POOL. With a bare client there
+        is exactly one service and nothing to move to, which is the
+        single-instance and test setup, so the error propagates as before.
+
+        The walk that failed is NOT retried. ``/walk`` is the one
+        non-idempotent endpoint, an unreachable service may or may not have
+        moved the pawn, and re-issuing it against a fresh spawn would credit
+        the episode with a walk nobody can say happened. The episode re-opens
+        at the node the graph believes in and the call that hit the dead
+        instance is refused, charged like any refusal.
+        """
+        if self._pool is None:
+            return False
+        logger.warning("instance lost under episode %s (%s); re-seating",
+                       self.episode_id, reason)
+        try:
+            self._release_lease()
+        except Exception as error:  # noqa: BLE001 — it is already dead
+            logger.info("releasing the dead lease raised (%s)", error)
+        self._client = None
+        self._episode_open = False
+        # A fleet of one is the fleet we actually run, and "move to another"
+        # has nowhere to go there -- which is how a run kept dying with the
+        # move already written. So the same instance is a legitimate
+        # destination: `unreachable` is a timed-out or reset SOCKET, not a
+        # death certificate, and the engine behind it has been up for hours in
+        # every case measured. Give it a moment and re-seat.
+        #
+        # The lease was dropped above, so the pool decides where the seat
+        # comes from -- another instance if one is healthy, this one if it is
+        # all there is. The pool has already struck it, so it is picked last.
+        time.sleep(self.reseat_pause_s)
+        try:
+            self._reopen_episode(f"instance lost: {reason}")
+        except Exception as error:  # noqa: BLE001
+            logger.warning("could not re-open %s on another instance (%s: %s)",
+                           self.episode_id, type(error).__name__, error)
+            self.embodied_log.append({
+                "recovery": "move_failed", "after": reason,
+                "error": f"{type(error).__name__}: {error}"})
+            return False
+        self.embodied_log.append({"recovery": "moved_instance", "after": reason,
+                                  "node": self.node_id})
+        return True
 
     def _episode_is_lost(self, error: Exception) -> bool:
         """Did this error mean "your episode is no longer on that instance"?
@@ -962,10 +1068,17 @@ class EmbodiedCourierEnv(CourierEnv):
         try:
             walk = self._ue().walk(request)
         except RenderServiceError as error:
-            if not self._episode_is_lost(error):
+            if self._episode_is_lost(error):
+                self._reopen_episode(f"walk: {type(error).__name__}")
+                walk = self._ue().walk(request)
+            elif self._instance_is_gone(error) and self._move_instance(
+                    f"walk: {type(error).__name__}"):
+                # Moved. The walk itself is not re-issued -- see
+                # ``_move_instance`` -- so this call is a refusal and the
+                # episode carries on from the node it re-opened at.
+                raise InstanceMoved(str(error)) from error
+            else:
                 raise
-            self._reopen_episode(f"walk: {type(error).__name__}")
-            walk = self._ue().walk(request)
         self.ue_pose = walk.pose
         return walk
 
