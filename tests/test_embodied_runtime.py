@@ -30,7 +30,7 @@ from pathlib import Path
 import contextlib
 import pytest
 
-from embodiedbench.compiler.road_network import build_road_network
+from embodiedbench.compiler.road_network import bearing_deg, build_road_network
 from embodiedbench.runtime.city.courier_env import (
     REJECTED_ACTION_SECONDS,
     CourierEnv,
@@ -437,10 +437,14 @@ class TestAnEmbodiedEpisodeWalksTheStockGraph:
         # after an audit found that an episode could degrade to album frames
         # or queue for minutes behind another episode and report neither
         # anywhere a training run looks.
+        # ``action_space`` joined them for the same reason: the coordinate
+        # space is measured against this one, and an episode that does not
+        # record which of the two it ran cannot be put on either side of that
+        # comparison afterwards.
         assert set(block) == {"hops", "recoveries", "total_ticks",
                               "total_walk_seconds", "max_pose_error_cm",
                               "stuck_count", "walk_timeout_count",
-                              "degraded", "busy_waits"}
+                              "degraded", "busy_waits", "action_space"}
         assert block["degraded"] is False
         assert block["walk_timeout_count"] == 0
         assert block["hops"] == len(env.embodied_log) > 0
@@ -861,3 +865,292 @@ class TestAnOnlineRunCanRefuseCachedFrames:
         import inspect
         sig = inspect.signature(EmbodiedCourierEnv.__init__)
         assert sig.parameters["return_mode"].default == RETURN_MODE_BASE64
+
+
+@needs_maps
+class TestTheCoordinateActionSpace:
+    """Naming a point instead of naming a street.
+
+    The reason the space exists: the street space is close to solved by the
+    map's route line plus the three-step procedure, and a GRPO group whose
+    rollouts nearly all succeed has an advantage of ~0 and a gradient to
+    match. So these tests are less about the walk -- the wire has always taken
+    coordinates -- than about the two things that would make the comparison
+    meaningless: an episode able to fall back to the easy action, and an
+    observation that describes somewhere the courier is not.
+    """
+
+    def coordinate(self, paris, service, tmp_path, **kwargs):
+        return embodied_env(paris, UERenderClient(service.base_url), tmp_path,
+                            action_space="coordinate", **kwargs)
+
+    # ── the two spaces are two tasks ─────────────────────────────────────────
+
+    def test_the_menus_never_overlap(self, paris, service, tmp_path):
+        """A menu holding both lets a run take the easy action and be
+        reported under the hard one's name."""
+        street = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
+        assert "walk_to" in street.allowed_tool_names()
+        assert "walk_to_xy" not in street.allowed_tool_names()
+
+        coords = self.coordinate(paris, service, tmp_path / "b")
+        names = coords.allowed_tool_names()
+        assert "walk_to_xy" in names
+        assert "walk_to" not in names and "follow_street" not in names
+
+    def test_an_unknown_action_space_is_refused_at_construction(
+            self, paris, service, tmp_path):
+        with pytest.raises(ValueError, match="action_space"):
+            embodied_env(paris, UERenderClient(service.base_url), tmp_path,
+                         action_space="freeform")
+
+    def test_the_prompt_states_the_cap_the_env_enforces(
+            self, paris, service, tmp_path):
+        """A manual quoting a limit the runtime does not keep is worse than
+        one that quotes none: the placeholder reaches the model verbatim, or
+        the number does and is a lie."""
+        from embodiedbench.agent.courier.session import CourierSession
+
+        env = self.coordinate(paris, service, tmp_path, max_step_m=42.0)
+        prompt = CourierSession(env, city="Paris").system_prompt()
+        assert "42 m" in prompt
+        assert "{max_step_m}" not in prompt and "{" not in prompt
+
+    def test_the_prompt_never_teaches_a_call_it_cannot_run(
+            self, paris, service, tmp_path):
+        """The whole system prompt, not only its menu: the worked example, the
+        reply format and the paragraph under the list of streets all named
+        walk_to by hand."""
+        from embodiedbench.agent.courier.session import CourierSession
+
+        env = self.coordinate(paris, service, tmp_path)
+        session = CourierSession(env, city="Paris")   # asserts this itself
+        prompt = session.system_prompt()
+        assert "walk_to(" not in prompt.replace("walk_to_xy(", "")
+        assert "walk_to_xy(" in prompt
+        assert "walk_to(" not in session.observe().text
+
+    # ── one call, and what bounds it ─────────────────────────────────────────
+
+    def test_a_point_past_the_cap_walks_the_cap_and_is_not_refused(
+            self, paris, service, tmp_path):
+        """A long stretch costs several calls, not one rejection: a courier
+        that can see where it wants to be should not have to guess the cap to
+        make progress toward it."""
+        env = self.coordinate(paris, service, tmp_path, max_step_m=20.0)
+        start = env._here_cm()
+        out = env.walk_to_xy(start[0] / 100.0 + 500.0, start[1] / 100.0)
+
+        assert out.ok, out.message
+        hop = env.embodied_log[-1]
+        assert hop["clamped"] is True
+        assert math.dist(start, hop["target_xy"]) == pytest.approx(2000.0, abs=1.0)
+        # ...and along the line that was asked for, not somewhere near it.
+        assert math.isclose(hop["target_xy"][1], start[1], abs_tol=1.0)
+        assert "as far as one walk carries you" in out.message
+
+    def test_the_point_you_are_standing_on_is_refused_not_walked(
+            self, paris, service, tmp_path):
+        env = self.coordinate(paris, service, tmp_path)
+        here = env._here_cm()
+        walks_before = len(service.walks)
+
+        out = env.walk_to_xy(here[0] / 100.0, here[1] / 100.0)
+
+        assert not out.ok and out.code == "already_here"
+        assert out.sim_seconds == REJECTED_ACTION_SECONDS
+        assert len(service.walks) == walks_before, "no walk was attempted"
+
+    def test_a_coordinate_that_is_not_a_number_is_a_refusal_not_a_crash(
+            self, paris, service, tmp_path):
+        env = self.coordinate(paris, service, tmp_path)
+        out = env.walk_to_xy("north", 12.0)
+        assert not out.ok and out.code == "bad_coordinate"
+
+    # ── where the courier is ─────────────────────────────────────────────────
+
+    def test_the_position_it_is_told_is_the_one_its_next_call_counts_from(
+            self, paris, service, tmp_path):
+        """The fairness line and the arithmetic line at once. The courier is
+        told its own position (never the delivery's), and that position is the
+        pawn's -- so a coordinate it derives by adding an offset to what it
+        was told lands where it meant."""
+        env = self.coordinate(paris, service, tmp_path)
+        env.walk_to_xy(*[v / 100.0 + 10.0 for v in env._here_cm()])
+
+        pawn = env._here_cm()
+        stated = env.pose_text()
+        assert f"({pawn[0] / 100.0:.1f}, {pawn[1] / 100.0:.1f})" in stated
+        assert env.position() == pytest.approx(pawn)
+        assert stated in env.location_text()
+
+    def test_the_street_space_is_not_told_its_coordinates(
+            self, paris, service, tmp_path):
+        """Not tidiness: the coordinate run is measured against the street
+        run, and adding a fact to the baseline moves what it is a baseline
+        of."""
+        env = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
+        assert "standing at (" not in env.location_text()
+        # ...and it stays one flag away, for the controlled version.
+        env2 = embodied_env(paris, UERenderClient(service.base_url),
+                            tmp_path / "b", show_pose=True)
+        assert "standing at (" in env2.location_text()
+
+    def test_the_junction_being_described_is_re_derived_from_the_pawn(
+            self, paris, service, tmp_path):
+        """Everything the environment can SAY is node-shaped -- which street
+        this is, what leaves it -- so a graph node is kept. It is the one
+        nearest the pawn after every walk, and how far off it is gets
+        logged rather than assumed small."""
+        env = self.coordinate(paris, service, tmp_path)
+        env.walk_to_xy(*[v / 100.0 + 12.0 for v in env._here_cm()])
+
+        hop = env.embodied_log[-1]
+        nearest, gap = env._nearest_node(env._here_cm())
+        assert env.node_id == nearest == hop["landed_node"]
+        assert hop["snap_cm"] == pytest.approx(gap, abs=0.1)
+
+    def test_two_walks_ending_in_different_places_do_not_share_a_photograph(
+            self, paris, service, tmp_path):
+        """Keyed by node alone, the first visit's picture would be served for
+        every later one: the observation would stop being of where the courier
+        is, and nothing would say so."""
+        env = self.coordinate(paris, service, tmp_path)
+        toward = env.candidates()[0]["node"]
+
+        first = env.frame_for(env.node_id, toward)
+        env.walk_to_xy(*[v / 100.0 + 3.0 for v in env._here_cm()])
+        second = env.frame_for(env.node_id, toward)
+
+        assert first and second and first != second
+        assert Path(first).parent != Path(second).parent, (
+            "the vantage, not just the frame, has to differ")
+        # ...and idempotency survives it: asked again from the same place,
+        # the frame comes off disk. FrameAliases and observation_media_hash
+        # both rest on the same picture having the same bytes forever.
+        rendered = len(service.observes)
+        assert env.frame_for(env.node_id, toward) == second
+        assert len(service.observes) == rendered
+
+    # ── a walk that does not get through ─────────────────────────────────────
+
+    def test_a_blocked_walk_keeps_the_ground_it_covered(
+            self, paris, service, tmp_path):
+        """No re-spawn here. In this space the pawn's position IS the
+        courier's, so standing it back on a node it may be twenty metres from
+        would be the desynchronisation the re-spawn exists to prevent, applied
+        backwards."""
+        service.wall_after_cm = 300.0
+        env = self.coordinate(paris, service, tmp_path)
+        start = env._here_cm()
+
+        out = env.walk_to_xy(*[v / 100.0 + 30.0 for v in start])
+
+        assert not out.ok and out.code == "stuck"
+        assert "no way to walk there" in out.message
+        moved = math.dist(start, env._here_cm())
+        assert moved > 100.0, "the pawn kept where its walk took it"
+        assert env.walked_cm > 0, "and the metres are counted"
+        assert not [h for h in env.embodied_log if h.get("recovery")]
+
+    # ── what the run writes down ─────────────────────────────────────────────
+
+    def test_the_summary_says_which_question_was_asked(
+            self, paris, service, tmp_path):
+        """Two runs whose action spaces have to be recalled from a launch
+        command are not a comparison."""
+        env = self.coordinate(paris, service, tmp_path, max_step_m=25.0)
+        env.walk_to_xy(*[v / 100.0 + 400.0 for v in env._here_cm()])
+
+        block = env.summary()["embodied"]
+        assert block["action_space"] == "coordinate"
+        assert block["max_step_m"] == 25.0
+        assert block["coordinate_walks"] == 1 and block["coordinate_clamped"] == 1
+        assert block["median_snap_cm"] is not None
+
+        street = embodied_env(paris, UERenderClient(service.base_url),
+                              tmp_path / "b")
+        assert street.summary()["embodied"]["action_space"] == "street"
+
+    def test_facing_is_the_way_it_walked_not_the_way_it_last_photographed(
+            self, paris, service, tmp_path):
+        """The pawn's own yaw is the obvious answer and the wrong one:
+        /observe aims the camera by turning the agent, and an observation
+        photographs every street leaving the junction -- so read off the pose,
+        "facing" is whichever neighbour rendered last, which then decides
+        every "on your left" in the same turn's list."""
+        env = self.coordinate(paris, service, tmp_path)
+        start = env._here_cm()
+        env.walk_to_xy(start[0] / 100.0 + 20.0, start[1] / 100.0)
+        walked = env.facing()
+        assert walked == pytest.approx(bearing_deg(start, env._here_cm()),
+                                       abs=1.0)
+
+        env.candidates()          # renders a frame down every street
+        assert env.ue_pose.yaw_deg != pytest.approx(walked, abs=1.0), (
+            "the fixture must actually turn the pawn, or this proves nothing")
+        assert env.facing() == pytest.approx(walked, abs=1.0)
+
+
+@needs_maps
+class TestTheTwoArmsDifferInOneThing:
+    """A/B configs, held to being an A/B.
+
+    The coordinate arm is worth running only as a comparison, and the way a
+    comparison stops being one is not a wrong number -- it is an unrelated key
+    drifting on one side while nobody is diffing the files. So the diff is the
+    assertion.
+    """
+
+    YAMLS = (Path(__file__).resolve().parents[1] / "embodiedbench" / "training"
+             / "vagen")
+    # The keys that MAY differ, and nothing else: the action space itself,
+    # what bounds one call of it, and the dataset name (two arms sharing a
+    # data_source collide in the trainer's index).
+    ALLOWED = {"action_space", "max_step_m", "data_source"}
+
+    @pytest.mark.parametrize("street, coordinate", [
+        ("train_embodied.yaml", "train_embodied_xy.yaml"),
+        ("val_embodied.yaml", "val_embodied_xy.yaml"),
+    ])
+    def test_the_arms_differ_only_in_the_action_space(self, street, coordinate):
+        yaml = pytest.importorskip("yaml")
+        a = yaml.safe_load((self.YAMLS / street).read_text())["envs"][0]
+        b = yaml.safe_load((self.YAMLS / coordinate).read_text())["envs"][0]
+
+        differ = {k for k in set(a) | set(b)
+                  if k != "config" and a.get(k) != b.get(k)}
+        differ |= {k for k in set(a["config"]) | set(b["config"])
+                   if a["config"].get(k) != b["config"].get(k)}
+        assert differ <= self.ALLOWED, (
+            f"{coordinate} differs from {street} in {sorted(differ - self.ALLOWED)}; "
+            "the comparison only reads if the action space is the only change")
+        assert b["config"]["action_space"] == "coordinate"
+        assert a["config"].get("action_space", "street") == "street"
+
+    def test_the_split_pair_agrees_on_what_the_task_is(self):
+        """Train at one setting and score at another and the run measures
+        neither -- which is what this pair was doing: val carried no
+        narration, so it scored at the "none" default while training ran at
+        "route", and no tick_chunk or arrive_cm, so its arrival check was
+        280 cm coarse against a 50 cm radius on a 16x fleet."""
+        yaml = pytest.importorskip("yaml")
+        for train, val in [("train_embodied.yaml", "val_embodied.yaml"),
+                           ("train_embodied_xy.yaml", "val_embodied_xy.yaml")]:
+            a = yaml.safe_load((self.YAMLS / train).read_text())["envs"][0]["config"]
+            b = yaml.safe_load((self.YAMLS / val).read_text())["envs"][0]["config"]
+            for key in ("narration", "tick_chunk", "arrive_cm", "stride",
+                        "difficulty", "hazards", "action_space"):
+                assert a.get(key) == b.get(key), (
+                    f"{train} and {val} disagree on {key}: "
+                    f"{a.get(key)!r} vs {b.get(key)!r}")
+
+    def test_the_coordinate_call_refuses_to_run_in_the_street_space(
+            self, paris, service, tmp_path):
+        """Unreachable through the menu, so this is a caller wiring the two
+        spaces together -- and every half that makes the call honest (the pawn
+        being the position, the vantage in the frame key, facing measured off
+        the walk) is switched off under `street`."""
+        env = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
+        with pytest.raises(RuntimeError, match="coordinate"):
+            env.walk_to_xy(0.0, 0.0)
