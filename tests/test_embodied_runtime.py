@@ -832,3 +832,32 @@ class TestSeatsPerInstance:
                 assert pool.members[0].leases == {"ep-keep", "ep-go"}
             assert pool.members[0].leases == {"ep-keep"}
         assert pool.members[0].leases == set()
+
+
+class TestAnOnlineRunCanRefuseCachedFrames:
+    """An episode whose pictures came from an album measured the album.
+
+    The fallback exists so a flaky renderer cannot kill a long run, and that
+    is right for training. It is wrong for an experiment measuring live UE:
+    walking stays live, the frames quietly stop being, and every metric still
+    reads green. Measured on ds-serv6/serv11: 11 of 11 episodes finished
+    `degraded` on a frame path that could never have worked across machines,
+    and the only symptom was a boolean nobody reads.
+    """
+
+    def test_the_default_still_survives_a_broken_renderer(self):
+        from embodiedbench.runtime.live.embodied_env import EmbodiedCourierEnv
+        import inspect
+        sig = inspect.signature(EmbodiedCourierEnv.__init__)
+        assert sig.parameters["allow_album_fallback"].default is True, (
+            "training runs should keep surviving a flaky renderer")
+
+    def test_frames_default_to_base64_not_a_path_on_someone_elses_disk(self):
+        """`path` returns a filename on the RENDERER's machine. It is only
+        readable when the two share a filesystem, and the fleet is addressable
+        over the network precisely so they need not."""
+        from embodiedbench.runtime.live.embodied_env import EmbodiedCourierEnv
+        from embodiedbench.runtime.live.protocol import RETURN_MODE_BASE64
+        import inspect
+        sig = inspect.signature(EmbodiedCourierEnv.__init__)
+        assert sig.parameters["return_mode"].default == RETURN_MODE_BASE64

@@ -87,6 +87,7 @@ from .protocol import (
     DEFAULT_MAX_WALK_SIM_SECONDS,
     DEFAULT_TICK_CHUNK,
     RETURN_MODE_PATH,
+    RETURN_MODE_BASE64,
     AgentSpec,
     EpisodeEndRequest,
     EpisodeRequest,
@@ -135,7 +136,18 @@ class EmbodiedCourierEnv(CourierEnv):
         arrive_cm: float = DEFAULT_ARRIVE_CM,
         max_walk_seconds: float = DEFAULT_MAX_WALK_SIM_SECONDS,
         tick_chunk: int = DEFAULT_TICK_CHUNK,
-        return_mode: str = RETURN_MODE_PATH,
+        # base64 by default. `path` hands back a filename on the RENDERER's
+        # disk, which is only readable when trainer and fleet share a
+        # filesystem -- and the whole point of the fleet being addressable
+        # over the network is that they no longer do. Measured: every
+        # episode degraded on FileNotFoundError while walking looked
+        # perfect, because walking is pure RPC and never touches a file.
+        return_mode: str = RETURN_MODE_BASE64,
+        # Whether a failed observe may finish the episode on cached
+        # frames. On by default so a flaky renderer does not kill a
+        # long run -- but an ONLINE experiment should turn it off: an
+        # episode whose pictures came from an album measured the album.
+        allow_album_fallback: bool = True,
         **courier_kwargs: Any,
     ):
         clash = sorted(set(_REFUSED_KWARGS) & set(courier_kwargs))
@@ -154,6 +166,7 @@ class EmbodiedCourierEnv(CourierEnv):
         self.max_walk_seconds = float(max_walk_seconds)
         self.tick_chunk = int(tick_chunk)
         self.return_mode = return_mode
+        self.allow_album_fallback = bool(allow_album_fallback)
         #: How long reset() waits for a busy instance before giving up.
         self.episode_busy_timeout_s = 1800.0
         # Lease plumbing: a pool is leased lazily (the fleet may still be
@@ -536,7 +549,16 @@ class EmbodiedCourierEnv(CourierEnv):
                     "observe busy for %s (%s); the next look retries",
                     key, error)
             except (RenderServiceError, ProtocolViolation, OSError) as error:
+                # No silent fallback to cached frames. An online run whose
+                # frames quietly come from an album is not an online run --
+                # walking stays live, the pictures stop being, and the metrics
+                # say nothing is wrong. Measured: 11 of 11 episodes finished
+                # `degraded` on a path that could never have worked across
+                # machines, and the only visible symptom was a flag nobody
+                # reads. Let it raise; a broken renderer should stop the run.
                 self.live_degraded = True
+                if not self.allow_album_fallback:
+                    raise
                 logger.warning(
                     "observe failed (%s: %s); episode %s continues with "
                     "cached frames only", type(error).__name__, error,
