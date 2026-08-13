@@ -911,9 +911,9 @@ class TestTheCoordinateActionSpace:
         the number does and is a lie."""
         from embodiedbench.agent.courier.session import CourierSession
 
-        env = self.coordinate(paris, service, tmp_path, max_step_m=42.0)
+        env = self.coordinate(paris, service, tmp_path, max_step_m=1.5)
         prompt = CourierSession(env, city="Paris").system_prompt()
-        assert "42 m" in prompt
+        assert "1.5 m" in prompt
         assert "{max_step_m}" not in prompt and "{" not in prompt
 
     def test_the_prompt_never_teaches_a_call_it_cannot_run(
@@ -932,22 +932,46 @@ class TestTheCoordinateActionSpace:
 
     # ── one call, and what bounds it ─────────────────────────────────────────
 
-    def test_a_point_past_the_cap_walks_the_cap_and_is_not_refused(
+    def test_a_point_past_the_cap_is_refused_and_nothing_moves(
             self, paris, service, tmp_path):
-        """A long stretch costs several calls, not one rejection: a courier
-        that can see where it wants to be should not have to guess the cap to
-        make progress toward it."""
-        env = self.coordinate(paris, service, tmp_path, max_step_m=20.0)
+        """Refused, not carried part of the way. A courier that asked for
+        forty metres and was quietly walked one and a half cannot tell that
+        from arriving, and neither can a reader of the log."""
+        env = self.coordinate(paris, service, tmp_path, max_step_m=1.5)
         start = env._here_cm()
-        out = env.walk_to_xy(start[0] / 100.0 + 500.0, start[1] / 100.0)
+        walks_before = len(service.walks)
 
-        assert out.ok, out.message
-        hop = env.embodied_log[-1]
-        assert hop["clamped"] is True
-        assert math.dist(start, hop["target_xy"]) == pytest.approx(2000.0, abs=1.0)
-        # ...and along the line that was asked for, not somewhere near it.
-        assert math.isclose(hop["target_xy"][1], start[1], abs_tol=1.0)
-        assert "as far as one walk carries you" in out.message
+        out = env.walk_to_xy(start[0] / 100.0 + 40.0, start[1] / 100.0)
+
+        assert not out.ok and out.code == "too_far"
+        assert "at most 1.5 m" in out.message
+        assert len(service.walks) == walks_before, "no walk was attempted"
+        assert env._here_cm() == pytest.approx(start)
+        refused = [h for h in env.embodied_log if h.get("code") == "too_far"]
+        assert refused and refused[0]["gap_m"] == pytest.approx(40.0, abs=0.2)
+
+    def test_each_call_of_a_chunk_is_judged_where_it_runs(
+            self, paris, service, tmp_path):
+        """Three waypoints are checked one at a time as they are reached,
+        never all three up front: the second and third are named relative to a
+        position the courier has not walked to yet, so judging them against
+        where it stood when it wrote them measures a step it never asked for.
+
+        Three steps of 1 m in a line: each is inside the cap from where the
+        previous one lands, and the third is 3 m from where the first was
+        written -- twice the cap.
+
+        1 m and not 1.4: a walk stops as soon as it is within ``arrive_cm`` of
+        its target, so a CHAINED plan advances ``max_step_m - arrive_cm`` per
+        call, not ``max_step_m``. At a 1.5 m cap and a 30 cm radius that is
+        1.2 m, and the shortfall accumulates down the chain."""
+        env = self.coordinate(paris, service, tmp_path,
+                              max_step_m=1.5, arrive_cm=30.0)
+        start = env._here_cm()
+        for i in range(1, 4):
+            out = env.walk_to_xy(start[0] / 100.0 + 1.0 * i, start[1] / 100.0)
+            assert out.ok, f"step {i} was refused: {out.message}"
+        assert math.dist(start, env._here_cm()) > 200.0, "it really moved 2+ m"
 
     def test_the_point_you_are_standing_on_is_refused_not_walked(
             self, paris, service, tmp_path):
@@ -976,7 +1000,7 @@ class TestTheCoordinateActionSpace:
         pawn's -- so a coordinate it derives by adding an offset to what it
         was told lands where it meant."""
         env = self.coordinate(paris, service, tmp_path)
-        env.walk_to_xy(*[v / 100.0 + 10.0 for v in env._here_cm()])
+        env.walk_to_xy(*[v / 100.0 + 0.8 for v in env._here_cm()])
 
         pawn = env._here_cm()
         stated = env.pose_text()
@@ -1003,7 +1027,7 @@ class TestTheCoordinateActionSpace:
         nearest the pawn after every walk, and how far off it is gets
         logged rather than assumed small."""
         env = self.coordinate(paris, service, tmp_path)
-        env.walk_to_xy(*[v / 100.0 + 12.0 for v in env._here_cm()])
+        env.walk_to_xy(*[v / 100.0 + 0.8 for v in env._here_cm()])
 
         hop = env.embodied_log[-1]
         nearest, gap = env._nearest_node(env._here_cm())
@@ -1019,7 +1043,7 @@ class TestTheCoordinateActionSpace:
         toward = env.candidates()[0]["node"]
 
         first = env.frame_for(env.node_id, toward)
-        env.walk_to_xy(*[v / 100.0 + 3.0 for v in env._here_cm()])
+        env.walk_to_xy(*[v / 100.0 + 0.9 for v in env._here_cm()])
         second = env.frame_for(env.node_id, toward)
 
         assert first and second and first != second
@@ -1040,16 +1064,16 @@ class TestTheCoordinateActionSpace:
         courier's, so standing it back on a node it may be twenty metres from
         would be the desynchronisation the re-spawn exists to prevent, applied
         backwards."""
-        service.wall_after_cm = 300.0
+        service.wall_after_cm = 40.0
         env = self.coordinate(paris, service, tmp_path)
         start = env._here_cm()
 
-        out = env.walk_to_xy(*[v / 100.0 + 30.0 for v in start])
+        out = env.walk_to_xy(*[v / 100.0 + 1.0 for v in start])
 
         assert not out.ok and out.code == "stuck"
         assert "no way to walk there" in out.message
         moved = math.dist(start, env._here_cm())
-        assert moved > 100.0, "the pawn kept where its walk took it"
+        assert moved > 20.0, "the pawn kept where its walk took it"
         assert env.walked_cm > 0, "and the metres are counted"
         assert not [h for h in env.embodied_log if h.get("recovery")]
 
@@ -1059,13 +1083,14 @@ class TestTheCoordinateActionSpace:
             self, paris, service, tmp_path):
         """Two runs whose action spaces have to be recalled from a launch
         command are not a comparison."""
-        env = self.coordinate(paris, service, tmp_path, max_step_m=25.0)
+        env = self.coordinate(paris, service, tmp_path, max_step_m=1.5)
+        env.walk_to_xy(*[v / 100.0 + 0.9 for v in env._here_cm()])
         env.walk_to_xy(*[v / 100.0 + 400.0 for v in env._here_cm()])
 
         block = env.summary()["embodied"]
         assert block["action_space"] == "coordinate"
-        assert block["max_step_m"] == 25.0
-        assert block["coordinate_walks"] == 1 and block["coordinate_clamped"] == 1
+        assert block["max_step_m"] == 1.5
+        assert block["coordinate_walks"] == 1 and block["coordinate_too_far"] == 1
         assert block["median_snap_cm"] is not None
 
         street = embodied_env(paris, UERenderClient(service.base_url),
@@ -1081,7 +1106,7 @@ class TestTheCoordinateActionSpace:
         every "on your left" in the same turn's list."""
         env = self.coordinate(paris, service, tmp_path)
         start = env._here_cm()
-        env.walk_to_xy(start[0] / 100.0 + 20.0, start[1] / 100.0)
+        env.walk_to_xy(start[0] / 100.0 + 1.4, start[1] / 100.0)
         walked = env.facing()
         assert walked == pytest.approx(bearing_deg(start, env._here_cm()),
                                        abs=1.0)
@@ -1174,9 +1199,16 @@ class TestTheTwoArmsDifferInOneThing:
     YAMLS = (Path(__file__).resolve().parents[1] / "embodiedbench" / "training"
              / "vagen")
     # The keys that MAY differ, and nothing else: the action space itself,
-    # what bounds one call of it, and the dataset name (two arms sharing a
-    # data_source collide in the trainer's index).
-    ALLOWED = {"action_space", "max_step_m", "data_source"}
+    # what bounds one call of it, the walk geometry that bound FORCES, and the
+    # dataset name (two arms sharing a data_source collide in the index).
+    #
+    # arrive_cm and tick_chunk are on this list reluctantly. They are not free
+    # choices -- a 1.5 m step cannot be walked with a 1.2 m arrival radius,
+    # and a radius that fine cannot be hit with a 2-tick chunk at 28 cm a tick
+    # -- but they do mean the two arms no longer walk on identical geometry,
+    # and that belongs in any reading of the difference between them.
+    ALLOWED = {"action_space", "max_step_m", "data_source",
+               "arrive_cm", "tick_chunk"}
 
     @pytest.mark.parametrize("street, coordinate", [
         ("train_embodied.yaml", "train_embodied_xy.yaml"),

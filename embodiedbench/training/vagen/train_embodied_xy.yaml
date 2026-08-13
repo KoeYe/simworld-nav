@@ -61,8 +61,6 @@ envs:
       # tick_chunk and arrive_cm must move with it: a tick is 28 cm here, so
       # checking arrival every 10 ticks would look 280 cm apart and the
       # courier would sail past a 50 cm radius and report stuck.
-      tick_chunk: 2
-      arrive_cm: 120.0
       # Three tool calls per turn. A solo delivery needs collect, several
       # walks and hand_over -- more than the four turns the KV budget pays
       # for at one call each, and raising max_turns does not fit: each turn
@@ -74,9 +72,20 @@ envs:
       # The action space, and the only thing that differs from the street
       # arm. See runtime/live/embodied_env.py.
       action_space: coordinate
-      # How far one call may carry, in metres. Measured, not chosen: over 300
-      # block-stride legs on this map one walk_to covers a median 38.8 m and a
-      # p75 of 59.5 m. At the street arm's own p75 a coordinate call is never
-      # the cheaper action, so a difference in success rate cannot be bought
-      # with a more generous step cap.
-      max_step_m: 60.0
+      # How far one call may carry, in metres. A request past it is REFUSED,
+      # not clamped, and refused when the call RUNS -- so the second and third
+      # waypoints of a chunk are judged from where the earlier walks left the
+      # courier, which is what they were named relative to.
+      #
+      # Short on purpose. The first live run never came near a 60 m cap: every
+      # request the policy made was 1-6 m and seven of sixteen were the point
+      # it was already standing on. A short step asks the thing that actually
+      # failed -- can you name a point that is somewhere else -- without also
+      # asking it to plan a block ahead.
+      max_step_m: 1.5
+      # These two move WITH the step and are checked against it at
+      # construction. One tick carries 28 cm at this dt, arrival is only
+      # tested at chunk boundaries, and the radius has to sit inside the cap
+      # or every request is either "already there" or "too far".
+      arrive_cm: 30.0
+      tick_chunk: 1

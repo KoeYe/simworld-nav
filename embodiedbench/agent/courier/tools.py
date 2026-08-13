@@ -305,12 +305,12 @@ WALK_TO_XY = Tool(
     name="walk_to_xy",
     kind=ToolKind.ACT,
     summary=(
-        "Walk toward a point on the map, naming it as a pair of coordinates. "
-        "Every turn tells you the point you are standing on and which way you "
-        "face, in the same two numbers. One call carries you at most "
-        "{max_step_m} m: name a point further off than that and you walk "
-        "{max_step_m} m of the way there and stop, so a long stretch is "
-        "several calls and not a refusal."
+        "Take one step toward a point on the map, naming the point as a pair "
+        "of coordinates. Every turn tells you the point you are standing on "
+        "and which way you face, in the same two numbers. A step is at most "
+        "{max_step_m} m, so the point you name is a step away and not your "
+        "destination: name the next {max_step_m} m of the way, walk it, and "
+        "name the next from where you land."
     ),
     # The axes are the city's, not the ones a reader would assume: this map's
     # north is +x and its east is +y, which is what ``bearing_deg`` and the
@@ -323,7 +323,7 @@ WALK_TO_XY = Tool(
         ToolParam("y", "number", "how far east, in metres, on the same scale"),
     ),
     example="walk_to_xy(-267.1, 97.8)",
-    example2="walk_to_xy(-231.4, 102.6)",
+    example2="walk_to_xy(-266.2, 98.9)",
     time_cost_s=0.0,
     requires_env_action="MOVE_TO_XY",
     returns=(
@@ -337,8 +337,12 @@ WALK_TO_XY = Tool(
          "wall, a river. You are left where the way ran out. Read the map "
          "again and aim at somewhere a person could walk to."),
         ("you are already standing there",
-         "the point you named is the one you are on. Name somewhere you are "
-         "not, far enough off to be worth a walk."),
+         "the point you named is the one you are on -- the same two numbers "
+         "the turn gave you. Decide how far north and how far east you want "
+         "to go, add that to each of your numbers, and name the result."),
+        ("that is further than one step",
+         "you named somewhere more than {max_step_m} m off. Nothing moves. "
+         "Name a point on the way there instead; several steps all arrive."),
     ),
     use_when=(
         "you can see on the map where you want to be, and would rather aim "

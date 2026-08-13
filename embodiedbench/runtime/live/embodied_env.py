@@ -110,17 +110,29 @@ ACTION_SPACE_STREET = "street"
 ACTION_SPACE_COORDINATE = "coordinate"
 ACTION_SPACES = (ACTION_SPACE_STREET, ACTION_SPACE_COORDINATE)
 
-# How far one ``walk_to_xy`` may carry, in metres.
+# How far one ``walk_to_xy`` may carry, in metres. A request past it is
+# REFUSED, not clamped: a courier that asked for forty metres and was quietly
+# carried one and a half cannot tell that from arriving, and neither can a
+# reader of the log.
 #
-# Measured rather than chosen: over 300 block-stride legs on citycore-paris,
-# one ``walk_to`` covers a median 38.8 m and a p75 of 59.5 m (min 2.8, p90
-# 98.8, max 108.0). 60 m is that p75. The number matters because it is the
-# one axis on which the coordinate action space could beat the street one
-# without navigating any better -- a cap generous enough to cross three
-# junctions buys turns, and turns are the budget an episode ends on. At the
-# street space's own p75 a coordinate call is never the cheaper action, so a
-# difference in success rate is a difference in navigation.
-DEFAULT_MAX_STEP_M = 60.0
+# A short step on purpose. The first live run answered the question the cap
+# was originally sized for -- 60 m was the street arm's own p75, so a
+# coordinate call could not be the cheaper action -- and the policy never got
+# near it: every request it made was 1 to 6 m, and seven of sixteen were the
+# point it was already standing on. A short step asks the thing that actually
+# failed (can you name a point that is somewhere else) without also asking it
+# to plan a block ahead.
+DEFAULT_MAX_STEP_M = 1.5
+
+# The arrival radius and the tick chunk are not free once the step is short.
+# One tick carries ``speed * fixed_dt`` -- 28 cm at the 16x rollout settings --
+# and arrival is only tested at chunk boundaries, so the radius has to be at
+# least a chunk's worth of travel or the pawn sails past and reports stuck.
+# It must also be well inside the step cap, or the band between "you are
+# already there" and "that is too far" closes and every request lands in one
+# refusal or the other.
+DEFAULT_STEP_ARRIVE_CM = 30.0
+DEFAULT_STEP_TICK_CHUNK = 1
 
 # The album roots this env owns (all of them: v1 embodied has exactly one
 # album, the live cache, and no hazard frames at all), plus the hazard levers
@@ -218,6 +230,14 @@ class EmbodiedCourierEnv(CourierEnv):
             raise ValueError(
                 f"max_step_m={max_step_m!r}; one coordinate call has to be "
                 "able to cover some ground.")
+        # The three numbers that have to move together, checked once here
+        # rather than rediscovered as a stuck rate. See DEFAULT_STEP_ARRIVE_CM.
+        if self.coordinate_mode and self.arrive_cm >= self.max_step_m * 100.0:
+            raise ValueError(
+                f"arrive_cm={self.arrive_cm} against a {self.max_step_m} m "
+                "step cap leaves no distance a request can name: anything "
+                "nearer counts as already arrived and anything further is "
+                "refused. Bring arrive_cm well inside the cap.")
         # Naming a point is only answerable if the courier is told the point
         # it is naming from. Defaulted here rather than required from the
         # caller, because a coordinate run without it is not a harder task,
@@ -226,10 +246,9 @@ class EmbodiedCourierEnv(CourierEnv):
         if self.action_space == ACTION_SPACE_COORDINATE:
             courier_kwargs.setdefault("show_pose", True)
         # Per-call evidence for the coordinate space, in the same log as the
-        # hops: what was asked for, what it was clamped to, and where the
-        # graph ended up relative to the pawn.
+        # hops: what was asked for, what became of it, and where the graph
+        # ended up relative to the pawn.
         self.coordinate_walks = 0
-        self.coordinate_clamped = 0
         # The bearing the last walk actually carried the pawn along. See
         # ``facing``: the pawn's own yaw cannot answer this, because taking a
         # photograph turns it.
@@ -297,7 +316,6 @@ class EmbodiedCourierEnv(CourierEnv):
         self.busy_waits = 0
         self.busy_wait_seconds = 0.0
         self.coordinate_walks = 0
-        self.coordinate_clamped = 0
         self._walked_bearing = None
         node = self.network.nodes[self.node_id]
         request = EpisodeRequest(
@@ -319,6 +337,28 @@ class EmbodiedCourierEnv(CourierEnv):
         self.fixed_dt = response.fixed_dt
         self.ue_pose = response.pose
         self._episode_open = True
+        self._check_walk_geometry()
+
+    def _check_walk_geometry(self) -> None:
+        """Can this arrival radius be hit at this tick chunk and speed?
+
+        Arrival is tested at chunk boundaries only, so a chunk carries the
+        pawn ``speed * fixed_dt * tick_chunk`` between looks. A radius smaller
+        than that is invisible: the pawn steps over the target and the walk
+        reports stuck, which reads as a navigation failure and is arithmetic.
+        Warned rather than raised -- the run is still meaningful, and taking a
+        training job down over a tuning mistake is worse than saying so.
+        """
+        if not self.fixed_dt:
+            return
+        per_chunk = (self.embodiment.speed_cm_s or 140.0) * self.fixed_dt * self.tick_chunk
+        if per_chunk > self.arrive_cm:
+            logger.warning(
+                "walk geometry: one chunk of %d tick(s) carries %.0f cm at "
+                "dt=%.3f, but arrive_cm is %.0f -- the pawn can step over the "
+                "target between arrival checks and report stuck. Lower "
+                "tick_chunk or raise arrive_cm.",
+                self.tick_chunk, per_chunk, self.fixed_dt, self.arrive_cm)
 
     def _episode_when_free(self, request: EpisodeRequest) -> Any:
         """Open the episode, waiting out a busy instance.
@@ -575,11 +615,10 @@ class EmbodiedCourierEnv(CourierEnv):
           courier is already standing on. Walking to it would burn a turn to
           arrive where it started, so it is refused with the wording the
           manual declares.
-        * **Too far.** Not a refusal. The request is clamped to
-          ``max_step_m`` along the line and walked, so a long stretch costs
-          several calls instead of one rejection -- a courier that can see
-          where it wants to be should not have to guess the cap to make
-          progress toward it.
+        * **Too far.** Refused, and refused at the moment this call runs
+          rather than when it was written -- so the second and third calls of
+          a chunk are judged against the position the first two walks left
+          the courier at, which is the position they were named relative to.
         * **Unwalkable.** The navmesh gets as far as it can and reports
           stuck; the pawn keeps the ground it covered and the refusal says
           there is no way through. No re-spawn: in this space the pawn's
@@ -634,15 +673,34 @@ class EmbodiedCourierEnv(CourierEnv):
                 ),
             ))
         cap_cm = self.max_step_m * 100.0
-        clamped = reach > cap_cm
-        if clamped:
-            scale = cap_cm / reach
-            target = (here[0] + (asked[0] - here[0]) * scale,
-                      here[1] + (asked[1] - here[1]) * scale)
-        else:
-            target = asked
+        if reach > cap_cm:
+            # Refused, not clamped, and refused HERE -- at the moment this
+            # call runs, against the position it runs from.
+            #
+            # A chunk of three waypoints is checked one at a time as it is
+            # reached, never all three up front: the second and third are
+            # named relative to a position the courier has not walked to yet,
+            # so judging them against the position it stood at when it wrote
+            # them measures a step it never asked for. The turn stops at the
+            # first refusal either way, so a chunk that opens well and drifts
+            # loses only its tail.
+            #
+            # Clamping was the earlier behaviour and it hid the mistake:
+            # a courier that asked for 40 m and was silently carried 1.5 m
+            # cannot tell the two apart from where it lands, and neither can
+            # a reader of the log.
+            self._log_refused_point(asked, here, "too_far")
+            return self._refuse(StepOutcome(
+                ok=False, code="too_far",
+                message=(
+                    f"{_point(asked)} is {reach / 100.0:.1f} m away and one "
+                    f"step is at most {_metres(self.max_step_m)} m. Name a "
+                    "point on the way there instead -- you can take several "
+                    "steps, and each one starts from where the last left you."
+                ),
+            ))
+        target = asked
         self.coordinate_walks += 1
-        self.coordinate_clamped += int(clamped)
         walk = self._walk_to_point(*target)
         walked_m = walk.walked_cm / 100.0
         # Every outcome moved the pawn some distance, and in this space that
@@ -662,7 +720,7 @@ class EmbodiedCourierEnv(CourierEnv):
         if landed != self.node_id:
             self.arrived_from = self.node_id
             self.node_id = landed
-        self._log_point_walk(asked, target, walk, start=here, clamped=clamped,
+        self._log_point_walk(asked, target, walk, start=here,
                              landed=landed, snap_cm=snap_cm)
         if not walk.arrived:
             code = "stuck" if walk.stuck else "walk_timeout"
@@ -694,8 +752,7 @@ class EmbodiedCourierEnv(CourierEnv):
             message=(
                 f"You walk {walked_m:.0f} m and stop at "
                 f"{_point(self._here_cm())}."
-                + (" That is as far as one walk carries you, so you are still "
-                   "short of the point you named." if clamped else "")
+
             ),
         )
 
@@ -728,7 +785,7 @@ class EmbodiedCourierEnv(CourierEnv):
 
     def _log_point_walk(self, asked: tuple[float, float],
                         target: tuple[float, float], walk: WalkResponse, *,
-                        start: tuple[float, float], clamped: bool,
+                        start: tuple[float, float],
                         landed: str, snap_cm: float) -> None:
         """One coordinate walk, in the same log shape as a hop.
 
@@ -737,7 +794,7 @@ class EmbodiedCourierEnv(CourierEnv):
         already reads ``embodied_log`` keeps working without being told this
         action space exists. ``pose_error_cm`` keeps its name and changes its
         referent: it is still "how far the pawn ended from what it was aimed
-        at", which here is the clamped point rather than a node.
+        at", which here is the point it named rather than a node.
         """
         graph_seconds = (math.dist(start, target)
                          / max(self.travel_speed_cm_s(), 1e-6))
@@ -745,7 +802,6 @@ class EmbodiedCourierEnv(CourierEnv):
             "kind": "coordinate",
             "asked_xy": (round(asked[0], 1), round(asked[1], 1)),
             "target_xy": (round(target[0], 1), round(target[1], 1)),
-            "clamped": bool(clamped),
             "chord_m": round(math.dist(start, target) / 100.0, 3),
             "graph_seconds": round(graph_seconds, 4),
             "ticks": walk.ticks,
@@ -1048,12 +1104,13 @@ class EmbodiedCourierEnv(CourierEnv):
             out["embodied"].update({
                 "max_step_m": self.max_step_m,
                 "coordinate_walks": self.coordinate_walks,
-                # How often the courier asked for more than one step buys.
-                # A run that is all clamp is a policy aiming at the
-                # destination every turn and being carried a fixed distance,
-                # which is a different behaviour from naming reachable points
-                # and worth being able to see.
-                "coordinate_clamped": self.coordinate_clamped,
+                # How often it asked for more than one step buys. A run
+                # that is all `too_far` is a policy aiming at the destination
+                # every turn, which is a different behaviour from naming
+                # reachable points and worth being able to see.
+                "coordinate_too_far": sum(
+                    1 for h in self.embodied_log
+                    if h.get("code") == "too_far"),
                 # How far the junction being described sits from where the
                 # courier actually is. The number that says whether the
                 # observation is about the courier's surroundings.
