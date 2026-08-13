@@ -911,9 +911,9 @@ class TestTheCoordinateActionSpace:
         the number does and is a lie."""
         from embodiedbench.agent.courier.session import CourierSession
 
-        env = self.coordinate(paris, service, tmp_path, max_step_m=1.5)
+        env = self.coordinate(paris, service, tmp_path, max_step_m=10.0)
         prompt = CourierSession(env, city="Paris").system_prompt()
-        assert "1.5 m" in prompt
+        assert "10 m" in prompt
         assert "{max_step_m}" not in prompt and "{" not in prompt
 
     def test_the_prompt_never_teaches_a_call_it_cannot_run(
@@ -937,14 +937,14 @@ class TestTheCoordinateActionSpace:
         """Refused, not carried part of the way. A courier that asked for
         forty metres and was quietly walked one and a half cannot tell that
         from arriving, and neither can a reader of the log."""
-        env = self.coordinate(paris, service, tmp_path, max_step_m=1.5)
+        env = self.coordinate(paris, service, tmp_path, max_step_m=10.0)
         start = env._here_cm()
         walks_before = len(service.walks)
 
         out = env.walk_to_xy(start[0] / 100.0 + 40.0, start[1] / 100.0)
 
         assert not out.ok and out.code == "too_far"
-        assert "at most 1.5 m" in out.message
+        assert "at most 10 m" in out.message
         assert len(service.walks) == walks_before, "no walk was attempted"
         assert env._here_cm() == pytest.approx(start)
         refused = [h for h in env.embodied_log if h.get("code") == "too_far"]
@@ -961,17 +961,17 @@ class TestTheCoordinateActionSpace:
         previous one lands, and the third is 3 m from where the first was
         written -- twice the cap.
 
-        1 m and not 1.4: a walk stops as soon as it is within ``arrive_cm`` of
+        8 m and not 10: a walk stops as soon as it is within ``arrive_cm`` of
         its target, so a CHAINED plan advances ``max_step_m - arrive_cm`` per
-        call, not ``max_step_m``. At a 1.5 m cap and a 30 cm radius that is
-        1.2 m, and the shortfall accumulates down the chain."""
+        call, not ``max_step_m``. At a 10 m cap and a 1 m radius that is 9 m,
+        and the shortfall accumulates down the chain."""
         env = self.coordinate(paris, service, tmp_path,
-                              max_step_m=1.5, arrive_cm=30.0)
+                              max_step_m=10.0, arrive_cm=100.0, tick_chunk=2)
         start = env._here_cm()
         for i in range(1, 4):
-            out = env.walk_to_xy(start[0] / 100.0 + 1.0 * i, start[1] / 100.0)
+            out = env.walk_to_xy(start[0] / 100.0 + 8.0 * i, start[1] / 100.0)
             assert out.ok, f"step {i} was refused: {out.message}"
-        assert math.dist(start, env._here_cm()) > 200.0, "it really moved 2+ m"
+        assert math.dist(start, env._here_cm()) > 1600.0, "it really moved 16+ m"
 
     def test_the_point_you_are_standing_on_is_refused_not_walked(
             self, paris, service, tmp_path):
@@ -1000,7 +1000,7 @@ class TestTheCoordinateActionSpace:
         pawn's -- so a coordinate it derives by adding an offset to what it
         was told lands where it meant."""
         env = self.coordinate(paris, service, tmp_path)
-        env.walk_to_xy(*[v / 100.0 + 0.8 for v in env._here_cm()])
+        env.walk_to_xy(*[v / 100.0 + 5.0 for v in env._here_cm()])
 
         pawn = env._here_cm()
         stated = env.pose_text()
@@ -1027,7 +1027,7 @@ class TestTheCoordinateActionSpace:
         nearest the pawn after every walk, and how far off it is gets
         logged rather than assumed small."""
         env = self.coordinate(paris, service, tmp_path)
-        env.walk_to_xy(*[v / 100.0 + 0.8 for v in env._here_cm()])
+        env.walk_to_xy(*[v / 100.0 + 5.0 for v in env._here_cm()])
 
         hop = env.embodied_log[-1]
         nearest, gap = env._nearest_node(env._here_cm())
@@ -1043,7 +1043,7 @@ class TestTheCoordinateActionSpace:
         toward = env.candidates()[0]["node"]
 
         first = env.frame_for(env.node_id, toward)
-        env.walk_to_xy(*[v / 100.0 + 0.9 for v in env._here_cm()])
+        env.walk_to_xy(*[v / 100.0 + 5.0 for v in env._here_cm()])
         second = env.frame_for(env.node_id, toward)
 
         assert first and second and first != second
@@ -1064,16 +1064,16 @@ class TestTheCoordinateActionSpace:
         courier's, so standing it back on a node it may be twenty metres from
         would be the desynchronisation the re-spawn exists to prevent, applied
         backwards."""
-        service.wall_after_cm = 40.0
+        service.wall_after_cm = 200.0
         env = self.coordinate(paris, service, tmp_path)
         start = env._here_cm()
 
-        out = env.walk_to_xy(*[v / 100.0 + 1.0 for v in start])
+        out = env.walk_to_xy(*[v / 100.0 + 6.0 for v in start])
 
         assert not out.ok and out.code == "stuck"
         assert "no way to walk there" in out.message
         moved = math.dist(start, env._here_cm())
-        assert moved > 20.0, "the pawn kept where its walk took it"
+        assert moved > 100.0, "the pawn kept where its walk took it"
         assert env.walked_cm > 0, "and the metres are counted"
         assert not [h for h in env.embodied_log if h.get("recovery")]
 
@@ -1083,13 +1083,13 @@ class TestTheCoordinateActionSpace:
             self, paris, service, tmp_path):
         """Two runs whose action spaces have to be recalled from a launch
         command are not a comparison."""
-        env = self.coordinate(paris, service, tmp_path, max_step_m=1.5)
-        env.walk_to_xy(*[v / 100.0 + 0.9 for v in env._here_cm()])
+        env = self.coordinate(paris, service, tmp_path, max_step_m=10.0)
+        env.walk_to_xy(*[v / 100.0 + 5.0 for v in env._here_cm()])
         env.walk_to_xy(*[v / 100.0 + 400.0 for v in env._here_cm()])
 
         block = env.summary()["embodied"]
         assert block["action_space"] == "coordinate"
-        assert block["max_step_m"] == 1.5
+        assert block["max_step_m"] == 10.0
         assert block["coordinate_walks"] == 1 and block["coordinate_too_far"] == 1
         assert block["median_snap_cm"] is not None
 
@@ -1106,7 +1106,7 @@ class TestTheCoordinateActionSpace:
         every "on your left" in the same turn's list."""
         env = self.coordinate(paris, service, tmp_path)
         start = env._here_cm()
-        env.walk_to_xy(start[0] / 100.0 + 1.4, start[1] / 100.0)
+        env.walk_to_xy(start[0] / 100.0 + 6.0, start[1] / 100.0)
         walked = env.facing()
         assert walked == pytest.approx(bearing_deg(start, env._here_cm()),
                                        abs=1.0)
@@ -1264,13 +1264,13 @@ class TestTheTraceRecordsWhatTheCourierSaw:
 
         monkeypatch.setenv("EB_LIVE_TRACE_DIR", str(tmp_path / "trace"))
         env = embodied_env(paris, UERenderClient(service.base_url), tmp_path,
-                           action_space="coordinate", max_step_m=1.5,
-                           arrive_cm=30.0, tick_chunk=1)
+                           action_space="coordinate", max_step_m=10.0,
+                           arrive_cm=100.0, tick_chunk=2)
         session = CourierSession(env, city="Paris")
         trace = EpisodeTrace(tmp_path / "trace", "ep", {"action_space": "coordinate"})
 
         here = env._here_cm()
-        session.step(f'```\nwalk_to_xy({here[0]/100 + 1.0:.1f}, {here[1]/100:.1f})\n```')
+        session.step(f'```\nwalk_to_xy({here[0]/100 + 5.0:.1f}, {here[1]/100:.1f})\n```')
         trace.record(env, session.run.turns[-1])
         path = trace.close(env)
 
@@ -1296,14 +1296,14 @@ class TestTheTraceRecordsWhatTheCourierSaw:
         from embodiedbench.runtime.live.trace import EpisodeTrace
 
         env = embodied_env(paris, UERenderClient(service.base_url), tmp_path,
-                           action_space="coordinate", max_step_m=1.5,
-                           arrive_cm=30.0, tick_chunk=1)
+                           action_space="coordinate", max_step_m=10.0,
+                           arrive_cm=100.0, tick_chunk=2)
         session = ChunkedCourierSession(env, city="Paris", action_chunk=3)
         trace = EpisodeTrace(tmp_path / "trace", "ep", {})
 
         x, y = (v / 100.0 for v in env._here_cm())
         session.step("```\n" + "\n".join(
-            f"walk_to_xy({x + 1.0 * i:.1f}, {y:.1f})" for i in (1, 2, 3)) + "\n```")
+            f"walk_to_xy({x + 8.0 * i:.1f}, {y:.1f})" for i in (1, 2, 3)) + "\n```")
         trace.record(env, session.run.turns[-1])
         rec = json.loads(trace.close(env).read_text())
 

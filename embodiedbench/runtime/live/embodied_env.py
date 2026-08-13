@@ -115,14 +115,28 @@ ACTION_SPACES = (ACTION_SPACE_STREET, ACTION_SPACE_COORDINATE)
 # carried one and a half cannot tell that from arriving, and neither can a
 # reader of the log.
 #
-# A short step on purpose. The first live run answered the question the cap
-# was originally sized for -- 60 m was the street arm's own p75, so a
-# coordinate call could not be the cheaper action -- and the policy never got
-# near it: every request it made was 1 to 6 m, and seven of sixteen were the
-# point it was already standing on. A short step asks the thing that actually
-# failed (can you name a point that is somewhere else) without also asking it
-# to plan a block ahead.
-DEFAULT_MAX_STEP_M = 1.5
+# 10 m, and the number has to clear four things at once.
+#
+# The JOB has to be reachable. A median delivery on this map is 247 m end to
+# end; at 9 m of ground per call (10 less the metre the walk stops short by)
+# that is 27 calls, nine turns at a chunk of three, against a val budget of
+# sixteen. A 1.5 m step wanted sixty-nine turns and the context window holds
+# about thirty, so `delivered` would have read zero for every seed by
+# arithmetic rather than by navigation.
+#
+# It has to sit near the scale the POLICY reaches for, or the refusals stop
+# being about navigation. Measured over the first live run: when it named a
+# point that was not the one under its feet, the request was 2.6 m at the
+# smallest, 4.8 m median, 16.2 m at the largest. A 10 m cap admits thirteen of
+# those fifteen, so what a refusal now means is "there is no way there", not
+# "you guessed the limit wrong".
+#
+# It must not make a coordinate call CHEAPER than a street one, which is what
+# the original 60 m was sized for: block-stride legs are a median 38.8 m and a
+# p75 of 59.5 m, and 10 m is comfortably under both.
+#
+# And the walk geometry has to close: see DEFAULT_STEP_ARRIVE_CM.
+DEFAULT_MAX_STEP_M = 10.0
 
 # The arrival radius and the tick chunk are not free once the step is short.
 # One tick carries ``speed * fixed_dt`` -- 28 cm at the 16x rollout settings --
@@ -131,8 +145,8 @@ DEFAULT_MAX_STEP_M = 1.5
 # It must also be well inside the step cap, or the band between "you are
 # already there" and "that is too far" closes and every request lands in one
 # refusal or the other.
-DEFAULT_STEP_ARRIVE_CM = 30.0
-DEFAULT_STEP_TICK_CHUNK = 1
+DEFAULT_STEP_ARRIVE_CM = 100.0
+DEFAULT_STEP_TICK_CHUNK = 2
 
 # The album roots this env owns (all of them: v1 embodied has exactly one
 # album, the live cache, and no hazard frames at all), plus the hazard levers

@@ -62,15 +62,17 @@ envs:
       # waypoints of a chunk are judged from where the earlier walks left the
       # courier, which is what they were named relative to.
       #
-      # Short on purpose. The first live run never came near a 60 m cap: every
-      # request the policy made was 1-6 m and seven of sixteen were the point
-      # it was already standing on. A short step asks the thing that actually
-      # failed -- can you name a point that is somewhere else -- without also
-      # asking it to plan a block ahead.
-      max_step_m: 1.5
+      # 10 m clears four constraints at once: a median 247 m job is 27 calls
+      # (nine turns at chunk 3) against a budget of sixteen, so a delivery is
+      # reachable; it sits on the scale the policy actually reaches for
+      # (2.6 m min, 4.8 m median, 16.2 m max when it named a point that was
+      # not under its feet); it stays well under the street arm's own 38.8 m
+      # median leg, so a coordinate call is never the cheaper action; and the
+      # arrival geometry below closes against it.
+      max_step_m: 10.0
       # These two move WITH the step and are checked against it at
       # construction. One tick carries 28 cm at this dt, arrival is only
       # tested at chunk boundaries, and the radius has to sit inside the cap
       # or every request is either "already there" or "too far".
-      arrive_cm: 30.0
-      tick_chunk: 1
+      arrive_cm: 100.0
+      tick_chunk: 2
