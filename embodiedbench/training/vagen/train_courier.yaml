@@ -17,30 +17,23 @@ envs:
     response_length_per_turn: 1024   # a cap, not a target: 48 truncated a 4B's
                                      # reasoning before its fenced call
     config:
-      difficulty: solo
+      # ENDLESS, one order at a time: the dispatcher refills after every
+      # delivery and the shift ends on the clock or the turn cap. The reward
+      # is then TOTAL earnings inside a fixed budget -- two deliveries beat
+      # one beats none -- which varies within a GRPO group where the same
+      # order's fee, paid identically for any successful route, did not.
+      #
+      # Chosen over earnings_per_hour after its runs held-out score went
+      # 2.1625 -> 1.9861 -> 0.6950 over twenty steps while entropy climbed
+      # from 0.21 to 0.66: a rate is maximised by making the denominator
+      # small as much as by earning, and the policy destabilised. A total
+      # under a cap has no denominator to game.
+      difficulty: endless
+      queue_depth: 1
       stride: block
       embodiment: human_on_foot
       hazards: true
-      # What this project is for: the fee the job pays, not four constants
-      # chosen in this repository. Punctuality and job size are inside the
-      # number already -- full fee on time, a fraction late, 3.00 plus a cent
-      # a metre -- so a policy that maximises it is a courier that earns.
-      # Per hour, not per job. The fee is 3.00 plus a cent a metre of the
-      # ORDER, so it pays the same however the shift went: the first real
-      # training step scored 4.075 with within-group variance of exactly 0.0
-      # and so pg_loss 0.0 and grad_norm 0.0, while scores across the batch
-      # ranged 0.0 to 5.43. Four samples of one order either all delivered,
-      # for the identical fee, or none did, for 0.0. All the variance was
-      # between orders, which is where GRPO cannot use it.
-      #
-      # A rate separates a ten-turn delivery from a twenty-one-turn one, and
-      # walking time is what a route choice costs -- sim_seconds accrues per
-      # street walked, per wait at a red and per red crossed. It stays 0.0 for
-      # a shift that delivered nothing, so unlike a straight charge for time
-      # it never pays to give up early. Validation stays on `earnings` so the
-      # held-out number remains money and stays comparable with every run
-      # measured so far.
-      reward_basis: earnings_per_hour
+      reward_basis: earnings
       # Dense term: metres closed on the target, potential-based, never in
       # env_return. Without it GRPO's first step logged reward_variance 0.0
       # and grad_norm 0.0 -- a 3B never delivers, so every sample in the
