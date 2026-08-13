@@ -1427,13 +1427,19 @@ class TestTheTraceRecordsWhatTheCourierSaw:
         rec = json.loads(trace.close(env).read_text())
 
         calls = rec["events"][0]["calls"]
-        assert len(calls) == 3
+        assert len(calls) == 3, "all three named waypoints are recorded"
         assert [c["index"] for c in calls] == [0, 1, 2]
-        # Each ran from where the one before it left off.
-        froms = [c["from_xy_m"] for c in calls]
-        assert all(f is not None for f in froms)
-        assert froms[0] != froms[1] != froms[2]
-        assert all(c["feedback"] for c in calls)
+        # One happened; the other two were the plan. A trace that kept only
+        # what ran could not tell a plan that was never made from one that was
+        # made and superseded, and the difference is the reason for asking for
+        # three in the first place.
+        assert calls[0]["status"] == "accepted"
+        assert [c["status"] for c in calls[1:]] == ["planned", "planned"]
+        assert calls[0]["from_xy_m"] is not None
+        assert calls[0]["feedback"]
+        assert calls[0]["walk"] is not None
+        assert all(c["walk"] is None for c in calls[1:]), (
+            "a planned call consumed no walk")
 
 
 @needs_maps
