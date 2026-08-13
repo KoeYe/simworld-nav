@@ -432,12 +432,18 @@ def render_candidates(rows: list[dict]) -> str:
         # Relative first, compass second. A courier on a corner decides in left
         # and right; the compass is what the phone speaks, and both are needed to
         # act on a route instruction, but only one of them is what the body does.
-        # Where the block stride knows how far one call carries, the line says
-        # that, and the compass is the direction the *block* runs rather than its
-        # first few metres. Quoting the next waypoint at block stride described a
-        # different action from the one the number was attached to: a 7 m stub
-        # labelled south-east carried a reviewer 61 m north-west.
-        heading = row.get("reach_heading") or row.get("heading", "")
+        #
+        # The compass printed is the FIRST-EDGE bearing, for one reason that
+        # outranks every other: it is the string ``match_street`` exact-matches
+        # when the name is ambiguous, and this line ends by telling the model
+        # to type the bearing "exactly as written". It printed the block-end
+        # bearing for a while, which reads better on a curved street, and on
+        # 5.6% of rows differed from the accepted one -- the same row then
+        # carried one bearing here, another under its photograph, and a third
+        # in the refusal that names the headings on offer. One string,
+        # everywhere: the photograph caption, this line, the map banner and the
+        # matcher now all quote ``row["heading"]``.
+        heading = row.get("heading", "")
         # The bearing is the second half of the street's name here: it is what
         # walk_to needs, so it is printed in the words walk_to takes rather
         # than only as scenery. The relative direction stays alongside it,

@@ -52,8 +52,16 @@ export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-$_DEV}
 # reads as slow rather than as broken.
 export ROLLOUT_MEM=${ROLLOUT_MEM:-$_MEM}
 export N_GPUS=$_N
-export SP=$_SP
-echo "PICKED devices=$_DEV vllm_mem=$_MEM gpus=$_N sp=$_SP"
+# Honoured for the same reason as the two above, and it was not: this line
+# overwrote an explicit SP without a word, so a run launched with SP=2 trained
+# with SP=1 and the OOM it was meant to fix was credited to it anyway.
+export SP=${SP:-$_SP}
+# What the run will actually use, not what the picker suggested. Printing the
+# picker's numbers next to settings the caller had already overridden is how
+# five hours went by on one card under a line that read gpus=1 as if that were
+# the request.
+echo "PICKED devices=$CUDA_VISIBLE_DEVICES gpus=$N_GPUS" \
+     "vllm_mem=$ROLLOUT_MEM sp=$SP (picker offered $_DEV/$_N/$_MEM/$_SP)"
 
 # Sizes that have actually run. See the table in docs/RUNNING_ELSEWHERE.md
 # before changing them; the learning rate and the reward scale multiply.

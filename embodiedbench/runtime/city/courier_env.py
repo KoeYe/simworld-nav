@@ -2705,15 +2705,13 @@ class CourierEnv:
     def _next_instruction(self, route: list[tuple[float, float]]) -> dict[str, str]:
         """The banner: the street to take next, and the bearing to take it at.
 
-        Both copied off the candidate line the courier will act on, not
+        Both copied off the candidate row the courier will act on, not
         derived a second way. Deriving the bearing separately -- as the compass
         of the step to the route's next node -- disagreed with the list on 6
         frames in 67, and on one of them it said south-east where the list
-        offered the same street going north-west. At block stride the two are
-        different quantities: the route's next node is the first waypoint,
-        18 m along, while the line quotes the bearing of the whole block. A
-        banner the courier cannot copy verbatim into walk_to is worse than no
-        banner, because it reads as the map contradicting the corner.
+        offered the same street going north-west. A banner the courier cannot
+        copy verbatim into walk_to is worse than no banner, because it reads
+        as the map contradicting the corner.
         """
         if len(route) < 2:
             return {"next_street": "", "next_heading": ""}
@@ -2726,12 +2724,14 @@ class CourierEnv:
         # of renders. Three live tests caught it; the cost is real either way.
         for row in self._raw_candidates():
             if math.dist(self.position(row["node"]), route[1]) < 1.0:
+                # The row's own first-edge bearing, exactly as the candidate
+                # line prints it and match_street accepts it. This recomputed
+                # the whole block's compass for a while, to match a candidate
+                # line that then printed the block's -- but the block bearing
+                # differs from the accepted one on 5.6% of rows, so the banner
+                # was verbatim-copyable except when it was not. One string,
+                # everywhere.
                 heading = row.get("heading") or ""
-                if self.stride == Stride.BLOCK:
-                    _, _, end = self._block_preview(row["node"])
-                    if end != self.node_id:
-                        heading = compass_of(
-                            bearing_deg(self.position(), self.position(end)))
                 return {"next_street": str(row["street"]),
                         "next_heading": str(heading)}
         nearest = min(self.network.nodes,

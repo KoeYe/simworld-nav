@@ -473,6 +473,26 @@ def test_vendor_checkout_has_no_local_modifications():
     # guard exists to catch stray writes -- the engine drops outputs/ and log/
     # into its own checkout when run from there.
     dirty = [line for line in dirty if line.strip() != "M verl"]
+    # The declared patches are the one sanctioned way to write to vendor/:
+    # they live in embodiedbench/training/vagen/patches/ precisely because
+    # vendor/ is gitignored and an edit made there directly would be invisible
+    # to review. Each patch module names its target; a modification of that
+    # file is the patch mechanism working, and any other modification is still
+    # the stray write this guard exists to catch.
+    import importlib
+    import pkgutil
+
+    import embodiedbench.training.vagen.patches as patches_pkg
+
+    patched: set[str] = set()
+    for module_info in pkgutil.iter_modules(patches_pkg.__path__):
+        module = importlib.import_module(
+            f"{patches_pkg.__name__}.{module_info.name}")
+        target = getattr(module, "TARGET", None)
+        if target is not None:
+            patched.add(str(Path(target).relative_to(vendor)))
+    dirty = [line for line in dirty
+             if line.split(maxsplit=1)[-1] not in patched]
     assert dirty == [], f"vendor/ was written to: {dirty[:5]}"
 
 

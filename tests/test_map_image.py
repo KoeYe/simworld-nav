@@ -309,4 +309,4 @@ class TestTheCourierIsAlwaysOnTheScreen:
                 if not rows:
                     break
                 env.walk_to(rows[0]["street"],
-                            rows[0].get("reach_heading") or rows[0]["heading"])
+                            rows[0]["heading"])

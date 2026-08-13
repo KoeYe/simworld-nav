@@ -1529,7 +1529,7 @@ class TestTheBannerIsAnInstructionYouCanObey:
                 if not street or not heading:
                     break
                 offered = {(r["street"],
-                            r.get("reach_heading") or r.get("heading"))
+                            r["heading"])
                            for r in env.candidates()}
                 assert (street.group(1), heading.group(1)) in offered, (
                     f"seed {seed}: banner says {street.group(1)!r} going "

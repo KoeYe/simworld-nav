@@ -125,6 +125,13 @@ class CourierSession:
         # The junction a walk started from, so it can be credited with the way
         # out that was taken rather than the one arrived at.
         self._leaving: str | None = None
+        # The candidate rows the courier was last shown, so what it typed can
+        # be resolved back to the row it meant before it is remembered. Memory
+        # used to record the typed strings verbatim -- a bearing left out
+        # because the name was unique, or given as "left" -- and then be
+        # queried with the row's compass heading, so the very marker meant to
+        # stop verbatim repeats could not fire on the repeats it was for.
+        self._offered: list[dict[str, Any]] = []
         self.lamp_legs: dict[str, str] = {}
         self.feedback = ""
         self.allowed = list(env.allowed_tool_names())
@@ -200,7 +207,12 @@ class CourierSession:
         here = self.env.node_id
         for row in rows:
             street = row.get("street", "")
-            heading = row.get("reach_heading") or row.get("heading", "")
+            # The lookup key is the row's own first-edge bearing -- the same
+            # string the candidate line prints and ``_remember`` records. It
+            # read ``reach_heading`` for a while, which on 5.6% of rows is a
+            # different compass point than the recorder wrote, and on those
+            # rows "(you have walked this before)" could never appear.
+            heading = row.get("heading", "")
             row["seen"] = self.memory.has_taken(here, street, heading)
             row["refused"] = self.memory.refusal_at(here, street, heading)
         text = build_observation(
@@ -212,6 +224,7 @@ class CourierSession:
                          if self.with_images else ""),
             extra=(f"\n### what just happened\n{self.feedback}" if self.feedback else ""),
         )
+        self._offered = rows
         return Observation(text=text, frames=self._frames(rows))
 
     def _frames(self, rows: list[dict[str, Any]]) -> list[Frame]:
@@ -347,8 +360,10 @@ class CourierSession:
             # Against the junction it was refused at, so the marker appears on
             # the very line that will be offered again next turn.
             self.memory.refused(
-                self._leaving, str(action.args[0]),
-                str(action.args[1]) if len(action.args) > 1 else "",
+                self._leaving,
+                *self._street_as_offered(
+                    str(action.args[0]),
+                    str(action.args[1]) if len(action.args) > 1 else ""),
                 outcome.code or "refused")
         if not outcome.ok and turn.action == self._last_refused:
             self._repeats += 1
@@ -445,6 +460,24 @@ class CourierSession:
                 "deliver to" if order.picked_up else "collect from", order.target.text
             )
 
+    def _street_as_offered(self, street: str, heading: str) -> tuple[str, str]:
+        """The typed street and bearing, as the row the courier was shown.
+
+        Memory must record the same key the next observation will look up:
+        the row's name and first-edge compass. What the courier typed can be
+        looser than that -- no bearing where the name was unique, "left" for
+        the compass, a base name for a suffixed one -- and ``walk_to`` accepts
+        all of it, so remembering the typed strings recorded keys that no
+        lookup would ever present again.
+        """
+        from embodiedbench.runtime.city.street_names import match_street
+
+        try:
+            row = match_street(self._offered, street, heading or None)
+            return str(row.get("street", street)), str(row.get("heading", heading))
+        except Exception:  # noqa: BLE001 - unresolvable stays as typed
+            return street, heading
+
     def _remember(self, action: ParsedAction, outcome: Any) -> None:
         self._set_goal()
         if outcome.ok and action.tool in ("walk_to", "follow_street"):
@@ -453,8 +486,9 @@ class CourierSession:
             # before the walk in ``step``; without it this would record the
             # junction arrived at, and mark the way *back* as already tried.
             if self._leaving is not None and action.args:
-                street = str(action.args[0])
-                heading = str(action.args[1]) if len(action.args) > 1 else ""
+                street, heading = self._street_as_offered(
+                    str(action.args[0]),
+                    str(action.args[1]) if len(action.args) > 1 else "")
                 self.memory.took(self._leaving, street, heading)
             rows = self.env.candidates()
             if len(rows) <= 1:
