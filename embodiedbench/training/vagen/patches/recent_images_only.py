@@ -1,5 +1,21 @@
 """Keep only the most recent frames in the context, not every frame ever.
 
+DO NOT APPLY YET -- it kills the run. Trimming at this seam is wrong.
+
+Applied on 2026-08-13 it took vLLM's EngineCore down with
+``IndexError: list index out of range`` inside a minute. By the time this hook
+runs the prompt is already tokenised: ``agent_data.prompt_ids`` carries the
+``<image>`` tokens, and rewriting the text of ``agent_data.messages``
+afterwards changes nothing about them. So the ids kept N placeholders while
+``image_data`` had been cut to three, the processor paired them by position,
+and it indexed past the end -- the same ids-versus-grids failure the
+image-safe truncation patch exists for, arriving from the opposite side.
+
+The idea is right and the seam is not. A window has to be applied where the
+ids are built, dropping the placeholder TOKENS with the images, which is the
+same place ``_cut_on_image_boundaries`` already works. Left here, tested at
+the function level, and not wired up.
+
 ``gym_agent_loop.py`` accumulates images for the whole episode::
 
     agent_data.image_data.extend(new_images)
