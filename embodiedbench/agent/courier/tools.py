@@ -147,29 +147,36 @@ class Tool:
     not_for: str = ""
 
     def manual(self) -> str:
-        """The full entry for this tool: call, result, refusals, judgement."""
+        """The full entry for this tool: call, result, refusals, judgement.
+
+        Every fact stays -- what to pass, what comes back, every refusal and
+        its remedy, when to reach for it and when not to -- in the fewest
+        words that still say it. The entries are ~45% of the system prompt
+        and ride in front of every request of every turn, so each word here
+        is paid for hundreds of times per episode.
+        """
         out = [f"{self.typed_signature()}", f"    {self.summary}"]
         for param in self.params:
             out.append(f"    {param.name} — {param.description}")
         if self.example:
-            out.append(f"    call it like this: {self.example}")
+            out.append(f"    e.g. {self.example}")
         if self.returns:
-            out.append(f"    you get back: {self.returns}")
+            out.append(f"    returns: {self.returns}")
         for wording, remedy in self.refusals:
             out.append(f'    refused "{wording}" — {remedy}')
         if self.use_when:
-            out.append(f"    use it when: {self.use_when}")
+            out.append(f"    use when: {self.use_when}")
         if self.not_for:
             out.append(f"    not for: {self.not_for}")
         # Walking's cost is the distance, not a constant, so quoting a fixed
         # number for it would be a figure the courier could not reconcile with
         # its own clock.
         if self.kind is ToolKind.ACT and not self.time_cost_s:
-            cost = "costs the time it takes to walk it, and one turn"
+            cost = "cost: the walk, and the turn"
         elif not self.time_cost_s:
-            cost = "costs no clock time, but it still costs you the turn"
+            cost = "cost: no clock time, but still the turn"
         else:
-            cost = f"costs about {self.time_cost_s:.0f} s of the shift, and one turn"
+            cost = f"cost: ~{self.time_cost_s:.0f} s, and the turn"
         out.append(f"    {cost}")
         return "\n".join(out)
 
@@ -219,9 +226,8 @@ WALK_TO = Tool(
     name="walk_to",
     kind=ToolKind.ACT,
     summary=(
-        "Walk down a street leaving this junction, naming it and the way you "
-        "are going. The bearing is only needed when the same street leaves "
-        "this junction twice, which is most junctions."
+        "Walk down a street leaving this junction. The bearing is only "
+        "needed when the same name leaves here twice -- most junctions."
     ),
     params=(
         ToolParam("street", "str", "the name of the street, as it is written"),
@@ -233,26 +239,24 @@ WALK_TO = Tool(
     time_cost_s=0.0,
     requires_env_action="MOVE_TO",
     returns=(
-        "the next junction: its street, the door numbers beside you, the "
-        "streets leaving it, and a photograph down each. If the numbers moved "
-        "the turn says which way they went."
+        "the next junction: street, door numbers, ways out, a photograph "
+        "down each. If the numbers moved, the turn says which way."
     ),
     refusals=(
         ("that street does not leave this junction",
-         "the name is not on this turn's list. The route crosses streets you "
-         "have not reached yet; take the listed street whose bearing is "
-         "nearest the way the map line goes, and you will reach it."),
+         "the name is not on this turn's list; you have not reached it "
+         "yet. Take the listed street nearest the map line's way."),
         ("which way along it",
          "that street leaves here twice. Say the bearing as well: "
          'walk_to("Rue de Grenelle", "east").'),
         ("blocked and you cannot get past",
-         "you are still at the junction and that street stays shut for the "
-         "rest of the shift. Take a different one."),
+         "you are still at the junction; that street stays shut all "
+         "shift. Take a different one."),
     ),
     use_when="you know which street you want and which way along it",
     not_for=(
-        "finding out what is down a street -- the photograph is already in "
-        "front of you, and look() reads the numbers without walking"
+        "finding out what is down a street; the photograph is already in "
+        "front of you, and look() reads numbers without walking"
     ),
 )
 
@@ -296,8 +300,8 @@ LOOK = Tool(
     # courier is not standing on, which is the gradient that finds a door when no
     # phone will. So that is all it says now, and the summary promises only that.
     summary=(
-        "Read the door numbers running away down a street, without walking it. "
-        "The numbers tell you which way they climb."
+        "Read the door numbers down a street without walking it, and which "
+        "way they climb."
     ),
     params=(
         ToolParam("street", "str", "the name of the street to look down"),
@@ -309,19 +313,14 @@ LOOK = Tool(
     time_cost_s=2.0,
     counts_as_step=True,
     provides=frozenset({FACT_NUMBERS_AHEAD}),
-    returns=(
-        "the door numbers running away down that street, and which way they "
-        "climb -- without walking it"
-    ),
+    returns="that street's door numbers, and which way they climb",
     refusals=(
         ("that street does not leave this junction",
          "look only sees streets on this turn's list"),
     ),
     use_when=(
         "you are on the right street at the wrong number and cannot tell "
-        "which way the numbers rise. This is the one question it answers "
-        "outright, and it answers it for the price of one turn instead of a "
-        "walk in the wrong direction"
+        "which way the numbers rise; one turn here beats a walk the wrong way"
     ),
     not_for="seeing a red light or a barrier",
 )
@@ -377,9 +376,8 @@ NAVIGATE = Tool(
     name="navigate",
     kind=ToolKind.CONSULT,
     summary=(
-        "Put a route on your phone's screen. Give the address you are heading "
-        "for; leave it out to route to the job in hand. The route is DRAWN on "
-        "the map, not written out — read which way to go off the picture. The "
+        "Put a route on the phone's screen; leave the address out to route to "
+        "the job in hand. The route is DRAWN on the map, not written out. The "
         "phone cannot see crossings, traffic or doors."
     ),
     params=(ToolParam("where", "str",
@@ -392,8 +390,7 @@ NAVIGATE = Tool(
     time_cost_s=15.0,
     provides=frozenset({FACT_TURN_BY_TURN, FACT_ROUTE_DISTANCE}),
     returns=(
-        "a route DRAWN on the map picture, which stays on the screen every "
-        "turn afterwards. Nothing is written out in words: you read which way "
+        "a route drawn on the map, on screen every turn after; read which way "
         "to go off the drawing"
     ),
     refusals=(
@@ -403,12 +400,12 @@ NAVIGATE = Tool(
          "nothing walkable reaches it; go a different way and ask again"),
     ),
     use_when=(
-        "you are travelling to an address and the screen is not already "
-        "showing the way there, or what you can see has stopped matching it"
+        "the screen is not already showing the way, or has stopped matching "
+        "what you see"
     ),
     not_for=(
-        "getting past a barrier. The map has never seen the barrier, there is "
-        "no way to tell it, and it will route you into the same street again"
+        "getting past a barrier; the map cannot see it and will route you "
+        "into the same street again"
     ),
 )
 
@@ -423,12 +420,11 @@ COLLECT = Tool(
     returns="the parcel in your bag, and the job becomes a delivery",
     refusals=(
         ("you are not at the pickup",
-         "you are somewhere else. It does not tell you where the pickup is "
-         "and it costs a turn, so do not call it to test whether you have "
-         "arrived -- compare the street and number at the top of the turn "
-         "against the slip instead."),
+         "you are somewhere else. It costs a turn and points nowhere; "
+         "compare the street and number at the top of the turn against the "
+         "slip instead of probing."),
     ),
-    use_when="the street and the door number both match the pickup on the slip",
+    use_when="street and door number both match the pickup on the slip",
     not_for="checking whether you have arrived",
 )
 
@@ -446,7 +442,7 @@ HAND_OVER = Tool(
         ("you have not collected it yet",
          "go to the pickup first"),
     ),
-    use_when="the street and the door number both match the dropoff",
+    use_when="street and door number both match the dropoff",
     not_for="checking whether you have arrived",
 )
 
@@ -475,21 +471,15 @@ WAIT = Tool(
     # crossing this waits out the phase, so one call always changes the light --
     # which is the fact a policy needs in order to use it at all.
     summary=(
-        "Wait where you are. At a crossing this waits for the light to change, "
-        "so one call is always enough."
+        "Wait where you are; at a crossing this sees the light change, so one "
+        "call is always enough."
     ),
     example="wait()",
     time_cost_s=10.0,
     requires_env_action="WAIT",
     returns="the crossing, with the light having changed",
-    use_when=(
-        "the pedestrian light for the street you want is red. One call sees "
-        "the whole phase out, so one is always enough"
-    ),
-    not_for=(
-        "anywhere else. Nothing in this city changes because you stood still; "
-        "waiting off a crossing spends the clock and buys nothing"
-    ),
+    use_when="the pedestrian light for the street you want is red",
+    not_for="anywhere else; nothing changes because you stood still",
 )
 
 REST = Tool(
@@ -499,10 +489,7 @@ REST = Tool(
     # shift the courier simply gets slower and there is nothing to decide. With
     # somewhere to spend time for energy back, stamina becomes the trade the
     # tiers are meant to pose -- rest now and walk fast, or push on tired.
-    summary=(
-        "Stop and catch your breath. Costs time and gives energy back, and how "
-        "much you get is what your body can recover."
-    ),
+    summary="Stop and catch your breath: time spent, energy back.",
     example="rest()",
     time_cost_s=60.0,
     requires_env_action="REST",
@@ -510,7 +497,7 @@ REST = Tool(
     refusals=(
         ("you never tire", "this body has no stamina to recover"),
     ),
-    use_when="you are tired enough that walking has slowed you down",
+    use_when="walking has slowed because you are tired",
     not_for="a pause to think; thinking is free and this is not",
 )
 
@@ -518,9 +505,8 @@ NOTE = Tool(
     name="note",
     kind=ToolKind.CONSULT,
     summary=(
-        "Write a line in your notebook. It is shown back to you every turn, so use it "
-        "for things you must not forget — a street that was a dead end, where you have "
-        "already searched."
+        "Write a line in your notebook, shown back to you every turn — for "
+        "what you must not forget."
     ),
     params=(ToolParam("text", "str", "what to remember, in a few words"),),
     example='note("Rue Monge north end is a dead end")',
@@ -530,13 +516,10 @@ NOTE = Tool(
         ("a note needs something written on it", "give it some text"),
     ),
     use_when=(
-        "you have worked out something the turn will not tell you again -- a "
-        "street that was a dead end, a corner you have already searched"
+        "you worked out something the turn will not tell you again -- a dead "
+        "end, a corner already searched"
     ),
-    not_for=(
-        "what is already in front of you. The streets here, the numbers and "
-        "the job are printed every turn"
-    ),
+    not_for="what is already printed every turn: streets, numbers, the job",
 )
 
 # Only tools the runtime dispatches. `accept_job`, `list_jobs` and `note` are
