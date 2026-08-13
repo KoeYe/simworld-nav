@@ -157,45 +157,58 @@ class TestKOfOneIsTheStockTurn:
 
 
 @needs_maps
-class TestAChunkIsSeveralCallsAndOneTurn:
-    def test_three_walks_in_one_reply_walk_three_hops(self, paris):
-        """The whole point, stated as a measurement: the same three calls that
-        would have cost three prompts cost one, and the world is left in
-        exactly the state the three separate turns would have left it."""
+class TestAChunkIsAPlanAndOneStep:
+    """A chunk is K waypoints estimated and ONE walked.
+
+    It was built as "K actions for one prompt", which is what a throughput
+    argument wants and the wrong contract for a plan: waypoints two and three
+    are named relative to positions the courier has not reached, so running
+    them commits to a forecast the first walk has already had a chance to
+    falsify -- it stops a metre short, or against a wall, and the rest was
+    computed from somewhere the courier is not.
+
+    So the later calls are a plan. Naming three makes the model look a few
+    steps ahead and puts that thinking in the trajectory; only the first
+    happens, and the next turn re-plans from where the walk actually ended."""
+
+    def test_three_named_one_walked(self, paris):
         calls, nodes, probe = walk_chain(paris, 3)
         env = courier(paris)
         session = ChunkedCourierSession(env, action_chunk=3)
         turn = session.step(fence(*calls))
 
         assert turn.status == "accepted"
-        assert turn.chunk_len == turn.chunk_executed == 3
-        assert turn.chunk_aborted_at is None
-        assert env.node_id == nodes[-1]
-        assert len(set(nodes)) == 4, "the hops must be to different junctions"
+        assert turn.chunk_len == 3, "three were named"
+        assert turn.chunk_executed == 1, "one was walked"
+        assert env.node_id == nodes[1], "it is one hop along, not three"
 
-    def test_a_chunk_is_one_turn_and_three_actions(self, paris):
-        """One TurnLog -- one prompt, one generation -- against three steps and
-        three tool calls. The saving is round trips; the world is charged in
-        full, or the cheapest policy becomes the longest reply."""
+    def test_the_rest_of_the_plan_is_recorded_not_run(self, paris):
+        calls, _, _ = walk_chain(paris, 3)
+        session = ChunkedCourierSession(courier(paris), action_chunk=3)
+        turn = session.step(fence(*calls))
+        status = [row["status"] for row in turn.chunk]
+        assert status == ["accepted", "planned", "planned"]
+        # A plan never made and a plan made and superseded must not look the
+        # same in the log -- the difference is the reason for asking for three.
+        assert all(row["action"] for row in turn.chunk)
+
+    def test_a_turn_costs_one_step_and_one_call(self, paris):
         calls, _, _ = walk_chain(paris, 3)
         session = ChunkedCourierSession(courier(paris), action_chunk=3)
         session.step(fence(*calls))
         assert len(session.run.turns) == 1
-        assert session.spend.steps == 3
-        assert session.spend.tool_calls == 3
+        assert session.spend.steps == 1
+        assert session.spend.tool_calls == 1
 
-    def test_the_clock_is_the_sum_of_the_calls_the_chunk_made(self, paris):
-        """The turn's seconds are the three hops' seconds added up, and they
-        are the seconds three separate turns would have cost -- the twin walked
-        the same three hops one at a time."""
-        calls, _, probe = walk_chain(paris, 3)
+    def test_the_clock_is_the_one_call_that_happened(self, paris):
+        calls, _, _ = walk_chain(paris, 3)
         env = courier(paris)
         session = ChunkedCourierSession(env, action_chunk=3)
         turn = session.step(fence(*calls))
+        walked = [r for r in turn.chunk if r["status"] == "accepted"]
         assert turn.sim_seconds == pytest.approx(
-            sum(row["sim_seconds"] for row in turn.chunk))
-        assert turn.sim_seconds == pytest.approx(probe.sim_seconds)
-        assert env.sim_seconds == pytest.approx(probe.sim_seconds)
+            sum(row["sim_seconds"] for row in walked))
+        assert env.sim_seconds == pytest.approx(turn.sim_seconds)
         assert session.spend.sim_seconds == pytest.approx(turn.sim_seconds)
 
     def test_the_chunk_detail_rides_beside_the_stock_fields(self, paris):
@@ -212,8 +225,14 @@ class TestAChunkIsSeveralCallsAndOneTurn:
             assert isinstance(record[key], type(value)), key
         assert set(record) - set(stock) == {
             "chunk", "chunk_len", "chunk_executed", "chunk_aborted_at"}
+        # `from_xy` and `message` joined them so a trace can say what each
+        # call was judged from and what the world said back to it -- a chunk's
+        # later calls are named relative to positions the courier has not
+        # reached yet, and the turn-level feedback is the calls' messages
+        # joined, so neither is recoverable from the turn alone.
         assert [set(row) for row in turn.chunk] == [
-            {"action", "status", "code", "sim_seconds", "reward"}] * 2
+            {"action", "status", "code", "sim_seconds", "reward",
+             "from_xy", "message"}] * 2
 
     def test_a_chunk_of_one_call_is_still_allowed(self, paris):
         """The permission is 'up to K'. A courier that is unsure must be able
@@ -227,65 +246,64 @@ class TestAChunkIsSeveralCallsAndOneTurn:
 
 
 @needs_maps
-class TestTheTurnStopsAtTheFirstRefusal:
-    def test_a_refusal_in_the_middle_throws_away_the_rest(self, paris):
-        """A wrong early call costs the whole tail of the turn. The third call
-        was written against a junction the courier never reached, so running it
-        would be acting on a prediction the world has already contradicted."""
+class TestOnlyTheFirstCallReachesTheWorld:
+    """Under a plan, "the turn stops at the first refusal" is not a rule so
+    much as an arithmetic consequence: there is only ever one call to stop
+    at. What has to hold is that the rest never runs, however tempting the
+    plan looked."""
+
+    def test_a_refused_first_call_leaves_the_plan_unrun(self, paris):
         calls, nodes, _ = walk_chain(paris, 3)
         env = courier(paris)
         session = ChunkedCourierSession(env, action_chunk=3)
+        before = env.node_id
         turn = session.step(
-            fence(calls[0], 'walk_to("Rue Nowhere", "north")', calls[1]))
+            fence('walk_to("Rue Nowhere", "north")', calls[0], calls[1]))
 
         assert [row["status"] for row in turn.chunk] == [
-            "accepted", "rejected", "dropped"]
-        assert turn.chunk[1]["code"] == "no_such_street"
-        assert turn.chunk_aborted_at == 1
-        assert turn.chunk_executed == 2
+            "rejected", "planned", "planned"]
+        assert turn.chunk[0]["code"] == "no_such_street"
         assert turn.status == "rejected" and turn.error == "no_such_street"
-        # One hop happened, the third call did not: the courier is where the
-        # refused call left it, which is where the first call put it.
-        assert env.node_id == nodes[1]
+        assert env.node_id == before, "the plan behind it did not run"
         assert not session.finished
+
+    def test_a_good_first_call_still_does_not_run_the_rest(self, paris):
+        """The one that matters. The second waypoint was named relative to a
+        position the first walk was predicted to reach, and predictions are
+        exactly what a re-plan exists to correct."""
+        calls, nodes, _ = walk_chain(paris, 3)
+        env = courier(paris)
+        session = ChunkedCourierSession(env, action_chunk=3)
+        turn = session.step(fence(*calls))
+        assert env.node_id == nodes[1], "one hop"
+        assert env.node_id != nodes[-1], "not three"
+        assert turn.chunk_executed == 1
 
     def test_the_refusal_is_charged_exactly_once(self, paris):
         """Not zero times (a free refusal is a rangefinder) and not twice (the
-        chunk measures the clock per call and the env charges it per call; a
-        session that also charged its own floor would double-bill)."""
-        calls, _, _ = walk_chain(paris, 1)
+        env charges per call; a session that also charged its own floor would
+        double-bill)."""
         env = courier(paris)
         session = ChunkedCourierSession(env, action_chunk=3)
-        walked = courier(paris)
-        assert walked.walk_to(*_call_args(calls[0])).ok
-
         turn = session.step(
-            fence(calls[0], 'walk_to("Rue Nowhere", "north")', "look()"))
+            fence('walk_to("Rue Nowhere", "north")', "look()", "look()"))
         assert env.rejected_actions == 1
-        assert turn.chunk[1]["sim_seconds"] == pytest.approx(
+        assert turn.chunk[0]["sim_seconds"] == pytest.approx(
             REJECTED_ACTION_SECONDS)
-        assert env.sim_seconds == pytest.approx(
-            walked.sim_seconds + REJECTED_ACTION_SECONDS)
+        assert env.sim_seconds == pytest.approx(REJECTED_ACTION_SECONDS)
         assert turn.sim_seconds == pytest.approx(env.sim_seconds)
 
-    def test_the_dropped_calls_are_named_rather_than_missing(self, paris):
-        """A plan that was cut short and a plan that was never made look
-        identical in a log that only records what ran."""
-        calls, _, _ = walk_chain(paris, 1)
+    def test_the_plan_is_named_rather_than_missing(self, paris):
+        """A plan never made and a plan made and superseded must not read the
+        same, and only one of them is worth showing a trainer."""
+        calls, _, _ = walk_chain(paris, 3)
         session = ChunkedCourierSession(courier(paris), action_chunk=3)
-        turn = session.step(
-            fence(calls[0], 'walk_to("Rue Nowhere", "north")', "look()"))
-        assert turn.chunk[2]["action"] == "look()"
-        assert turn.chunk[2]["code"] == "no_such_street", (
-            "a dropped call says why it did not run")
-        assert "look()" in session.feedback
-        assert "NOT CARRIED OUT" in session.feedback
-        assert "stops at the first call that is refused" in session.feedback
+        turn = session.step(fence(*calls))
+        assert [row["action"] for row in turn.chunk[1:]] == [
+            calls[1], calls[2]]
+        assert all(row["status"] == "planned" for row in turn.chunk[1:])
 
-    def test_a_terminating_call_inside_a_chunk_ends_the_episode_cleanly(
-            self, paris):
-        """The last hand_over finishes the shift. The calls behind it in the
-        same reply must not run into an episode that is over."""
+    def test_a_terminating_first_call_ends_the_episode_cleanly(self, paris):
         env = courier(paris)
         order = env.active_order()
         env.node_id = order.pickup.kerb_node
@@ -295,12 +313,10 @@ class TestTheTurnStopsAtTheFirstRefusal:
 
         turn = session.step(fence("hand_over()", "look()", "look()"))
         assert turn.chunk[0]["status"] == "accepted"
-        assert [row["status"] for row in turn.chunk[1:]] == ["dropped", "dropped"]
-        assert turn.chunk_aborted_at == 0 and turn.chunk_executed == 1
-        assert turn.reward == pytest.approx(turn.chunk[0]["reward"])
+        assert [row["status"] for row in turn.chunk[1:]] == ["planned", "planned"]
         assert session.finished
         assert session.run.termination_reason == "delivered"
-        assert session.spend.tool_calls == 1, "the dropped calls cost nothing"
+        assert session.spend.tool_calls == 1
 
 
 @needs_maps
@@ -366,26 +382,18 @@ class TestOverTheLimitIsRefusedNotTrimmed:
 
 @needs_maps
 class TestTheBudgetStopsAChunkAtTheBoundary:
-    def test_a_chunk_that_would_overrun_the_tool_budget_stops_where_it_ends(
-            self, paris):
-        """The budget is checked before each call, never after, so an exhausted
-        limit never leaves half a transition for the trajectory to explain --
-        and the call it stopped at is named rather than quietly absent."""
-        calls, nodes, _ = walk_chain(paris, 3)
+    def test_a_turn_spends_one_call_against_the_budget(self, paris):
+        """A chunk cannot straddle a budget boundary any more: it spends one
+        call, so it either fits or the turn was already over."""
         env = courier(paris)
-        session = ChunkedCourierSession(env, action_chunk=3,
-                                        budgets=Budgets(tool_calls=2))
+        session = ChunkedCourierSession(
+            env, action_chunk=3, budgets=Budgets(tool_calls=1))
+        calls, _, _ = walk_chain(paris, 3)
+        session.step(fence(*calls))
+        assert session.spend.tool_calls == 1
+        # The next turn is the one the budget stops.
         turn = session.step(fence(*calls))
-
-        assert turn.chunk_executed == 2
-        assert turn.chunk_aborted_at == 2
-        assert turn.chunk[2]["status"] == "dropped"
-        assert turn.chunk[2]["code"] == "tool_call_budget_exhausted"
-        assert turn.error == "tool_call_budget_exhausted"
-        assert env.node_id == nodes[2], "the third hop did not happen"
-        assert session.finished
-        assert session.run.termination_reason == "tool_call_budget_exhausted"
-        assert session.spend.tool_calls == 2
+        assert turn.status == "truncated"
 
     def test_a_budget_already_spent_ends_the_turn_as_it_always_did(self, paris):
         """Chunking does not add a way past a limit that was already reached."""
@@ -400,15 +408,21 @@ class TestTheBudgetStopsAChunkAtTheBoundary:
 
 @needs_maps
 class TestThePromptStatesTheRule:
-    def test_above_one_the_prompt_teaches_the_chunk_and_its_cost(self, paris):
-        """A model told it may send K calls and not told what a refusal does to
-        the rest will chain optimistically and lose the tail of every turn."""
-        prompt = ChunkedCourierSession(courier(paris),
-                                       action_chunk=3).system_prompt().lower()
+    def test_above_one_the_prompt_teaches_the_plan_and_which_call_happens(
+            self, paris):
+        """A model told it may write three calls and not told that only the
+        first happens will write three it means, and plan its next turn from
+        where the third was supposed to land."""
+        # Whitespace-normalised: the rule is wrapped for the prompt, so a
+        # phrase that matters can straddle a line break.
+        prompt = " ".join(ChunkedCourierSession(
+            courier(paris), action_chunk=3).system_prompt().lower().split())
         assert "up to 3 calls" in prompt
-        assert "in order" in prompt
-        assert "stops at" in prompt and "refused" in prompt
-        assert "more than 3 calls is" in prompt
+        assert "only the first one happens" in prompt
+        assert "plan" in prompt
+        # ...and it says why the plan will be wrong, which is the reason to
+        # re-write it rather than trust it.
+        assert "not land exactly where you predicted" in prompt
 
     def test_at_one_the_prompt_says_exactly_one_call_and_nothing_about_chunks(
             self, paris):
@@ -477,28 +491,28 @@ class TestTheEmbodiedAdapterDrivesAChunk:
                 "difficulty": "solo", "stride": "waypoint",
                 "max_turns": 3, "max_images": 1}
 
-    def test_a_chunk_of_three_walks_moves_the_pawn_three_times(
-            self, paris, config, service):
-        """One VLM turn, three /walk calls, three different junctions -- the
-        engine did the work of three turns for the price of one prompt."""
-        env = _AdapterUnderTest({**config, "action_chunk": 3})
-        obs, info = run(env.reset(0))
-        assert info["action_chunk"] == 3
-        twin = courier(paris, difficulty="solo", stride="waypoint")
-        assert env._env.node_id == twin.node_id, (
-            "the twin must start where the embodied episode starts")
-        calls, nodes, _ = walk_chain(paris, 3, difficulty="solo",
-                                     stride="waypoint")
+    def test_a_chunk_of_three_walks_moves_the_pawn_once(
+            self, paris, service, tmp_path):
+        """End to end over the embodied backend: three waypoints reach the
+        env, one reaches the engine."""
+        endpoints = write_endpoints(tmp_path / "endpoints.json", [service])
+        adapter = _AdapterUnderTest({
+            "backend": "embodied", "ue_endpoints": str(endpoints),
+            "live_cache_root": str(tmp_path / "cache"),
+            "difficulty": "solo", "stride": "waypoint",
+            "max_turns": 3, "max_images": 1, "action_chunk": 3})
+        run(adapter.reset(0))
+        env = adapter._env
+        rows = env.candidates()
+        calls = [f'walk_to("{r["street"]}", "{r["heading"]}")'
+                 for r in rows[:1] * 3]
+        walks_before = len(service.walks)
+        _, _, _, info = run(adapter.step(fence(*calls)))
 
-        obs, reward, done, step_info = run(env.step(fence(*calls)))
-        assert step_info["chunk_len"] == 3
-        assert step_info["chunk_executed"] == 3
-        assert step_info["status"] == "accepted"
-        assert step_info["turns"] == 1, "a chunk is one turn to the trainer too"
-        assert len(service.walks) == 3, "UE walked every hop"
-        assert len({walk["target_xy"] for walk in service.walks}) == 3
-        assert env._env.node_id == nodes[-1]
-        run(env.close())
+        assert info["chunk_len"] == 3
+        assert info["chunk_executed"] == 1
+        assert len(service.walks) - walks_before >= 1
+        run(adapter.close())
 
     def test_the_info_contract_is_unchanged_and_two_keys_wider(
             self, paris, config, service):

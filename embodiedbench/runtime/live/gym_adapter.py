@@ -66,6 +66,11 @@ from typing import Any, Coroutine
 
 from embodiedbench.training.vagen_courier_env import CourierGymEnv
 
+from .embodied_env import (
+    ACTION_SPACE_STREET,
+    CAMERA_VIEW_STREETS,
+    DEFAULT_MAX_STEP_M,
+)
 from .pool import RenderPool, shared_pool
 from .protocol import (
     DEFAULT_ARRIVE_CM,
@@ -410,6 +415,36 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         # 640x480 against 161.2 ms at 256x192, and 486 KB of PNG against 75 KB.
         self.capture_at_served_size = bool(config.get("capture_at_served_size", False))
         self.spawn_z_cm = float(config.get("spawn_z_cm", 100.0))
+        # Which action space this run measures. "street" is what every
+        # embodied run before this one used, so an unset config is the old
+        # behaviour exactly; "coordinate" is the harder one under test. The
+        # env refuses anything else, and both the telemetry record and the
+        # reset info carry the answer -- a pair of runs whose action spaces
+        # have to be recalled from a launch command is not a comparison.
+        self.action_space = str(config.get("action_space", ACTION_SPACE_STREET))
+        self.max_step_m = float(config.get("max_step_m", DEFAULT_MAX_STEP_M))
+        # What the turn's photographs are OF. "streets" is the default and
+        # the comparable one; "forward" shows what is in front of the courier
+        # instead of one frame per street, and is a second axis rather than a
+        # free improvement -- it changes what an arm SEES, so a run using it
+        # is not comparable to one that does not.
+        self.camera_view = str(config.get("camera_view", CAMERA_VIEW_STREETS))
+        # Whether the observation states the courier's own coordinates.
+        # Defaulted by the env to on under the coordinate space (where the
+        # task is unanswerable without it) and off under the street one. Set
+        # it explicitly for the controlled comparison: street space with the
+        # pose shown isolates the action space from the extra fact.
+        self.show_pose = config.get("show_pose")
+        # Whether a dead renderer may finish an episode on cached frames.
+        # The env has had this knob since the cross-machine work and the
+        # quickstart's own settings table says an experiment must turn it
+        # off -- but no config key reached it, so the only value any run
+        # could have was the training-friendly default. Measured the hard
+        # way on 2026-08-13: one of three instances died mid-validation with
+        # UE's malloc crash, and the episodes it was serving carried on
+        # against an album with every walking metric still reading green.
+        self.allow_album_fallback = bool(
+            config.get("allow_album_fallback", True))
         self.action_chunk = int(config.get("action_chunk", 1))
         if self.action_chunk < 1:
             raise ValueError(
@@ -452,6 +487,14 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             "stride": self.stride,
             "embodiment": self.embodiment,
             "spawn_z_cm": self.spawn_z_cm,
+            # The action space changes both the frame keys and where the pawn
+            # stands when a frame is taken, so two runs that differ only in it
+            # must not share a cache directory.
+            "action_space": self.action_space,
+            "max_step_m": self.max_step_m,
+            "camera_view": self.camera_view,
+            "show_pose": self.show_pose,
+            "allow_album_fallback": self.allow_album_fallback,
         }
         self._cfg8 = hashlib.blake2b(
             json.dumps(axes, sort_keys=True).encode("utf-8"),
@@ -514,8 +557,11 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
 
         obs, reward, done, info = await super().step(action_str)
         turns = self._session.run.turns if self._session is not None else []
-        info.update(chunk_info(turns[-1] if turns else None))
+        last = turns[-1] if turns else None
+        info.update(chunk_info(last))
         info.update(self._live_health())
+        if getattr(self, "_trace", None) is not None and last is not None:
+            self._trace.record(self._env, last)
         return obs, reward, done, info
 
     def _live_health(self) -> dict[str, Any]:
@@ -572,6 +618,11 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         }
         if self.image_max_side:
             kwargs["served_long_edge"] = float(self.image_max_side)
+        # Unset means "let the action space decide", which is the env's own
+        # default. Passing None through would override that decision with a
+        # falsy value and leave a coordinate courier unable to answer.
+        if self.show_pose is not None:
+            kwargs["show_pose"] = bool(self.show_pose)
 
         # Unique per EPISODE, not per (seed, config). GRPO's group runs the
         # same seed n times concurrently -- that is where its advantage comes
@@ -593,11 +644,16 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             arrive_cm=self.arrive_cm,
             tick_chunk=self.tick_chunk,
             max_walk_seconds=self.max_walk_seconds,
+            action_space=self.action_space,
+            max_step_m=self.max_step_m,
+            camera_view=self.camera_view,
+            allow_album_fallback=self.allow_album_fallback,
             **kwargs,
         )
         self._env.reset()
         self._episode_opened_at = time.time()
         self._last_seed = int(seed)
+        self._trace = self._open_trace(episode_id)
         # The chunked session only where chunking was asked for: at K=1 it is
         # the stock session by delegation anyway, and building the stock one
         # keeps "chunking off" and "chunking never installed" the same run.
@@ -615,11 +671,32 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                      "difficulty": self.difficulty, "stride": self.stride,
                      "embodiment": self.embodiment,
                      "action_chunk": self.action_chunk,
+                     "action_space": self.action_space,
                      "backend": "embodied", "episode_id": episode_id}
+
+    def _open_trace(self, episode_id: str) -> Any:
+        """A per-call trace, when one was asked for. See ``trace.py``."""
+        from .trace import EpisodeTrace, trace_dir
+
+        root = trace_dir()
+        if root is None:
+            return None
+        return EpisodeTrace(root, episode_id, {
+            "seed": self._last_seed, "map": self.map_dir.name,
+            "action_space": self.action_space, "max_step_m": self.max_step_m,
+            "camera_view": self.camera_view,
+            "arrive_cm": self.arrive_cm, "tick_chunk": self.tick_chunk,
+            "action_chunk": self.action_chunk, "narration": self.narration,
+            "difficulty": self.difficulty, "stride": self.stride,
+        })
 
     def _flush_telemetry(self) -> None:
         """Write the finished episode's record. Never raises."""
         from .telemetry import record_episode
+
+        if getattr(self, "_trace", None) is not None and self._env is not None:
+            self._trace.close(self._env)
+            self._trace = None
 
         record_episode(
             self._env,
@@ -639,6 +716,15 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                 "max_walk_seconds": self.max_walk_seconds,
                 "image_max_side": self.image_max_side,
                 "backend": "embodied",
+                # Which action space, and the cap that bounds one call of it.
+                # In the record because the comparison this run exists for is
+                # between two files of these, read weeks apart.
+                "action_space": self.action_space,
+                "max_step_m": self.max_step_m,
+                "camera_view": self.camera_view,
+                "allow_album_fallback": self.allow_album_fallback,
+                "show_pose": self.show_pose,
+                "narration": self.narration,
             },
         )
 

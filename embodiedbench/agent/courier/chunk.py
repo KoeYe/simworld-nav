@@ -270,6 +270,14 @@ class ChunkedCourierSession(CourierSession):
             image_paths=observation.image_paths,
             reply=reply,
         )
+        turn.frame_yaws = list(self._frame_yaws)
+        # The pose the turn STARTED at, which is where its photographs were
+        # taken. Set on both session paths or the two produce different record
+        # shapes -- and a reader of one would find a field the other lacks.
+        try:
+            turn.from_xy = [round(v, 1) for v in self.env.position()]
+        except Exception:  # noqa: BLE001 — a recording never fails a turn
+            turn.from_xy = None
         stopped = budget_exceeded(self.spend, self.budgets)
         if stopped:
             turn.status, turn.error = "truncated", stopped
@@ -319,7 +327,24 @@ class ChunkedCourierSession(CourierSession):
         stop_code = ""
         finish_reason = ""
         refused: Any = None
-        for index, action in enumerate(calls):
+        # RECEDING HORIZON: the reply names K waypoints, and exactly ONE of
+        # them happens.
+        #
+        # The earlier reading was that a chunk buys K actions for one prompt,
+        # which is what the throughput argument for chunking wanted. It is the
+        # wrong contract for a plan. The later waypoints are named relative to
+        # positions the courier has not reached yet, so executing them commits
+        # to a forecast the world has already had a chance to falsify: the
+        # first walk stops a metre short, or ends against a wall, and the
+        # second and third were computed from somewhere the courier is not.
+        #
+        # So they are a PLAN, not a queue. Naming three makes the model think a
+        # few steps ahead and shows that thinking in the trajectory; only the
+        # first is carried out, and the next turn re-plans from where the walk
+        # actually left it. The turn budget is sized for one action a turn
+        # because that is what a turn now buys.
+        planned = calls[1:]
+        for index, action in enumerate(calls[:1]):
             # Before the call, never after: an exhausted budget must not leave
             # a half-applied transition for the trajectory to explain. This is
             # the same rule ``budget_exceeded`` is documented with, applied
@@ -330,6 +355,16 @@ class ChunkedCourierSession(CourierSession):
                 break
             before = self.env.sim_seconds
             self._leaving = self.env.node_id
+            # Where this call is being judged FROM. The second and third
+            # waypoints of a chunk are named relative to positions the courier
+            # has not reached yet, so a trace that records only the reply
+            # cannot say what each call was actually asking for.
+            from_xy = None
+            if hasattr(self.env, "position"):
+                try:
+                    from_xy = [round(v, 1) for v in self.env.position()]
+                except Exception:  # noqa: BLE001 — a trace never fails a turn
+                    from_xy = None
             outcome = self._execute(action)
             seconds = self.env.sim_seconds - before
             executed += 1
@@ -343,6 +378,11 @@ class ChunkedCourierSession(CourierSession):
                 "code": "" if outcome.ok else (outcome.code or "refused"),
                 "sim_seconds": seconds,
                 "reward": outcome.reward,
+                "from_xy": from_xy,
+                # What the world said back to THIS call. The turn-level
+                # feedback is the calls' messages joined, so by the time a
+                # reader sees it there is no telling which call said what.
+                "message": outcome.message,
             })
             messages.append(outcome.message)
 
@@ -365,12 +405,15 @@ class ChunkedCourierSession(CourierSession):
                 stop_code = finish_reason
                 break
 
-        # Everything the chunk did not reach, named rather than silently
-        # missing: a plan that was cut short and a plan that was never made
-        # look identical in a log that only records what ran.
-        for action in calls[len(rows):]:
-            rows.append({"action": action.render(), "status": "dropped",
-                         "code": stop_code, "sim_seconds": 0.0, "reward": 0.0})
+        # The rest of the plan, recorded and not run. Named rather than
+        # silently missing: a plan that was never made and a plan that was
+        # made and superseded look identical in a log that keeps only what
+        # happened, and the difference is the whole reason for asking for
+        # three.
+        for action in planned:
+            rows.append({"action": action.render(), "status": "planned",
+                         "code": "", "sim_seconds": 0.0, "reward": 0.0,
+                         "from_xy": None, "message": ""})
 
         turn.chunk = rows
         turn.chunk_executed = executed
@@ -456,23 +499,32 @@ class ChunkedCourierSession(CourierSession):
 
     def _chunk_feedback(self, rows: list[dict[str, Any]], messages: list[str],
                         refused: Any) -> str:
-        """What the next prompt says about the chunk that just ran."""
-        lines = []
+        """What the next prompt says about the step that was taken.
+
+        Says which one happened and which were the plan, because the courier
+        wrote them as one reply and only one of them is a fact. A courier told
+        "you did all three" plans its next turn from a position it is not at.
+        """
+        lines, done = [], 0
         for index, row in enumerate(rows):
-            if row["status"] == "dropped":
+            if row["status"] in ("planned", "dropped"):
                 lines.append(f"  {index + 1}. {row['action']} — NOT CARRIED OUT")
             else:
-                lines.append(f"  {index + 1}. {row['action']} — {messages[index]}")
-        dropped = sum(1 for row in rows if row["status"] == "dropped")
-        many = "the call" if dropped == 1 else f"the {dropped} calls"
+                said = messages[done] if done < len(messages) else ""
+                done += 1
+                lines.append(f"  {index + 1}. {row['action']} — {said}")
+        rest = sum(1 for row in rows if row["status"] in ("planned", "dropped"))
+        many = "the call" if rest == 1 else f"the {rest} calls"
         tail = ""
-        if dropped and refused is not None:
+        if rest:
             tail = (
-                f"\nThat is where the turn stopped, so {many} after it never "
-                "happened. A turn stops at the first call that is refused.\n\n"
-                + REJECTED_TEMPLATE.format(reason=refused.message)
+                f"\nOnly the first call is ever carried out, so {many} after "
+                "it did not happen. They were your plan, and the step you just "
+                "took is the only thing that has changed the world -- work the "
+                "next one out again from where you are now, which is what the "
+                "turn above tells you."
             )
-        elif dropped:
-            tail = f"\nThe turn ran out before {many} at the end of it."
+        if refused is not None:
+            tail += "\n\n" + REJECTED_TEMPLATE.format(reason=refused.message)
         return CHUNK_FEEDBACK_TEMPLATE.format(
             count=len(rows), lines="\n".join(lines), tail=tail).rstrip()

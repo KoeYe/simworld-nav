@@ -71,6 +71,7 @@ from embodiedbench.runtime.city.courier_env import (
     REJECTED_ACTION_SECONDS,
     CourierEnv,
     StepOutcome,
+    compass_of,
 )
 
 from .cache import LiveAlbum
@@ -79,6 +80,7 @@ from .client import (
     RenderFailedError,
     RenderServiceError,
     ServiceBusy,
+    ServiceUnreachable,
     UERenderClient,
 )
 from .env import STREET_CAMERA, STREET_EYE_CM
@@ -100,10 +102,82 @@ from .protocol import (
 
 logger = logging.getLogger(__name__)
 
+
+class InstanceMoved(Exception):
+    """The instance died and the episode has been re-opened on another.
+
+    Raised out of the walk path so the caller charges the call as a refusal
+    rather than crediting a walk nobody can say happened. Not a
+    ``RenderServiceError``: nothing about the service is wrong any more.
+    """
+
 # Where the pawn spawns on the z axis, in cm. The capsule needs clearance
 # above the road surface; 100 is the spec's own example and what the SimWorld2
 # scaffold uses.
 DEFAULT_SPAWN_Z_CM = 100.0
+
+#: The two action spaces this env can present. See ``action_space``.
+ACTION_SPACE_STREET = "street"
+ACTION_SPACE_COORDINATE = "coordinate"
+ACTION_SPACES = (ACTION_SPACE_STREET, ACTION_SPACE_COORDINATE)
+
+#: What the courier is shown each turn.
+#:
+#: ``streets`` photographs every street leaving the junction, one frame per
+#: candidate, each captioned with the street a ``walk_to`` would name. That
+#: pairing is the street action space's whole design.
+#:
+#: ``forward`` photographs one thing: what is in front of the courier. It
+#: exists because the pairing stops being a design once the courier no longer
+#: takes streets by name -- under ``coordinate`` the per-street frames include
+#: the way it came, which it cannot act on and which spends half a two-image
+#: budget. A walking person does not get a photograph of behind them each time
+#: they take a step.
+#:
+#: ``streets`` is the default and stays it: the two action spaces are compared
+#: against each other, and changing what one of them SEES makes the difference
+#: between them two things instead of one.
+CAMERA_VIEW_STREETS = "streets"
+CAMERA_VIEW_FORWARD = "forward"
+CAMERA_VIEWS = (CAMERA_VIEW_STREETS, CAMERA_VIEW_FORWARD)
+
+# How far one ``walk_to_xy`` may carry, in metres. A request past it is
+# REFUSED, not clamped: a courier that asked for forty metres and was quietly
+# carried one and a half cannot tell that from arriving, and neither can a
+# reader of the log.
+#
+# 10 m, and the number has to clear four things at once.
+#
+# The JOB has to be reachable. A median delivery on this map is 247 m end to
+# end; at 9 m of ground per call (10 less the metre the walk stops short by)
+# that is 27 calls, nine turns at a chunk of three, against a val budget of
+# sixteen. A 1.5 m step wanted sixty-nine turns and the context window holds
+# about thirty, so `delivered` would have read zero for every seed by
+# arithmetic rather than by navigation.
+#
+# It has to sit near the scale the POLICY reaches for, or the refusals stop
+# being about navigation. Measured over the first live run: when it named a
+# point that was not the one under its feet, the request was 2.6 m at the
+# smallest, 4.8 m median, 16.2 m at the largest. A 10 m cap admits thirteen of
+# those fifteen, so what a refusal now means is "there is no way there", not
+# "you guessed the limit wrong".
+#
+# It must not make a coordinate call CHEAPER than a street one, which is what
+# the original 60 m was sized for: block-stride legs are a median 38.8 m and a
+# p75 of 59.5 m, and 10 m is comfortably under both.
+#
+# And the walk geometry has to close: see DEFAULT_STEP_ARRIVE_CM.
+DEFAULT_MAX_STEP_M = 10.0
+
+# The arrival radius and the tick chunk are not free once the step is short.
+# One tick carries ``speed * fixed_dt`` -- 28 cm at the 16x rollout settings --
+# and arrival is only tested at chunk boundaries, so the radius has to be at
+# least a chunk's worth of travel or the pawn sails past and reports stuck.
+# It must also be well inside the step cap, or the band between "you are
+# already there" and "that is too far" closes and every request lands in one
+# refusal or the other.
+DEFAULT_STEP_ARRIVE_CM = 100.0
+DEFAULT_STEP_TICK_CHUNK = 2
 
 # The album roots this env owns (all of them: v1 embodied has exactly one
 # album, the live cache, and no hazard frames at all), plus the hazard levers
@@ -113,6 +187,23 @@ _REFUSED_KWARGS = (
     "pavement_album_root", "pavement_obstacle_album_root",
     "obstacle_sidecar_root", "signal_sidecar_root",
 )
+
+
+def _metres(value: float) -> str:
+    """A distance as the manual should read it: 60, not 60.0."""
+    return f"{value:g}"
+
+
+def _point(xy: tuple[float, float]) -> str:
+    """A position as the courier is told it, in the units it types back.
+
+    One decimal and north first, identical to ``CourierEnv.pose_text`` -- the
+    coordinates in "you walk 38 m and stop at (…)" and the ones in "you are
+    standing at (…)" are the same position and have to read as the same
+    number, or the courier is left deciding which of two spellings of its own
+    position to count from.
+    """
+    return f"({xy[0] / 100.0:.1f}, {xy[1] / 100.0:.1f})"
 
 
 class EmbodiedCourierEnv(CourierEnv):
@@ -148,6 +239,13 @@ class EmbodiedCourierEnv(CourierEnv):
         # long run -- but an ONLINE experiment should turn it off: an
         # episode whose pictures came from an album measured the album.
         allow_album_fallback: bool = True,
+        # Which action space this episode presents: "street" (name one of
+        # the streets leaving this junction) or "coordinate" (name a point
+        # and walk toward it). Never both -- see ``tools.COORDINATE_TOOLS``.
+        action_space: str = ACTION_SPACE_STREET,
+        max_step_m: float = DEFAULT_MAX_STEP_M,
+        # What the turn's photographs are of. See CAMERA_VIEWS.
+        camera_view: str = CAMERA_VIEW_STREETS,
         **courier_kwargs: Any,
     ):
         clash = sorted(set(_REFUSED_KWARGS) & set(courier_kwargs))
@@ -167,8 +265,63 @@ class EmbodiedCourierEnv(CourierEnv):
         self.tick_chunk = int(tick_chunk)
         self.return_mode = return_mode
         self.allow_album_fallback = bool(allow_album_fallback)
+        if action_space not in ACTION_SPACES:
+            raise ValueError(
+                f"action_space={action_space!r}; it is one of {ACTION_SPACES}. "
+                "The two are different tasks and a run is one or the other -- "
+                "a menu holding both lets an episode fall back to naming a "
+                "street and be reported as coordinate walking.")
+        self.action_space = action_space
+        if camera_view not in CAMERA_VIEWS:
+            raise ValueError(
+                f"camera_view={camera_view!r}; it is one of {CAMERA_VIEWS}.")
+        self.camera_view = camera_view
+        if camera_view == CAMERA_VIEW_FORWARD and action_space != ACTION_SPACE_COORDINATE:
+            raise ValueError(
+                "camera_view='forward' with the street action space would "
+                "photograph nothing the courier can name: it picks a street "
+                "off the list, and the list's pictures are how it tells them "
+                "apart.")
+        self.max_step_m = float(max_step_m)
+        if self.max_step_m <= 0:
+            raise ValueError(
+                f"max_step_m={max_step_m!r}; one coordinate call has to be "
+                "able to cover some ground.")
+        # The three numbers that have to move together, checked once here
+        # rather than rediscovered as a stuck rate. See DEFAULT_STEP_ARRIVE_CM.
+        if self.coordinate_mode and self.arrive_cm >= self.max_step_m * 100.0:
+            raise ValueError(
+                f"arrive_cm={self.arrive_cm} against a {self.max_step_m} m "
+                "step cap leaves no distance a request can name: anything "
+                "nearer counts as already arrived and anything further is "
+                "refused. Bring arrive_cm well inside the cap.")
+        # Naming a point is only answerable if the courier is told the point
+        # it is naming from. Defaulted here rather than required from the
+        # caller, because a coordinate run without it is not a harder task,
+        # it is an unanswerable one -- but it stays overridable, so the
+        # controlled comparison (street space, pose shown) is a config away.
+        if self.action_space == ACTION_SPACE_COORDINATE:
+            courier_kwargs.setdefault("show_pose", True)
+        # Per-call evidence for the coordinate space, in the same log as the
+        # hops: what was asked for, what became of it, and where the graph
+        # ended up relative to the pawn.
+        self.coordinate_walks = 0
+        # The bearing the last walk actually carried the pawn along. See
+        # ``facing``: the pawn's own yaw cannot answer this, because taking a
+        # photograph turns it.
+        self._walked_bearing: float | None = None
+        #: Album path -> the yaw the camera was aimed at when it was taken.
+        #: The pawn is turned to aim, so it is also the pawn's own yaw at the
+        #: shutter -- which is why ``facing`` cannot be read off the pose.
+        self.frame_yaws: dict[str, float] = {}
         #: How long reset() waits for a busy instance before giving up.
         self.episode_busy_timeout_s = 1800.0
+        #: How long to leave an instance alone after it stopped answering,
+        #: before asking the pool for a seat again.
+        self.reseat_pause_s = 5.0
+        #: How many times one episode may re-seat while trying to open. An
+        #: instance that cannot spawn twice running is not one to wait out.
+        self.max_reseats = 3
         # Lease plumbing: a pool is leased lazily (the fleet may still be
         # launching when the env object is built); a bare client is used as
         # given and never "released".
@@ -229,6 +382,9 @@ class EmbodiedCourierEnv(CourierEnv):
         self.live_degraded = False
         self.busy_waits = 0
         self.busy_wait_seconds = 0.0
+        self.coordinate_walks = 0
+        self._walked_bearing = None
+        self.frame_yaws = {}
         node = self.network.nodes[self.node_id]
         request = EpisodeRequest(
             episode_id=self.episode_id,
@@ -249,6 +405,28 @@ class EmbodiedCourierEnv(CourierEnv):
         self.fixed_dt = response.fixed_dt
         self.ue_pose = response.pose
         self._episode_open = True
+        self._check_walk_geometry()
+
+    def _check_walk_geometry(self) -> None:
+        """Can this arrival radius be hit at this tick chunk and speed?
+
+        Arrival is tested at chunk boundaries only, so a chunk carries the
+        pawn ``speed * fixed_dt * tick_chunk`` between looks. A radius smaller
+        than that is invisible: the pawn steps over the target and the walk
+        reports stuck, which reads as a navigation failure and is arithmetic.
+        Warned rather than raised -- the run is still meaningful, and taking a
+        training job down over a tuning mistake is worse than saying so.
+        """
+        if not self.fixed_dt:
+            return
+        per_chunk = (self.embodiment.speed_cm_s or 140.0) * self.fixed_dt * self.tick_chunk
+        if per_chunk > self.arrive_cm:
+            logger.warning(
+                "walk geometry: one chunk of %d tick(s) carries %.0f cm at "
+                "dt=%.3f, but arrive_cm is %.0f -- the pawn can step over the "
+                "target between arrival checks and report stuck. Lower "
+                "tick_chunk or raise arrive_cm.",
+                self.tick_chunk, per_chunk, self.fixed_dt, self.arrive_cm)
 
     def _episode_when_free(self, request: EpisodeRequest) -> Any:
         """Open the episode, waiting out a busy instance.
@@ -262,6 +440,7 @@ class EmbodiedCourierEnv(CourierEnv):
         """
         deadline = time.monotonic() + self.episode_busy_timeout_s
         delay = 1.0
+        reseats = 0
         while True:
             try:
                 return self._ue().episode(request)
@@ -274,6 +453,33 @@ class EmbodiedCourierEnv(CourierEnv):
                 self.busy_wait_seconds += delay
                 time.sleep(delay)
                 delay = min(delay * 1.5, 15.0)
+            except RenderServiceError as error:
+                # Opening the episode is the OTHER call that can meet a wedged
+                # instance, and it was the one left unguarded: `/walk` learned
+                # to re-seat and `reset()` still took the training job down
+                # with `render_failed: spawn failed: AssertionError:` -- the
+                # engine answering /healthz green while every RPC into it
+                # raises. Same recovery, same reason, and bounded, because an
+                # instance that cannot spawn twice running is not one this
+                # episode can wait out.
+                if reseats >= self.max_reseats or self._pool is None:
+                    raise
+                if not (self._instance_is_gone(error)
+                        or isinstance(error, RenderFailedError)):
+                    raise
+                reseats += 1
+                logger.warning(
+                    "episode %s could not open (%s); re-seating (%d/%d)",
+                    self.episode_id, error, reseats, self.max_reseats)
+                try:
+                    self._release_lease()
+                except Exception:  # noqa: BLE001 — it is already unusable
+                    pass
+                self._client = None
+                self.embodied_log.append({
+                    "recovery": "reseat_on_open", "attempt": reseats,
+                    "error": f"{type(error).__name__}: {error}"})
+                time.sleep(self.reseat_pause_s)
 
     def close(self) -> None:
         """End the embodied episode and give the instance back.
@@ -354,7 +560,15 @@ class EmbodiedCourierEnv(CourierEnv):
             # coaching). No walk was attempted, so nothing embodied applies.
             return super()._step_to(k)
         row = rows[k]
-        walk = self._walk_hop(row["node"])
+        try:
+            walk = self._walk_hop(row["node"])
+        except InstanceMoved:
+            return self._refuse(StepOutcome(
+                ok=False, code="instance_moved",
+                message=("Something went wrong out of your sight and you are "
+                         "back at the last junction. Nothing you did caused "
+                         "it. Read where you are and go on from there."),
+            ))
         if not walk.arrived:
             outcome = "stuck" if walk.stuck else "timeout"
             if walk.stuck:
@@ -407,6 +621,414 @@ class EmbodiedCourierEnv(CourierEnv):
             ),
         )
 
+    # ── the coordinate action space ──────────────────────────────────────────
+    #
+    # The street space asks which of the handful of streets leaving this
+    # junction to take. The coordinate space asks for a point, and the pawn
+    # walks toward it under the navmesh -- so the courier has to derive a
+    # position from the map and its own, which is the harder question and the
+    # reason the space exists. The two are never offered together: a menu with
+    # both lets an episode take the easy action and be reported under the hard
+    # one's name.
+    #
+    # Where the courier IS, in this space, is wherever the last walk left the
+    # pawn -- not a node. That one decision settles the rest of this section.
+    # ``position()`` answers with the pawn, so the map's "you are here", the
+    # distances beside each street, the door tolerance ``collect`` measures and
+    # the coordinates the observation prints are all the same point. The graph
+    # node is kept as well, because everything the environment can *say* is
+    # node-shaped -- which street this is, its house numbers, what leaves it --
+    # and it is re-derived from the pawn after every walk. The gap between the
+    # two is measured and logged as ``snap_cm`` rather than assumed small.
+
+    def movement_env_actions(self) -> tuple[str, ...]:
+        if self.action_space == ACTION_SPACE_COORDINATE:
+            return ("MOVE_TO_XY",)
+        return super().movement_env_actions()
+
+    def tool_limits(self) -> dict[str, Any]:
+        limits = dict(super().tool_limits())
+        limits["max_step_m"] = _metres(self.max_step_m)
+        return limits
+
+    @property
+    def coordinate_mode(self) -> bool:
+        return self.action_space == ACTION_SPACE_COORDINATE
+
+    def _here_cm(self) -> tuple[float, float]:
+        """Where the courier actually stands: the pawn, once the engine says.
+
+        Before the first ``/episode`` there is no pawn, and the node the graph
+        starts on is the honest answer -- it is where the pawn is about to be
+        spawned.
+        """
+        pose = getattr(self, "ue_pose", None)
+        if pose is None:
+            return CourierEnv.position(self)
+        return (float(pose.x_cm), float(pose.y_cm))
+
+    def position(self, node_id: str | None = None) -> tuple[float, float]:
+        """Where a node is, or -- with no argument -- where the courier is.
+
+        Only the no-argument case changes, and only in the coordinate space:
+        there the courier is a pawn standing anywhere, and every caller asking
+        "where is the courier" should get that rather than the nearest
+        junction. Asked about a named node this is the stock lookup, so the
+        graph's own geometry is untouched.
+        """
+        if node_id is not None or not self.coordinate_mode:
+            return super().position(node_id)
+        return self._here_cm()
+
+    def facing(self) -> float | None:
+        """Which way the courier is looking: the way its last walk carried it.
+
+        The stock answer is the bearing from the node it came from to the node
+        it is on, which has no meaning when the courier stands between nodes
+        and the node it "came from" is merely the one it was nearest to
+        before. This is the same fact measured off the pawn: where the last
+        walk started, to where it ended. ``None`` until it has walked, exactly
+        as the stock env has no back to its head at the start of a shift.
+
+        NOT the pawn's own yaw, which is the obvious answer and the wrong
+        one: ``/observe`` aims the camera by TURNING the agent, so after an
+        observation the pawn's yaw is the bearing of the last photograph
+        taken -- and an observation photographs every street leaving the
+        junction. Read off the pose, "facing" was whichever neighbour the
+        album happened to render last, which then decided every "on your
+        left" in the same turn's list of streets.
+        """
+        if not self.coordinate_mode:
+            return super().facing()
+        if self._walked_bearing is None:
+            return super().facing()
+        return self._walked_bearing % 360.0
+
+    def _nearest_node(self, point_cm: tuple[float, float]) -> tuple[str, float]:
+        """The graph node closest to a point, and how far off it is."""
+        node = min(self.network.nodes,
+                   key=lambda n: math.dist(self.position(n), point_cm))
+        return node, math.dist(self.position(node), point_cm)
+
+    def walk_to_xy(self, x: float, y: float) -> StepOutcome:
+        """Walk toward a named point, as far as one step is allowed to carry.
+
+        The three cases, and the reason each is what it is:
+
+        * **Too near.** A point inside the arrival radius is the one the
+          courier is already standing on. Walking to it would burn a turn to
+          arrive where it started, so it is refused with the wording the
+          manual declares.
+        * **Too far.** Refused, and refused at the moment this call runs
+          rather than when it was written -- so the second and third calls of
+          a chunk are judged against the position the first two walks left
+          the courier at, which is the position they were named relative to.
+        * **Unwalkable.** The navmesh gets as far as it can and reports
+          stuck; the pawn keeps the ground it covered and the refusal says
+          there is no way through. No re-spawn: in this space the pawn's
+          position is the truth and standing it back on a node it may be
+          twenty metres from would be the desynchronisation the re-spawn
+          exists to prevent, applied backwards.
+        """
+        if not self.coordinate_mode:
+            # Unreachable through the menu -- the tool is not offered -- so
+            # this is a caller wiring the two spaces together, and the halves
+            # that make this method honest (the pawn being the courier's
+            # position, the frame keys carrying the vantage, facing measured
+            # off the walk) are all switched off under `street`.
+            raise RuntimeError(
+                "walk_to_xy needs action_space='coordinate'; this episode is "
+                f"running {self.action_space!r}.")
+        try:
+            asked = (float(x) * 100.0, float(y) * 100.0)
+        except (TypeError, ValueError):
+            return self._refuse(StepOutcome(
+                ok=False, code="bad_coordinate",
+                message=("A point is two numbers, metres north and metres "
+                         "east: walk_to_xy(-267.1, 97.8)."),
+            ))
+        if not all(math.isfinite(v) for v in asked):
+            self._log_refused_point(asked, self._here_cm(), "bad_coordinate")
+            return self._refuse(StepOutcome(
+                ok=False, code="bad_coordinate",
+                message=("A point is two ordinary numbers, metres north and "
+                         "metres east: walk_to_xy(-267.1, 97.8)."),
+            ))
+        here = self._here_cm()
+        reach = math.dist(here, asked)
+        if reach <= self.arrive_cm:
+            # Names the mistake rather than the rule. Measured on Qwen3-VL-4B:
+            # 83 of 205 coordinate turns were this, and every one of them was
+            # the model typing back the two numbers the observation had just
+            # given it for its own position -- reasoning correctly about where
+            # it wanted to go ("the next junction is 18 m north-east") and then
+            # writing down where it already was. "Name somewhere you are not"
+            # is true and was not enough; a courier repeating a refusal word
+            # for word has not understood which word was wrong.
+            self._log_refused_point(asked, here, "already_here")
+            return self._refuse(StepOutcome(
+                ok=False, code="already_here",
+                message=(
+                    f"{_point(asked)} is the point you are standing on -- the "
+                    "same two numbers this turn gave you for your own "
+                    "position. Naming it again does not move you. Decide how "
+                    "far north and how far east you want to go, ADD that to "
+                    "each of your numbers, and name the result."
+                ),
+            ))
+        cap_cm = self.max_step_m * 100.0
+        if reach > cap_cm:
+            # Refused, not clamped, and refused HERE -- at the moment this
+            # call runs, against the position it runs from.
+            #
+            # A chunk of three waypoints is checked one at a time as it is
+            # reached, never all three up front: the second and third are
+            # named relative to a position the courier has not walked to yet,
+            # so judging them against the position it stood at when it wrote
+            # them measures a step it never asked for. The turn stops at the
+            # first refusal either way, so a chunk that opens well and drifts
+            # loses only its tail.
+            #
+            # Clamping was the earlier behaviour and it hid the mistake:
+            # a courier that asked for 40 m and was silently carried 1.5 m
+            # cannot tell the two apart from where it lands, and neither can
+            # a reader of the log.
+            self._log_refused_point(asked, here, "too_far")
+            return self._refuse(StepOutcome(
+                ok=False, code="too_far",
+                message=(
+                    f"{_point(asked)} is {reach / 100.0:.1f} m away and one "
+                    f"step is at most {_metres(self.max_step_m)} m. Name a "
+                    "point on the way there instead -- you can take several "
+                    "steps, and each one starts from where the last left you."
+                ),
+            ))
+        target = asked
+        self.coordinate_walks += 1
+        try:
+            walk = self._walk_to_point(*target)
+        except InstanceMoved as error:
+            # The instance died under this call and the episode is now open on
+            # another one, standing at the node the graph believes in. The
+            # call itself did not happen.
+            self._log_refused_point(asked, here, "instance_moved")
+            return self._refuse(StepOutcome(
+                ok=False, code="instance_moved",
+                message=("Something went wrong out of your sight and you are "
+                         "back at the last junction. Nothing you did caused "
+                         "it. Read where you are and go on from there."),
+            ))
+        # The distance covered is measured between two poses this env holds,
+        # not taken from the service's own count.
+        #
+        # Measured on ds-serv6, 13 accepted walks in one episode: every one
+        # moved between 0.5 and 4.7 m by its own start and end pose, and every
+        # one reported walked_cm = 0.00. The episode's route quality therefore
+        # read "walked 0 m" for a courier that had covered fifteen. Both
+        # numbers come back from the same response, so this is not a baseline
+        # I picked badly -- it is the count disagreeing with the poses beside
+        # it, and the poses are the ones the arrival test and the next walk
+        # both use.
+        #
+        # The service's figure is kept in the log rather than discarded: the
+        # gap between the two is the evidence for whatever is wrong in the
+        # walk loop's per-chunk accumulation, and dropping it would hide the
+        # defect this line is working around.
+        landed_at = self._here_cm()
+        walked_m = math.dist(here, landed_at) / 100.0
+        # Every outcome moved the pawn some distance, and in this space that
+        # distance is kept: there is no re-spawn undoing it, the next call
+        # starts from where it left off, and a body that walked forty metres
+        # into a dead end has walked forty metres. The stock hop drops them
+        # because it puts the pawn back where it started.
+        self._spend_stamina(walked_m)
+        self.walked_cm += walked_m * 100.0
+        # Measured, not assumed to be the bearing that was asked for: a
+        # navmesh route round a corner ends the courier facing along the last
+        # leg of it, which is not the direction of the point it named.
+        if math.dist(here, landed_at) > 1.0:
+            self._walked_bearing = bearing_deg(here, landed_at)
+        landed, snap_cm = self._nearest_node(self._here_cm())
+        if landed != self.node_id:
+            self.arrived_from = self.node_id
+            self.node_id = landed
+        self._log_point_walk(asked, target, walk, start=here,
+                             landed=landed, snap_cm=snap_cm)
+        if not walk.arrived:
+            code = "stuck" if walk.stuck else "walk_timeout"
+            if walk.stuck:
+                self.blocked_attempts += 1
+            # No ``_issue`` here, matching both stock refusal paths: the queue
+            # is topped up and swept after the clock is charged, and ``_refuse``
+            # charges it on the way out. Sweeping first would expire orders
+            # against a clock this turn has not yet paid.
+            return self._refuse(StepOutcome(
+                ok=False, code=code, walked_m=walked_m,
+                message=(
+                    (f"There is no way to walk there. You get {walked_m:.0f} m "
+                     f"and stop at {_point(self._here_cm())}; something is "
+                     "across the way. Read the map again and aim at somewhere "
+                     "a person could walk to."
+                     if walk.stuck else
+                     f"You give up {walked_m:.0f} m along, at "
+                     f"{_point(self._here_cm())}; getting there is taking far "
+                     "longer than it should.")
+                ),
+            ), seconds=max(walk.sim_seconds, REJECTED_ACTION_SECONDS))
+        self.turns += 1
+        self.sim_seconds += walk.sim_seconds
+        self._issue()
+        return StepOutcome(
+            ok=True, moved=True, sim_seconds=walk.sim_seconds,
+            walked_m=walked_m,
+            message=(
+                f"You walk {walked_m:.0f} m and stop at "
+                f"{_point(self._here_cm())}."
+
+            ),
+        )
+
+    def _log_refused_point(self, asked: tuple[float, float],
+                           here: tuple[float, float], code: str) -> None:
+        """A coordinate request that never became a walk.
+
+        Deliberately NOT shaped like a hop -- no ``ticks``, so every existing
+        aggregation goes on counting walks and only walks.
+
+        It exists because leaving it out cost a whole evening's reading. 83 of
+        205 turns in the first live run were refused here, and because a
+        refusal returned before the hop log, the telemetry recorded the
+        coordinate that caused them exactly nowhere: the only way to see what
+        the policy had asked for was to parse it back out of the model's own
+        reply text. That is the same shape as every other measurement failure
+        on this system -- the zero I read was invisible, not absent.
+
+        ``gap_m`` is the number the refusal turns on, so a reader can tell
+        "it named its own position" from "it named somewhere a metre away"
+        without re-deriving the arithmetic.
+        """
+        self.embodied_log.append({
+            "kind": "coordinate_refused",
+            "code": code,
+            "asked_xy": (round(asked[0], 1), round(asked[1], 1)),
+            "from_xy": (round(here[0], 1), round(here[1], 1)),
+            "gap_m": round(math.dist(here, asked) / 100.0, 2),
+        })
+
+    def _log_point_walk(self, asked: tuple[float, float],
+                        target: tuple[float, float], walk: WalkResponse, *,
+                        start: tuple[float, float],
+                        landed: str, snap_cm: float) -> None:
+        """One coordinate walk, in the same log shape as a hop.
+
+        Same keys where the meaning survives -- ``ticks``, ``sim_seconds``,
+        ``walked_cm``, ``end_pose``, ``outcome`` -- so every aggregation that
+        already reads ``embodied_log`` keeps working without being told this
+        action space exists. ``pose_error_cm`` keeps its name and changes its
+        referent: it is still "how far the pawn ended from what it was aimed
+        at", which here is the point it named rather than a node.
+        """
+        graph_seconds = (math.dist(start, target)
+                         / max(self.travel_speed_cm_s(), 1e-6))
+        self.embodied_log.append({
+            "kind": "coordinate",
+            "asked_xy": (round(asked[0], 1), round(asked[1], 1)),
+            "target_xy": (round(target[0], 1), round(target[1], 1)),
+            "chord_m": round(math.dist(start, target) / 100.0, 3),
+            "graph_seconds": round(graph_seconds, 4),
+            "ticks": walk.ticks,
+            "sim_seconds": walk.sim_seconds,
+            "walked_cm": round(math.dist(start, (walk.pose.x_cm, walk.pose.y_cm)), 2),
+            # What the service counted, beside what the poses say. They
+            # disagree, and the disagreement is the evidence.
+            "service_walked_cm": walk.walked_cm,
+            # The identity that makes the disagreement checkable, once the
+            # service reports both ends of its own walk: a path is never
+            # shorter than the line it spans, so `service_walked_cm` below
+            # `service_displacement_cm` is the count being wrong and not the
+            # baseline being badly chosen. Absent from a service that predates
+            # the field, which is why it is written as None rather than
+            # computed from something else.
+            "service_displacement_cm": (
+                round(math.dist(
+                    (walk.start_pose.x_cm, walk.start_pose.y_cm),
+                    (walk.pose.x_cm, walk.pose.y_cm)), 2)
+                if walk.start_pose is not None else None),
+            "end_pose": walk.pose.to_dict(),
+            "pose_error_cm": math.dist(
+                (walk.pose.x_cm, walk.pose.y_cm), target),
+            # Which junction the environment will describe from here, and how
+            # far that junction is from where the courier is really standing.
+            # The one number that says whether "the streets leaving this
+            # junction" is a description of the courier's surroundings or of
+            # somewhere down the road.
+            "landed_node": landed,
+            "snap_cm": round(snap_cm, 1),
+            "outcome": ("arrived" if walk.arrived else
+                        "stuck" if walk.stuck else "timeout"),
+        })
+
+    def _instance_is_gone(self, error: Exception) -> bool:
+        """Did this error mean "that instance is not there any more"?
+
+        Different from ``_episode_is_lost``, which is a LIVE service saying it
+        does not hold this episode. This is no service at all -- and until now
+        it ended the training job, because a lease hands the env one instance
+        and the env had nowhere else to go. Twice today: forty minutes in,
+        ``ServiceUnreachable: ue-0 /walk unreachable (timed out)``, run over.
+        """
+        return isinstance(error, ServiceUnreachable) or (
+            isinstance(error, RenderServiceError)
+            and getattr(error, "code", None) == "engine_down")
+
+    def _move_instance(self, reason: str) -> bool:
+        """Give the dead instance back and take a seat on a healthy one.
+
+        Only possible when the env was handed a POOL. With a bare client there
+        is exactly one service and nothing to move to, which is the
+        single-instance and test setup, so the error propagates as before.
+
+        The walk that failed is NOT retried. ``/walk`` is the one
+        non-idempotent endpoint, an unreachable service may or may not have
+        moved the pawn, and re-issuing it against a fresh spawn would credit
+        the episode with a walk nobody can say happened. The episode re-opens
+        at the node the graph believes in and the call that hit the dead
+        instance is refused, charged like any refusal.
+        """
+        if self._pool is None:
+            return False
+        logger.warning("instance lost under episode %s (%s); re-seating",
+                       self.episode_id, reason)
+        try:
+            self._release_lease()
+        except Exception as error:  # noqa: BLE001 — it is already dead
+            logger.info("releasing the dead lease raised (%s)", error)
+        self._client = None
+        self._episode_open = False
+        # A fleet of one is the fleet we actually run, and "move to another"
+        # has nowhere to go there -- which is how a run kept dying with the
+        # move already written. So the same instance is a legitimate
+        # destination: `unreachable` is a timed-out or reset SOCKET, not a
+        # death certificate, and the engine behind it has been up for hours in
+        # every case measured. Give it a moment and re-seat.
+        #
+        # The lease was dropped above, so the pool decides where the seat
+        # comes from -- another instance if one is healthy, this one if it is
+        # all there is. The pool has already struck it, so it is picked last.
+        time.sleep(self.reseat_pause_s)
+        try:
+            self._reopen_episode(f"instance lost: {reason}")
+        except Exception as error:  # noqa: BLE001
+            logger.warning("could not re-open %s on another instance (%s: %s)",
+                           self.episode_id, type(error).__name__, error)
+            self.embodied_log.append({
+                "recovery": "move_failed", "after": reason,
+                "error": f"{type(error).__name__}: {error}"})
+            return False
+        self.embodied_log.append({"recovery": "moved_instance", "after": reason,
+                                  "node": self.node_id})
+        return True
+
     def _episode_is_lost(self, error: Exception) -> bool:
         """Did this error mean "your episode is no longer on that instance"?
 
@@ -458,9 +1080,18 @@ class EmbodiedCourierEnv(CourierEnv):
         a dead engine really is a dead episode.
         """
         target = self.network.nodes[toward]
+        return self._walk_to_point(target.x_cm, target.y_cm)
+
+    def _walk_to_point(self, x_cm: float, y_cm: float) -> WalkResponse:
+        """One /walk to an arbitrary world point.
+
+        The wire has always taken coordinates -- a node hop is this with the
+        node's own -- so the coordinate action space needed no new endpoint,
+        only somewhere to hand a point that is not a node's.
+        """
         request = WalkRequest(
             episode_id=self.episode_id,
-            target_x_cm=target.x_cm, target_y_cm=target.y_cm,
+            target_x_cm=float(x_cm), target_y_cm=float(y_cm),
             arrive_cm=self.arrive_cm,
             max_sim_seconds=self.max_walk_seconds,
             tick_chunk=self.tick_chunk,
@@ -468,10 +1099,17 @@ class EmbodiedCourierEnv(CourierEnv):
         try:
             walk = self._ue().walk(request)
         except RenderServiceError as error:
-            if not self._episode_is_lost(error):
+            if self._episode_is_lost(error):
+                self._reopen_episode(f"walk: {type(error).__name__}")
+                walk = self._ue().walk(request)
+            elif self._instance_is_gone(error) and self._move_instance(
+                    f"walk: {type(error).__name__}"):
+                # Moved. The walk itself is not re-issued -- see
+                # ``_move_instance`` -- so this call is a refusal and the
+                # episode carries on from the node it re-opened at.
+                raise InstanceMoved(str(error)) from error
+            else:
                 raise
-            self._reopen_episode(f"walk: {type(error).__name__}")
-            walk = self._ue().walk(request)
         self.ue_pose = walk.pose
         return walk
 
@@ -519,9 +1157,10 @@ class EmbodiedCourierEnv(CourierEnv):
         next look retries), anything deterministic degrades the episode's
         frames -- never its physics -- to album mode.
         """
-        key = f"{node_id}/toward_{toward}"
+        vantage = self._vantage(node_id)
+        key = f"{vantage}/toward_{toward}"
         if not self.live_album.has(key) and not self.live_degraded:
-            yaw = bearing_deg(self.position(node_id), self.position(toward))
+            yaw = bearing_deg(self._camera_at(node_id), self.position(toward))
             request = ObserveRequest(
                 episode_id=self.episode_id,
                 camera=self.street_camera,
@@ -563,7 +1202,111 @@ class EmbodiedCourierEnv(CourierEnv):
                     "observe failed (%s: %s); episode %s continues with "
                     "cached frames only", type(error).__name__, error,
                     self.episode_id)
-        return super()._plain_frame(node_id, toward)
+        path = super()._plain_frame(vantage, toward)
+        if path is not None and path not in self.frame_yaws:
+            self.frame_yaws[path] = round(bearing_deg(
+                self._camera_at(node_id), self.position(toward)), 1)
+        return path
+
+    def photo_rows(self, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """One picture of what is in front, when that is what was asked for.
+
+        The row is synthetic on purpose: the caption renderer and the frame
+        attacher both walk this list positionally, so handing them a row is
+        what keeps a picture and its caption together without either learning
+        that this mode exists.
+        """
+        if self.camera_view != CAMERA_VIEW_FORWARD:
+            return super().photo_rows(rows)
+        yaw = self.facing()
+        if yaw is None:
+            # It has not walked yet, so there is no direction of travel. The
+            # pawn spawns facing north and that is the honest answer.
+            pose = self.ue_pose
+            yaw = float(pose.yaw_deg) % 360.0 if pose is not None else 0.0
+        image = self._forward_frame(yaw)
+        if image is None:
+            return []
+        return [{"street": "ahead", "heading": compass_of(yaw), "ahead": True,
+                 "image": image, "signal_image": None, "node": None,
+                 "bearing": yaw, "distance_m": 0.0}]
+
+    def _forward_frame(self, yaw_deg: float) -> str | None:
+        """The view along ``yaw_deg`` from where the pawn stands.
+
+        Keyed by vantage and bearing, to the degree: the courier walks a few
+        metres a turn and turns as it goes, so a frame is only reusable when
+        both the place and the direction repeat.
+        """
+        key = f"{self._vantage(self.node_id)}/ahead_{round(yaw_deg):+04d}"
+        path = self.live_album.path_for(key)
+        if not path.exists() and not self.live_degraded:
+            request = ObserveRequest(
+                episode_id=self.episode_id, camera=self.street_camera,
+                yaw_deg=float(yaw_deg), return_mode=self.return_mode)
+            try:
+                try:
+                    result = self._ue().observe(request)
+                except RenderServiceError as error:
+                    if not self._episode_is_lost(error):
+                        raise
+                    self._reopen_episode(f"observe: {type(error).__name__}")
+                    result = self._ue().observe(request)
+                if result.ok:
+                    self.live_album.store(key, result)
+                    if result.pose is not None:
+                        self.ue_pose = result.pose
+            except ServiceBusy as error:
+                logger.info("observe busy for %s (%s); the next look retries",
+                            key, error)
+            except (RenderServiceError, ProtocolViolation, OSError) as error:
+                self.live_degraded = True
+                if not self.allow_album_fallback:
+                    raise
+                logger.warning(
+                    "observe failed (%s: %s); episode %s continues with "
+                    "cached frames only", type(error).__name__, error,
+                    self.episode_id)
+        if not path.exists():
+            return None
+        self.frame_yaws[str(path)] = round(float(yaw_deg) % 360.0, 1)
+        return str(path)
+
+    def _camera_at(self, node_id: str) -> tuple[float, float]:
+        """Where the camera stands when photographing from ``node_id``.
+
+        The pawn, when the node in question is the one the courier is at and
+        the courier may be standing off it. Street mode is unchanged: there
+        the pawn is within ``arrive_cm`` of the node by construction, and
+        moving the yaw's origin would change every baked comparison for a
+        fraction of a degree.
+        """
+        if self.coordinate_mode and node_id == self.node_id:
+            return self._here_cm()
+        return super().position(node_id)
+
+    def _vantage(self, node_id: str) -> str:
+        """The album key's first component: the place a frame was taken from.
+
+        A node, in the street space, and that is a complete description --
+        the courier arrives within ``arrive_cm`` of it every time, so one
+        frame per (node, neighbour) can be rendered once and reused, which is
+        the idempotency ``observation_media_hash`` and ``FrameAliases`` both
+        rest on.
+
+        In the coordinate space the courier stands wherever its last walk
+        left it, and the same node can be looked at from anywhere within the
+        snap radius. Keyed by node alone, the first visit's photograph would
+        be served for every later one -- the observation would stop being of
+        where the courier is, and nothing would say so. So the position joins
+        the key, rounded to the decimetre: fine enough that two genuinely
+        different vantages never share a frame, coarse enough that the same
+        one re-rendered is still a cache hit.
+        """
+        if not self.coordinate_mode or node_id != self.node_id:
+            return node_id
+        x_cm, y_cm = self._here_cm()
+        return f"{node_id}@{round(x_cm / 10.0):+d}_{round(y_cm / 10.0):+d}"
 
     def signal_frame_for(self, node_id: str, toward: str) -> str | None:
         # v1 embodied: hazards off, unconditionally (spec 3b).
@@ -585,7 +1328,7 @@ class EmbodiedCourierEnv(CourierEnv):
                 total += 1
                 if self.live_album.has(f"{node_id}/toward_{neighbour}"):
                     rendered += 1
-        return {
+        out = {
             "directed_edges": total, "with_frame": rendered,
             "fraction": round(rendered / total, 4) if total else 0.0,
             "signalised_with_frame": 0,     # hazards off in v1
@@ -593,6 +1336,16 @@ class EmbodiedCourierEnv(CourierEnv):
             "backend": "embodied",
             "degraded": self.live_degraded,
         }
+        if self.coordinate_mode:
+            # Frames are keyed by where the pawn stood, not by node, so
+            # "fraction of directed edges covered" counts something this run
+            # never renders and would read 0.0 for a fully-photographed
+            # episode. Say what is there instead of a ratio that is not one.
+            out["with_frame"] = out["fraction"] = None
+            out["frames_on_disk"] = sum(
+                1 for _ in self.live_album.images.rglob("*.png"))
+            out["keyed_by"] = "vantage"
+        return out
 
     def summary(self) -> dict[str, Any]:
         """The stock summary plus the ``embodied`` block -- the I/O evidence
@@ -622,5 +1375,30 @@ class EmbodiedCourierEnv(CourierEnv):
             # trainer looks.
             "degraded": self.live_degraded,
             "busy_waits": self.busy_waits,
+            # Which question this episode was asked. Recorded on every
+            # episode, both spaces, because the whole point of the coordinate
+            # run is a number compared against the street run's -- and a pair
+            # of numbers whose configs are remembered rather than written
+            # down is a comparison nobody can check afterwards.
+            "action_space": self.action_space,
         }
+        if self.coordinate_mode:
+            snaps = sorted(h["snap_cm"] for h in hops if "snap_cm" in h)
+            out["embodied"].update({
+                "max_step_m": self.max_step_m,
+                "coordinate_walks": self.coordinate_walks,
+                # How often it asked for more than one step buys. A run
+                # that is all `too_far` is a policy aiming at the destination
+                # every turn, which is a different behaviour from naming
+                # reachable points and worth being able to see.
+                "coordinate_too_far": sum(
+                    1 for h in self.embodied_log
+                    if h.get("code") == "too_far"),
+                # How far the junction being described sits from where the
+                # courier actually is. The number that says whether the
+                # observation is about the courier's surroundings.
+                "median_snap_cm": (round(snaps[len(snaps) // 2], 1)
+                                   if snaps else None),
+                "max_snap_cm": round(snaps[-1], 1) if snaps else None,
+            })
         return out

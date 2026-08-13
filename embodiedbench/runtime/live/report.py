@@ -104,6 +104,7 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     breaches = 0
     engine_seconds = graph_seconds = 0.0
     workers: Counter[int] = Counter()
+    action_spaces: Counter[str] = Counter()
     delivered = 0
 
     for record in records:
@@ -111,6 +112,8 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         # Per record, not a constant: arrive_cm is a config axis and a
         # directory can hold episodes from more than one setting.
         arrive_cm = float((record.get("config") or {}).get("arrive_cm") or 0.0)
+        action_spaces[str((record.get("config") or {}).get("action_space")
+                          or "street")] += 1
         outcomes.update(counters.get("outcomes", {}))
         hops += int(counters.get("hops", 0))
         recoveries += int(counters.get("recoveries", 0))
@@ -187,6 +190,13 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         "episodes": len(records),
         "worker_processes": len(workers),
         "episodes_per_worker": dict(sorted(workers.items())),
+        # Which question these episodes were asked. First, and a count rather
+        # than a name, because the coordinate action space exists to be
+        # compared against the street one and the failure mode of that
+        # comparison is reading two arms out of one directory as though they
+        # were one run. More than one entry here means the numbers below are
+        # a blend and every one of them is meaningless.
+        "action_spaces": dict(action_spaces),
         "hops": hops,
         "outcomes": dict(outcomes),
         # THE bias number: what fraction of walks failed for reasons the
@@ -268,6 +278,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print(f"episodes            {report['episodes']} "
           f"across {report['worker_processes']} worker processes")
+    spaces = report["action_spaces"]
+    print(f"action space        {spaces}"
+          + ("   ** MIXED: every number below blends two different tasks **"
+             if len(spaces) > 1 else ""))
     print(f"hops                {report['hops']}  {report['outcomes']}")
     print(f"sim failure rate    {report['sim_failure_rate']}   "
           f"(stuck/timeout charged to the policy)")

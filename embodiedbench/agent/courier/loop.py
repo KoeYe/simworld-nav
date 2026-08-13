@@ -184,6 +184,12 @@ def _bare_call(text: str, allowed: set[str]) -> str | None:
     return None
 
 
+#: A number argument that is an unevaluated sum: two numbers with an operator
+#: between them. Deliberately narrow -- it only has to recognise the shape the
+#: refusal below names, and anything it does not match falls through to the
+#: general "that is not a number" message.
+_ARITHMETIC = re.compile(r"^\s*[-+]?[\d.]+\s*[-+*/]\s*[-+]?[\d.]+")
+
 REASONING_START = "<think>"
 REASONING_END = "</think>"
 
@@ -375,6 +381,30 @@ def _check_argument_types(name: str, args: list[Any], kwargs: dict[str, Any]) ->
             raise FormatError(
                 f"{name}({param.name}=…) takes a whole number without quotes, "
                 f"like {tool.example or name + '(2)'}."
+            )
+        # A coordinate arrives as something other than a number often enough
+        # to be worth its own messages, and the two ways it happens want
+        # different answers.
+        #
+        # Measured on Qwen3-VL-4B over 205 coordinate turns: 62 of 81 format
+        # errors were an unevaluated SUM -- ``walk_to_xy(-53.2, 297.7 - 18)``,
+        # the model saying "eighteen metres west of where I am" in the most
+        # direct way it knows. Answering that with a sentence about quotes is
+        # advice it cannot act on, and it repeated the same reply until the
+        # three-strike rule ended the episode. The sum is still refused --
+        # working the position out is the task, and a harness that does the
+        # subtraction is measuring something easier than it claims -- but the
+        # refusal has to say which thing went wrong.
+        if param.type == "number" and not isinstance(value, (int, float)):
+            if isinstance(value, str) and _ARITHMETIC.search(value):
+                raise FormatError(
+                    f"{name}({param.name}=…) got the sum {value.strip()!r} "
+                    "rather than a number. Work it out and type the answer: "
+                    f"{tool.example or name + '(1.0, 2.0)'}."
+                )
+            raise FormatError(
+                f"{name}({param.name}=…) takes a number, with no quotes around "
+                f"it: {tool.example or name + '(1.0, 2.0)'}."
             )
 
 

@@ -117,6 +117,68 @@ more UE instances. The other lever is `action_chunk`: one prefill buying K
 actions shortens the serial chain inside each episode, which raises the 1.31×
 that everything else multiplies.
 
+## The second action space: naming a point instead of a street
+
+The street space is close to solved. The base model completes deliveries
+zero-shot — 18 of 18 hops, parcel collected and delivered, no training step
+taken — so nearly every rollout in a GRPO group succeeds, the group-normalised
+advantage is ~0, and so is the gradient. **"Reward is always 0 and grad_norm
+is always 0" is at least as likely to mean the task is too easy as it is to
+mean the reward is broken.**
+
+So there is a harder question, asked of the same world: instead of naming one
+of the streets leaving this junction, the courier names a **point**, and the
+pawn walks toward it under the navmesh.
+
+```bash
+DATASET_TRAIN=embodiedbench/training/vagen/train_embodied_xy.yaml \
+DATASET_VAL=embodiedbench/training/vagen/val_embodied_xy.yaml \
+bash embodiedbench/training/vagen/train_grpo_embodied.sh
+```
+
+Those two files are their street siblings with two keys added and nothing else
+changed — `tests/test_embodied_runtime.py::TestTheTwoArmsDifferInOneThing`
+fails if that stops being true, because the number this arm exists to produce
+is only readable against the other arm.
+
+| key | value | what it does |
+|---|---|---|
+| `action_space` | `coordinate` | offers `walk_to_xy(north, east)` and **withdraws** `walk_to`/`follow_street` |
+| `max_step_m` | `60.0` | how far one call may carry; a request past it walks the cap and stops, it is not refused |
+| `show_pose` | (auto) | the observation states the courier's own `(x, y)` and facing. On under `coordinate`, off under `street` |
+
+**Read the success rate, not the throughput.** Throughput was never what
+stopped learning — the engine is already under-subscribed at 44% busy. The
+question this arm answers is whether a policy that has to derive a coordinate
+succeeds more or less often than one picking a name off a list.
+
+Three things were decided rather than discovered, and are worth arguing with:
+
+- **60 m** is the street arm's own p75: over 300 block-stride legs on this
+  map one `walk_to` covers a median 38.8 m, p75 59.5 m. At that cap a
+  coordinate call is never the cheaper action, so a win cannot come from a
+  more generous step budget. Lower it and the coordinate arm pays more turns
+  per leg; raise it and it starts buying turns the street arm cannot.
+- **The pose is given, the destination is not.** The courier is told the two
+  numbers for its own "you are here" circle. The delivery's pin is on the map
+  to be measured like anything else. Handing over its coordinates would
+  replace the task with subtraction.
+- **The pawn's position is the courier's position.** In this space the map
+  dot, the distances beside each street, `collect`'s door tolerance and the
+  printed coordinates are all the pawn's, and the graph node — which is what
+  lets the environment say *which street this is* — is re-derived from the
+  pawn after every walk. How far that node sits from the courier is logged
+  per walk as `snap_cm` and summarised as `median_snap_cm`, rather than
+  assumed small.
+
+At `narration: route` — what both arms run — the two differ in exactly one
+thing: the marked street still says which way to go and how far, and the only
+question is whether the move is expressed as a name or as a point.
+
+`python -m embodiedbench.runtime.live.report <dir>` prints `action space` on
+its second line and says **MIXED** if one directory holds both arms; every
+number under that line would be a blend of two different tasks.
+
 ## Known limits
 
 - **`PROMPT_LEN=4096` is now too small.** A courier that reaches its

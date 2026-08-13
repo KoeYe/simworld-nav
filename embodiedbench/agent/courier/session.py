@@ -44,15 +44,21 @@ from embodiedbench.agent.courier.loop import (
 from embodiedbench.agent.courier.frame_alias import FrameAliases
 from embodiedbench.agent.courier.memory import CourierMemory
 from embodiedbench.agent.courier.prompts import (
+    AIM_HINT,
     FORMAT_ERROR_TEMPLATE,
     REJECTED_TEMPLATE,
+    TAKE_STREET_HINT,
     TRUNCATED_TEMPLATE,
     build_observation,
     build_system_prompt,
     render_candidates,
     render_photographs,
 )
-from embodiedbench.agent.courier.tools import TOOLS_BY_NAME, ToolKind
+from embodiedbench.agent.courier.tools import (
+    TOOLS_BY_NAME,
+    ToolKind,
+    _Blanks,
+)
 
 
 @dataclass(frozen=True)
@@ -132,10 +138,17 @@ class CourierSession:
         # queried with the row's compass heading, so the very marker meant to
         # stop verbatim repeats could not fire on the repeats it was for.
         self._offered: list[dict[str, Any]] = []
+        #: Which way each of this turn's photographs looks. See ``_frames``.
+        self._frame_yaws: list[float | None] = []
         self.lamp_legs: dict[str, str] = {}
         self.feedback = ""
         self.allowed = list(env.allowed_tool_names())
-        self.tools = [TOOLS_BY_NAME[name] for name in self.allowed]
+        # From the environment, so a manual that quotes one of its numbers
+        # quotes the number it will actually enforce. An env that has none
+        # hands back the same declarations this used to read directly.
+        self.tools = (env.tools_for_prompt()
+                      if hasattr(env, "tools_for_prompt") else
+                      [TOOLS_BY_NAME[name] for name in self.allowed])
         # Tools the session runs itself. The notebook belongs to the courier,
         # not to the city: nothing about the world changes when a line is
         # written, and putting a no-op on CourierEnv purely to satisfy the
@@ -215,17 +228,34 @@ class CourierSession:
             heading = row.get("heading", "")
             row["seen"] = self.memory.has_taken(here, street, heading)
             row["refused"] = self.memory.refusal_at(here, street, heading)
+        # One list, asked for once: the captions and the attached images are
+        # read positionally by the model, so a renderer and an attacher that
+        # each decide for themselves which rows get a picture is a pairing
+        # waiting to slip.
+        photo = self.env.photo_rows(rows) if hasattr(self.env, "photo_rows") else rows
         text = build_observation(
             memory=self.memory.render(),
             location=self.env.location_text(),
             clock=self.env.clock_text(),
             candidates=render_candidates(rows),
-            photographs=(render_photographs(rows, phone_map=self.phone_map_on())
+            # The line under the list names the call that acts on it, so it
+            # follows the action space rather than being written once for the
+            # one that existed first.
+            # The step budget is stated in the tool manual once, at the top
+            # of a prompt the courier then reads past for the rest of the
+            # shift. Measured: told "at most 10 m" in the manual and nothing
+            # anywhere else, a courier named points a median 1.14 m off for
+            # thirteen calls running and was never refused, because naming a
+            # short step breaks no rule it had been given. The rule belongs
+            # where the distances are -- next to "36 m on, 2 junctions".
+            take_hint=(AIM_HINT.format_map(_Blanks(self.env.tool_limits()))
+                       if "walk_to_xy" in self.allowed else TAKE_STREET_HINT),
+            photographs=(render_photographs(photo, phone_map=self.phone_map_on())
                          if self.with_images else ""),
             extra=(f"\n### what just happened\n{self.feedback}" if self.feedback else ""),
         )
         self._offered = rows
-        return Observation(text=text, frames=self._frames(rows))
+        return Observation(text=text, frames=self._frames(photo))
 
     def _frames(self, rows: list[dict[str, Any]]) -> list[Frame]:
         """The images, in the order their captions are listed.
@@ -239,8 +269,17 @@ class CourierSession:
         # Renamed on the way out. The album names its files after what is in
         # them, which would let a policy read ``road_block`` off the path instead
         # of the picture. See ``frame_alias``.
+        # The album path and the alias the harness serves are both known here
+        # and nowhere else -- FrameAliases renames on the way out, so a yaw
+        # recorded against the album path cannot be joined to `image_paths`
+        # afterwards. Carry it across in the same order as the frames.
+        aims = getattr(self.env, "frame_yaws", None) or {}
+        self._frame_yaws = [aims.get(row["image"])
+                            for row in rows if row.get("image")]
         frames = [
-            Frame(f"[{row['street']}, {row['heading']}] the view down it",
+            Frame((f"[ahead, {row['heading']}] the view straight ahead"
+                   if row.get("ahead") else
+                   f"[{row['street']}, {row['heading']}] the view down it"),
                   self.frames_seen.alias(row["image"]))
             for row in rows if row.get("image")
         ]
@@ -291,6 +330,7 @@ class CourierSession:
             image_paths=observation.image_paths,
             reply=reply,
         )
+        turn.frame_yaws = list(self._frame_yaws)
         stopped = budget_exceeded(self.spend, self.budgets)
         if stopped:
             turn.status, turn.error = "truncated", stopped
@@ -331,6 +371,15 @@ class CourierSession:
 
         before = self.env.sim_seconds
         self._leaving = self.env.node_id
+        # Where this call ran from, which is also where the turn's photographs
+        # were taken: `observe` runs before `_execute`, so the two poses are a
+        # walk apart and a recording that keeps only one has the camera
+        # trailing the position. The chunked session records the same field
+        # per call; this is the chunk of one.
+        try:
+            turn.from_xy = [round(v, 1) for v in self.env.position()]
+        except Exception:  # noqa: BLE001 — a recording never fails a turn
+            turn.from_xy = None
         outcome = self._execute(action)
         turn.sim_seconds = self.env.sim_seconds - before
         turn.reward = outcome.reward
