@@ -79,6 +79,7 @@ export TEST_FREQ="${TEST_FREQ:-10}"
 # partly patched.
 for patch in agent_loop_qwen3vl_rope \
              agent_loop_image_safe_truncation \
+             agent_loop_generation_budget \
              multiturn_image_safe_truncation; do
     python -m "embodiedbench.training.vagen.patches.${patch}" || exit 1
 done
