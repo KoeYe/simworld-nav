@@ -613,11 +613,22 @@ class EmbodiedCourierEnv(CourierEnv):
         here = self._here_cm()
         reach = math.dist(here, asked)
         if reach <= self.arrive_cm:
+            # Names the mistake rather than the rule. Measured on Qwen3-VL-4B:
+            # 83 of 205 coordinate turns were this, and every one of them was
+            # the model typing back the two numbers the observation had just
+            # given it for its own position -- reasoning correctly about where
+            # it wanted to go ("the next junction is 18 m north-east") and then
+            # writing down where it already was. "Name somewhere you are not"
+            # is true and was not enough; a courier repeating a refusal word
+            # for word has not understood which word was wrong.
             return self._refuse(StepOutcome(
                 ok=False, code="already_here",
                 message=(
-                    "You are already standing there. Name somewhere you are "
-                    "not, far enough off to be worth walking to."
+                    f"{_point(asked)} is the point you are standing on -- the "
+                    "same two numbers this turn gave you for your own "
+                    "position. Naming it again does not move you. Decide how "
+                    "far north and how far east you want to go, ADD that to "
+                    "each of your numbers, and name the result."
                 ),
             ))
         cap_cm = self.max_step_m * 100.0

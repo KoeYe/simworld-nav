@@ -1090,7 +1090,54 @@ class TestTheCoordinateActionSpace:
         assert env.ue_pose.yaw_deg != pytest.approx(walked, abs=1.0), (
             "the fixture must actually turn the pawn, or this proves nothing")
         assert env.facing() == pytest.approx(walked, abs=1.0)
+    def test_the_coordinate_call_refuses_to_run_in_the_street_space(
+            self, paris, service, tmp_path):
+        """Unreachable through the menu, so this is a caller wiring the two
+        spaces together -- and every half that makes the call honest (the pawn
+        being the position, the vantage in the frame key, facing measured off
+        the walk) is switched off under `street`."""
+        env = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
+        with pytest.raises(RuntimeError, match="coordinate"):
+            env.walk_to_xy(0.0, 0.0)
 
+    def test_the_album_fallback_is_reachable_from_a_config(self, tmp_path, service):
+        """The env has had the knob since the cross-machine work and the
+        quickstart's settings table says an experiment must turn it off -- but
+        no config key reached it, so the only value any run could have was the
+        training-friendly default. Measured the hard way: an instance died
+        mid-validation and the episodes it was serving carried on against an
+        album with every walking metric still reading green."""
+        endpoints = write_endpoints(tmp_path / "e.json", [service])
+        base = {"backend": "embodied", "ue_endpoints": str(endpoints),
+                "live_cache_root": str(tmp_path / "cache")}
+        assert EmbodiedCourierGymEnv(base).allow_album_fallback is True
+        assert EmbodiedCourierGymEnv(
+            {**base, "allow_album_fallback": False}).allow_album_fallback is False
+
+    def test_a_sum_is_refused_by_naming_the_sum(self, paris, service, tmp_path):
+        """Measured on Qwen3-VL-4B: 62 of 81 coordinate format errors were an
+        unevaluated sum -- the model saying "eighteen metres west of here" the
+        most direct way it knows. It is still refused, because working the
+        position out IS the task, but "you used quotes" is advice it cannot
+        act on and it repeated the reply until the three-strike rule ended the
+        episode."""
+        from embodiedbench.agent.courier.loop import FormatError, build_call
+
+        with pytest.raises(FormatError, match="sum"):
+            build_call("walk_to_xy", "-53.2, 297.7 - 18", {"walk_to_xy"})
+        with pytest.raises(FormatError, match="quotes"):
+            build_call("walk_to_xy", '"-53.2", "297.7"', {"walk_to_xy"})
+        # ...and a plain negative number is not mistaken for one.
+        name, args, _ = build_call("walk_to_xy", "-53.2, -297.7", {"walk_to_xy"})
+        assert args == [-53.2, -297.7]
+
+    def test_naming_your_own_position_says_so(self, paris, service, tmp_path):
+        env = self.coordinate(paris, service, tmp_path)
+        here = env._here_cm()
+        out = env.walk_to_xy(round(here[0] / 100.0, 1), round(here[1] / 100.0, 1))
+        assert not out.ok and out.code == "already_here"
+        assert "the point you are standing on" in out.message
+        assert "ADD" in out.message
 
 @needs_maps
 class TestTheTwoArmsDifferInOneThing:
@@ -1144,27 +1191,3 @@ class TestTheTwoArmsDifferInOneThing:
                 assert a.get(key) == b.get(key), (
                     f"{train} and {val} disagree on {key}: "
                     f"{a.get(key)!r} vs {b.get(key)!r}")
-
-    def test_the_coordinate_call_refuses_to_run_in_the_street_space(
-            self, paris, service, tmp_path):
-        """Unreachable through the menu, so this is a caller wiring the two
-        spaces together -- and every half that makes the call honest (the pawn
-        being the position, the vantage in the frame key, facing measured off
-        the walk) is switched off under `street`."""
-        env = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
-        with pytest.raises(RuntimeError, match="coordinate"):
-            env.walk_to_xy(0.0, 0.0)
-
-    def test_the_album_fallback_is_reachable_from_a_config(self, tmp_path, service):
-        """The env has had the knob since the cross-machine work and the
-        quickstart's settings table says an experiment must turn it off -- but
-        no config key reached it, so the only value any run could have was the
-        training-friendly default. Measured the hard way: an instance died
-        mid-validation and the episodes it was serving carried on against an
-        album with every walking metric still reading green."""
-        endpoints = write_endpoints(tmp_path / "e.json", [service])
-        base = {"backend": "embodied", "ue_endpoints": str(endpoints),
-                "live_cache_root": str(tmp_path / "cache")}
-        assert EmbodiedCourierGymEnv(base).allow_album_fallback is True
-        assert EmbodiedCourierGymEnv(
-            {**base, "allow_album_fallback": False}).allow_album_fallback is False
