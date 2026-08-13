@@ -1185,6 +1185,27 @@ class TestTheCoordinateActionSpace:
         assert "ticks" not in refused[0]
         assert env.summary()["embodied"]["hops"] == 0
 
+    def test_the_distance_walked_comes_from_the_poses(
+            self, paris, service, tmp_path):
+        """Measured on ds-serv6: 13 accepted walks in one episode each moved
+        0.5 to 4.7 m by their own start and end pose, and each reported
+        walked_cm = 0.00 -- so the episode's route quality read "walked 0 m"
+        for a courier that had covered fifteen. Both numbers come back in the
+        same response, so this is the service's count disagreeing with the
+        poses beside it, and the poses are what the arrival test and the next
+        walk both use."""
+        env = self.coordinate(paris, service, tmp_path,
+                              max_step_m=10.0, arrive_cm=100.0, tick_chunk=2)
+        start = env._here_cm()
+        out = env.walk_to_xy(start[0] / 100.0 + 6.0, start[1] / 100.0)
+
+        assert out.ok
+        moved_m = math.dist(start, env._here_cm()) / 100.0
+        assert out.walked_m == pytest.approx(moved_m, abs=0.02)
+        assert env.walked_cm == pytest.approx(moved_m * 100.0, abs=2.0)
+        # ...and the service's own figure stays on the record beside it.
+        hop = env.embodied_log[-1]
+        assert "service_walked_cm" in hop
 
 @needs_maps
 class TestTheTwoArmsDifferInOneThing:

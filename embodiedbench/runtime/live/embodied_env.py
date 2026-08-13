@@ -716,15 +716,31 @@ class EmbodiedCourierEnv(CourierEnv):
         target = asked
         self.coordinate_walks += 1
         walk = self._walk_to_point(*target)
-        walked_m = walk.walked_cm / 100.0
+        # The distance covered is measured between two poses this env holds,
+        # not taken from the service's own count.
+        #
+        # Measured on ds-serv6, 13 accepted walks in one episode: every one
+        # moved between 0.5 and 4.7 m by its own start and end pose, and every
+        # one reported walked_cm = 0.00. The episode's route quality therefore
+        # read "walked 0 m" for a courier that had covered fifteen. Both
+        # numbers come back from the same response, so this is not a baseline
+        # I picked badly -- it is the count disagreeing with the poses beside
+        # it, and the poses are the ones the arrival test and the next walk
+        # both use.
+        #
+        # The service's figure is kept in the log rather than discarded: the
+        # gap between the two is the evidence for whatever is wrong in the
+        # walk loop's per-chunk accumulation, and dropping it would hide the
+        # defect this line is working around.
+        landed_at = self._here_cm()
+        walked_m = math.dist(here, landed_at) / 100.0
         # Every outcome moved the pawn some distance, and in this space that
         # distance is kept: there is no re-spawn undoing it, the next call
         # starts from where it left off, and a body that walked forty metres
         # into a dead end has walked forty metres. The stock hop drops them
         # because it puts the pawn back where it started.
         self._spend_stamina(walked_m)
-        self.walked_cm += walk.walked_cm
-        landed_at = self._here_cm()
+        self.walked_cm += walked_m * 100.0
         # Measured, not assumed to be the bearing that was asked for: a
         # navmesh route round a corner ends the courier facing along the last
         # leg of it, which is not the direction of the point it named.
@@ -820,7 +836,10 @@ class EmbodiedCourierEnv(CourierEnv):
             "graph_seconds": round(graph_seconds, 4),
             "ticks": walk.ticks,
             "sim_seconds": walk.sim_seconds,
-            "walked_cm": walk.walked_cm,
+            "walked_cm": round(math.dist(start, (walk.pose.x_cm, walk.pose.y_cm)), 2),
+            # What the service counted, beside what the poses say. They
+            # disagree, and the disagreement is the evidence.
+            "service_walked_cm": walk.walked_cm,
             "end_pose": walk.pose.to_dict(),
             "pose_error_cm": math.dist(
                 (walk.pose.x_cm, walk.pose.y_cm), target),
