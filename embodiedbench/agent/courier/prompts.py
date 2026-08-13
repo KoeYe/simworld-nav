@@ -315,8 +315,13 @@ def render_photographs(rows: list[dict], *, phone_map: bool = False) -> str:
     # dropping some of them.
     for row in rows:
         if row.get("image"):
-            lines.append(f'  [{row["street"]}, {row["heading"]}] '
-                         "the view down it from here")
+            # A row the environment marked as the view ahead is captioned as
+            # what it is. Naming a street the courier is not being offered
+            # would read as a menu it cannot order from.
+            lines.append(
+                f'  [ahead, {row["heading"]}] the view straight ahead of you'
+                if row.get("ahead") else
+                f'  [{row["street"]}, {row["heading"]}] the view down it from here')
     for row in rows:
         if row.get("signal_image"):
             lines.append(f'  [light: {row["street"]}, {row["heading"]}] '

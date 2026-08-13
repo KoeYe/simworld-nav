@@ -1875,6 +1875,21 @@ class CourierEnv:
             return ", ".join(str(n) for n in numbers)
         return ", ".join(str(n) for n in numbers[:limit]) + f", … {numbers[-1]}"
 
+    def photo_rows(self, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Which of this turn's rows get a photograph, in caption order.
+
+        The candidate rows themselves, here: one picture per street leaving
+        the junction, each captioned with the street the courier would name to
+        take it. That pairing is the whole design of the street action space
+        -- the caption is in the words ``walk_to`` accepts, so reading a
+        picture and acting on it need no translation.
+
+        It is a hook because the pairing stops being the design when the
+        courier no longer takes streets by name. See
+        ``EmbodiedCourierEnv.photo_rows``.
+        """
+        return rows
+
     def location_text(self) -> str:
         street = self.street_of(self.node_id)
         numbers = self.house_numbers_near(self.node_id)

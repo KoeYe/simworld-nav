@@ -66,7 +66,11 @@ from typing import Any, Coroutine
 
 from embodiedbench.training.vagen_courier_env import CourierGymEnv
 
-from .embodied_env import ACTION_SPACE_STREET, DEFAULT_MAX_STEP_M
+from .embodied_env import (
+    ACTION_SPACE_STREET,
+    CAMERA_VIEW_STREETS,
+    DEFAULT_MAX_STEP_M,
+)
 from .pool import RenderPool, shared_pool
 from .protocol import (
     DEFAULT_ARRIVE_CM,
@@ -419,6 +423,12 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         # have to be recalled from a launch command is not a comparison.
         self.action_space = str(config.get("action_space", ACTION_SPACE_STREET))
         self.max_step_m = float(config.get("max_step_m", DEFAULT_MAX_STEP_M))
+        # What the turn's photographs are OF. "streets" is the default and
+        # the comparable one; "forward" shows what is in front of the courier
+        # instead of one frame per street, and is a second axis rather than a
+        # free improvement -- it changes what an arm SEES, so a run using it
+        # is not comparable to one that does not.
+        self.camera_view = str(config.get("camera_view", CAMERA_VIEW_STREETS))
         # Whether the observation states the courier's own coordinates.
         # Defaulted by the env to on under the coordinate space (where the
         # task is unanswerable without it) and off under the street one. Set
@@ -482,6 +492,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             # must not share a cache directory.
             "action_space": self.action_space,
             "max_step_m": self.max_step_m,
+            "camera_view": self.camera_view,
             "show_pose": self.show_pose,
             "allow_album_fallback": self.allow_album_fallback,
         }
@@ -635,6 +646,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             max_walk_seconds=self.max_walk_seconds,
             action_space=self.action_space,
             max_step_m=self.max_step_m,
+            camera_view=self.camera_view,
             allow_album_fallback=self.allow_album_fallback,
             **kwargs,
         )
@@ -672,6 +684,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         return EpisodeTrace(root, episode_id, {
             "seed": self._last_seed, "map": self.map_dir.name,
             "action_space": self.action_space, "max_step_m": self.max_step_m,
+            "camera_view": self.camera_view,
             "arrive_cm": self.arrive_cm, "tick_chunk": self.tick_chunk,
             "action_chunk": self.action_chunk, "narration": self.narration,
             "difficulty": self.difficulty, "stride": self.stride,
@@ -708,6 +721,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                 # between two files of these, read weeks apart.
                 "action_space": self.action_space,
                 "max_step_m": self.max_step_m,
+                "camera_view": self.camera_view,
                 "allow_album_fallback": self.allow_album_fallback,
                 "show_pose": self.show_pose,
                 "narration": self.narration,

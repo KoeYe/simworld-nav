@@ -228,6 +228,11 @@ class CourierSession:
             heading = row.get("heading", "")
             row["seen"] = self.memory.has_taken(here, street, heading)
             row["refused"] = self.memory.refusal_at(here, street, heading)
+        # One list, asked for once: the captions and the attached images are
+        # read positionally by the model, so a renderer and an attacher that
+        # each decide for themselves which rows get a picture is a pairing
+        # waiting to slip.
+        photo = self.env.photo_rows(rows) if hasattr(self.env, "photo_rows") else rows
         text = build_observation(
             memory=self.memory.render(),
             location=self.env.location_text(),
@@ -245,12 +250,12 @@ class CourierSession:
             # where the distances are -- next to "36 m on, 2 junctions".
             take_hint=(AIM_HINT.format_map(_Blanks(self.env.tool_limits()))
                        if "walk_to_xy" in self.allowed else TAKE_STREET_HINT),
-            photographs=(render_photographs(rows, phone_map=self.phone_map_on())
+            photographs=(render_photographs(photo, phone_map=self.phone_map_on())
                          if self.with_images else ""),
             extra=(f"\n### what just happened\n{self.feedback}" if self.feedback else ""),
         )
         self._offered = rows
-        return Observation(text=text, frames=self._frames(rows))
+        return Observation(text=text, frames=self._frames(photo))
 
     def _frames(self, rows: list[dict[str, Any]]) -> list[Frame]:
         """The images, in the order their captions are listed.
@@ -272,7 +277,9 @@ class CourierSession:
         self._frame_yaws = [aims.get(row["image"])
                             for row in rows if row.get("image")]
         frames = [
-            Frame(f"[{row['street']}, {row['heading']}] the view down it",
+            Frame((f"[ahead, {row['heading']}] the view straight ahead"
+                   if row.get("ahead") else
+                   f"[{row['street']}, {row['heading']}] the view down it"),
                   self.frames_seen.alias(row["image"]))
             for row in rows if row.get("image")
         ]

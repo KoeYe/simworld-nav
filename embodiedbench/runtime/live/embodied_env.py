@@ -71,6 +71,7 @@ from embodiedbench.runtime.city.courier_env import (
     REJECTED_ACTION_SECONDS,
     CourierEnv,
     StepOutcome,
+    compass_of,
 )
 
 from .cache import LiveAlbum
@@ -109,6 +110,26 @@ DEFAULT_SPAWN_Z_CM = 100.0
 ACTION_SPACE_STREET = "street"
 ACTION_SPACE_COORDINATE = "coordinate"
 ACTION_SPACES = (ACTION_SPACE_STREET, ACTION_SPACE_COORDINATE)
+
+#: What the courier is shown each turn.
+#:
+#: ``streets`` photographs every street leaving the junction, one frame per
+#: candidate, each captioned with the street a ``walk_to`` would name. That
+#: pairing is the street action space's whole design.
+#:
+#: ``forward`` photographs one thing: what is in front of the courier. It
+#: exists because the pairing stops being a design once the courier no longer
+#: takes streets by name -- under ``coordinate`` the per-street frames include
+#: the way it came, which it cannot act on and which spends half a two-image
+#: budget. A walking person does not get a photograph of behind them each time
+#: they take a step.
+#:
+#: ``streets`` is the default and stays it: the two action spaces are compared
+#: against each other, and changing what one of them SEES makes the difference
+#: between them two things instead of one.
+CAMERA_VIEW_STREETS = "streets"
+CAMERA_VIEW_FORWARD = "forward"
+CAMERA_VIEWS = (CAMERA_VIEW_STREETS, CAMERA_VIEW_FORWARD)
 
 # How far one ``walk_to_xy`` may carry, in metres. A request past it is
 # REFUSED, not clamped: a courier that asked for forty metres and was quietly
@@ -213,6 +234,8 @@ class EmbodiedCourierEnv(CourierEnv):
         # and walk toward it). Never both -- see ``tools.COORDINATE_TOOLS``.
         action_space: str = ACTION_SPACE_STREET,
         max_step_m: float = DEFAULT_MAX_STEP_M,
+        # What the turn's photographs are of. See CAMERA_VIEWS.
+        camera_view: str = CAMERA_VIEW_STREETS,
         **courier_kwargs: Any,
     ):
         clash = sorted(set(_REFUSED_KWARGS) & set(courier_kwargs))
@@ -239,6 +262,16 @@ class EmbodiedCourierEnv(CourierEnv):
                 "a menu holding both lets an episode fall back to naming a "
                 "street and be reported as coordinate walking.")
         self.action_space = action_space
+        if camera_view not in CAMERA_VIEWS:
+            raise ValueError(
+                f"camera_view={camera_view!r}; it is one of {CAMERA_VIEWS}.")
+        self.camera_view = camera_view
+        if camera_view == CAMERA_VIEW_FORWARD and action_space != ACTION_SPACE_COORDINATE:
+            raise ValueError(
+                "camera_view='forward' with the street action space would "
+                "photograph nothing the courier can name: it picks a street "
+                "off the list, and the list's pictures are how it tells them "
+                "apart.")
         self.max_step_m = float(max_step_m)
         if self.max_step_m <= 0:
             raise ValueError(
@@ -1030,6 +1063,70 @@ class EmbodiedCourierEnv(CourierEnv):
             self.frame_yaws[path] = round(bearing_deg(
                 self._camera_at(node_id), self.position(toward)), 1)
         return path
+
+    def photo_rows(self, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """One picture of what is in front, when that is what was asked for.
+
+        The row is synthetic on purpose: the caption renderer and the frame
+        attacher both walk this list positionally, so handing them a row is
+        what keeps a picture and its caption together without either learning
+        that this mode exists.
+        """
+        if self.camera_view != CAMERA_VIEW_FORWARD:
+            return super().photo_rows(rows)
+        yaw = self.facing()
+        if yaw is None:
+            # It has not walked yet, so there is no direction of travel. The
+            # pawn spawns facing north and that is the honest answer.
+            pose = self.ue_pose
+            yaw = float(pose.yaw_deg) % 360.0 if pose is not None else 0.0
+        image = self._forward_frame(yaw)
+        if image is None:
+            return []
+        return [{"street": "ahead", "heading": compass_of(yaw), "ahead": True,
+                 "image": image, "signal_image": None, "node": None,
+                 "bearing": yaw, "distance_m": 0.0}]
+
+    def _forward_frame(self, yaw_deg: float) -> str | None:
+        """The view along ``yaw_deg`` from where the pawn stands.
+
+        Keyed by vantage and bearing, to the degree: the courier walks a few
+        metres a turn and turns as it goes, so a frame is only reusable when
+        both the place and the direction repeat.
+        """
+        key = f"{self._vantage(self.node_id)}/ahead_{round(yaw_deg):+04d}"
+        path = self.live_album.path_for(key)
+        if not path.exists() and not self.live_degraded:
+            request = ObserveRequest(
+                episode_id=self.episode_id, camera=self.street_camera,
+                yaw_deg=float(yaw_deg), return_mode=self.return_mode)
+            try:
+                try:
+                    result = self._ue().observe(request)
+                except RenderServiceError as error:
+                    if not self._episode_is_lost(error):
+                        raise
+                    self._reopen_episode(f"observe: {type(error).__name__}")
+                    result = self._ue().observe(request)
+                if result.ok:
+                    self.live_album.store(key, result)
+                    if result.pose is not None:
+                        self.ue_pose = result.pose
+            except ServiceBusy as error:
+                logger.info("observe busy for %s (%s); the next look retries",
+                            key, error)
+            except (RenderServiceError, ProtocolViolation, OSError) as error:
+                self.live_degraded = True
+                if not self.allow_album_fallback:
+                    raise
+                logger.warning(
+                    "observe failed (%s: %s); episode %s continues with "
+                    "cached frames only", type(error).__name__, error,
+                    self.episode_id)
+        if not path.exists():
+            return None
+        self.frame_yaws[str(path)] = round(float(yaw_deg) % 360.0, 1)
+        return str(path)
 
     def _camera_at(self, node_id: str) -> tuple[float, float]:
         """Where the camera stands when photographing from ``node_id``.

@@ -1251,6 +1251,47 @@ class TestTheCoordinateActionSpace:
         assert len(set(e["frame_yaws_deg"])) == len(e["frame_yaws_deg"])
         assert e["yaw_after_deg"] is not None
         assert e["calls"][0]["walk"]["end_yaw_deg"] is not None
+    def test_forward_view_photographs_one_thing_the_way_it_faces(
+            self, paris, service, tmp_path):
+        """Under `streets` a turn photographs every street leaving the
+        junction, including the way it came -- which the coordinate courier
+        cannot act on by name and which spends half a two-image budget. A
+        walking person does not get a photograph of behind them each step."""
+        from embodiedbench.agent.courier.session import CourierSession
+
+        env = self.coordinate(paris, service, tmp_path, max_step_m=10.0,
+                              arrive_cm=100.0, tick_chunk=2,
+                              camera_view="forward")
+        session = CourierSession(env, city="Paris")
+        obs = session.observe()
+
+        # The phone's map rides along as always; the CAMERA frames are one.
+        shots = [f for f in obs.frames if f.kind != "map"]
+        assert len(shots) == 1, [f.label for f in obs.frames]
+        assert "ahead" in shots[0].label
+        assert "the view straight ahead" in obs.text
+        # ...and it looks the way the courier is facing, not down a street.
+        here = env._here_cm()
+        session.step(f'```\nwalk_to_xy({here[0]/100 + 6.0:.1f}, {here[1]/100:.1f})\n```')
+        after = session.observe()
+        assert len([f for f in after.frames if f.kind != "map"]) == 1
+        yaw = env.frame_yaws[[k for k in env.frame_yaws if "ahead" in k][-1]]
+        assert yaw == pytest.approx(env.facing(), abs=1.0)
+
+    def test_forward_view_is_refused_for_the_street_space(
+            self, paris, service, tmp_path):
+        """It picks a street off the list, and the list's pictures are how it
+        tells them apart."""
+        with pytest.raises(ValueError, match="street action space"):
+            embodied_env(paris, UERenderClient(service.base_url), tmp_path,
+                         camera_view="forward")
+
+    def test_streets_remains_the_default(self, paris, service, tmp_path):
+        """The arms are compared against each other; changing what one of them
+        SEES makes the difference between them two things instead of one."""
+        env = self.coordinate(paris, service, tmp_path)
+        assert env.camera_view == "streets"
+        assert len(env.photo_rows(env.candidates())) == len(env.candidates())
 
 @needs_maps
 class TestTheTwoArmsDifferInOneThing:
