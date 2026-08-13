@@ -271,6 +271,13 @@ class ChunkedCourierSession(CourierSession):
             reply=reply,
         )
         turn.frame_yaws = list(self._frame_yaws)
+        # The pose the turn STARTED at, which is where its photographs were
+        # taken. Set on both session paths or the two produce different record
+        # shapes -- and a reader of one would find a field the other lacks.
+        try:
+            turn.from_xy = [round(v, 1) for v in self.env.position()]
+        except Exception:  # noqa: BLE001 — a recording never fails a turn
+            turn.from_xy = None
         stopped = budget_exceeded(self.spend, self.budgets)
         if stopped:
             turn.status, turn.error = "truncated", stopped
