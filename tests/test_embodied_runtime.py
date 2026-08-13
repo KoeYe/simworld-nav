@@ -1206,6 +1206,25 @@ class TestTheCoordinateActionSpace:
         # ...and the service's own figure stays on the record beside it.
         hop = env.embodied_log[-1]
         assert "service_walked_cm" in hop
+    def test_the_step_budget_is_stated_where_the_distances_are(
+            self, paris, service, tmp_path):
+        """Told the cap once in the tool manual and nowhere else, a courier
+        named points a median 1.14 m off for thirteen calls running and was
+        never refused -- naming a short step breaks no rule it had been given.
+        The manual states a maximum and nothing states that a metre is a
+        wasted turn, so the rule we were scoring it against was not one it
+        could read. It belongs beside "36 m on, 2 junctions"."""
+        from embodiedbench.agent.courier.session import CourierSession
+
+        env = self.coordinate(paris, service, tmp_path, max_step_m=10.0,
+                              arrive_cm=100.0, tick_chunk=2)
+        text = CourierSession(env, city="Paris").observe().text
+        assert "UP TO 10 m" in text
+        assert "{max_step_m}" not in text
+        # ...and the street arm's line is untouched: it has no step to state.
+        street = embodied_env(paris, UERenderClient(service.base_url),
+                              tmp_path / "b")
+        assert "UP TO" not in CourierSession(street, city="Paris").observe().text
 
 @needs_maps
 class TestTheTwoArmsDifferInOneThing:
@@ -1300,7 +1319,10 @@ class TestTheTraceRecordsWhatTheCourierSaw:
         event = rec["events"][0]
         assert event["calls"] and event["calls"][0]["action"].startswith("walk_to_xy")
         assert event["calls"][0]["walk"]["kind"] == "coordinate"
-        assert event["pose_m"] and len(event["pose_m"]) == 2
+        assert event["pose_before_m"] and len(event["pose_before_m"]) == 2
+        # The frames were rendered before the call ran, so the pose they
+        # belong to is not the one the turn ended at.
+        assert event["pose_after_m"] != event["pose_before_m"]
         assert event["observation"] and event["reply"]
         # The frames were copied out of the cache, which the episode owns and
         # takes down with it -- the whole reason they are copied.

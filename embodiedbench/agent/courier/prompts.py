@@ -380,10 +380,14 @@ TAKE_STREET_HINT = (
 # Under the coordinate action space the list is still worth printing -- it is
 # how the courier tells which way is walkable and how far -- but it is no
 # longer a menu, and saying so is the whole of the difference.
+#: ``{max_step_m}`` is filled from the environment, the same way the tool
+#: manual's copy is -- see ``tools.available_tools``.
 AIM_HINT = (
     "(you do not take these by name — they are what is walkable from here, "
     "and how far.\n Move with walk_to_xy(north, east), counting from your own "
-    "position above)")
+    "position above.\n ONE CALL CARRIES YOU UP TO {max_step_m} m: a point a "
+    "metre or two off spends the\n turn to go almost nowhere. Aim the whole "
+    "step.)")
 
 
 def build_system_prompt(*, city: str, tools: list[Tool],

@@ -54,7 +54,11 @@ from embodiedbench.agent.courier.prompts import (
     render_candidates,
     render_photographs,
 )
-from embodiedbench.agent.courier.tools import TOOLS_BY_NAME, ToolKind
+from embodiedbench.agent.courier.tools import (
+    TOOLS_BY_NAME,
+    ToolKind,
+    _Blanks,
+)
 
 
 @dataclass(frozen=True)
@@ -230,8 +234,15 @@ class CourierSession:
             # The line under the list names the call that acts on it, so it
             # follows the action space rather than being written once for the
             # one that existed first.
-            take_hint=(AIM_HINT if "walk_to_xy" in self.allowed
-                       else TAKE_STREET_HINT),
+            # The step budget is stated in the tool manual once, at the top
+            # of a prompt the courier then reads past for the rest of the
+            # shift. Measured: told "at most 10 m" in the manual and nothing
+            # anywhere else, a courier named points a median 1.14 m off for
+            # thirteen calls running and was never refused, because naming a
+            # short step breaks no rule it had been given. The rule belongs
+            # where the distances are -- next to "36 m on, 2 junctions".
+            take_hint=(AIM_HINT.format_map(_Blanks(self.env.tool_limits()))
+                       if "walk_to_xy" in self.allowed else TAKE_STREET_HINT),
             photographs=(render_photographs(rows, phone_map=self.phone_map_on())
                          if self.with_images else ""),
             extra=(f"\n### what just happened\n{self.feedback}" if self.feedback else ""),
@@ -343,6 +354,15 @@ class CourierSession:
 
         before = self.env.sim_seconds
         self._leaving = self.env.node_id
+        # Where this call ran from, which is also where the turn's photographs
+        # were taken: `observe` runs before `_execute`, so the two poses are a
+        # walk apart and a recording that keeps only one has the camera
+        # trailing the position. The chunked session records the same field
+        # per call; this is the chunk of one.
+        try:
+            turn.from_xy = [round(v, 1) for v in self.env.position()]
+        except Exception:  # noqa: BLE001 — a recording never fails a turn
+            turn.from_xy = None
         outcome = self._execute(action)
         turn.sim_seconds = self.env.sim_seconds - before
         turn.reward = outcome.reward

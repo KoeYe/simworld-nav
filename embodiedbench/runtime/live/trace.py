@@ -76,7 +76,7 @@ def _rows_for(turn: Any) -> list[dict[str, Any]]:
         "code": getattr(turn, "error", "") or "",
         "sim_seconds": getattr(turn, "sim_seconds", 0.0),
         "reward": getattr(turn, "reward", 0.0),
-        "from_xy": None,
+        "from_xy": getattr(turn, "from_xy", None),
         "message": getattr(turn, "feedback", "") or "",
     }]
 
@@ -139,12 +139,31 @@ class EpisodeTrace:
                 wi += 1
             calls.append(call)
 
+        # WHERE THE PICTURES WERE TAKEN, which is not where the turn ended.
+        #
+        # `session.step` observes first and acts second, so a turn's frames are
+        # rendered at the pose BEFORE its calls run, while this method is
+        # called after them. Recorded as one "pose" they read as the same
+        # place, and a playback showing the two together has the camera
+        # trailing the position by one step -- which looks, watching it, like
+        # the courier walking backwards.
+        #
+        # The first call's own `from_xy` is that pose exactly. A turn that made
+        # no call (a format error) moved nothing, so the previous event's
+        # after-pose still stands.
+        after = _metres(_pose(env))
+        before = calls[0]["from_xy_m"] if calls and calls[0]["from_xy_m"] else None
+        if before is None:
+            before = self.events[-1]["pose_after_m"] if self.events else after
         self.events.append({
             "turn": getattr(turn, "step", None),
             "at": round(time.time() - self.opened_at, 3),
             "sim_seconds": round(float(getattr(env, "sim_seconds", 0.0) or 0.0), 2),
             "node": getattr(env, "node_id", None),
-            "pose_m": _metres(_pose(env)),
+            # The frames belong to `pose_before_m`; everything the calls did
+            # belongs between the two.
+            "pose_before_m": before,
+            "pose_after_m": after,
             "facing_deg": _facing(env),
             "observation": getattr(turn, "prompt", "") or "",
             "frames": self._keep(getattr(turn, "image_paths", None) or []),
