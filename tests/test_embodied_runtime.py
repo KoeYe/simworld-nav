@@ -1568,3 +1568,58 @@ class TestTheWalkReportsWhereItStarted:
         assert not out.ok and out.code == "instance_moved"
         env._ue().walk = real
         assert env.walk_to_xy(*[v / 100.0 + 5.0 for v in env._here_cm()]).ok
+
+    def test_opening_an_episode_survives_a_wedged_instance(
+            self, paris, service, tmp_path):
+        """Opening the episode is the OTHER call that meets a wedged engine,
+        and it was the one left unguarded: /walk learned to re-seat and
+        reset() still ended the training job with `render_failed: spawn
+        failed: AssertionError:` -- the engine answering /healthz green while
+        every RPC into it raises."""
+        from embodiedbench.runtime.live.client import RenderFailedError
+        from embodiedbench.runtime.live.embodied_env import EmbodiedCourierEnv
+
+        endpoints = write_endpoints(tmp_path / "e.json", [service], seats=4)
+        pool = RenderPool(endpoints, lease_timeout_s=2.0, lease_poll_s=0.05)
+        env = EmbodiedCourierEnv(paris, pool, episode_id=EPISODE,
+                                 cache_root=tmp_path / "cache", seed=5,
+                                 action_space="coordinate", max_step_m=10.0,
+                                 arrive_cm=100.0, tick_chunk=2)
+        env.reseat_pause_s = 0.01
+
+        real = pool.members[0].client.episode
+        fired = {"n": 0}
+
+        def wedged_once(request):
+            fired["n"] += 1
+            if fired["n"] == 1:
+                raise RenderFailedError(
+                    "render_failed: spawn failed: AssertionError:")
+            return real(request)
+
+        pool.members[0].client.episode = wedged_once
+        env.reset()          # would have raised before
+
+        assert fired["n"] == 2, "it retried exactly once"
+        assert [h for h in env.embodied_log
+                if h.get("recovery") == "reseat_on_open"]
+
+    def test_it_gives_up_rather_than_spin_on_an_instance_that_cannot_spawn(
+            self, paris, service, tmp_path):
+        from embodiedbench.runtime.live.client import RenderFailedError
+        from embodiedbench.runtime.live.embodied_env import EmbodiedCourierEnv
+
+        endpoints = write_endpoints(tmp_path / "e.json", [service], seats=4)
+        pool = RenderPool(endpoints, lease_timeout_s=2.0, lease_poll_s=0.05)
+        env = EmbodiedCourierEnv(paris, pool, episode_id=EPISODE,
+                                 cache_root=tmp_path / "cache", seed=5,
+                                 action_space="coordinate", max_step_m=10.0,
+                                 arrive_cm=100.0, tick_chunk=2)
+        env.reseat_pause_s = 0.01
+
+        def always_wedged(request):
+            raise RenderFailedError("render_failed: spawn failed: AssertionError:")
+
+        pool.members[0].client.episode = always_wedged
+        with pytest.raises(RenderFailedError):
+            env.reset()

@@ -319,6 +319,9 @@ class EmbodiedCourierEnv(CourierEnv):
         #: How long to leave an instance alone after it stopped answering,
         #: before asking the pool for a seat again.
         self.reseat_pause_s = 5.0
+        #: How many times one episode may re-seat while trying to open. An
+        #: instance that cannot spawn twice running is not one to wait out.
+        self.max_reseats = 3
         # Lease plumbing: a pool is leased lazily (the fleet may still be
         # launching when the env object is built); a bare client is used as
         # given and never "released".
@@ -437,6 +440,7 @@ class EmbodiedCourierEnv(CourierEnv):
         """
         deadline = time.monotonic() + self.episode_busy_timeout_s
         delay = 1.0
+        reseats = 0
         while True:
             try:
                 return self._ue().episode(request)
@@ -449,6 +453,33 @@ class EmbodiedCourierEnv(CourierEnv):
                 self.busy_wait_seconds += delay
                 time.sleep(delay)
                 delay = min(delay * 1.5, 15.0)
+            except RenderServiceError as error:
+                # Opening the episode is the OTHER call that can meet a wedged
+                # instance, and it was the one left unguarded: `/walk` learned
+                # to re-seat and `reset()` still took the training job down
+                # with `render_failed: spawn failed: AssertionError:` -- the
+                # engine answering /healthz green while every RPC into it
+                # raises. Same recovery, same reason, and bounded, because an
+                # instance that cannot spawn twice running is not one this
+                # episode can wait out.
+                if reseats >= self.max_reseats or self._pool is None:
+                    raise
+                if not (self._instance_is_gone(error)
+                        or isinstance(error, RenderFailedError)):
+                    raise
+                reseats += 1
+                logger.warning(
+                    "episode %s could not open (%s); re-seating (%d/%d)",
+                    self.episode_id, error, reseats, self.max_reseats)
+                try:
+                    self._release_lease()
+                except Exception:  # noqa: BLE001 — it is already unusable
+                    pass
+                self._client = None
+                self.embodied_log.append({
+                    "recovery": "reseat_on_open", "attempt": reseats,
+                    "error": f"{type(error).__name__}: {error}"})
+                time.sleep(self.reseat_pause_s)
 
     def close(self) -> None:
         """End the embodied episode and give the instance back.
