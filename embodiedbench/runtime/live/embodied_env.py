@@ -605,6 +605,7 @@ class EmbodiedCourierEnv(CourierEnv):
                          "east: walk_to_xy(-267.1, 97.8)."),
             ))
         if not all(math.isfinite(v) for v in asked):
+            self._log_refused_point(asked, self._here_cm(), "bad_coordinate")
             return self._refuse(StepOutcome(
                 ok=False, code="bad_coordinate",
                 message=("A point is two ordinary numbers, metres north and "
@@ -621,6 +622,7 @@ class EmbodiedCourierEnv(CourierEnv):
             # writing down where it already was. "Name somewhere you are not"
             # is true and was not enough; a courier repeating a refusal word
             # for word has not understood which word was wrong.
+            self._log_refused_point(asked, here, "already_here")
             return self._refuse(StepOutcome(
                 ok=False, code="already_here",
                 message=(
@@ -696,6 +698,33 @@ class EmbodiedCourierEnv(CourierEnv):
                    "short of the point you named." if clamped else "")
             ),
         )
+
+    def _log_refused_point(self, asked: tuple[float, float],
+                           here: tuple[float, float], code: str) -> None:
+        """A coordinate request that never became a walk.
+
+        Deliberately NOT shaped like a hop -- no ``ticks``, so every existing
+        aggregation goes on counting walks and only walks.
+
+        It exists because leaving it out cost a whole evening's reading. 83 of
+        205 turns in the first live run were refused here, and because a
+        refusal returned before the hop log, the telemetry recorded the
+        coordinate that caused them exactly nowhere: the only way to see what
+        the policy had asked for was to parse it back out of the model's own
+        reply text. That is the same shape as every other measurement failure
+        on this system -- the zero I read was invisible, not absent.
+
+        ``gap_m`` is the number the refusal turns on, so a reader can tell
+        "it named its own position" from "it named somewhere a metre away"
+        without re-deriving the arithmetic.
+        """
+        self.embodied_log.append({
+            "kind": "coordinate_refused",
+            "code": code,
+            "asked_xy": (round(asked[0], 1), round(asked[1], 1)),
+            "from_xy": (round(here[0], 1), round(here[1], 1)),
+            "gap_m": round(math.dist(here, asked) / 100.0, 2),
+        })
 
     def _log_point_walk(self, asked: tuple[float, float],
                         target: tuple[float, float], walk: WalkResponse, *,

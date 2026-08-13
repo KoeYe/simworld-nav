@@ -1138,6 +1138,28 @@ class TestTheCoordinateActionSpace:
         assert not out.ok and out.code == "already_here"
         assert "the point you are standing on" in out.message
         assert "ADD" in out.message
+    def test_a_refused_coordinate_is_written_down(
+            self, paris, service, tmp_path):
+        """Leaving it out cost an evening's reading. 83 of 205 turns in the
+        first live run were refused before the hop log, so the coordinate that
+        caused them was recorded exactly nowhere -- the only way to see what
+        the policy had asked for was to parse it back out of the reply text.
+        Same shape as every other measurement failure here: the zero I read
+        was invisible, not absent."""
+        env = self.coordinate(paris, service, tmp_path)
+        here = env._here_cm()
+        env.walk_to_xy(round(here[0] / 100.0, 1), round(here[1] / 100.0, 1))
+
+        refused = [h for h in env.embodied_log
+                   if h.get("kind") == "coordinate_refused"]
+        assert len(refused) == 1
+        assert refused[0]["code"] == "already_here"
+        assert refused[0]["gap_m"] < 1.0
+        # ...and it must not look like a walk, or every aggregation that
+        # counts hops starts counting refusals too.
+        assert "ticks" not in refused[0]
+        assert env.summary()["embodied"]["hops"] == 0
+
 
 @needs_maps
 class TestTheTwoArmsDifferInOneThing:
