@@ -142,6 +142,15 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             "pavement_obstacle_album_root",
             f"/data/murray/paris_obstacles_pavement/{name}")
         self.difficulty = config.get("difficulty", "solo")
+        # Present so training can run ``difficulty: endless`` one order at a
+        # time: the tier's own depth is 3 concurrent jobs, which is a
+        # scheduling problem on top of a navigation one. An explicit depth
+        # wins over the tier's (the env says so), so endless + depth 1 is a
+        # fixed one-hour shift whose dispatcher refills after every delivery
+        # -- under which TOTAL earnings vary within a GRPO group (two
+        # deliveries against one against none), where the one-order fee, paid
+        # identically for any successful route, does not.
+        self.queue_depth = config.get("queue_depth", None)
         self.stride = config.get("stride", "block")
         self.embodiment = config.get("embodiment", "human_on_foot")
         self.hazards = bool(config.get("hazards", True))
@@ -207,6 +216,8 @@ class CourierGymEnv(_base_class()):  # type: ignore[misc]
             "stride": self.stride,
             "embodiment": self.embodiment,
         }
+        if self.queue_depth is not None:
+            kwargs["queue_depth"] = int(self.queue_depth)
         if self.album_root is not None:
             kwargs["album_root"] = self.album_root
             # Named, not guessed.
