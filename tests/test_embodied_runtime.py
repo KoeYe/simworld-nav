@@ -1294,34 +1294,41 @@ class TestTheCoordinateActionSpace:
         assert len(env.photo_rows(env.candidates())) == len(env.candidates())
 
 @needs_maps
-class TestTheTwoArmsDifferInOneThing:
-    """A/B configs, held to being an A/B.
+class TestTheCoordinateArmDeclaresWhatItChanged:
+    """The coordinate arm is no longer a controlled A/B, and this says so.
 
-    The coordinate arm is worth running only as a comparison, and the way a
-    comparison stops being one is not a wrong number -- it is an unrelated key
-    drifting on one side while nobody is diffing the files. So the diff is the
-    assertion.
+    It began as one: the same task, the same pictures, the same budget, and
+    the only difference the words a call is made of -- so a gap in success
+    rates would be attributable to the action space and nothing else. Four
+    decisions since have each been right on their own and have cost that
+    together:
+
+      max_step_m    a 10 m step, because 60 was sized against a policy that
+                    turned out never to aim past six;
+      arrive_cm /   forced by the step -- a step cannot be walked with an
+      tick_chunk    arrival radius larger than itself;
+      camera_view   one photograph of what is ahead, because per-street frames
+                    are the STREET space's design and a coordinate courier at a
+                    four-way junction was being handed three views down streets
+                    it cannot name and one of the way it came;
+      max_turns     32 against 16, because a median job is 27 calls at one call
+                    a turn and the old cap made `delivered` zero by arithmetic.
+
+    So this no longer asserts the arms are nearly identical. It asserts the
+    differences are the DECLARED ones: a new one still fails here, and anyone
+    comparing the two numbers reads this list first.
     """
 
     YAMLS = (Path(__file__).resolve().parents[1] / "embodiedbench" / "training"
              / "vagen")
-    # The keys that MAY differ, and nothing else: the action space itself,
-    # what bounds one call of it, the walk geometry that bound FORCES, and the
-    # dataset name (two arms sharing a data_source collide in the index).
-    #
-    # arrive_cm and tick_chunk are on this list reluctantly. They are not free
-    # choices -- a 1.5 m step cannot be walked with a 1.2 m arrival radius,
-    # and a radius that fine cannot be hit with a 2-tick chunk at 28 cm a tick
-    # -- but they do mean the two arms no longer walk on identical geometry,
-    # and that belongs in any reading of the difference between them.
-    ALLOWED = {"action_space", "max_step_m", "data_source",
-               "arrive_cm", "tick_chunk"}
+    DECLARED = {"action_space", "max_step_m", "arrive_cm", "tick_chunk",
+                "camera_view", "max_turns", "data_source"}
 
     @pytest.mark.parametrize("street, coordinate", [
         ("train_embodied.yaml", "train_embodied_xy.yaml"),
         ("val_embodied.yaml", "val_embodied_xy.yaml"),
     ])
-    def test_the_arms_differ_only_in_the_action_space(self, street, coordinate):
+    def test_nothing_differs_that_was_not_declared(self, street, coordinate):
         yaml = pytest.importorskip("yaml")
         a = yaml.safe_load((self.YAMLS / street).read_text())["envs"][0]
         b = yaml.safe_load((self.YAMLS / coordinate).read_text())["envs"][0]
@@ -1330,9 +1337,11 @@ class TestTheTwoArmsDifferInOneThing:
                   if k != "config" and a.get(k) != b.get(k)}
         differ |= {k for k in set(a["config"]) | set(b["config"])
                    if a["config"].get(k) != b["config"].get(k)}
-        assert differ <= self.ALLOWED, (
-            f"{coordinate} differs from {street} in {sorted(differ - self.ALLOWED)}; "
-            "the comparison only reads if the action space is the only change")
+        undeclared = sorted(differ - self.DECLARED)
+        assert not undeclared, (
+            f"{coordinate} differs from {street} in {undeclared}, which is not "
+            "on the declared list -- either it is a mistake or the list and "
+            "the docstring above need to grow with it")
         assert b["config"]["action_space"] == "coordinate"
         assert a["config"].get("action_space", "street") == "street"
 

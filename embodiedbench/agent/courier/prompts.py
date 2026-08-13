@@ -259,13 +259,13 @@ ONE_CALL_RULE = ("Exactly one fenced block, containing exactly one call, and "
 # a bet that every call after the first will still make sense. A model told it
 # may issue K calls and not told what a refusal does to the rest will chain
 # optimistically and lose the turn.
-CHUNK_CALL_RULE = """Exactly one fenced block. It may hold UP TO {calls} calls, one per line,
-    and nothing after it. They are carried out IN ORDER, and the turn STOPS at
-    the first one that is refused -- everything you wrote after it is thrown
-    away and never happens. So a wrong early call wastes the whole rest of the
-    turn: chain calls only where you already know each one will be accepted,
-    and write just one when you are not sure. More than {calls} calls is
-    refused outright, and nothing in the reply is carried out."""
+CHUNK_CALL_RULE = """Exactly one fenced block, holding UP TO {calls} calls, one per line, and
+    nothing after it. ONLY THE FIRST ONE HAPPENS. The rest are your plan for
+    after it: write them so you are thinking a few steps ahead, and expect to
+    write them again next turn, because the first step will not land exactly
+    where you predicted and the turn after this one starts from where it
+    actually landed. So make the FIRST call the one you are surest of. More
+    than {calls} calls is refused outright and nothing is carried out."""
 
 # What a chunked turn gets back: every call it made, in order, with what the
 # world said to each. A single summarising sentence would lose exactly the

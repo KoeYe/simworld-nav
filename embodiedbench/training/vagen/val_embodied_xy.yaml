@@ -24,7 +24,19 @@ envs:
     n_envs: 32
     data_source: courier_paris_embodied_xy_val
     seed: [1000, 1032, 1]
-    max_turns: 16
+    # 40, the same as the offline task in val_courier.yaml.
+    #
+    # The live configs were cut to 4 and 16 against a KV budget, and the cut
+    # was paid for by `action_chunk: 3` -- one prompt buying three actions, so
+    # four turns was twelve steps. A chunk is a PLAN now: three waypoints are
+    # estimated and one is walked, because waypoints two and three are named
+    # relative to a position the first walk has already had a chance to
+    # falsify. So a turn buys one action, and the turn count has to be the
+    # offline one or the task is a different, shorter task.
+    #
+    # A median job is 247 m and one call carries 9 m of ground: 27 calls. 40
+    # turns finishes it with room for the mistakes.
+    max_turns: 40
     response_length_per_turn: 1024
     config:
       backend: embodied
@@ -57,6 +69,18 @@ envs:
       # The action space, and the only thing that differs from the street
       # arm. See runtime/live/embodied_env.py.
       action_space: coordinate
+      # One photograph, of what is in front. The per-street frames are the
+      # STREET space's design -- a picture beside each candidate, captioned in
+      # the words walk_to takes. This courier does not take streets by name,
+      # so at a four-way junction it was being handed four pictures, three of
+      # them down streets it cannot name and one of them the way it came, and
+      # they filled the image budget. A person walking does not get a
+      # photograph of behind them each time they take a step.
+      #
+      # The list of streets is untouched: their names, bearings and distances
+      # still print, and the route marker still says which way. What changes
+      # is only what the CAMERA is pointed at.
+      camera_view: forward
       # How far one call may carry, in metres. A request past it is REFUSED,
       # not clamped, and refused when the call RUNS -- so the second and third
       # waypoints of a chunk are judged from where the earlier walks left the
