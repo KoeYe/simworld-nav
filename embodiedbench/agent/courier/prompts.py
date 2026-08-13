@@ -15,8 +15,12 @@ disabled, and a policy that obeyed it was rejected on every single turn.
 
 from __future__ import annotations
 
+import logging
+
 from embodiedbench.agent.courier.skills import render_procedures
 from embodiedbench.agent.courier.tools import Tool, render_tool_menu
+
+_log = logging.getLogger("courier.prompts")
 
 SYSTEM_TEMPLATE = """You are a delivery courier working on foot in {city}. You collect parcels and
 hand them to customers at street addresses, against a clock.
@@ -402,12 +406,27 @@ def build_observation(
     extra: str = "",
 ) -> str:
     """Compose one turn's observation."""
-    return OBSERVATION_TEMPLATE.format(
+    text = OBSERVATION_TEMPLATE.format(
         memory=memory, location=location, clock=clock,
         candidates=candidates or "There is no way on from here.",
         photographs=photographs or "  (no photographs here)",
         extra=extra,
     ).rstrip() + "\n"
+    # Which part of a turn actually grows. `max_tokens must be at least 1,
+    # got -N` overran by a DIFFERENT N each time (-37, then -259), so the
+    # growth is content-driven, and images are capped at max_images -- which
+    # leaves the text. Sized in characters, per part, so the answer is a
+    # measurement rather than the fifth guess.
+    # warning, not info: verl configures the root logger and info from a
+    # library logger does not survive it -- a measurement that is not printed
+    # is not a measurement.
+    _log.warning(
+        "obs_size total=%d memory=%d location=%d clock=%d candidates=%d "
+        "photographs=%d extra=%d",
+        len(text), len(memory), len(location), len(clock),
+        len(candidates or ""), len(photographs or ""), len(extra or ""),
+    )
+    return text
 
 
 def render_candidates(rows: list[dict]) -> str:

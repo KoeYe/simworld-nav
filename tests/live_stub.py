@@ -356,16 +356,24 @@ class FakeTrackBService(FakeRenderService):
                 "z_cm": self.agent["z"], "yaw_deg": self.agent["yaw"]}
 
 
-def write_endpoints(path: Path, services: list[Any]) -> Path:
-    """An endpoints.json for these services (or (id, base_url) pairs)."""
+def write_endpoints(path: Path, services: list[Any], seats: int | None = None) -> Path:
+    """An endpoints.json for these services (or (id, base_url) pairs).
+
+    ``seats`` writes the fleet's ``max_episodes`` per instance; left None the
+    key is omitted entirely, which is the pre-seats file shape the pool must
+    still read (defaulting to one courier per instance).
+    """
     instances = []
     for entry in services:
         if isinstance(entry, FakeRenderService):
-            instances.append({"id": entry.instance_id, "base_url": entry.base_url,
-                              "map_name": entry.map_name, "gpu_uuid": ""})
+            row = {"id": entry.instance_id, "base_url": entry.base_url,
+                   "map_name": entry.map_name, "gpu_uuid": ""}
         else:
             member_id, base_url = entry
-            instances.append({"id": member_id, "base_url": base_url,
-                              "map_name": "citycore-paris", "gpu_uuid": ""})
+            row = {"id": member_id, "base_url": base_url,
+                   "map_name": "citycore-paris", "gpu_uuid": ""}
+        if seats is not None:
+            row["max_episodes"] = seats
+        instances.append(row)
     path.write_text(json.dumps({"version": 0, "instances": instances}, indent=2))
     return path

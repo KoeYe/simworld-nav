@@ -154,9 +154,15 @@ Track B gives UE ownership of **locomotion and locomotion time**: a
 DeliveryAgent pawn (SpHumanoidAgent) actually walks edges under
 `global_sync` lockstep at fixed dt; the env's other tool costs (collect,
 hand_over, look …) remain declared bookkeeping added on top of the
-UE-derived clock. These endpoints are STATEFUL: one active embodied episode
-per instance at a time (`busy` otherwise), so the nav-side pool leases an
-instance exclusively for the episode's duration in embodied mode.
+UE-derived clock. These endpoints are STATEFUL: an instance carries up to
+`max_episodes` concurrent embodied episodes (`busy` past the last seat), each
+with its own pawn, so the nav-side pool leases a SEAT for the episode's
+duration. Seats default to 1, which is the original one-episode-per-instance
+behaviour exactly. Couriers on one instance are mutually invisible and have no
+physics between them — only agent-to-world — so a shared world is safe as well
+as cheap: 96 pawns tick at 1.01x the cost of one. An instance carrying even one
+courier still answers `/render` with `busy`; a spare seat does not reopen it to
+stateless renders.
 
 ### POST /episode
 ```json

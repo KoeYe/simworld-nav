@@ -27,6 +27,7 @@ import json
 import math
 from pathlib import Path
 
+import contextlib
 import pytest
 
 from embodiedbench.compiler.road_network import build_road_network
@@ -751,3 +752,83 @@ class TestAnOversubscribedFleetWaitsItsTurn:
             with pool.lease_embodied("ep-dead"):
                 pass
         assert _time.monotonic() - t0 < 5.0, "all-dead must not wait out the lease timeout"
+
+
+# ── seats: many couriers per instance ────────────────────────────────────────
+#
+# The service carries N couriers per instance (SimWorld2 --max-episodes); the
+# pool is the half that decides whether those seats are ever used. Exclusive
+# leases here would leave them empty however high the service is configured.
+
+
+class TestSeatsPerInstance:
+
+    def test_a_pre_seats_endpoints_file_still_means_one_courier(self, tmp_path):
+        """Files written before seats existed carry no key. Defaulting them to
+        anything but 1 would oversubscribe every old fleet in place."""
+        pool = RenderPool(write_endpoints(tmp_path / "e.json",
+                                          [("ue-a", "http://127.0.0.1:1")]))
+        assert [m.seats for m in pool.members] == [1]
+
+    def test_seats_are_read_from_the_endpoints_file(self, tmp_path):
+        pool = RenderPool(write_endpoints(tmp_path / "e.json",
+                                          [("ue-a", "http://127.0.0.1:1")], seats=4))
+        assert [m.seats for m in pool.members] == [4]
+
+    def test_one_instance_leases_up_to_its_seats_then_parks(self, tmp_path):
+        pool = RenderPool(write_endpoints(tmp_path / "e.json",
+                                          [("ue-a", "http://127.0.0.1:1")], seats=3),
+                          lease_timeout_s=0.3, lease_poll_s=0.05)
+        with contextlib.ExitStack() as stack:
+            for name in ("ep-0", "ep-1", "ep-2"):
+                stack.enter_context(pool.lease_embodied(name))
+            member = pool.members[0]
+            assert member.leases == {"ep-0", "ep-1", "ep-2"}
+            # The fourth has nowhere to sit and parks rather than colliding.
+            with pytest.raises(NoHealthyInstance) as caught:
+                with pool.lease_embodied("ep-3"):
+                    pass
+            assert "seats" in str(caught.value)
+        assert pool.members[0].leases == set()
+
+    def test_seats_fill_breadth_first_across_instances(self, tmp_path):
+        """Two instances of two seats take one courier each before either
+        takes a second: seats are cheap to stack but share one GPU's render
+        throughput, so spreading first is strictly better."""
+        pool = RenderPool(
+            write_endpoints(tmp_path / "e.json",
+                            [("ue-a", "http://127.0.0.1:1"),
+                             ("ue-b", "http://127.0.0.1:2")], seats=2),
+            lease_timeout_s=1.0, lease_poll_s=0.05)
+        with contextlib.ExitStack() as stack:
+            for name in ("ep-0", "ep-1"):
+                stack.enter_context(pool.lease_embodied(name))
+            assert sorted(len(m.leases) for m in pool.members) == [1, 1], (
+                "the second courier stacked instead of spreading")
+            for name in ("ep-2", "ep-3"):
+                stack.enter_context(pool.lease_embodied(name))
+            assert sorted(len(m.leases) for m in pool.members) == [2, 2]
+
+    def test_render_still_avoids_any_instance_with_a_courier(self, tmp_path):
+        """A seat left over does NOT make the instance available to /render:
+        the service answers /render busy while any courier is alive, so one
+        lease withdraws the whole instance from dispatch."""
+        pool = RenderPool(
+            write_endpoints(tmp_path / "e.json",
+                            [("ue-a", "http://127.0.0.1:1"),
+                             ("ue-b", "http://127.0.0.1:2")], seats=4))
+        with pool.lease_embodied("ep-0"):
+            leased = next(m for m in pool.members if m.leases)
+            assert len(leased.leases) < leased.seats, "precondition: a seat is free"
+            picked = pool._pick(set())
+            assert picked is not None and picked.id != leased.id
+
+    def test_releasing_one_courier_leaves_the_others_seated(self, tmp_path):
+        pool = RenderPool(write_endpoints(tmp_path / "e.json",
+                                          [("ue-a", "http://127.0.0.1:1")], seats=3),
+                          lease_timeout_s=1.0, lease_poll_s=0.05)
+        with pool.lease_embodied("ep-keep"):
+            with pool.lease_embodied("ep-go"):
+                assert pool.members[0].leases == {"ep-keep", "ep-go"}
+            assert pool.members[0].leases == {"ep-keep"}
+        assert pool.members[0].leases == set()

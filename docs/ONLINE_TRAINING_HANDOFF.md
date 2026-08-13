@@ -42,6 +42,44 @@ Then, at any point during or after a run:
 python -m embodiedbench.runtime.live.report /data/koe/nav_telemetry
 ```
 
+## Seats: many couriers on one instance
+
+An instance carries `max_episodes` couriers at once. Each gets its own pawn;
+they are mutually invisible and there is no physics between them, only
+agent-to-world. Turn it on in one place — the fleet — and it publishes the
+number into `endpoints.json`, which is where this side reads it:
+
+```bash
+python -m simworld_nav_service.fleet --n 1 --max-episodes 4 ...
+```
+
+`--n 1 --max-episodes 4` and `--n 4 --max-episodes 1` serve the same rollout
+width. The first holds one GPU.
+
+**Why it is nearly free.** 96 pawns tick at 1.01× the cost of one (36.1 ms),
+and the per-agent camera renders on demand, so the ticking cost of a courier
+is about 0.4 ms. What used to make one agent per instance look mandatory was
+not the engine: this service serialised a whole *walk* — hundreds of ticks —
+so a second courier could not move until the first finished its hop. The
+critical section is one frame bracket, and that is where the lock lives now.
+
+**The number is written once.** The fleet's `--max-episodes` goes to the
+service (which enforces it, answering `busy` past the last seat) and into
+`endpoints.json` (which the pool reads as `seats`). Setting them apart by hand
+is the one way to break this: a pool that believes in more seats than the
+service enforces sends episodes into a 503 that retrying cannot fix.
+
+**Seats fill breadth-first.** Four episodes over two 2-seat instances go one
+each before either takes a second. Seats are cheap to stack but share one
+GPU's render throughput, so spreading first is strictly better whenever there
+is somewhere to spread to.
+
+**What it does not change.** `/render` still avoids any instance carrying even
+one courier — the service answers `/render` busy while any episode is alive,
+so a spare seat does not make the instance available for stateless renders.
+And the default is 1 everywhere, including an `endpoints.json` written before
+seats existed, so nothing moves unless asked.
+
 ## The one cross-repo coupling
 
 `fixed_dt_seconds` (fleet) and `arrive_cm` / `tick_chunk` (here) are a single

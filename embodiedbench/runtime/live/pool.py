@@ -89,18 +89,29 @@ class _Member:
     in_flight: int = 0
     dispatched: int = 0     # lifetime batches, the round-robin tiebreak
     quarantined_at: float = 0.0
-    # The embodied episode holding this instance exclusively, or None. Track B
-    # endpoints are stateful -- one active embodied episode per instance -- so
-    # a leased member is withdrawn from /render dispatch entirely. In-process
-    # state only: the lease dies with the process that took it, and a fleet
-    # restart clears the service side anyway.
-    leased_to: str | None = None
+    # The embodied episodes holding seats on this instance. Track B endpoints
+    # are stateful, and an instance serves ``seats`` couriers at once; a member
+    # with ANY lease is withdrawn from /render dispatch entirely, because the
+    # service answers /render busy while any courier is alive. In-process state
+    # only: leases die with the process that took them, and a fleet restart
+    # clears the service side anyway.
+    leases: set[str] = field(default_factory=set)
+    # How many couriers this instance will carry, straight from the fleet's
+    # endpoints.json (``--max-episodes``). Defaults to 1, so an endpoints file
+    # written before seats existed keeps the old one-episode-per-instance shape.
+    seats: int = 1
+
+    @property
+    def leased_to(self) -> str | None:
+        """The historical single-lease view, kept for state dumps and tests."""
+        return next(iter(sorted(self.leases)), None)
 
     def state(self) -> dict[str, Any]:
         return {"id": self.id, "base_url": self.base_url,
                 "quarantined": self.quarantined, "strikes": self.strikes,
                 "in_flight": self.in_flight, "dispatched": self.dispatched,
-                "leased_to": self.leased_to}
+                "leased_to": self.leased_to,
+                "leases": sorted(self.leases), "seats": self.seats}
 
 
 _SHARED_POOLS: dict[str, "RenderPool"] = {}
@@ -172,11 +183,16 @@ class RenderPool:
         for row in instances:
             base_url = str(row["base_url"])
             member_id = str(row.get("id") or base_url)
+            try:
+                seats = int(row.get("max_episodes") or 1)
+            except (TypeError, ValueError):
+                seats = 1
             self.members.append(_Member(
                 id=member_id, base_url=base_url,
                 map_name=str(row.get("map_name") or ""),
                 gpu_uuid=str(row.get("gpu_uuid") or ""),
                 client=client_factory(base_url, instance_id=member_id, **kwargs),
+                seats=max(1, seats),
             ))
 
         self._index_of = {m.id: i for i, m in enumerate(self.members)}
@@ -259,14 +275,35 @@ class RenderPool:
             member.strikes = 0
             return results
 
-    def _pick(self, exclude: set[str]) -> _Member | None:
-        candidates = [m for m in self.members
-                      if not m.quarantined and m.leased_to is None
-                      and m.id not in exclude]
+    def _pick(self, exclude: set[str], *, for_lease: bool = False) -> _Member | None:
+        """The best instance, by two different definitions of "free".
+
+        For /render, free means *no courier at all*: the service answers
+        /render busy while any embodied episode is alive, so one lease
+        withdraws the whole instance from dispatch.
+
+        For a lease, free means *a seat left*. Seats are ordered ahead of
+        every other criterion so the pool fills instances breadth-first --
+        four episodes over four instances rather than four stacked on the
+        first. They cost nearly nothing to stack (96 pawns tick at 1.01x the
+        cost of one) but they do share one GPU's render throughput, so
+        spreading first is strictly better whenever there is somewhere to
+        spread to.
+        """
+        if for_lease:
+            candidates = [m for m in self.members
+                          if not m.quarantined and len(m.leases) < m.seats
+                          and m.id not in exclude]
+            key = lambda m: (len(m.leases), m.in_flight, m.dispatched,  # noqa: E731
+                             self._rotated(m))
+        else:
+            candidates = [m for m in self.members
+                          if not m.quarantined and not m.leases
+                          and m.id not in exclude]
+            key = lambda m: (m.in_flight, m.dispatched, self._rotated(m))  # noqa: E731
         if not candidates:
             return None
-        return min(candidates, key=lambda m: (m.in_flight, m.dispatched,
-                                              self._rotated(m)))
+        return min(candidates, key=key)
 
     def _rotated(self, member: _Member) -> int:
         """Tie-break position, rotated by process.
@@ -311,20 +348,20 @@ class RenderPool:
         skip = set(exclude or ())
         while True:
             with self._lease_lock:
-                member = self._pick(skip)
+                member = self._pick(skip, for_lease=True)
                 if member is not None:
-                    member.leased_to = episode_id
+                    member.leases.add(episode_id)
             if member is None:
                 # Same last resort as render: probe the quarantined before
                 # declaring the fleet dead.
                 with self._lease_lock:
                     self._readmit_one(skip)
-                    member = self._pick(skip)
+                    member = self._pick(skip, for_lease=True)
                     if member is not None:
-                        member.leased_to = episode_id
+                        member.leases.add(episode_id)
             if member is not None:
                 break
-            leased = sum(m.leased_to is not None for m in self.members)
+            leased = sum(len(m.leases) for m in self.members)
             # All healthy instances merely LEASED is the normal shape of a
             # trainer driving more concurrent episodes than the fleet has
             # instances -- wait for one to free rather than failing the
@@ -332,15 +369,17 @@ class RenderPool:
             # actually dead, and waiting would only delay the report.
             if leased == 0 or time.monotonic() >= deadline:
                 raise NoHealthyInstance(
-                    f"no instance free to lease for embodied episode {episode_id} "
-                    f"({len(self.members)} configured, "
+                    f"no seat free to lease for embodied episode {episode_id} "
+                    f"({len(self.members)} instances configured, "
+                    f"{sum(m.seats for m in self.members)} seats, "
                     f"{sum(m.quarantined for m in self.members)} quarantined, "
                     f"{leased} leased)")
             time.sleep(self.lease_poll_s)
         try:
             yield member.client
         finally:
-            member.leased_to = None
+            with self._lease_lock:
+                member.leases.discard(episode_id)
 
     # ── health ───────────────────────────────────────────────────────────────
 
