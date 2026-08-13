@@ -1225,6 +1225,32 @@ class TestTheCoordinateActionSpace:
         street = embodied_env(paris, UERenderClient(service.base_url),
                               tmp_path / "b")
         assert "UP TO" not in CourierSession(street, city="Paris").observe().text
+    def test_the_trace_says_which_way_the_camera_pointed(
+            self, paris, service, tmp_path):
+        """Three orientations and three different facts: the way the courier
+        travelled, where its body points now, and where each photograph
+        looked. They are not the same number -- /observe aims by turning the
+        pawn, so after a look the body's yaw is the last frame's bearing --
+        and a recording that keeps one of them cannot tell them apart."""
+        from embodiedbench.agent.courier.session import CourierSession
+        from embodiedbench.runtime.live.trace import EpisodeTrace
+
+        env = self.coordinate(paris, service, tmp_path, max_step_m=10.0,
+                              arrive_cm=100.0, tick_chunk=2)
+        session = CourierSession(env, city="Paris")
+        trace = EpisodeTrace(tmp_path / "trace", "ep", {})
+        here = env._here_cm()
+        session.step(f'```\nwalk_to_xy({here[0]/100 + 5.0:.1f}, {here[1]/100:.1f})\n```')
+        trace.record(env, session.run.turns[-1])
+        rec = json.loads(trace.close(env).read_text())
+        e = rec["events"][0]
+
+        assert len(e["frame_yaws_deg"]) == len(e["frames"])
+        assert all(y is not None for y in e["frame_yaws_deg"]), e["frame_yaws_deg"]
+        # Each frame looks at a different street, so no two share a bearing.
+        assert len(set(e["frame_yaws_deg"])) == len(e["frame_yaws_deg"])
+        assert e["yaw_after_deg"] is not None
+        assert e["calls"][0]["walk"]["end_yaw_deg"] is not None
 
 @needs_maps
 class TestTheTwoArmsDifferInOneThing:

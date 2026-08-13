@@ -267,6 +267,10 @@ class EmbodiedCourierEnv(CourierEnv):
         # ``facing``: the pawn's own yaw cannot answer this, because taking a
         # photograph turns it.
         self._walked_bearing: float | None = None
+        #: Album path -> the yaw the camera was aimed at when it was taken.
+        #: The pawn is turned to aim, so it is also the pawn's own yaw at the
+        #: shutter -- which is why ``facing`` cannot be read off the pose.
+        self.frame_yaws: dict[str, float] = {}
         #: How long reset() waits for a busy instance before giving up.
         self.episode_busy_timeout_s = 1800.0
         # Lease plumbing: a pool is leased lazily (the fleet may still be
@@ -331,6 +335,7 @@ class EmbodiedCourierEnv(CourierEnv):
         self.busy_wait_seconds = 0.0
         self.coordinate_walks = 0
         self._walked_bearing = None
+        self.frame_yaws = {}
         node = self.network.nodes[self.node_id]
         request = EpisodeRequest(
             episode_id=self.episode_id,
@@ -1020,7 +1025,11 @@ class EmbodiedCourierEnv(CourierEnv):
                     "observe failed (%s: %s); episode %s continues with "
                     "cached frames only", type(error).__name__, error,
                     self.episode_id)
-        return super()._plain_frame(vantage, toward)
+        path = super()._plain_frame(vantage, toward)
+        if path is not None and path not in self.frame_yaws:
+            self.frame_yaws[path] = round(bearing_deg(
+                self._camera_at(node_id), self.position(toward)), 1)
+        return path
 
     def _camera_at(self, node_id: str) -> tuple[float, float]:
         """Where the camera stands when photographing from ``node_id``.

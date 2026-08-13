@@ -164,9 +164,19 @@ class EpisodeTrace:
             # belongs between the two.
             "pose_before_m": before,
             "pose_after_m": after,
+            # Three orientations, and they are three different facts:
+            # `facing` is the way the courier travelled (what the candidate
+            # list's left/right come from), `yaw_after` is where the body
+            # points now, and each frame below carries the yaw it was shot at.
             "facing_deg": _facing(env),
+            "yaw_after_deg": _yaw(env),
             "observation": getattr(turn, "prompt", "") or "",
             "frames": self._keep(getattr(turn, "image_paths", None) or []),
+            # Which way each photograph looks, in the same order as `frames`.
+            # Carried on the turn rather than looked up here: the harness
+            # renames frames on the way out, so the album path the yaw was
+            # recorded against is not the path this sees.
+            "frame_yaws_deg": list(getattr(turn, "frame_yaws", None) or []),
             "reply": getattr(turn, "reply", "") or "",
             "status": getattr(turn, "status", None),
             "error": getattr(turn, "error", None),
@@ -242,6 +252,26 @@ def _pose(env: Any) -> tuple[float, float] | None:
         return None
 
 
+def _yaw(env: Any) -> float | None:
+    """The pawn's OWN yaw, straight off the last pose the engine returned.
+
+    Not the same thing as ``facing`` and recorded beside it on purpose.
+    ``facing`` is the direction the courier travelled, which is what every
+    "on your left" in the observation is derived from. This is where the body
+    is actually pointing -- and because ``/observe`` aims the camera by
+    turning the pawn, after a look it is the bearing of the last photograph
+    taken rather than the way the courier was walking. Keeping both is what
+    lets a reader tell those two apart instead of assuming they agree.
+    """
+    pose = getattr(env, "ue_pose", None)
+    if pose is None:
+        return None
+    try:
+        return round(float(pose.yaw_deg) % 360.0, 1)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _facing(env: Any) -> float | None:
     try:
         value = env.facing()
@@ -271,6 +301,10 @@ def _walk(hop: dict[str, Any]) -> dict[str, Any]:
         "target_m": _metres(hop.get("target_xy")),
         "end_m": _metres((hop["end_pose"]["x_cm"], hop["end_pose"]["y_cm"]))
                  if hop.get("end_pose") else None,
+        # Where the body pointed when the walk stopped: a navmesh route round
+        # a corner leaves it facing along the last leg, not at what it named.
+        "end_yaw_deg": (round(float(hop["end_pose"]["yaw_deg"]) % 360.0, 1)
+                        if hop.get("end_pose") else None),
         "walked_m": round(float(hop.get("walked_cm") or 0.0) / 100.0, 2),
         "ticks": hop.get("ticks"),
         "sim_seconds": hop.get("sim_seconds"),

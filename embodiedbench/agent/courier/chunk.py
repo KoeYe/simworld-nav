@@ -270,6 +270,7 @@ class ChunkedCourierSession(CourierSession):
             image_paths=observation.image_paths,
             reply=reply,
         )
+        turn.frame_yaws = list(self._frame_yaws)
         stopped = budget_exceeded(self.spend, self.budgets)
         if stopped:
             turn.status, turn.error = "truncated", stopped

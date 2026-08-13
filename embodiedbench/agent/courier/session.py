@@ -138,6 +138,8 @@ class CourierSession:
         # queried with the row's compass heading, so the very marker meant to
         # stop verbatim repeats could not fire on the repeats it was for.
         self._offered: list[dict[str, Any]] = []
+        #: Which way each of this turn's photographs looks. See ``_frames``.
+        self._frame_yaws: list[float | None] = []
         self.lamp_legs: dict[str, str] = {}
         self.feedback = ""
         self.allowed = list(env.allowed_tool_names())
@@ -262,6 +264,13 @@ class CourierSession:
         # Renamed on the way out. The album names its files after what is in
         # them, which would let a policy read ``road_block`` off the path instead
         # of the picture. See ``frame_alias``.
+        # The album path and the alias the harness serves are both known here
+        # and nowhere else -- FrameAliases renames on the way out, so a yaw
+        # recorded against the album path cannot be joined to `image_paths`
+        # afterwards. Carry it across in the same order as the frames.
+        aims = getattr(self.env, "frame_yaws", None) or {}
+        self._frame_yaws = [aims.get(row["image"])
+                            for row in rows if row.get("image")]
         frames = [
             Frame(f"[{row['street']}, {row['heading']}] the view down it",
                   self.frames_seen.alias(row["image"]))
@@ -314,6 +323,7 @@ class CourierSession:
             image_paths=observation.image_paths,
             reply=reply,
         )
+        turn.frame_yaws = list(self._frame_yaws)
         stopped = budget_exceeded(self.spend, self.budgets)
         if stopped:
             turn.status, turn.error = "truncated", stopped
