@@ -36,9 +36,26 @@ observation telling the agent to use MOVE on a map where MOVE was disabled.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Any, Callable
+
+
+class _Blanks(dict):
+    """Leaves a placeholder nobody supplied exactly as it was written.
+
+    So that filling in one number does not turn every other brace in the prose
+    into a ``KeyError`` -- and so that an unsupplied one survives to be caught
+    by the check in ``available_tools`` rather than vanishing.
+    """
+
+    def __missing__(self, key: str) -> str:
+        return "{" + key + "}"
+
+
+def _fill(text: str, values: dict[str, Any]) -> str:
+    return text.format_map(_Blanks(values)) if text else text
 
 
 class ToolKind(str, Enum):
@@ -145,6 +162,33 @@ class Tool:
     refusals: tuple[tuple[str, str], ...] = ()
     use_when: str = ""
     not_for: str = ""
+    # A second worked call, for the chunked prompt's two-line example. It has to
+    # come off the tool for the same reason the first one does: the example is
+    # part of the manual, and a hard-coded second line demonstrates a tool the
+    # environment may not have.
+    example2: str = ""
+
+    def filled(self, **values: Any) -> "Tool":
+        """This manual with the environment's own numbers written into it.
+
+        A tool whose behaviour is bounded by a configured number has to state
+        that number, and stating it twice -- once in the prose here, once in
+        the env that enforces it -- is how a prompt comes to promise a limit
+        the runtime does not keep. So the prose carries ``{placeholder}`` and
+        the env supplies the value; ``available_tools`` refuses to hand back a
+        manual with a placeholder still in it.
+        """
+        if not values:
+            return self
+        return replace(
+            self,
+            summary=_fill(self.summary, values),
+            returns=_fill(self.returns, values),
+            use_when=_fill(self.use_when, values),
+            not_for=_fill(self.not_for, values),
+            refusals=tuple((wording, _fill(remedy, values))
+                           for wording, remedy in self.refusals),
+        )
 
     def manual(self) -> str:
         """The full entry for this tool: call, result, refusals, judgement."""
@@ -230,6 +274,7 @@ WALK_TO = Tool(
                   required=False),
     ),
     example='walk_to("Rue de Grenelle", "east")',
+    example2='walk_to("Rue du Bac", "north")',
     time_cost_s=0.0,
     requires_env_action="MOVE_TO",
     returns=(
@@ -253,6 +298,56 @@ WALK_TO = Tool(
     not_for=(
         "finding out what is down a street -- the photograph is already in "
         "front of you, and look() reads the numbers without walking"
+    ),
+)
+
+WALK_TO_XY = Tool(
+    name="walk_to_xy",
+    kind=ToolKind.ACT,
+    summary=(
+        "Walk toward a point on the map, naming it as a pair of coordinates. "
+        "Every turn tells you the point you are standing on and which way you "
+        "face, in the same two numbers. One call carries you at most "
+        "{max_step_m} m: name a point further off than that and you walk "
+        "{max_step_m} m of the way there and stop, so a long stretch is "
+        "several calls and not a refusal."
+    ),
+    # The axes are the city's, not the ones a reader would assume: this map's
+    # north is +x and its east is +y, which is what ``bearing_deg`` and the
+    # drawing both speak (see ``map_image.MapView.to_px``). Stating it the
+    # other way round -- as the first draft of this tool did -- would send
+    # every coordinate the policy names ninety degrees off.
+    params=(
+        ToolParam("x", "number", "how far north, in metres, on the same scale "
+                                 "your own position is given in"),
+        ToolParam("y", "number", "how far east, in metres, on the same scale"),
+    ),
+    example="walk_to_xy(-267.1, 97.8)",
+    example2="walk_to_xy(-231.4, 102.6)",
+    time_cost_s=0.0,
+    requires_env_action="MOVE_TO_XY",
+    returns=(
+        "how far you actually walked and the point you are standing on now, "
+        "then the same look at where you have arrived that any other arrival "
+        "gives: the streets leaving it, and the view down them."
+    ),
+    refusals=(
+        ("there is no way to walk there",
+         "there is no pavement between you and that point -- a building, a "
+         "wall, a river. You are left where the way ran out. Read the map "
+         "again and aim at somewhere a person could walk to."),
+        ("you are already standing there",
+         "the point you named is the one you are on. Name somewhere you are "
+         "not, far enough off to be worth a walk."),
+    ),
+    use_when=(
+        "you can see on the map where you want to be, and would rather aim "
+        "straight at it than work out which streets lead there"
+    ),
+    not_for=(
+        "somewhere you have not located on the map. You are told your own "
+        "position and nothing else's, so a coordinate you guessed at walks "
+        "you into a wall and costs you the turn"
     ),
 )
 
@@ -553,8 +648,22 @@ ALL_TOOLS: tuple[Tool, ...] = (
     WALK_TO, FOLLOW_STREET, LOOK, CHECK_ORDER, CHECK_MAP, NAVIGATE,
     COLLECT, HAND_OVER, WAIT, REST, NOTE,
 )
+
+# Offered only when the environment enables coordinate walking, because the
+# two are different tasks: naming a street is a choice among the handful this
+# junction offers, while naming a point is a free coordinate the policy has to
+# derive from the map and its own pose. Mixing them in one menu would let a
+# run fall back to the easy one and report the hard one's number.
+COORDINATE_TOOLS: tuple[Tool, ...] = (WALK_TO_XY,)
+
+#: The environment actions that move the courier. An environment enables one
+#: of these and not the other -- which of the two is the action space a run is
+#: measuring, and the prompt is built around whichever it finds.
+MOVEMENT_ACTIONS: frozenset[str] = frozenset({"MOVE_TO", "MOVE_TO_XY"})
 UNIMPLEMENTED_TOOLS: tuple[Tool, ...] = (LIST_JOBS, ACCEPT_JOB)
-TOOLS_BY_NAME: dict[str, Tool] = {t.name: t for t in ALL_TOOLS}
+TOOLS_BY_NAME: dict[str, Tool] = {
+    t.name: t for t in ALL_TOOLS + COORDINATE_TOOLS + UNIMPLEMENTED_TOOLS
+}
 # Tools that were in the menu and are not any more, with the reason, so a
 # reviewer can tell a deliberate retirement from an oversight.
 RETIRED_TOOLS: dict[str, str] = {
@@ -572,12 +681,16 @@ RETIRED_TOOLS: dict[str, str] = {
     ),
 }
 
+#: A ``{placeholder}`` no environment filled in. See ``available_tools``.
+_UNFILLED = re.compile(r"\{[a-z_][a-z0-9_]*\}")
+
 
 def available_tools(
     enabled_env_actions: list[str],
     *,
     allow_consult: bool = True,
     observation_provides: frozenset[str] = OBSERVATION_PROVIDES,
+    limits: dict[str, Any] | None = None,
 ) -> list[Tool]:
     """The tools this environment can actually execute and that can say something.
 
@@ -594,17 +707,38 @@ def available_tools(
     the same knob as ``allow_consult`` pointed at the other half: a condition
     that stops stating house numbers in the header gives a tool that reports
     house numbers something to do again.
+
+    ``limits`` are the environment's own numbers, written into the manuals that
+    quote them. The coordinate action space is the reason it exists: its step
+    cap is configurable, the manual has to state it, and the two would drift
+    the first time either was changed alone. The check below is the point --
+    an unfilled placeholder reaches the model as the literal characters
+    ``{max_step_m}``, which is the same defect as the ``{street}`` this
+    module's docstring was written about.
+
+    The coordinate tools are considered here alongside the street ones, and
+    the ``requires_env_action`` filter is what keeps them apart: an
+    environment enables ``MOVE_TO`` or ``MOVE_TO_XY``, never both, so the menu
+    describes one action space and the other is not mentioned.
     """
     enabled = set(enabled_env_actions)
     out: list[Tool] = []
-    for tool in ALL_TOOLS:
+    for tool in ALL_TOOLS + COORDINATE_TOOLS:
         if tool.requires_env_action and tool.requires_env_action not in enabled:
             continue
         if tool.kind is ToolKind.CONSULT and not allow_consult:
             continue
         if not tool.informative(observation_provides):
             continue
-        out.append(tool)
+        chosen = tool.filled(**(limits or {}))
+        left = _UNFILLED.search(chosen.manual())
+        if left:
+            raise ValueError(
+                f"{tool.name}'s manual still carries {left.group(0)}: the "
+                "environment offering this tool has to supply that value in "
+                "`limits`, or the model is shown the placeholder."
+            )
+        out.append(chosen)
     return out
 
 

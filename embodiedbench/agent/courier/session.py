@@ -44,8 +44,10 @@ from embodiedbench.agent.courier.loop import (
 from embodiedbench.agent.courier.frame_alias import FrameAliases
 from embodiedbench.agent.courier.memory import CourierMemory
 from embodiedbench.agent.courier.prompts import (
+    AIM_HINT,
     FORMAT_ERROR_TEMPLATE,
     REJECTED_TEMPLATE,
+    TAKE_STREET_HINT,
     TRUNCATED_TEMPLATE,
     build_observation,
     build_system_prompt,
@@ -135,7 +137,12 @@ class CourierSession:
         self.lamp_legs: dict[str, str] = {}
         self.feedback = ""
         self.allowed = list(env.allowed_tool_names())
-        self.tools = [TOOLS_BY_NAME[name] for name in self.allowed]
+        # From the environment, so a manual that quotes one of its numbers
+        # quotes the number it will actually enforce. An env that has none
+        # hands back the same declarations this used to read directly.
+        self.tools = (env.tools_for_prompt()
+                      if hasattr(env, "tools_for_prompt") else
+                      [TOOLS_BY_NAME[name] for name in self.allowed])
         # Tools the session runs itself. The notebook belongs to the courier,
         # not to the city: nothing about the world changes when a line is
         # written, and putting a no-op on CourierEnv purely to satisfy the
@@ -220,6 +227,11 @@ class CourierSession:
             location=self.env.location_text(),
             clock=self.env.clock_text(),
             candidates=render_candidates(rows),
+            # The line under the list names the call that acts on it, so it
+            # follows the action space rather than being written once for the
+            # one that existed first.
+            take_hint=(AIM_HINT if "walk_to_xy" in self.allowed
+                       else TAKE_STREET_HINT),
             photographs=(render_photographs(rows, phone_map=self.phone_map_on())
                          if self.with_images else ""),
             extra=(f"\n### what just happened\n{self.feedback}" if self.feedback else ""),

@@ -635,6 +635,7 @@ class CourierEnv:
         pavement_album_root: Path | None = None,
         pavement_obstacle_album_root: Path | None = None,
         served_long_edge: float | None = None,
+        show_pose: bool = False,
     ):
         # A tier sets the list, the queue and the clock; they are not
         # independent, and the tier is the only place they are chosen together.
@@ -825,6 +826,14 @@ class CourierEnv:
         # gets. Silence means the album's own answer stands.
         self.served_long_edge = (
             float(served_long_edge) if served_long_edge else None)
+        # Whether the observation states the courier's own coordinates. Off by
+        # default: it is information the street action space cannot use and
+        # never had, and switching it on for everyone would move the baseline
+        # the coordinate space is being compared against. The coordinate space
+        # turns it on for itself, and it stays a separate flag so the
+        # controlled version of that comparison -- street action space, pose
+        # shown -- is one config away rather than a code change.
+        self.show_pose = bool(show_pose)
         self.visible_signals = self._load_signal_visibility()
         # Where an obstacle can stand on this map. Seed-free and computed once:
         # it is a property of the road network, which is what lets one bake of
@@ -1895,6 +1904,35 @@ class CourierEnv:
                     text += " " + trend
             else:
                 text += f" The slip says {target.street_name}, which is not this street."
+        if self.show_pose:
+            text += " " + self.pose_text()
+        return text
+
+    def pose_text(self) -> str:
+        """Where the courier is standing, and which way it is facing.
+
+        The fairness line for the coordinate action space, and the reason it
+        is a whole sentence rather than a number: a policy asked to name a
+        point has to be told the point it is naming *from*, or every
+        coordinate it writes is a guess dressed as arithmetic. What it is NOT
+        told is where the delivery is -- the pin is on the map to be measured
+        like anything else, and handing over its coordinates would replace the
+        task with subtraction.
+
+        Both numbers are metres, north first, on the axes the whole
+        environment speaks (north is +x, east is +y -- see
+        ``map_image.MapView.to_px``) so that what is printed here and what
+        ``walk_to_xy`` accepts are the same two numbers in the same order.
+
+        One decimal: the pawn lands a median 38 cm from the node it aimed at,
+        so a second decimal would be printing noise, and whole metres would
+        make two adjacent positions read as one.
+        """
+        x_m, y_m = (v / 100.0 for v in self.position())
+        text = f"You are standing at ({x_m:.1f}, {y_m:.1f}), north then east."
+        facing = self.facing()
+        if facing is not None:
+            text += f" You are facing {compass_of(facing)}."
         return text
 
     def _number_trend(self, street: str, numbers: str) -> str:
@@ -2950,31 +2988,61 @@ class CourierEnv:
         """
         from embodiedbench.agent.courier.tools import available_tools
 
-        env_actions = ["VIEW_ORDERS", "ACCEPT_ORDER", "PICKUP", "DROP_OFF", "WAIT", "MOVE_TO"]
+        env_actions = ["VIEW_ORDERS", "ACCEPT_ORDER", "PICKUP", "DROP_OFF", "WAIT"]
+        env_actions += list(self.movement_env_actions())
         # A body that never tires must not be offered a rest: a tool that
         # can only be refused is a turn the agent is invited to lose.
         if self.embodiment.stamina and self.embodiment.stamina_per_m:
             env_actions.append("REST")
         allow_consult = self.condition == Condition.FULL
+        offered = available_tools(env_actions, allow_consult=allow_consult,
+                                  limits=self.tool_limits())
         if self.stride == Stride.BLOCK:
             # ``follow_street`` exists to spend one turn on several waypoints of
             # one street. Under this stride ``walk_to`` already does that, and
             # offering both would put two names on one action -- the same defect
             # the tool audit retired ``read_sign`` for, arrived at from the other
             # direction.
-            return [
-                t.name for t in available_tools(env_actions, allow_consult=allow_consult)
-                if t.name != "follow_street"
-            ]
+            return [t.name for t in offered if t.name != "follow_street"]
         # ``note`` is back, and this time it runs. It was removed because it
         # was advertised with no executor anywhere -- the defect the
         # UNIMPLEMENTED_TOOLS split exists to make impossible. CourierSession
         # now executes it itself, because a notebook is the courier's and not
         # the city's, so the name is dispatchable again.
-        names = [t.name for t in available_tools(env_actions, allow_consult=allow_consult)]
+        names = [t.name for t in offered]
         if allow_consult and "note" not in names:
             names.append("note")
         return names
+
+    def movement_env_actions(self) -> tuple[str, ...]:
+        """The environment actions that move the courier.
+
+        A hook rather than a constant because the coordinate action space is
+        chosen at construction and has to reach the menu: an environment
+        offers ``MOVE_TO`` or ``MOVE_TO_XY``, never both, and everything that
+        follows from that -- which tools are described, which worked example
+        the prompt shows, which line sits under the list of streets -- falls
+        out of this one answer. See ``EmbodiedCourierEnv``.
+        """
+        return ("MOVE_TO",)
+
+    def tool_limits(self) -> dict[str, Any]:
+        """The environment's own numbers, for the manuals that quote them."""
+        return {}
+
+    def tools_for_prompt(self) -> list[Any]:
+        """The tool objects behind ``allowed_tool_names``, manuals filled in.
+
+        The session used to look each allowed name up in ``TOOLS_BY_NAME``,
+        which hands back the module-level declaration -- the one whose limits
+        are still ``{placeholders}``. Names alone were enough while no tool's
+        manual quoted a number the environment owned.
+        """
+        from embodiedbench.agent.courier.tools import TOOLS_BY_NAME
+
+        limits = self.tool_limits()
+        return [TOOLS_BY_NAME[name].filled(**limits)
+                for name in self.allowed_tool_names()]
 
     def summary(self) -> dict[str, Any]:
         """Everything needed to judge a run, including how it was judged.

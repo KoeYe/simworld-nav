@@ -376,6 +376,16 @@ def _check_argument_types(name: str, args: list[Any], kwargs: dict[str, Any]) ->
                 f"{name}({param.name}=…) takes a whole number without quotes, "
                 f"like {tool.example or name + '(2)'}."
             )
+        # A coordinate arrives quoted often enough to be worth its own message:
+        # every other argument in this grammar is text in double quotes, so
+        # ``walk_to_xy("-267.1", "97.8")`` is the shape a model reaches for.
+        # Without this it is dispatched, and the environment gets a string
+        # where it does its arithmetic.
+        if param.type == "number" and not isinstance(value, (int, float)):
+            raise FormatError(
+                f"{name}({param.name}=…) takes a number, with no quotes around "
+                f"it: {tool.example or name + '(1.0, 2.0)'}."
+            )
 
 
 def split_calls(text: str) -> list[tuple[str, str]]:

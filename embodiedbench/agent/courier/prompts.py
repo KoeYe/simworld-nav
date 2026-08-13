@@ -18,7 +18,11 @@ from __future__ import annotations
 import logging
 
 from embodiedbench.agent.courier.skills import render_procedures
-from embodiedbench.agent.courier.tools import Tool, render_tool_menu
+from embodiedbench.agent.courier.tools import (
+    MOVEMENT_ACTIONS,
+    Tool,
+    render_tool_menu,
+)
 
 _log = logging.getLogger("courier.prompts")
 
@@ -34,7 +38,50 @@ building opposite — a view that does not reach, not an empty street.
 
 {steps}
 
-READING THE MAP. It is a picture of the streets around you, north up. On it:
+{map_reading}
+
+Repeating a call that was just refused will be refused again for the same
+reason. Nothing about the world changed in between. Read what the refusal
+listed, and choose from that.
+
+{hazards}
+
+{tool_menu}
+
+{streets}
+
+What you have been trained to do:
+{procedures}
+
+HOW TO REPLY — exactly this shape, every turn:
+
+THOUGHT: one line saying what you read and what you concluded.
+```
+{reply_example}
+```
+
+  - {call_count_rule}
+  - The name must be one of the tools listed above.
+  - {quoting_rule}
+  - Whole numbers go bare.
+  - A tool with no arguments still needs its brackets: {no_arg_example}
+  - Keep the THOUGHT to one line. A reply that runs too long is cut off before
+    it reaches the action, and a cut-off reply loses the turn."""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The two action spaces
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Naming a street and naming a point are different tasks, and the paragraphs
+# below are where the prompt says which one is being asked for. They are split
+# out rather than written into the template because everything else about the
+# prompt -- the hazards, the reply format, the procedures, the clock -- is the
+# same task in both, and a second copy of the whole system prompt with three
+# paragraphs different is how a run comes to differ from its own baseline in
+# ways nobody chose. See ``tools.COORDINATE_TOOLS`` for why the two are never
+# offered together.
+
+MAP_READING = """READING THE MAP. It is a picture of the streets around you, north up. On it:
 
   - a BLUE LINE is your route, from where you are to where you are going;
   - a THICK BLUE ARROW leaves your position along the first stretch of that
@@ -64,17 +111,9 @@ The route is walked one junction at a time. The line on the map crosses several
 streets; you can only ever take one that leaves the corner you are on. When the
 street you had in mind is not in the list, THE MAP IS NOT WRONG AND NEITHER IS
 THE LIST — you simply have not reached that street yet. Take whichever street
-here goes most nearly the right way, and look again from there.
+here goes most nearly the right way, and look again from there."""
 
-Repeating a call that was just refused will be refused again for the same
-reason. Nothing about the world changed in between. Read what the refusal
-listed, and choose from that.
-
-{hazards}
-
-{tool_menu}
-
-How the streets work here:
+STREET_RULES = """How the streets work here:
   - You take a street by naming it and the way you are going:
     walk_to("Rue de Grenelle", "east"). Both are written on the line above it,
     and the photograph captioned with the same two words is the view down it.
@@ -90,26 +129,97 @@ How the streets work here:
   - House numbers run in order along a street, odd one side and even the other;
     if they are falling and you want a higher one, turn around.
   - A street keeps its name from junction to junction, so a turn shows a new
-    name. A new name means you have left the street you were on.
+    name. A new name means you have left the street you were on."""
 
-What you have been trained to do:
-{procedures}
+QUOTING_RULE = ("Street names and bearings go in double quotes, spelled as "
+                "they are written\n    in the list: {number_example}.")
 
-HOW TO REPLY — exactly this shape, every turn:
+# The coordinate action space. What changes is the whole middle of the job:
+# the courier no longer picks a name off a list, it reads a position off the
+# map and names one. So the map section stops being "find the name in both
+# places" and becomes "measure", the street rules become coordinate rules, and
+# the quoting rule inverts -- these are the only arguments in this grammar
+# that must NOT be quoted.
+MAP_READING_XY = """READING THE MAP. It is a picture of the streets around you, north up. On it:
 
-THOUGHT: one line saying what you read and what you concluded.
-```
-{reply_example}
-```
+  - a BLUE LINE is your route, from where you are to where you are going;
+  - a THICK BLUE ARROW leaves your position along the first stretch of that
+    route — it points the way you want to go next;
+  - a small circle labelled "you are here" is you, and every turn tells you the
+    two numbers for that circle;
+  - a red pin is the address you are heading for;
+  - the streets are named on the map, written along each street.
 
-  - {call_count_rule}
-  - The name must be one of the tools listed above.
-  - Street names and bearings go in double quotes, spelled as they are written
-    in the list: {number_example}.
-  - Whole numbers go bare.
-  - A tool with no arguments still needs its brackets: {no_arg_example}
-  - Keep the THOUGHT to one line. A reply that runs too long is cut off before
-    it reaches the action, and a cut-off reply loses the turn."""
+YOU MOVE BY NAMING A POINT, NOT A STREET. The two numbers are metres: the first
+counts NORTH, which is up the map, and the second counts EAST, which is right
+across it. Both can be negative. Your own position is given in exactly those
+two numbers every turn, so the way to name a point is to start from where you
+are and count:
+
+  1. find yourself on the map, and read the two numbers the turn gives you;
+  2. look along the blue line and pick somewhere on it you want to reach —
+     a corner it turns at, or simply a stretch of it ahead of you;
+  3. work out how far north and how far east that point is FROM YOU, using the
+     scale bar, and add each to your own two numbers;
+  4. walk to the result.
+
+Aim at the road. A point inside a building or across a wall has no pavement
+leading to it, and asking for one costs you the turn and leaves you where the
+way ran out. When you are unsure, name a nearer point on the line rather than a
+further one: several short walks along a route all arrive, and one long walk
+through a building does not.
+
+Nothing tells you the coordinates of the address you are delivering to. Its pin
+is on the map and you can measure it like anything else, but the numbers for it
+are not written anywhere, and a guessed coordinate is a walk into a wall."""
+
+STREET_RULES_XY = """How getting about works here:
+  - You move by naming a point: walk_to_xy(-267.1, 97.8). North first, east
+    second, both in metres, both bare numbers.
+  - The streets leaving where you stand are still listed, with their names,
+    bearings and how far the next junction is. You do not take one by name —
+    but the list and the photographs are how you tell which way is walkable
+    from here, and how far it is worth aiming.
+  - Where you end up is a real position, and it is where your next call counts
+    from. Read your own two numbers again every turn rather than adding up the
+    walks you meant to take: a walk that was cut short or stopped at a wall
+    leaves you somewhere you did not plan.
+  - House numbers run in order along a street, odd one side and even the other;
+    if they are falling and you want a higher one, turn around.
+  - A street keeps its name from junction to junction, so a new name means you
+    have left the street you were on."""
+
+QUOTING_RULE_XY = ("Coordinates are bare numbers — no quotes, no units, no "
+                   "brackets of\n    their own: {number_example}.")
+
+# The narrated settings keep their own first step -- the route marker still
+# says which way, and taking that away would make the coordinate arm harder
+# than the street arm at something other than the action space. What changes
+# is only the last clause of the last step, where "walk it" is a call this
+# space does not have. At narration=route the two arms then differ in exactly
+# one thing: whether the move is expressed as a name or as a point.
+STEPS_XY_ALL = """SO EVERY MOVE IS THE SAME TWO STEPS:
+  1. Find the street in the list marked *** THE ROUTE GOES THIS WAY ***. Its
+     bearing is the way to go and its distance is how far the next junction is.
+  2. If its line says the pedestrian light is RED, wait(). If its line says
+     BLOCKED, that street is shut — aim along another and the marker will move.
+     Otherwise name a point that far along it, and walk there."""
+
+STEPS_XY_ROUTE = """SO EVERY MOVE IS THE SAME TWO STEPS:
+  1. Find the street in the list marked *** THE ROUTE GOES THIS WAY ***. Its
+     bearing is the way to go and its distance is how far the next junction is.
+  2. Look at that street's photograph. Red light, or blocked? Then wait() or
+     aim along a different one. Otherwise turn that bearing and that distance
+     into a point — how far north, how far east — add it to your own position,
+     and walk there."""
+
+THREE_STEPS_XY = """SO EVERY MOVE IS THE SAME THREE STEPS:
+  1. Look at the map. Where does the line go from here — how far north and how
+     far east of the point you are standing on?
+  2. Add that to your own two numbers, and keep the point on a street. Do not
+     aim past a corner the route turns at; aim at the corner.
+  3. Look at the photograph down the way you are about to walk. Red light, or
+     blocked? Then wait() or aim somewhere else. Otherwise walk it."""
 
 THREE_STEPS = """SO EVERY MOVE IS THE SAME THREE STEPS:
   1. Look at the map. Which way does the line leave you — which compass point?
@@ -173,8 +283,7 @@ OBSERVATION_TEMPLATE = """{memory}
 
 ### streets leaving this junction
 {candidates}
-(take one with walk_to("street name", "bearing") — the name and the bearing
- exactly as they are written above; nothing else is a street)
+{take_hint}
 
 ### photographs
 {photographs}
@@ -255,9 +364,26 @@ you act:
   3. Is that street's photograph clear — light green, nothing across the road?"""
 
 REQUIRED_FIELDS = {
-    "system": {"city", "tool_menu", "procedures", "blocked_advice"},
-    "observation": {"memory", "location", "clock", "candidates", "photographs", "extra"},
+    "system": {"city", "tool_menu", "procedures", "blocked_advice",
+               "map_reading", "streets", "quoting_rule"},
+    "observation": {"memory", "location", "clock", "candidates", "photographs",
+                    "extra", "take_hint"},
 }
+
+# The line under the list of streets, naming the call that acts on it. It is a
+# parameter of the observation for the same reason the menu is a parameter of
+# the system prompt: on a map with no ``walk_to`` it was still telling the
+# courier, every single turn, to take a street with ``walk_to``.
+TAKE_STREET_HINT = (
+    '(take one with walk_to("street name", "bearing") — the name and the '
+    'bearing\n exactly as they are written above; nothing else is a street)')
+# Under the coordinate action space the list is still worth printing -- it is
+# how the courier tells which way is walkable and how far -- but it is no
+# longer a menu, and saying so is the whole of the difference.
+AIM_HINT = (
+    "(you do not take these by name — they are what is walkable from here, "
+    "and how far.\n Move with walk_to_xy(north, east), counting from your own "
+    "position above)")
 
 
 def build_system_prompt(*, city: str, tools: list[Tool],
@@ -298,11 +424,24 @@ def build_system_prompt(*, city: str, tools: list[Tool],
     # prompt demonstrated the syntax of a tool the runtime would refuse.
     # One call only: the fence it lands in says "exactly one call", and a
     # second comma-joined call made the shown example a reply the parser rejects.
-    number_example = 'walk_to("Rue de Grenelle", "east")'
+    #
+    # And it went on being written out by hand here, which is how the same
+    # defect reached the coordinate action space: a prompt whose only worked
+    # example was walk_to(...) on a map where walk_to does not exist. The
+    # example is the movement tool's own, whichever movement tool this
+    # environment has. At MOVE_TO that is the string it always was.
+    mover = next((t for t in tools if t.requires_env_action in MOVEMENT_ACTIONS
+                  and t.example), None)
+    coordinates = mover is not None and mover.name == "walk_to_xy"
     # Likewise the no-argument example: it named check_order(), which no_phone
     # takes away, so that condition's prompt demonstrated a tool it had removed.
     no_arg = next((t.name for t in tools if not t.params), "")
     no_arg_example = f"{no_arg}()" if no_arg else "a call with empty brackets"
+    # A map with no movement action at all leaves nothing to demonstrate; take
+    # any tool that has arguments rather than name one this map lacks.
+    with_args = next((t for t in tools if t.params and t.example), None)
+    number_example = (mover.example if mover else
+                      with_args.example if with_args else no_arg_example)
     # Each setting is told the truth about itself and nothing else. A prompt
     # that keeps telling a narrated courier the colour is only in the picture
     # is teaching a rule that does not hold, and one that leaves the sentence
@@ -370,6 +509,14 @@ def build_system_prompt(*, city: str, tools: list[Tool],
     else:
         steps = THREE_STEPS
         hazards = HAZARD_RULES.format(blocked_advice=blocked_advice)
+    # The coordinate space replaces the steps rather than adding to them: the
+    # last clause of every variant is "otherwise walk it", naming a call this
+    # space does not have. Narration and action space are different axes --
+    # what the WORDS may state, and what a CALL may name -- so all three
+    # narration settings have a coordinate form.
+    if coordinates:
+        steps = {"all": STEPS_XY_ALL,
+                 "route": STEPS_XY_ROUTE}.get(narration, THREE_STEPS_XY)
 
     # The worked example is the rule in miniature, so it has to carry the same
     # number of calls the rule permits: a chunked prompt whose only example is
@@ -379,13 +526,18 @@ def build_system_prompt(*, city: str, tools: list[Tool],
     chunk = max(1, int(action_chunk))
     call_count_rule = (ONE_CALL_RULE if chunk == 1
                        else CHUNK_CALL_RULE.format(calls=chunk))
+    second = (mover.example2 or mover.example) if mover else number_example
     reply_example = (number_example if chunk == 1 else
-                     f'{number_example}\nwalk_to("Rue du Bac", "north")')
+                     f"{number_example}\n{second}")
     return SYSTEM_TEMPLATE.format(
         city=city,
         sources=sources,
         steps=steps,
         hazards=hazards,
+        map_reading=MAP_READING_XY if coordinates else MAP_READING,
+        streets=STREET_RULES_XY if coordinates else STREET_RULES,
+        quoting_rule=(QUOTING_RULE_XY if coordinates else QUOTING_RULE).format(
+            number_example=number_example),
         tool_menu=render_tool_menu(tools),
         procedures=render_procedures(available=names, narration=narration),
         blocked_advice=blocked_advice,
@@ -404,11 +556,13 @@ def build_observation(
     candidates: str,
     photographs: str = "",
     extra: str = "",
+    take_hint: str = TAKE_STREET_HINT,
 ) -> str:
     """Compose one turn's observation."""
     text = OBSERVATION_TEMPLATE.format(
         memory=memory, location=location, clock=clock,
         candidates=candidates or "There is no way on from here.",
+        take_hint=take_hint,
         photographs=photographs or "  (no photographs here)",
         extra=extra,
     ).rstrip() + "\n"
