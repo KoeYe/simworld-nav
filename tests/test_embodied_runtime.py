@@ -1245,3 +1245,73 @@ class TestTheTwoArmsDifferInOneThing:
                 assert a.get(key) == b.get(key), (
                     f"{train} and {val} disagree on {key}: "
                     f"{a.get(key)!r} vs {b.get(key)!r}")
+
+
+@needs_maps
+class TestTheTraceRecordsWhatTheCourierSaw:
+    """One event per CALL, with the picture beside it.
+
+    Episode telemetry is the right grain for a fleet and the wrong one for
+    "what did it see, what did it decide, what did the world do" -- which is
+    asked one call at a time, and which a chunked turn flattens into one
+    action with one joined feedback paragraph.
+    """
+
+    def test_a_trace_carries_the_frames_after_the_cache_is_gone(
+            self, paris, service, tmp_path, monkeypatch):
+        from embodiedbench.agent.courier.session import CourierSession
+        from embodiedbench.runtime.live.trace import EpisodeTrace
+
+        monkeypatch.setenv("EB_LIVE_TRACE_DIR", str(tmp_path / "trace"))
+        env = embodied_env(paris, UERenderClient(service.base_url), tmp_path,
+                           action_space="coordinate", max_step_m=1.5,
+                           arrive_cm=30.0, tick_chunk=1)
+        session = CourierSession(env, city="Paris")
+        trace = EpisodeTrace(tmp_path / "trace", "ep", {"action_space": "coordinate"})
+
+        here = env._here_cm()
+        session.step(f'```\nwalk_to_xy({here[0]/100 + 1.0:.1f}, {here[1]/100:.1f})\n```')
+        trace.record(env, session.run.turns[-1])
+        path = trace.close(env)
+
+        assert path and path.exists()
+        rec = json.loads(path.read_text())
+        event = rec["events"][0]
+        assert event["calls"] and event["calls"][0]["action"].startswith("walk_to_xy")
+        assert event["calls"][0]["walk"]["kind"] == "coordinate"
+        assert event["pose_m"] and len(event["pose_m"]) == 2
+        assert event["observation"] and event["reply"]
+        # The frames were copied out of the cache, which the episode owns and
+        # takes down with it -- the whole reason they are copied.
+        assert event["frames"], "no frames kept"
+        for rel in event["frames"]:
+            assert (path.parent / rel).exists()
+
+    def test_every_call_of_a_chunk_gets_its_own_row(
+            self, paris, service, tmp_path):
+        """The turn-level record says one action and one outcome; the reply
+        named three, and the second and third were judged from positions the
+        first two walks produced."""
+        from embodiedbench.agent.courier.chunk import ChunkedCourierSession
+        from embodiedbench.runtime.live.trace import EpisodeTrace
+
+        env = embodied_env(paris, UERenderClient(service.base_url), tmp_path,
+                           action_space="coordinate", max_step_m=1.5,
+                           arrive_cm=30.0, tick_chunk=1)
+        session = ChunkedCourierSession(env, city="Paris", action_chunk=3)
+        trace = EpisodeTrace(tmp_path / "trace", "ep", {})
+
+        x, y = (v / 100.0 for v in env._here_cm())
+        session.step("```\n" + "\n".join(
+            f"walk_to_xy({x + 1.0 * i:.1f}, {y:.1f})" for i in (1, 2, 3)) + "\n```")
+        trace.record(env, session.run.turns[-1])
+        rec = json.loads(trace.close(env).read_text())
+
+        calls = rec["events"][0]["calls"]
+        assert len(calls) == 3
+        assert [c["index"] for c in calls] == [0, 1, 2]
+        # Each ran from where the one before it left off.
+        froms = [c["from_xy_m"] for c in calls]
+        assert all(f is not None for f in froms)
+        assert froms[0] != froms[1] != froms[2]
+        assert all(c["feedback"] for c in calls)

@@ -212,8 +212,14 @@ class TestAChunkIsSeveralCallsAndOneTurn:
             assert isinstance(record[key], type(value)), key
         assert set(record) - set(stock) == {
             "chunk", "chunk_len", "chunk_executed", "chunk_aborted_at"}
+        # `from_xy` and `message` joined them so a trace can say what each
+        # call was judged from and what the world said back to it -- a chunk's
+        # later calls are named relative to positions the courier has not
+        # reached yet, and the turn-level feedback is the calls' messages
+        # joined, so neither is recoverable from the turn alone.
         assert [set(row) for row in turn.chunk] == [
-            {"action", "status", "code", "sim_seconds", "reward"}] * 2
+            {"action", "status", "code", "sim_seconds", "reward",
+             "from_xy", "message"}] * 2
 
     def test_a_chunk_of_one_call_is_still_allowed(self, paris):
         """The permission is 'up to K'. A courier that is unsure must be able

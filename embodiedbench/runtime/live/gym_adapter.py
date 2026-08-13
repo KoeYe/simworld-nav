@@ -546,8 +546,11 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
 
         obs, reward, done, info = await super().step(action_str)
         turns = self._session.run.turns if self._session is not None else []
-        info.update(chunk_info(turns[-1] if turns else None))
+        last = turns[-1] if turns else None
+        info.update(chunk_info(last))
         info.update(self._live_health())
+        if getattr(self, "_trace", None) is not None and last is not None:
+            self._trace.record(self._env, last)
         return obs, reward, done, info
 
     def _live_health(self) -> dict[str, Any]:
@@ -638,6 +641,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         self._env.reset()
         self._episode_opened_at = time.time()
         self._last_seed = int(seed)
+        self._trace = self._open_trace(episode_id)
         # The chunked session only where chunking was asked for: at K=1 it is
         # the stock session by delegation anyway, and building the stock one
         # keeps "chunking off" and "chunking never installed" the same run.
@@ -658,9 +662,28 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                      "action_space": self.action_space,
                      "backend": "embodied", "episode_id": episode_id}
 
+    def _open_trace(self, episode_id: str) -> Any:
+        """A per-call trace, when one was asked for. See ``trace.py``."""
+        from .trace import EpisodeTrace, trace_dir
+
+        root = trace_dir()
+        if root is None:
+            return None
+        return EpisodeTrace(root, episode_id, {
+            "seed": self._last_seed, "map": self.map_dir.name,
+            "action_space": self.action_space, "max_step_m": self.max_step_m,
+            "arrive_cm": self.arrive_cm, "tick_chunk": self.tick_chunk,
+            "action_chunk": self.action_chunk, "narration": self.narration,
+            "difficulty": self.difficulty, "stride": self.stride,
+        })
+
     def _flush_telemetry(self) -> None:
         """Write the finished episode's record. Never raises."""
         from .telemetry import record_episode
+
+        if getattr(self, "_trace", None) is not None and self._env is not None:
+            self._trace.close(self._env)
+            self._trace = None
 
         record_episode(
             self._env,

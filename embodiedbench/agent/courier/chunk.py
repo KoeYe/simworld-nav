@@ -330,6 +330,16 @@ class ChunkedCourierSession(CourierSession):
                 break
             before = self.env.sim_seconds
             self._leaving = self.env.node_id
+            # Where this call is being judged FROM. The second and third
+            # waypoints of a chunk are named relative to positions the courier
+            # has not reached yet, so a trace that records only the reply
+            # cannot say what each call was actually asking for.
+            from_xy = None
+            if hasattr(self.env, "position"):
+                try:
+                    from_xy = [round(v, 1) for v in self.env.position()]
+                except Exception:  # noqa: BLE001 — a trace never fails a turn
+                    from_xy = None
             outcome = self._execute(action)
             seconds = self.env.sim_seconds - before
             executed += 1
@@ -343,6 +353,11 @@ class ChunkedCourierSession(CourierSession):
                 "code": "" if outcome.ok else (outcome.code or "refused"),
                 "sim_seconds": seconds,
                 "reward": outcome.reward,
+                "from_xy": from_xy,
+                # What the world said back to THIS call. The turn-level
+                # feedback is the calls' messages joined, so by the time a
+                # reader sees it there is no telling which call said what.
+                "message": outcome.message,
             })
             messages.append(outcome.message)
 
