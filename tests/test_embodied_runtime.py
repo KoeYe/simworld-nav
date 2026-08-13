@@ -1154,3 +1154,17 @@ class TestTheTwoArmsDifferInOneThing:
         env = embodied_env(paris, UERenderClient(service.base_url), tmp_path)
         with pytest.raises(RuntimeError, match="coordinate"):
             env.walk_to_xy(0.0, 0.0)
+
+    def test_the_album_fallback_is_reachable_from_a_config(self, tmp_path, service):
+        """The env has had the knob since the cross-machine work and the
+        quickstart's settings table says an experiment must turn it off -- but
+        no config key reached it, so the only value any run could have was the
+        training-friendly default. Measured the hard way: an instance died
+        mid-validation and the episodes it was serving carried on against an
+        album with every walking metric still reading green."""
+        endpoints = write_endpoints(tmp_path / "e.json", [service])
+        base = {"backend": "embodied", "ue_endpoints": str(endpoints),
+                "live_cache_root": str(tmp_path / "cache")}
+        assert EmbodiedCourierGymEnv(base).allow_album_fallback is True
+        assert EmbodiedCourierGymEnv(
+            {**base, "allow_album_fallback": False}).allow_album_fallback is False

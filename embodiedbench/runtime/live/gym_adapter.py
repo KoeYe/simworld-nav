@@ -425,6 +425,16 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
         # it explicitly for the controlled comparison: street space with the
         # pose shown isolates the action space from the extra fact.
         self.show_pose = config.get("show_pose")
+        # Whether a dead renderer may finish an episode on cached frames.
+        # The env has had this knob since the cross-machine work and the
+        # quickstart's own settings table says an experiment must turn it
+        # off -- but no config key reached it, so the only value any run
+        # could have was the training-friendly default. Measured the hard
+        # way on 2026-08-13: one of three instances died mid-validation with
+        # UE's malloc crash, and the episodes it was serving carried on
+        # against an album with every walking metric still reading green.
+        self.allow_album_fallback = bool(
+            config.get("allow_album_fallback", True))
         self.action_chunk = int(config.get("action_chunk", 1))
         if self.action_chunk < 1:
             raise ValueError(
@@ -473,6 +483,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             "action_space": self.action_space,
             "max_step_m": self.max_step_m,
             "show_pose": self.show_pose,
+            "allow_album_fallback": self.allow_album_fallback,
         }
         self._cfg8 = hashlib.blake2b(
             json.dumps(axes, sort_keys=True).encode("utf-8"),
@@ -621,6 +632,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
             max_walk_seconds=self.max_walk_seconds,
             action_space=self.action_space,
             max_step_m=self.max_step_m,
+            allow_album_fallback=self.allow_album_fallback,
             **kwargs,
         )
         self._env.reset()
@@ -673,6 +685,7 @@ class EmbodiedCourierGymEnv(CourierGymEnv):
                 # between two files of these, read weeks apart.
                 "action_space": self.action_space,
                 "max_step_m": self.max_step_m,
+                "allow_album_fallback": self.allow_album_fallback,
                 "show_pose": self.show_pose,
                 "narration": self.narration,
             },
