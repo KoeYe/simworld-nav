@@ -318,10 +318,20 @@ class EmbodiedCourierEnv(CourierEnv):
         self.episode_busy_timeout_s = 1800.0
         #: How long to leave an instance alone after it stopped answering,
         #: before asking the pool for a seat again.
-        self.reseat_pause_s = 5.0
-        #: How many times one episode may re-seat while trying to open. An
-        #: instance that cannot spawn twice running is not one to wait out.
-        self.max_reseats = 3
+        #:
+        #: Sixty seconds, not five. A wedged engine is not repaired by asking
+        #: it again -- it is repaired by the keeper noticing and rebuilding
+        #: it, which is a four-minute cold boot. Measured: three attempts five
+        #: seconds apart gave up at 18:50:34 and the engine came back at
+        #: 18:56:40, so the trainer died of impatience six minutes before the
+        #: fix landed. Patience here is free; the alternative is losing every
+        #: step since the last checkpoint.
+        self.reseat_pause_s = 60.0
+        #: How many times one episode may re-seat while trying to open.
+        #: Eight at a minute apart is eight minutes, which covers the cold
+        #: boot the keeper needs with room to spare. Still bounded: an engine
+        #: that cannot spawn after that is not one this episode can wait out.
+        self.max_reseats = 8
         # Lease plumbing: a pool is leased lazily (the fleet may still be
         # launching when the env object is built); a bare client is used as
         # given and never "released".
