@@ -1,0 +1,67 @@
+# Held-out episodes for the COORDINATE action space: the courier names a
+# point and the pawn walks toward it, instead of naming one of the streets
+# leaving this junction.
+#
+# This file is val_embodied.yaml with two keys added and nothing else
+# changed, and it is meant to be diffed against it. The comparison the
+# coordinate arm exists for -- does naming a point succeed more or less often
+# than naming a street -- is only readable if the two arms differ in the
+# action space and in nothing else. Every other axis here (narration, stride,
+# the fleet, the image budget, the chunk, the dt-matched arrival geometry) is
+# its sibling's, verbatim.
+#
+# Why the arm exists: the base model already completes deliveries zero-shot in
+# the street space -- 18 of 18 hops, parcel collected and delivered, no
+# training step taken -- so nearly every rollout in a GRPO group succeeds, the
+# group-normalised advantage is ~0 and so is the gradient. The reward is not
+# obviously broken; the task is close to solved. This is a harder question
+# asked of the same world, and the number to read off it is the SUCCESS RATE
+# against the street arm, not the throughput -- throughput was never what
+# stopped learning.
+
+envs:
+  - name: Embodied
+    n_envs: 32
+    data_source: courier_paris_embodied_xy_val
+    seed: [1000, 1032, 1]
+    max_turns: 16
+    response_length_per_turn: 1024
+    config:
+      backend: embodied
+      difficulty: solo
+      stride: block
+      embodiment: human_on_foot
+      hazards: false
+      # Three keys this file was missing while its own smoke sibling carried
+      # them, and each one silently made the reportable number measure
+      # something other than the run that produced it.
+      #
+      # ``narration`` is a definition of the task, and train_embodied.yaml
+      # says so in as many words: a run that trains at "route" and scores at
+      # the "none" default is measuring neither.
+      narration: route
+      reward_basis: earnings
+      progress_weight: 0.0
+      max_images: 3
+      image_max_side: 320
+      ue_endpoints: /data/koe/nav_fleet_game/endpoints.json
+      live_cache_root: /data/koe/nav_live_cache
+      spawn_z_cm: 100.0
+      # And these two are properties of the FLEET, not of the split: the
+      # engine's dt is set when the fleet launches, and both splits walk the
+      # same fleet. At 16x a tick is 28 cm, so the defaults (chunk 10, radius
+      # 50 cm) look 280 cm apart -- the courier sails past its node and the
+      # walk reports stuck. Validation would have counted the arithmetic of
+      # its own arrival check as a navigation failure.
+      tick_chunk: 2
+      arrive_cm: 120.0
+      action_chunk: 3
+      # The action space, and the only thing that differs from the street
+      # arm. See runtime/live/embodied_env.py.
+      action_space: coordinate
+      # How far one call may carry, in metres. Measured, not chosen: over 300
+      # block-stride legs on this map one walk_to covers a median 38.8 m and a
+      # p75 of 59.5 m. At the street arm's own p75 a coordinate call is never
+      # the cheaper action, so a difference in success rate cannot be bought
+      # with a more generous step cap.
+      max_step_m: 60.0

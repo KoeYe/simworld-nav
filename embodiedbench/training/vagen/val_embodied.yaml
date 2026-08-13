@@ -15,6 +15,14 @@ envs:
       stride: block
       embodiment: human_on_foot
       hazards: false
+      # Three keys this file was missing while its own smoke sibling carried
+      # them, and each one silently made the reportable number measure
+      # something other than the run that produced it.
+      #
+      # ``narration`` is a definition of the task, and train_embodied.yaml
+      # says so in as many words: a run that trains at "route" and scores at
+      # the "none" default is measuring neither.
+      narration: route
       reward_basis: earnings
       progress_weight: 0.0
       max_images: 3
@@ -22,3 +30,12 @@ envs:
       ue_endpoints: /data/koe/nav_fleet_game/endpoints.json
       live_cache_root: /data/koe/nav_live_cache
       spawn_z_cm: 100.0
+      # And these two are properties of the FLEET, not of the split: the
+      # engine's dt is set when the fleet launches, and both splits walk the
+      # same fleet. At 16x a tick is 28 cm, so the defaults (chunk 10, radius
+      # 50 cm) look 280 cm apart -- the courier sails past its node and the
+      # walk reports stuck. Validation would have counted the arithmetic of
+      # its own arrival check as a navigation failure.
+      tick_chunk: 2
+      arrive_cm: 120.0
+      action_chunk: 3
