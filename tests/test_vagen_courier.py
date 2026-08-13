@@ -655,3 +655,36 @@ class TestPayingByTheHourGivesGRPOSomethingToPushOn:
     def test_an_unknown_basis_is_refused_rather_than_silently_zeroed(self, config):
         with pytest.raises(ValueError, match="unknown reward_basis"):
             CourierGymEnv({**config, "reward_basis": "per_parcel"})
+
+
+class TestEndlessDispatchOneOrderAtATime:
+    """difficulty: endless + queue_depth: 1 is the fixed-time-total-earnings
+    shift: the dispatcher refills after every delivery, the clock and the turn
+    cap end the episode, and total earnings can differ within a GRPO group."""
+
+    def test_the_depth_reaches_the_env_and_the_dispatch_never_runs_out(self):
+        env = CourierGymEnv({"difficulty": "endless", "queue_depth": 1,
+                             "reward_basis": "earnings", "max_turns": 3})
+        run(env.reset(0))
+        inner = env._env
+        assert inner.unbounded, "endless tier should leave the dispatcher unbounded"
+        assert inner.queue_depth == 1, "the explicit depth must win over the tier's 3"
+        assert len(inner.live_orders()) == 1
+        run(env.close())
+
+    def test_the_episode_does_not_end_with_the_first_delivery(self):
+        env = CourierGymEnv({"difficulty": "endless", "queue_depth": 1,
+                             "reward_basis": "earnings", "max_turns": 2})
+        run(env.reset(0))
+        inner = env._env
+        order = inner.active_order()
+        # Deliver by teleport: the wrapper's step is not under test here.
+        inner.node_id = order.pickup.kerb_node
+        assert inner.collect().ok
+        inner.node_id = order.dropoff.kerb_node
+        assert inner.hand_over().ok
+        assert not inner.finished, (
+            "endless dispatch must refill instead of ending the shift")
+        assert len(inner.live_orders()) == 1, "a fresh order should be live"
+        assert inner.summary()["earnings"] > 0
+        run(env.close())

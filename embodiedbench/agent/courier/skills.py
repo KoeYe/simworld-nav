@@ -98,13 +98,11 @@ DECIDE = Procedure(
              "and the numbers here include that one, act now — do not walk on to "
              "be sure.",
              requires=("collect",)),
-        "On the slip's street but at the wrong number? Then the door is along "
-        "this street and the only question is which way. Take the street leaving "
-        "here that keeps the same name and runs the way the numbers must go. Do "
-        "not turn off onto a different street: leaving the right street is the "
-        "most expensive mistake available to you.",
-        Step("If you cannot tell which way the numbers run, look(k) reads them "
-             "down a street without walking it, and answers it outright.",
+        "On the slip's street at the wrong number? The door is along this "
+        "street; keep its name, walk the way the numbers must go. Leaving the "
+        "right street is the most expensive mistake available to you.",
+        Step("If you cannot tell which way the numbers run, "
+             "look(\"street\", \"bearing\") reads them without walking it.",
              requires=("look",)),
         Step("Not on the slip's street? Then you are travelling: navigate() once, "
              "take the street its first instruction names, and do not ask again "
@@ -121,9 +119,10 @@ FIND_ADDRESS = Procedure(
     when="you know the address but not where it is",
     steps=(
         "navigate() for the route: which street, which turn, how far.",
-        "Read which way the line leaves you, then take the street here whose bearing is nearest it. The route runs through streets you cannot reach yet; only the ones listed here can be walked.",
-        Step("If the route says to stay on that street for several junctions, "
-             "follow_street(k, n) does them in one turn.",
+        "Read which way the line leaves you and take the street here whose "
+        "bearing is nearest it; only streets in the list can be walked.",
+        Step("To stay on one street for several junctions, "
+             "follow_street(\"street\", \"bearing\", n) does them in one turn.",
              requires=("follow_street",)),
         "navigate() again when you have made the turn, or when what you see stops "
         "matching what it said.",
@@ -137,8 +136,8 @@ FIND_ADDRESS_NO_PHONE = Procedure(
     steps=(
         "The turn already names the street you are standing on and the doors at your "
         "feet; the numbers run in order, odd one side and even the other.",
-        "If you are on the right street, look(k) down it to see whether the numbers "
-        "climb or fall that way, then walk the way they climb toward yours.",
+        "If you are on the right street, look() down it to see whether the "
+        "numbers climb or fall, then walk the way they climb toward yours.",
         "If you are not, take a street heading the right way and read the numbers "
         "again at the next junction to check you are closer.",
     ),
@@ -174,9 +173,8 @@ LOST = Procedure(
         "Stop repeating the last turn; it is the one that brought you back.",
         "Re-anchor on the street named at the top of the turn and the doors beside it.",
         "Prefer a street you have not walked yet, even if it looks less direct.",
-        "Walking back the way you came is a legal move and sometimes the only "
-        "one. At a dead end it is the only one. Refusing to backtrack does not "
-        "find a new street; it spends the shift standing still.",
+        "Walking back the way you came is legal and at a dead end it is the "
+        "only move; refusing to backtrack spends the shift standing still.",
     ),
     requires=("walk_to",),
 )
@@ -185,9 +183,8 @@ WAY_SHUT = Procedure(
     name="When the way is shut",
     when="a photograph shows a barrier across the street the route wants",
     steps=(
-        "Believe the picture. The route came off a map, the map has never seen "
-        "this street, and there is no way to tell it -- ask again and it will "
-        "send you the same way.",
+        "Believe the picture: the map cannot see the barrier and will send "
+        "you the same way again.",
         "Take another street yourself. The map on your phone shows the layout: "
         "pick one that runs the same way and rejoin further along.",
         "Ask for a route again once you are past it, from where you now are.",
@@ -200,8 +197,7 @@ DEADLINE = Procedure(
     when="an order has a deadline",
     steps=(
         "A late delivery still scores, but less. An abandoned one scores nothing.",
-        Step("wait() is for a red pedestrian light and nothing else. Waiting "
-             "anywhere else spends the clock and changes nothing.",
+        Step("wait() is for a red pedestrian light and nothing else.",
              requires=("wait",)),
         "Every tool costs time, looking and consulting included. Do not spend turns on "
         "them when the way is already clear.",
@@ -215,8 +211,8 @@ ARRIVAL = Procedure(
     steps=(
         "Compare the street and door numbers at the top of the turn to the slip, "
         "exactly.",
-        "Only collect() at the pickup and hand_over() at the dropoff; a refusal "
-        "only says you are not there, and costs time, so it is not a search tool.",
+        "Only collect() at the pickup and hand_over() at the dropoff; a "
+        "refusal is not a search tool.",
         "If the number is close but wrong, walk one more junction the way the numbers "
         "are going.",
     ),
@@ -228,7 +224,7 @@ CROSSINGS = Procedure(
     when="a photograph of a pedestrian light is shown for the street you want",
     steps=(
         "Read the lamp in the [light: street, bearing] photograph, not one in a street view.",
-        "Red — wait(). One wait sees the phase out, so one is always enough.",
+        "Red — wait(), once; it sees the phase out.",
         "Green, or no lamp photograph for that street — walk on.",
     ),
     requires=("wait", "walk_to"),

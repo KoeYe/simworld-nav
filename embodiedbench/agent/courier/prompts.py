@@ -98,38 +98,32 @@ is ALSO IN THE LIST above. Do it in this order:
      names in it;
   3. walk that one, spelling it exactly as THE LIST spells it.
 
-If none of the names on the line is in the list, you have not reached any of
-them yet. Do not type a name off the map that is not in the list: it will be
-refused, the turn is gone and nothing has moved. Take the street in the list
-that runs most nearly the way the arrow points instead, and read the map again
-from the next corner.
+If none of the line's names is in the list, you have not reached them yet —
+THE MAP IS NOT WRONG AND NEITHER IS THE LIST. Typing a name off the map that
+is not in the list is refused and the turn is gone. Take the listed street
+that runs most nearly the way the arrow points, and read the map again from
+the next corner. The arrow and compass are a check on the name you picked,
+not a substitute.
 
-Use the arrow and the compass as a check on the name you picked, not instead
-of it.
-
-The route is walked one junction at a time. The line on the map crosses several
-streets; you can only ever take one that leaves the corner you are on. When the
-street you had in mind is not in the list, THE MAP IS NOT WRONG AND NEITHER IS
-THE LIST — you simply have not reached that street yet. Take whichever street
-here goes most nearly the right way, and look again from there."""
+The route is walked one junction at a time. The line crosses several streets;
+you can only take one that leaves the corner you are on. When the street you
+had in mind is not in the list, THE MAP IS NOT WRONG AND NEITHER IS THE LIST —
+you have not reached that street yet."""
 
 STREET_RULES = """How the streets work here:
   - You take a street by naming it and the way you are going:
-    walk_to("Rue de Grenelle", "east"). Both are written on the line above it,
-    and the photograph captioned with the same two words is the view down it.
-  - The same street name usually leaves a junction twice, once each way. They
-    are two directions along one street, not two streets, which is why the
-    bearing is part of naming one.
-  - A street name means the same thing everywhere in the city. If you walked
-    "Rue de Grenelle" going east an hour ago, that is the same street you are
-    looking at now — so a street you have already tried is a street you can
-    recognise and rule out.
+    walk_to("Rue de Grenelle", "east"). Both are written on its line, and the
+    photograph captioned with the same two words is the view down it.
+  - The same name usually leaves a junction twice — two directions along one
+    street, which is why the bearing is part of naming one.
+  - A street name means the same thing everywhere: one you have already tried
+    is one you can recognise and rule out.
   - Each street also says where it lies relative to the way you face, so
-    "turn left onto Rue X" is something you can act on.
-  - House numbers run in order along a street, odd one side and even the other;
-    if they are falling and you want a higher one, turn around.
-  - A street keeps its name from junction to junction, so a turn shows a new
-    name. A new name means you have left the street you were on."""
+    "turn left onto Rue X" is actable.
+  - House numbers run in order, odd one side and even the other; falling when
+    you want higher means turn around.
+  - A street keeps its name junction to junction; a new name at the top of the
+    turn means you have left the street you were on."""
 
 QUOTING_RULE = ("Street names and bearings go in double quotes, spelled as "
                 "they are written\n    in the list: {number_example}.")
